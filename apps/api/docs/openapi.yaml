@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+    title: Wawki API
+  version: 0.1.0
+  description: API v1 - marketplace academico UNSA (comunidad @unsa.edu.pe)
+servers:
+  - url: http://localhost:4000/api/v1
+paths:
+  /health:
+    get:
+      summary: Liveness
+      responses: { '200': { description: OK } }
+  /auth/register:
+    post:
+      summary: Registro creator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+                fullName: { type: string }
+                university: { type: string, enum: [UNSA] }
+                career: { type: string, description: "Clave de carrera UNSA (p. ej. ENFERMERIA)" }
+      responses: { '201': { description: Creado } }
+  /auth/login:
+    post:
+      summary: Login
+      responses: { '200': { description: OK } }
+  /documents:
+    get:
+      summary: Listar apuntes publicados
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: university, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer } }
+      responses: { '200': { description: OK } }
+    post:
+      summary: Crear apunte (auth)
+      security: [{ bearerAuth: [] }]
+      responses: { '201': { description: Creado } }
+  /bazar:
+    get: { summary: Listar bazar, responses: { '200': { description: OK } } }
+    post: { summary: Publicar item (auth), responses: { '201': { description: Creado } } }
+  /orders:
+    post: { summary: Crear orden en escrow (auth), responses: { '201': { description: Creado } } }
+  /orders/mine:
+    get: { summary: Mis pedidos (auth), responses: { '200': { description: OK } } }
+  /uploads:
+    post: { summary: Subir PDF/imagen real 25MB (auth, campo file), responses: { '201': { description: Creado } } }
+  /monetization/payouts/mine:
+    get: { summary: Mis payouts (auth), responses: { '200': { description: OK } } }
+  /monetization/simulate:
+    post:
+      summary: Calculadora de ingresos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                avgPrice: { type: number, example: 15 }
+                salesPerMonth: { type: integer, example: 40 }
+                bazarExtra: { type: number, example: 100 }
+      responses: { '200': { description: OK } }
+  /reports:
+    post: { summary: Reportar contenido (takedown D.L. 822), responses: { '201': { description: Creado } } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }

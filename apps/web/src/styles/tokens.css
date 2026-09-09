@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --hub-primary: #00685f;
+  --hub-secondary: #4648d4;
+}
+
+body {
+  font-family: Inter, system-ui, sans-serif;
+  background: #faf8ff;
+  color: #131b2e;
+  overscroll-behavior: none;
+}
+/* Base Stitch 1:1 (era el <style> inline de cada code.html) */
+main > :first-child { margin-top: 0 !important; }
+main > :last-child { margin-bottom: 0 !important; }
+::-webkit-scrollbar { display: none; }
+/* Micro-interacción Stitch: pulso al presionar botones */
+button { transition: transform 120ms ease; }
+button:active { transform: scale(0.95); }
+.font-display { font-family: "Plus Jakarta Sans", sans-serif; }
+.price-tag { font-family: "Plus Jakarta Sans", sans-serif; font-variant-numeric: tabular-nums; }
+.card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
+}
+.btn-primary {
+  background: #0d9488;
+  color: #fff;
+  border-radius: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  font-weight: 600;
+}
+.btn-primary:hover { background: #0f766e; }
+.badge-uni { background: #f1f5f9; color: #475569; border-radius: 9999px; padding: 0.15rem 0.6rem; font-size: 0.72rem; font-weight: 600; }
+.badge-price { background: #f0fdfa; color: #0f766e; border-radius: 9999px; padding: 0.15rem 0.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.badge-cep { background: #ecfdf5; color: #047857; border-radius: 9999px; padding: 0.15rem 0.6rem; font-size: 0.72rem; font-weight: 600; }
+.input { background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.6rem 0.8rem; width: 100%; }
+.input:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }

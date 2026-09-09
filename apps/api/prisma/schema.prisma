@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  student
+  creator
+  moderator
+  admin
+}
+
+enum DocStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  TAKEDOWN
+}
+
+enum BazarStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  RENTED
+}
+
+enum OrderStatus {
+  PENDING
+  ESCROW
+  RELEASED
+  REFUNDED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(student)
+  createdAt    DateTime @default(now())
+  profile      Profile?
+  documents    Document[]
+  bazarItems   BazarItem[]
+  orders       Order[]  @relation("BuyerOrders")
+  payouts      Payout[]
+  reports      Report[]
+  refreshTokens RefreshToken[]
+}
+
+model Profile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName    String
+  university  String  @default("UNSA")
+  career      String  @default("ENFERMERIA")
+  cycle       String?
+  hospital    String?
+  cepCode     String?
+  cepVerified Boolean @default(false)
+}
+
+model Document {
+  id          String    @id @default(cuid())
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title       String
+  course      String
+  university  String   @default("UNSA")
+  career      String   @default("ENFERMERIA")
+  cycle       String
+  type        String    // APUNTE | PAE | BALOTARIO | GUIA
+  priceCents  Int       @default(0)
+  fileUrl     String?
+  description String?
+  status      DocStatus @default(PUBLISHED)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([university, career, status])
+  @@index([title])
+}
+
+model BazarItem {
+  id           String      @id @default(cuid())
+  sellerId     String
+  seller       User        @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  title        String
+  kind         String      // LIBRO | SCRUB | INSTRUMENTO
+  tx           String      // VENTA | ALQUILER
+  priceCents   Int
+  depositCents Int?
+  description  String?
+  status       BazarStatus @default(AVAILABLE)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  buyerId    String
+  buyer      User        @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  itemType   String      // document | bazar
+  itemId     String
+  amountCents Int
+  feeCents   Int
+  netCents   Int
+  status     OrderStatus @default(ESCROW)
+  escrow     Escrow?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Escrow {
+  id         String    @id @default(cuid())
+  orderId    String    @unique
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  releasedAt DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+model Payout {
+  id         String   @id @default(cuid())
+  creatorId  String
+  creator    User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  period     String
+  grossCents Int
+  feeCents   Int
+  netCents   Int
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  reporterId String?
+  reporter   User?    @relation(fields: [reporterId], references: [id], onDelete: SetNull)
+  targetType String
+  targetId   String
+  reason     String
+  status     String   @default("OPEN")
+  createdAt  DateTime @default(now())
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  authorId   String
+  targetType String
+  targetId   String
+  stars      Int
+  comment    String?
+  createdAt  DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String?
+  meta      String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hash      String   @unique
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

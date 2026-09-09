@@ -1,0 +1,19 @@
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.local
+*.log
+*.log.*
+.DS_Store
+Thumbs.db
+# Prisma
+apps/api/prisma/migrations/**/migration.sql.lock
+# Uploads locales
+apps/api/uploads/
+# Vite
+apps/web/dist/
+# Turbo / TS
+*.tsbuildinfo
+.turbo/
