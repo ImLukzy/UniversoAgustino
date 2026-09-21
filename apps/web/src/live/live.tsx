@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { api, apiError, type HubBazarItem, type HubDocument } from "../lib/api";
+import { api, pen, type HubBazarItem, type HubDocument } from "../lib/api";
 import { careerColor, careerLabel, careerSoft } from "../data/unsa";
+import { careerContent } from "../data/careerContent";
+import { PagePreview } from "../components/PdfPreview";
 import { useAuth } from "../auth/AuthContext";
 
-const pen2 = (cents: number) => `S/ ${(cents / 100).toFixed(2)}`;
 const PAGE_SIZE = 9;
 
 const CYCLE_MAP: Record<string, string[]> = {
@@ -15,27 +16,12 @@ const CYCLE_MAP: Record<string, string[]> = {
   "c9-10": ["IX", "X"],
 };
 
-function useBuy() {
-  const { user } = useAuth();
-  const [msg, setMsg] = useState("");
-  const [busyId, setBusyId] = useState("");
-  const buy = async (itemType: "document" | "bazar", itemId: string) => {
-    if (!user) {
-      window.location.href = "/login";
-      return;
-    }
-    setBusyId(itemId);
-    setMsg("");
-    try {
-      await api.post("/orders", { itemType, itemId });
-      setMsg("Pedido creado en custodia. Véalo en Mis pedidos para confirmar la entrega.");
-    } catch (e) {
-      setMsg(apiError(e));
-    } finally {
-      setBusyId("");
-    }
-  };
-  return { user, msg, busyId, buy };
+// Ver detalle lleva a otra pestaña: visor protegido (/v/:id) para apuntes,
+// detalle (/p/bazar/:id) para bazar. Ahí se crea el pedido y sigue el checkout.
+function useGoDetail() {
+  const nav = useNavigate();
+  return (itemType: "document" | "bazar", id: string) =>
+    nav(itemType === "document" ? `/v/${id}` : `/p/bazar/${id}`);
 }
 
 export interface LiveDocsFilters {
@@ -43,16 +29,16 @@ export interface LiveDocsFilters {
   cycle: string;
   career: string;
   docType: string;
-  payVip: boolean;
   accentColor: string | null;
+  emptyHint?: string;
 }
 
 // ---- Marketplace: datos reales UNSA con todos los filtros + paginación real + paleta de carrera ----
-export function LiveDocuments({ q, cycle, career, docType, payVip, accentColor }: LiveDocsFilters) {
+export function LiveDocuments({ q, cycle, career, docType, accentColor, emptyHint }: LiveDocsFilters) {
   const [page, setPage] = useState(1);
   useEffect(() => {
     setPage(1);
-  }, [q, cycle, career, docType, payVip]);
+  }, [q, cycle, career, docType]);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["live-documents", q, cycle, career, docType, page],
@@ -65,16 +51,16 @@ export function LiveDocuments({ q, cycle, career, docType, payVip, accentColor }
       return r.data as { data: HubDocument[]; total: number; page: number; pageSize: number };
     },
   });
-  const { user, msg, busyId, buy } = useBuy();
-  const [openId, setOpenId] = useState("");
+  const { user } = useAuth();
+  const goDetail = useGoDetail();
 
-  const accent = accentColor ?? "#0d9488";
+  const accent = accentColor ?? "rgb(var(--hub-p, 0 104 95))";
+  const cc = careerContent(career);
   const rows = (data?.data ?? []).filter((d) => {
     if (cycle && cycle !== "all") {
       const allowed = CYCLE_MAP[cycle];
       if (allowed && !allowed.includes((d.cycle || "").toUpperCase().trim())) return false;
     }
-    if (payVip && d.priceCents !== 0) return false;
     return true;
   });
 
@@ -83,7 +69,6 @@ export function LiveDocuments({ q, cycle, career, docType, payVip, accentColor }
 
   return (
     <div>
-      {msg && <p className="mb-space-sm p-space-sm rounded-lg bg-tertiary text-on-tertiary font-label-md text-label-md">{msg}</p>}
       {isLoading && <p className="font-body-md text-body-md text-on-surface-variant">Cargando recursos reales…</p>}
       {isError && (
         <p className="font-body-md text-body-md text-on-surface-variant">
@@ -94,7 +79,7 @@ export function LiveDocuments({ q, cycle, career, docType, payVip, accentColor }
         <div className="p-space-lg bg-surface-container-low rounded-xl text-center">
           <p className="font-title-md text-title-md text-on-surface font-semibold">Aún no hay recursos aquí</p>
           <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xxs">
-            {user ? "Sé la primera persona en publicar con el asistente de Monetiza." : "Entra o crea tu cuenta para publicar el primer apunte."}
+            {user ? (emptyHint ?? "Sé la primera persona en publicar con el asistente de Monetiza.") : "Entra o crea tu cuenta para publicar el primer apunte."}
           </p>
           {!user && (
             <p className="mt-space-sm">
@@ -105,25 +90,33 @@ export function LiveDocuments({ q, cycle, career, docType, payVip, accentColor }
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
         {rows.map((d) => (
-          <div key={d.id} className="bg-surface-container-lowest rounded-xl p-space-md flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
-            <div className="flex flex-col gap-space-sm">
-              <div className="relative w-full rounded-lg overflow-hidden bg-surface-container p-space-md flex items-center gap-space-sm">
-                <span className="material-symbols-outlined text-display" style={{ color: accent }}>description</span>
-                <div className="flex flex-wrap gap-space-xxs">
-                  <span className="px-space-xs py-space-xxs bg-surface-container-lowest/95 rounded-full font-label-sm text-label-sm font-bold" style={{ color: accent }}>UNSA</span>
-                  {d.career && (
-                    <span
-                      className="px-space-xs py-space-xxs rounded-full font-label-sm text-label-sm font-semibold"
-                      style={{ backgroundColor: careerSoft(d.career), color: careerColor(d.career) }}
-                    >
-                      {careerLabel(d.career)}
-                    </span>
-                  )}
-                  <span className="px-space-xs py-space-xxs bg-tertiary text-on-tertiary rounded-full font-label-sm text-label-sm font-semibold">{d.type}</span>
+          <div key={d.id} className="bg-surface-container-lowest rounded-xl flex flex-col justify-between shadow-sm hover:shadow-md transition-all overflow-hidden">
+            <div className="relative h-44 overflow-hidden bg-surface-container">
+              {d.fileUrl ? (
+                <PagePreview fileUrl={d.fileUrl} page={1} scale={0.7} careerImg={cc.imgQuote} title={d.title} imgClassName="h-full w-full object-cover object-top" />
+              ) : (
+                <div className="flex h-full w-full items-center gap-space-sm p-space-md">
+                  <span className="material-symbols-outlined text-display" style={{ color: accent }}>description</span>
+                  <div className="flex flex-col gap-space-xxs">
+                    <span className="font-label-sm text-label-sm font-bold" style={{ color: accent }}>UNSA · {d.career ? careerLabel(d.career) : "General"}</span>
+                    <span className="font-body-sm text-body-sm text-on-surface-variant">{d.type} · Ciclo {d.cycle}</span>
+                  </div>
                 </div>
-                <div className="absolute bottom-2 right-2">
-                  <span className="px-space-sm py-space-xxs text-white rounded-lg font-price-tag text-price-tag shadow" style={{ backgroundColor: accent }}>{pen2(d.priceCents)}</span>
-                </div>
+              )}
+              <span className="absolute bottom-2 right-2 px-space-sm py-space-xxs text-white rounded-lg font-price-tag text-price-tag shadow" style={{ backgroundColor: accent }}>{pen(d.priceCents)}</span>
+            </div>
+            <div className="flex flex-col gap-space-sm p-space-md">
+              <div className="flex flex-wrap gap-space-xxs">
+                <span className="px-space-xs py-space-xxs bg-surface-container-lowest/95 rounded-full font-label-sm text-label-sm font-bold" style={{ color: accent }}>UNSA</span>
+                {d.career && (
+                  <span
+                    className="px-space-xs py-space-xxs rounded-full font-label-sm text-label-sm font-semibold"
+                    style={{ backgroundColor: careerSoft(d.career), color: careerColor(d.career) }}
+                  >
+                    {careerLabel(d.career)}
+                  </span>
+                )}
+                <span className="px-space-xs py-space-xxs bg-tertiary text-on-tertiary rounded-full font-label-sm text-label-sm font-semibold">{d.type}</span>
               </div>
               <h3 className="font-title-lg text-title-lg text-on-surface font-bold line-clamp-2 leading-snug">{d.title}</h3>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
@@ -131,35 +124,16 @@ export function LiveDocuments({ q, cycle, career, docType, payVip, accentColor }
                 {d.author?.profile?.fullName ? ` · ${d.author.profile.fullName}` : ""}
               </p>
               {d.description && <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">{d.description}</p>}
-              {openId === d.id && (
-                <div className="p-space-sm bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface">
-                  {(d as unknown as { fileUrl?: string }).fileUrl ? (
-                    <a className="underline font-semibold" style={{ color: accent }} href={(d as unknown as { fileUrl: string }).fileUrl} target="_blank" rel="noreferrer">Abrir archivo adjunto</a>
-                  ) : (
-                    <span>Sin archivo adjunto. Coordina la entrega con el autor tras la compra.</span>
-                  )}
-                </div>
-              )}
             </div>
-            <div className="pt-space-md flex flex-col gap-space-xs">
-              <div className="grid grid-cols-2 gap-space-xs">
-                <button
-                  onClick={() => setOpenId(openId === d.id ? "" : d.id)}
-                  className="px-space-sm py-space-xs rounded-lg bg-surface-container text-on-surface-variant font-label-md text-label-md font-semibold hover:bg-surface-container-high transition-colors flex items-center justify-center gap-space-xxs"
-                >
-                  <span className="material-symbols-outlined text-title-sm">visibility</span>
-                  {openId === d.id ? "Ocultar" : "Ver detalle"}
-                </button>
-                <button
-                  disabled={busyId === d.id}
-                  onClick={() => buy("document", d.id)}
-                  className="px-space-sm py-space-xs rounded-lg text-white font-label-md text-label-md font-bold transition-colors flex items-center justify-center gap-space-xxs shadow-sm disabled:opacity-60"
-                  style={{ backgroundColor: accent }}
-                >
-                  <span className="material-symbols-outlined text-title-sm">qr_code_2</span>
-                  {user ? "Comprar Yape" : "Entrar y comprar"}
-                </button>
-              </div>
+            <div className="flex flex-col gap-space-xs p-space-md pt-0">
+              <button
+                onClick={() => goDetail("document", d.id)}
+                className="px-space-sm py-space-xs rounded-lg text-white font-label-md text-label-md font-bold transition-colors flex items-center justify-center gap-space-xxs shadow-sm"
+                style={{ backgroundColor: accent }}
+              >
+                <span className="material-symbols-outlined text-title-sm">visibility</span>
+                {user ? "Ver detalle" : "Entrar y ver detalle"}
+              </button>
               <span className="text-[10px] text-center text-outline">Compra en custodia: se libera al confirmar recepción</span>
             </div>
           </div>
@@ -192,7 +166,8 @@ export function LiveDocuments({ q, cycle, career, docType, payVip, accentColor }
 }
 
 // ---- Bazar: datos reales, filtros Stitch (all/libros/instrumental/uniformes/alquiler) ----
-export function LiveBazarItems({ filter, q }: { filter: string; q: string }) {
+export function LiveBazarItems({ filter, q, accentColor }: { filter: string; q: string; accentColor?: string | null }) {
+  const accentBg = accentColor ? { backgroundColor: accentColor } : undefined;
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["live-bazar", q],
     queryFn: async () => {
@@ -200,7 +175,8 @@ export function LiveBazarItems({ filter, q }: { filter: string; q: string }) {
       return r.data as { data: HubBazarItem[]; total: number };
     },
   });
-  const { user, msg, busyId, buy } = useBuy();
+  const { user } = useAuth();
+  const goDetail = useGoDetail();
 
   const rows = (data?.data ?? []).filter((b) => {
     if (filter === "all") return true;
@@ -213,7 +189,6 @@ export function LiveBazarItems({ filter, q }: { filter: string; q: string }) {
 
   return (
     <div>
-      {msg && <p className="mb-space-sm p-space-sm rounded-lg bg-tertiary text-on-tertiary font-label-md text-label-md">{msg}</p>}
       {isLoading && <p className="font-body-md text-body-md text-on-surface-variant">Cargando bazar real…</p>}
       {isError && (
         <p className="font-body-md text-body-md text-on-surface-variant">
@@ -228,7 +203,7 @@ export function LiveBazarItems({ filter, q }: { filter: string; q: string }) {
           </p>
           {!user && (
             <p className="mt-space-sm">
-              <Link to="/register" className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold">Crear cuenta gratis</Link>
+              <Link to="/register" className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold" style={accentBg}>Crear cuenta gratis</Link>
             </p>
           )}
         </div>
@@ -236,6 +211,16 @@ export function LiveBazarItems({ filter, q }: { filter: string; q: string }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
         {rows.map((b) => (
           <article key={b.id} className="flex flex-col rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group">
+            {b.photos?.[0] && (
+              <div className="relative">
+                <img src={b.photos[0]} alt={b.title} loading="lazy" className="h-44 w-full object-cover" />
+                {(b.photos?.length ?? 0) > 1 && (
+                  <span className="absolute bottom-2 right-2 rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-bold text-white">
+                    +{(b.photos?.length ?? 1) - 1} fotos
+                  </span>
+                )}
+              </div>
+            )}
             <div className="p-space-lg flex flex-col flex-1 justify-between">
               <div>
                 <div className="flex flex-wrap items-center gap-space-xs mb-space-xs">
@@ -248,15 +233,14 @@ export function LiveBazarItems({ filter, q }: { filter: string; q: string }) {
               </div>
               <div className="mt-space-md pt-space-md bg-surface-container-low -mx-space-lg -mb-space-lg p-space-lg rounded-b-xl flex flex-col gap-space-sm">
                 <div className="flex items-center justify-between">
-                  <span className="px-space-sm py-space-xxs bg-primary text-on-primary rounded-lg font-price-tag text-price-tag shadow">{pen2(b.priceCents)}</span>
-                  {b.depositCents ? <span className="font-label-sm text-label-sm text-on-surface-variant">Garantía {pen2(b.depositCents)}</span> : null}
+                  <span className="px-space-sm py-space-xxs bg-primary text-on-primary rounded-lg font-price-tag text-price-tag shadow" style={accentBg}>{pen(b.priceCents)}</span>
+                  {b.depositCents ? <span className="font-label-sm text-label-sm text-on-surface-variant">Garantía {pen(b.depositCents)}</span> : null}
                 </div>
                 <button
-                  disabled={busyId === b.id}
-                  onClick={() => buy("bazar", b.id)}
-                  className="px-space-sm py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-primary-container transition-colors shadow-sm disabled:opacity-60"
+                  onClick={() => goDetail("bazar", b.id)}
+                  className="px-space-sm py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-primary-container transition-colors shadow-sm disabled:opacity-60" style={accentBg}
                 >
-                  {user ? "Reservar en custodia" : "Entrar y reservar"}
+                  {user ? "Ver y reservar" : "Entrar y reservar"}
                 </button>
               </div>
             </div>

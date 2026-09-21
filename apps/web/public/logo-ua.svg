@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" role="img" aria-label="Universo Agustino">
+  <!-- U izquierda: flecha azul hacia arriba -->
+  <path d="M41 6 L14 38 H27 V100 C27 132 66 148 100 148 V134 C72 134 55 126 55 100 V38 H68 Z" fill="#1b3a5f"/>
+  <!-- U derecha: flecha roja hacia arriba, curva con punta hacia el centro -->
+  <path d="M159 6 L186 38 H173 V92 C173 110 162 122 142 129 L134 117 C148 112 159 104 159 92 V38 H132 Z" fill="#a50021"/>
+  <!-- Birrete de graduación -->
+  <polygon points="100,58 134,73 100,88 66,73" fill="#111111"/>
+  <path d="M82 77 V90 C82 96 118 96 118 90 V77 L100 85 Z" fill="#111111"/>
+  <line x1="126" y1="75" x2="126" y2="88" stroke="#111111" stroke-width="2"/>
+  <circle cx="126" cy="91" r="2.6" fill="#111111"/>
+</svg>

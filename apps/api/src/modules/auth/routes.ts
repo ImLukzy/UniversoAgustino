@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { LoginSchema, RegisterSchema, isAllowedEmail } from "@hub/shared";
+import { LoginSchema, RegisterSchema, UpdateProfileSchema, isAllowedEmail } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
 import { hashPassword, newJti, sha256, signAccess, signRefresh, verifyPassword, verifyRefresh } from "../../lib/auth.js";
 import { asyncHandler } from "../../middleware/errors.js";
@@ -104,5 +104,20 @@ authRouter.get(
     if (!me) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Usuario no existe" } });
     const { passwordHash: _omit, ...safe } = me;
     res.json({ data: safe });
+  })
+);
+
+authRouter.patch(
+  "/profile",
+  requireAuth,
+  asyncHandler(async (req: AuthedRequest, res) => {
+    const input = UpdateProfileSchema.parse(req.body);
+    const profile = await prisma.profile.upsert({
+      where: { userId: req.user!.sub },
+      create: { userId: req.user!.sub, fullName: input.fullName, university: "UNSA", career: input.career, cycle: input.cycle },
+      update: { fullName: input.fullName, career: input.career, cycle: input.cycle },
+    });
+    await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "auth.profile.update", entity: "profile", entityId: profile.id } });
+    res.json({ data: profile });
   })
 );

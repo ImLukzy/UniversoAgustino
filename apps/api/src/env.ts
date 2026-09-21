@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { z } from "zod";
 
 // Carga .env ANTES de leer process.env (los imports ESM se hoistean,
 // por eso debe vivir aquí y no en server.ts).
@@ -28,8 +27,3 @@ export const env = {
   DATABASE_URL: process.env.DATABASE_URL ?? "",
   FEE_PCT: Number(process.env.PLATFORM_FEE_PCT ?? 13),
 };
-
-export const paginationSchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(50).default(12),
-});

@@ -1,16 +1,20 @@
 // GENERADO por scripts/migrate-stitch.mjs desde marco_legal_y_tica_acad_mica_d.l._822/code.html (diseño Stitch 1:1).
 // La interactividad original (<script> de Stitch) está re-implementada con React (ver wire*).
 import { useState } from "react";
-import { StitchAuth } from "../live/StitchAuth";
+import { StitchHeader } from "../components/StitchHeader";
+import { StitchFooter } from "../components/StitchFooter";
 import { useCareerTheme } from "../live/careerTheme";
+import { careerContent } from "../data/careerContent";
+import { CareerPhoto } from "../components/CareerVisual";
 /* LIVE-CAREER v1 */
 /* LIVE-HEADER v1 */
 export function LegalStitch() {
-  const { accent } = useCareerTheme();
+  const { accent, career: liveCareer } = useCareerTheme();
+  const cc = careerContent(liveCareer);
   const [openFaq, setOpenFaq] = useState(-1);
   return (
     <>
-<header className="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div className="h-20 max-w-[90rem] mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md"><div className="flex items-center gap-space-md"><a className="flex items-center gap-space-sm group" data-path="explorar-marketplace" href="#"><img alt="Wawki Logo" className="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuvy32rBRIBSNf8odU3lN0kIgy00ey01Mw9NqxSKdRoYVb-n2dEUaARklI6HcxyJwA_sX01pYy0PPbWns91EJy7-eLMIVb9FEOKwxT4eqOEaC3rD_EUKslyLHuVvaRUnkf3EQDjyDAg6LbZSGB0xLJe3AoCW_p9P0F2S62t6p79tzqfzkRV6Mo-mEmAEJXJobIhjg6hIwQKT27PfLKJA-QBWnCXmJtcZ_yjOEK6EJ6ZUIHz1fPfg31"/><div className="flex flex-col"><span style={accent ? { color: accent.color } : undefined} className="font-headline-sm text-headline-sm text-primary tracking-tight">Wawki <span className="text-secondary font-headline-sm text-headline-sm">Arequipa</span></span><span className="font-label-sm text-label-sm text-on-surface-variant font-medium">Comunidad UNSA</span></div></a></div><nav className="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-primary font-semibold rounded-lg"><a className="px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container hover:text-on-surface transition-all" data-path="explorar-marketplace" href="#">Explorar Marketplace</a><a className="px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container hover:text-on-surface transition-all" data-path="bazar-y-alquiler" href="#">Bazar &amp; Alquiler</a><a className="px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container hover:text-on-surface transition-all" data-path="vender-y-monetizar" href="#">Vender &amp; Monetizar</a><a className="px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container hover:text-on-surface transition-all" style={accent ? { backgroundColor: accent.soft, color: accent.color } : undefined} data-path="marco-legal-y-etica-academica" href="#">Marco Legal &amp; Ética</a><a className="px-space-md py-space-sm rounded-lg text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container hover:text-on-surface transition-all flex items-center gap-space-xs" data-path="membresia-semestral" href="#"><span className="w-2 h-2 rounded-full bg-secondary"></span>Pase Semestral VIP</a></nav><div className="flex items-center gap-space-sm"><div className="hidden sm:flex items-center gap-space-xs px-space-sm py-space-xs bg-surface-container-low rounded-full"><span className="material-symbols-outlined text-tertiary text-title-md">verified</span><span className="font-label-sm text-label-sm text-tertiary font-semibold">Yape / Plin Verificado</span></div><div className="hidden lg:flex items-center bg-surface-container-low rounded-full px-space-sm py-space-xxs"><span className="material-symbols-outlined text-outline text-title-md mr-space-xxs">school</span><select onChange={(e) => { window.location.href = "/?career=" + e.target.value; }} className="bg-transparent font-label-sm text-label-sm text-on-surface font-semibold focus:outline-none cursor-pointer pr-space-xs" defaultValue="all"><option value="all">Todas las carreras</option><option value="ENFERMERIA">Enfermería</option><option value="MEDICINA">Medicina Humana</option><option value="PSICOLOGIA">Psicología</option><option value="BIOLOGIA">Biología</option><option value="DERECHO">Derecho</option><option value="EDUCACION">Educación</option><option value="ADMINISTRACION">Administración</option><option value="CONTABILIDAD">Contabilidad</option><option value="ECONOMIA">Economía</option><option value="ING_SISTEMAS">Ing. de Sistemas</option><option value="ING_CIVIL">Ing. Civil</option><option value="ING_INDUSTRIAL">Ing. Industrial</option><option value="ARQUITECTURA">Arquitectura</option><option value="AGRONOMIA">Agronomía</option><option value="OTRA_UNSA">Otra carrera UNSA</option></select></div><StitchAuth /></div></div></header><main className="w-full pt-20 bg-surface"><div className="flex flex-col w-full">
+<StitchHeader active="legal" /><main className="w-full pt-20 bg-surface"><div className="flex flex-col w-full">
 {/*Top Compliance Alert Banner*/}
 <section className="w-full bg-surface-container-high py-space-sm px-margin-mobile md:px-margin-tablet lg:px-margin-desktop">
 <div className="max-w-container-max mx-auto flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface">
@@ -30,34 +34,34 @@ export function LegalStitch() {
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
 <div className="lg:col-span-8 flex flex-col gap-space-md">
 <div className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container rounded-full w-fit">
-<span className="material-symbols-outlined text-primary text-title-md">gavel</span>
-<span className="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-primary">Regulación Nacional D.L. 822</span>
+<span className="material-symbols-outlined text-primary text-title-md" style={accent ? { color: accent.color } : undefined}>gavel</span>
+<span className="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-primary" style={accent ? { color: accent.color } : undefined}>Regulación Nacional D.L. 822</span>
 </div>
 <h1 className="font-display text-display text-on-surface tracking-tight leading-tight">
             Guía de Cumplimiento Legal y Ética Académica en el Perú:
-            <span className="text-primary block mt-space-xs">Estudia, Comparte y Emprende con Total Seguridad</span>
+            <span className="text-primary block mt-space-xs" style={accent ? { color: accent.color } : undefined}>Estudia, Comparte y Emprende con Total Seguridad</span>
 </h1>
 <p className="font-body-lg text-body-lg text-on-surface-variant max-w-3xl leading-relaxed">
-            La formación clínica de enfermería en Arequipa exige rigor ético, tanto frente al paciente como en la producción intelectual. Conoce las fronteras entre el delito de infracción patrimonial y el legítimo derecho a monetizar tus propios resúmenes, esquemas PAE y guías de rotación.
+            {cc.legalDesc}
           </p>
 {/*Formal Endorsement Badges*/}
 <div className="flex flex-wrap items-center gap-space-sm pt-space-sm">
 <div className="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-space-sm rounded-xl shadow-sm">
-<span className="material-symbols-outlined text-tertiary text-title-md" style={{fontVariationSettings: "'FILL' 1"}}>verified</span>
+<span className="material-symbols-outlined text-tertiary text-title-md" style={accent ? { color: accent.color, fontVariationSettings: "'FILL' 1" } : {fontVariationSettings: "'FILL' 1"}}>verified</span>
 <div className="flex flex-col">
 <span className="font-label-sm text-label-sm font-bold text-on-surface">Auditado bajo normativa INDECOPI</span>
 <span className="font-body-sm text-body-sm text-on-surface-variant text-[11px] leading-none">Dirección de Derecho de Autor</span>
 </div>
 </div>
 <div className="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-space-sm rounded-xl shadow-sm">
-<span className="material-symbols-outlined text-secondary text-title-md" style={{fontVariationSettings: "'FILL' 1"}}>account_balance</span>
+<span className="material-symbols-outlined text-secondary text-title-md" style={accent ? { color: accent.color, fontVariationSettings: "'FILL' 1" } : {fontVariationSettings: "'FILL' 1"}}>account_balance</span>
 <div className="flex flex-col">
 <span className="font-label-sm text-label-sm font-bold text-on-surface">Ley Universitaria N° 30220</span>
 <span className="font-body-sm text-body-sm text-on-surface-variant text-[11px] leading-none">Tribunales de Honor UNSA</span>
 </div>
 </div>
 <div className="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-space-sm rounded-xl shadow-sm">
-<span className="material-symbols-outlined text-primary text-title-md" style={{fontVariationSettings: "'FILL' 1"}}>shield</span>
+<span className="material-symbols-outlined text-primary text-title-md" style={accent ? { color: accent.color, fontVariationSettings: "'FILL' 1" } : {fontVariationSettings: "'FILL' 1"}}>shield</span>
 <div className="flex flex-col">
 <span className="font-label-sm text-label-sm font-bold text-on-surface">Escudo Protector de Autores</span>
 <span className="font-body-sm text-body-sm text-on-surface-variant text-[11px] leading-none">Safe Harbor DMCA / Perú</span>
@@ -68,23 +72,23 @@ export function LegalStitch() {
 <div className="lg:col-span-4 flex flex-col gap-space-md">
 <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-md relative overflow-hidden">
 <div className="flex items-center justify-between mb-space-sm">
-<span className="font-label-md text-label-md font-bold text-primary uppercase">Ecosistema Seguro</span>
+<span className="font-label-md text-label-md font-bold text-primary uppercase" style={accent ? { color: accent.color } : undefined}>Ecosistema Seguro</span>
 <span className="font-label-sm text-label-sm bg-surface-container px-space-xs py-space-xxs rounded-md text-on-surface-variant">Métricas 2024</span>
 </div>
 <div className="grid grid-cols-2 gap-space-md mb-space-md">
 <div className="p-space-sm bg-surface-container-low rounded-lg">
-<span className="font-headline-md text-headline-md text-on-surface font-bold block">1,840+</span>
-<span className="font-body-sm text-body-sm text-on-surface-variant">Fichas PAE originales validadas</span>
+<span className="font-headline-md text-headline-md text-on-surface font-bold block" style={accent ? { color: accent.color } : undefined}>{cc.metricAValue}</span>
+<span className="font-body-sm text-body-sm text-on-surface-variant">{cc.metricALabel}</span>
 </div>
 <div className="p-space-sm bg-surface-container-low rounded-lg">
-<span className="font-headline-md text-headline-md text-tertiary font-bold block">&lt; 4 hrs</span>
-<span className="font-body-sm text-body-sm text-on-surface-variant">Tasa de respuesta Take-Down</span>
+<span className="font-headline-md text-headline-md text-tertiary font-bold block" style={accent ? { color: accent.color } : undefined}>{cc.metricBValue}</span>
+<span className="font-body-sm text-body-sm text-on-surface-variant">{cc.metricBLabel}</span>
 </div>
 </div>
 <div className="relative h-44 rounded-lg overflow-hidden bg-surface-container">
-<img className="w-full h-full object-cover" data-alt="Close-up photograph of Peruvian nursing students in scrub uniforms at Universidad Nacional de San Agustin UNSA studying handwritten notes and original clinical clinical study guides on a clean desk with stethoscope in warm natural sunlight teal tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4lAj-B185_lAESVa8j6wUP0CZuAbJYyrEpUvCT_PKDKHy6c3eSjBK1v7Q4bNeWutfVDOnpZzZBDP8j4uOLbAgXFMKEk7MDZUbegeGTrkMeVimwSqvtGowXRtPeqt23bq6h7pR5oX7D2sBzoxgXsGq6oFwob7oZOzOX2QZexIUj26ztCfWtqHXAc2gEUho2PijhJYAvl8DFe3VHDJCOynS1lmOkKE2sUjLwImD_i-j11hS7HDY_YFI"/>
-<div className="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex items-end p-space-sm">
-<span className="font-label-sm text-label-sm text-surface-container-lowest font-medium">Estudiantes de Arequipa promoviendo el software libre y notas éticas</span>
+<CareerPhoto src={cc.imgMetrics} alt={cc.metricsCaption} className="absolute inset-0 h-full w-full" />
+<div className="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex items-end p-space-sm pointer-events-none">
+<span className="font-label-sm text-label-sm text-surface-container-lowest font-medium">{cc.metricsCaption}</span>
 </div>
 </div>
 </div>
@@ -232,7 +236,7 @@ export function LegalStitch() {
 <ul className="font-body-sm text-body-sm text-on-surface-variant list-disc pl-5 space-y-1">
 <li><strong>Protección de Derechos Morales:</strong> Tu firma y reconocimiento como autor quedan registrados permanentemente.</li>
 <li><strong>Comisiones directas (80%-85%)</strong> pagadas vía Yape/Plin con liquidación instantánea por descarga.</li>
-<li><strong>Certificado digital de autor estudiante</strong> emitido por Wawki Arequipa.</li>
+<li><strong>Certificado digital de autor estudiante</strong> emitido por Universo Agustino.</li>
 </ul>
 </div>
 </div>
@@ -241,39 +245,39 @@ export function LegalStitch() {
 </section>
 {/*Visual Break / Image & Stats Callout*/}
 <section className="w-full py-space-xl px-margin-mobile md:px-margin-tablet lg:px-margin-desktop">
-<div className="max-w-container-max mx-auto bg-primary text-on-primary rounded-2xl p-space-xl relative overflow-hidden shadow-lg">
+<div className="max-w-container-max mx-auto bg-primary text-on-primary rounded-2xl p-space-xl relative overflow-hidden shadow-lg" style={accent ? { backgroundColor: accent.color } : undefined}>
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center relative z-10">
 <div className="lg:col-span-7 flex flex-col gap-space-sm">
 <span className="font-label-md text-label-md bg-surface-container-lowest/20 w-fit px-space-sm py-space-xxs rounded-full font-semibold uppercase tracking-wider text-on-primary">
-            Código Deontológico del Colegio de Enfermeros del Perú
+            {cc.quoteEyebrow}
           </span>
 <h2 className="font-headline-lg text-headline-lg font-bold leading-tight">
-            "La veracidad académica y la pulcritud en los datos sustentan la seguridad clínica del paciente."
+            &ldquo;{cc.quoteText}&rdquo;
           </h2>
 <p className="font-body-md text-body-md text-on-primary-container leading-relaxed">
-            Cuando un estudiante elabora una ficha PAE sin plagiar y referenciando adecuadamente las taxonomías NANDA-I, NIC y NOC, fortalece su pensamiento crítico y protege su futuro registro profesional.
+            {cc.quoteBody}
           </p>
 <div className="pt-space-xs flex items-center gap-space-md">
 <div className="flex items-center gap-space-xs">
 <span className="material-symbols-outlined text-title-lg">verified</span>
-<span className="font-label-sm text-label-sm font-semibold">Consejo Regional II Arequipa Ref.</span>
+<span className="font-label-sm text-label-sm font-semibold">{cc.quoteBy1}</span>
 </div>
 <span className="text-on-primary/40">•</span>
 <div className="flex items-center gap-space-xs">
 <span className="material-symbols-outlined text-title-lg">lock</span>
-<span className="font-label-sm text-label-sm font-semibold">Datos Clínicos Anonimizados</span>
+<span className="font-label-sm text-label-sm font-semibold">{cc.quoteBy2}</span>
 </div>
 </div>
 </div>
 <div className="lg:col-span-5 flex justify-center">
 <div className="w-full max-w-sm rounded-xl overflow-hidden shadow-2xl bg-surface-container-lowest p-space-xs">
-<img className="w-full h-56 object-cover rounded-lg" data-alt="Close up view of nursing study flashcards with handwritten pediatric vital signs and medication dosages beside a stethoscope on a medical table in Arequipa Peru clean bright professional medical aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXctx-qr8MtL1S67ZEyHRPYIxJHR0OYeoQSee_8YgHfcpT6yB3D_QOzilA6wky1WQo7IMYkcXZRftOZWHzbfKDXghmCGt8Mj-80vGclIMBA9NLfeXnswsm63V3bnHqiKfNZJB1VvmPWxj2dVBiAdCNhDoGt5G0QP9nMAjwZVYsZr5NSvOAPAoz7SN-13szw77BwB3LCcMCpZBhrvrgfXNpmQ3LgJ9VDuInpOe2Qj3-kKYA2QM0eS5y"/>
+<CareerPhoto src={cc.imgQuote} alt={cc.quoteCardTitle} className="w-full h-56 rounded-lg" />
 <div className="p-space-sm flex justify-between items-center text-on-surface">
 <div>
-<span className="font-label-sm text-label-sm text-tertiary font-bold block">Ficha PAE Pediátrica</span>
-<span className="font-body-sm text-body-sm text-on-surface-variant">Creada por estudiante UNSA</span>
+<span className="font-label-sm text-label-sm text-tertiary font-bold block" style={accent ? { color: accent.color } : undefined}>{cc.quoteCardTitle}</span>
+<span className="font-body-sm text-body-sm text-on-surface-variant">{cc.quoteCardSub}</span>
 </div>
-<span className="font-label-sm text-label-sm bg-surface-container px-space-sm py-space-xxs rounded-full font-bold text-primary">S/ 4.50</span>
+<span className="font-label-sm text-label-sm bg-surface-container px-space-sm py-space-xxs rounded-full font-bold text-primary" style={accent ? { color: accent.color } : undefined}>{cc.quoteCardPrice}</span>
 </div>
 </div>
 </div>
@@ -318,7 +322,7 @@ export function LegalStitch() {
             </div>
 <h3 className="font-title-lg text-title-lg text-on-surface font-bold">Licencia de Distribución No Exclusiva</h3>
 <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-              Otorgas a Wawki Arequipa una licencia no exclusiva, revocable en cualquier momento, para alojar, comprimir y comercializar tus documentos en la red universitaria. Eres libre de publicar tus notas en otros medios personales.
+              Otorgas a Universo Agustino una licencia no exclusiva, revocable en cualquier momento, para alojar, comprimir y comercializar tus documentos en la red universitaria. Eres libre de publicar tus notas en otros medios personales.
             </p>
 </div>
 <div className="mt-space-md pt-space-xs flex items-center gap-space-xs text-secondary font-label-sm text-label-sm font-bold">
@@ -350,7 +354,7 @@ export function LegalStitch() {
             </div>
 <h3 className="font-title-lg text-title-lg text-on-surface font-bold">Política Take-Down en menos de 24 Horas</h3>
 <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-              Si un docente, autor o institución detecta que un material compromete datos restringidos o propiedad ajena, Wawki retira preventivamente el documento en menos de 24 horas hábiles tras la solicitud formal con sustento.
+              Si un docente, autor o institución detecta que un material compromete datos restringidos o propiedad ajena, Universo Agustino retira preventivamente el documento en menos de 24 horas hábiles tras la solicitud formal con sustento.
             </p>
 </div>
 <div className="mt-space-md pt-space-xs flex items-center gap-space-xs text-tertiary font-label-sm text-label-sm font-bold">
@@ -465,7 +469,7 @@ export function LegalStitch() {
 <div className={`px-space-lg pb-space-lg pt-0 text-on-surface-variant font-body-md text-body-md leading-relaxed ${openFaq === 2 ? "" : "hidden"} faq-content`}>
 <div className="pt-space-xs space-y-2">
 <p>
-                  Wawki liquida las ganancias directamente a tu billetera digital (Yape o Plin). Cuando tus ingresos por material digital excedan el monto de exención de SUNAT o requieras justificar ingresos para bancarización:
+                  Universo Agustino liquida las ganancias directamente a tu billetera digital (Yape o Plin). Cuando tus ingresos por material digital excedan el monto de exención de SUNAT o requieras justificar ingresos para bancarización:
                 </p>
 <ul className="list-disc pl-5 space-y-1">
 <li>Puedes tramitar tu RUC 10 con régimen tributario especial de rentas de capital (Regalías por derechos de autor, gravadas con tasa preferencial del 5%).</li>
@@ -550,14 +554,14 @@ export function LegalStitch() {
 </div>
 </div>
 <div className="flex items-center gap-space-sm w-full sm:w-auto">
-<a className="w-full sm:w-auto px-space-xl py-space-sm bg-primary text-on-primary rounded-lg font-label-lg text-label-lg font-bold text-center hover:bg-primary-container transition-colors shadow-sm" data-path="vender-y-monetizar" href="#">
+<a className="w-full sm:w-auto px-space-xl py-space-sm bg-primary text-on-primary rounded-lg font-label-lg text-label-lg font-bold text-center hover:bg-primary-container transition-colors shadow-sm" data-path="vender-y-monetizar" href="#" style={accent ? { backgroundColor: accent.color } : undefined}>
           Comenzar a Monetizar Éticamente
         </a>
 </div>
 </div>
 </section>
 </div>
-</main><footer className="w-full bg-surface-container-low mt-space-3xl py-space-2xl"><div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-tablet lg:px-margin-desktop"><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-xl pb-space-xl"><div className="flex flex-col gap-space-sm"><div className="flex items-center gap-space-xs"><span className="font-headline-sm text-headline-sm text-primary">Wawki</span><span className="font-label-sm text-label-sm bg-surface-container-high text-secondary px-space-sm py-space-xxs rounded-full font-semibold">Arequipa</span></div><p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">Plataforma académica y red cooperativa de estudiantes de la UNSA Arequipa. Intercambio responsable y fiscalizado.</p><div className="flex flex-wrap gap-space-xs pt-space-xs"><span className="font-label-sm text-label-sm px-space-sm py-space-xxs bg-surface-container text-on-surface-variant rounded-full">Sede Honorio Delgado</span><span className="font-label-sm text-label-sm px-space-sm py-space-xxs bg-surface-container text-on-surface-variant rounded-full">Sede Goyeneche</span></div></div><div className="flex flex-col gap-space-xs"><span className="font-title-md text-title-md text-on-surface font-semibold">Red Hospitalaria &amp; Campus</span><a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-path="explorar-marketplace" href="#">UNSA Área Biomédicas (Av. Alcides Carrión)</a><a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-path="explorar-marketplace" href="#">EsSalud Seguín Escobedo Rotaciones</a><a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-path="explorar-marketplace" href="#">Puntos de Entrega Segura en Hospitales</a></div><div className="flex flex-col gap-space-xs"><span className="font-title-md text-title-md text-on-surface font-semibold">Soporte Estudiantil</span><a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-path="vender-y-monetizar" href="#">Calculadora de Comisiones (15%-20%)</a><a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-path="vender-y-monetizar" href="#">Billeteras Yape &amp; Plin Estudiantes</a><a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-path="membresia-semestral" href="#">Pase VIP S/ 15.00 por Ciclo</a><a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-path="soporte-guardias" href="#">Centro de Ayuda en Guardias</a></div><div className="flex flex-col gap-space-xs"><span className="font-title-md text-title-md text-on-surface font-semibold">Marco Regulatorio</span><div className="p-space-sm bg-surface-container rounded-lg"><div className="flex items-center gap-space-xxs text-tertiary mb-space-xxs"><span className="material-symbols-outlined text-title-sm">gavel</span><span className="font-label-sm text-label-sm font-bold">D.L. 822 Cumplimiento</span></div><p className="font-body-sm text-body-sm text-on-surface-variant text-[11px] leading-snug">Prohibida la comercialización no autorizada de material bajo derecho de autor. Solo se admiten resúmenes originales, fichas PAE de elaboración propia y guías elaboradas por pares.</p></div><a className="font-label-sm text-label-sm text-primary font-semibold hover:underline mt-space-xs" data-path="marco-legal-y-etica-academica" href="#">Ver Normativa y Protocolo de Retiro →</a></div></div><div className="pt-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant"><div className="flex items-center gap-space-sm"><span className="font-label-sm text-label-sm">© 2024 Wawki Arequipa. Impulsado por estudiantes UNSA.</span></div><div className="flex items-center gap-space-md"><a className="font-label-sm text-label-sm hover:text-on-surface" data-path="marco-legal-y-etica-academica" href="#">Términos y Condiciones</a><a className="font-label-sm text-label-sm hover:text-on-surface" data-path="marco-legal-y-etica-academica" href="#">Políticas DL 822</a><a className="font-label-sm text-label-sm hover:text-on-surface" data-path="marco-legal-y-etica-academica" href="#">Protocolo Ética NANDA</a></div></div></div></footer>
+</main><StitchFooter />
     </>
   );
 }

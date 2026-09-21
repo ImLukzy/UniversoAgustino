@@ -46,7 +46,6 @@ export function StitchAuth() {
 
   const name = user.profile?.fullName?.trim() || user.email;
   const initial = name.charAt(0).toUpperCase();
-  const isMod = user.role === "admin" || user.role === "moderator";
 
   const out = async () => {
     await logout();
@@ -66,7 +65,7 @@ export function StitchAuth() {
         {escrow > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full" />}
       </button>
       <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-space-sm pl-space-xs" aria-label="Mi cuenta">
-        <span className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-label-lg shrink-0" style={{ backgroundColor: accent?.color ?? "#0d9488" }}>
+        <span className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-label-lg shrink-0" style={{ backgroundColor: accent?.color ?? "rgb(var(--hub-p, 0 104 95))" }}>
           {initial}
         </span>
         <span className="hidden md:flex flex-col text-left">
@@ -79,13 +78,7 @@ export function StitchAuth() {
       </button>
       {open && (
         <div className="absolute right-0 top-12 w-56 rounded-xl bg-surface-container-lowest shadow-lg p-space-xs flex flex-col z-50">
-          <Link to="/cuenta" onClick={() => setOpen(false)} className={itemCls}>Mi cuenta</Link>
-          <Link to="/pedidos" onClick={() => setOpen(false)} className={itemCls}>
-            Mis pedidos{escrow > 0 ? ` (${escrow} en custodia)` : ""}
-          </Link>
-          {isMod && (
-            <Link to="/admin" onClick={() => setOpen(false)} className={itemCls}>Moderación</Link>
-          )}
+          <Link to="/panel" onClick={() => setOpen(false)} className={itemCls}>Panel</Link>
           <button onClick={out} className={itemCls}>Salir</button>
         </div>
       )}

@@ -46,12 +46,3 @@ export function careerColor(key?: string | null): string {
 export function careerSoft(key?: string | null): string {
   return careerOf(key)?.soft ?? "#ccfbf1";
 }
-
-// Sedes y puntos de entrega UNSA (hospitales + campus).
-export const UNSA_SEDES = [
-  "UNSA – Área Biomédicas",
-  "UNSA – Campus Central",
-  "Hospital Honorio Delgado",
-  "Hospital Goyeneche",
-  "EsSalud Seguín Escobedo",
-] as const;

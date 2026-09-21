@@ -29,10 +29,11 @@ export function Register() {
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const email = form.email.trim().toLowerCase();
-  const emailOk = email.endsWith("@unsa.edu.pe");
+  // Excepción autorizada del propietario (igual que ALLOWED_EMAIL_EXCEPTIONS en el backend).
+  const emailOk = email.endsWith("@unsa.edu.pe") || email === "lukas.melgar@tecsup.edu.pe";
   const pwOk = form.password.length >= 8;
   const faculty = careerOf(form.career)?.faculty ?? "UNSA";
-  const careerColor = careerOf(form.career)?.color ?? "#0d9488";
+  const careerColor = careerOf(form.career)?.color ?? "rgb(var(--hub-p, 0 104 95))";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +72,7 @@ export function Register() {
             <div className="relative flex items-center gap-2">
               <span className="material-symbols-outlined text-3xl text-emerald-300">local_hospital</span>
               <div className="flex flex-col leading-tight">
-                <span className="text-lg font-extrabold tracking-tight">Wawki</span>
+                <span className="text-lg font-extrabold tracking-tight">Universo Agustino</span>
                 <span className="text-xs font-semibold uppercase tracking-widest text-white/60">Arequipa · UNSA</span>
               </div>
             </div>
@@ -103,7 +104,7 @@ export function Register() {
           <div className="flex flex-col gap-4 p-8 md:p-10">
             <div>
               <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-900">Crear cuenta</h1>
-              <p className="mt-1 text-sm text-slate-500">Exclusivo comunidad <span className="font-bold text-teal-700">UNSA</span> · Rol inicial: creator.</p>
+              <p className="mt-1 text-sm text-slate-500">Exclusivo comunidad <span className="font-bold text-primary">UNSA</span> · Rol inicial: creator.</p>
             </div>
             <form onSubmit={onSubmit} autoComplete="off" className="flex flex-col gap-3">
               <label className="flex flex-col gap-1 text-sm font-semibold text-slate-700">
@@ -185,16 +186,16 @@ export function Register() {
               <button
                 disabled={busy}
                 className="mt-1 w-full rounded-xl py-3 font-bold text-white shadow-lg transition-all hover:brightness-110 disabled:opacity-60"
-                style={{ background: "linear-gradient(90deg,#0d9488,#4648d4)" }}
+                style={{ background: "linear-gradient(90deg, rgb(var(--hub-p, 0 104 95)), #4648d4)" }}
               >
                 {busy ? "Creando tu cuenta…" : "Registrarme gratis"}
               </button>
             </form>
             <p className="text-center text-sm text-slate-600">
-              ¿Ya tienes cuenta? <Link className="font-bold text-teal-700 underline" to="/login">Entra aquí</Link>
+              ¿Ya tienes cuenta? <Link className="font-bold text-primary underline" to="/login">Entra aquí</Link>
             </p>
             <p className="text-center">
-              <Link to="/" className="inline-flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-teal-700 hover:underline">
+              <Link to="/" className="inline-flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-primary hover:underline">
                 <span className="material-symbols-outlined text-base">arrow_back</span>
                 Volver al inicio
               </Link>

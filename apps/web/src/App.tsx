@@ -12,8 +12,16 @@ import { Register } from "./pages/Register";
 import { Forgot } from "./pages/Forgot";
 import { Cuenta } from "./pages/Cuenta";
 import { Pedidos } from "./pages/Pedidos";
+import { Publicaciones } from "./pages/Publicaciones";
+import { Detalle } from "./pages/Detalle";
+import { Checkout } from "./pages/Checkout";
+import { Visor } from "./pages/Visor";
+import { Panel } from "./pages/Panel";
+import { Publicar } from "./pages/Publicar";
+import { Ventas } from "./pages/Ventas";
 import { Admin } from "./pages/Admin";
-import { AuthLayout } from "./components/SiteChrome";
+import { StitchLayout } from "./components/StitchLayout";
+import { PanelLayout } from "./components/PanelLayout";
 
 const qc = new QueryClient();
 
@@ -24,7 +32,6 @@ const PATH_MAP: Record<string, string> = {
   "bazar-y-alquiler": "/bazar",
   "vender-y-monetizar": "/monetiza",
   "marco-legal-y-etica-academica": "/legal",
-  "membresia-semestral": "/monetiza",
   "soporte-guardias": "/legal",
 };
 
@@ -54,9 +61,7 @@ function StitchNavBridge() {
   return null;
 }
 
-function LegalConFuncional() {
-  return <LegalStitch />;
-}
+
 
 export function App() {
   return (
@@ -71,14 +76,21 @@ export function App() {
               <Route path="/" element={<MarketplaceStitch />} />
               <Route path="/bazar" element={<BazarStitch />} />
               <Route path="/monetiza" element={<MonetizaStitch />} />
-              <Route path="/legal" element={<LegalConFuncional />} />
-              {/* Páginas de cuenta: siempre con barra superior e inferior */}
-              <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
-              <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
-              <Route path="/forgot-password" element={<AuthLayout><Forgot /></AuthLayout>} />
-              <Route path="/cuenta" element={<AuthLayout><Cuenta /></AuthLayout>} />
-              <Route path="/pedidos" element={<AuthLayout><Pedidos /></AuthLayout>} />
-              <Route path="/admin" element={<AuthLayout><Admin /></AuthLayout>} />
+              <Route path="/legal" element={<LegalStitch />} />
+              {/* Páginas de cuenta: misma barra superior principal y pie del sitio */}
+              <Route path="/login" element={<StitchLayout><Login /></StitchLayout>} />
+              <Route path="/register" element={<StitchLayout><Register /></StitchLayout>} />
+              <Route path="/forgot-password" element={<StitchLayout><Forgot /></StitchLayout>} />
+              <Route path="/cuenta" element={<PanelLayout><Cuenta /></PanelLayout>} />
+              <Route path="/pedidos" element={<PanelLayout><Pedidos /></PanelLayout>} />
+              <Route path="/publicaciones" element={<PanelLayout><Publicaciones /></PanelLayout>} />
+              <Route path="/p/:type/:id" element={<StitchLayout><Detalle /></StitchLayout>} />
+              <Route path="/v/:id" element={<StitchLayout><Visor /></StitchLayout>} />
+              <Route path="/publicar" element={<StitchLayout><Publicar /></StitchLayout>} />
+              <Route path="/panel" element={<PanelLayout><Panel /></PanelLayout>} />
+              <Route path="/ventas" element={<PanelLayout><Ventas /></PanelLayout>} />
+              <Route path="/checkout/:orderId" element={<StitchLayout><Checkout /></StitchLayout>} />
+              <Route path="/admin" element={<PanelLayout><Admin /></PanelLayout>} />
             </Routes>
           </div>
         </BrowserRouter>

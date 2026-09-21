@@ -2,7 +2,7 @@
   "name": "enfermeria-hub",
   "version": "0.1.0",
   "private": true,
-  "description": "Wawki Arequipa - Marketplace academico UNSA (comunidad @unsa.edu.pe)",
+  "description": "Universo Agustino - Marketplace academico UNSA (comunidad @unsa.edu.pe)",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -12,8 +12,6 @@
     "dev:api": "npm run dev -w apps/api",
     "dev:web": "npm run dev -w apps/web",
     "build": "npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "prisma:generate": "npm run prisma:generate -w apps/api",

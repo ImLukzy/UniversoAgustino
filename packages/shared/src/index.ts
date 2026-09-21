@@ -63,6 +63,23 @@ export const LoginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof LoginSchema>;
 
+// Edición del perfil propio (Mi cuenta).
+export const UpdateProfileSchema = z.object({
+  fullName: z.string().min(2).max(120),
+  career: CareerSchema,
+  cycle: z.string().max(20).optional(),
+});
+export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
+
+// --- Cobro del vendedor: método + QR + dato (titular/número) ---
+export const PayMethodSchema = z.enum(["YAPE", "PLIN", "AMBAS"]);
+export type PayMethod = z.infer<typeof PayMethodSchema>;
+const payFields = {
+  payMethod: PayMethodSchema.default("YAPE"),
+  payQrUrl: z.string().url().or(z.string().startsWith("/uploads/")).optional(),
+  payDetail: z.string().max(160).optional(),
+};
+
 // --- Documents (marketplace apuntes) ---
 export const DocumentTypeSchema = z.enum(["APUNTE", "PAE", "BALOTARIO", "GUIA"]);
 export const CreateDocumentSchema = z.object({
@@ -75,8 +92,23 @@ export const CreateDocumentSchema = z.object({
   priceCents: z.number().int().min(0).max(50_000_00),
   fileUrl: z.string().url().or(z.string().startsWith("/uploads/")).optional(),
   description: z.string().max(2000).optional(),
+  ...payFields,
 });
 export type CreateDocumentInput = z.infer<typeof CreateDocumentSchema>;
+
+// Edición por el dueño: solo campos seguros (sin carrera/universidad/tipo).
+export const UpdateDocumentSchema = z.object({
+  title: z.string().min(4).max(160).optional(),
+  course: z.string().min(2).max(100).optional(),
+  cycle: z.string().min(1).max(20).optional(),
+  priceCents: z.number().int().min(0).max(50_000_00).optional(),
+  fileUrl: z.string().url().or(z.string().startsWith("/uploads/")).nullable().optional(),
+  description: z.string().max(2000).nullable().optional(),
+  payMethod: PayMethodSchema.optional(),
+  payQrUrl: z.string().url().or(z.string().startsWith("/uploads/")).nullable().optional(),
+  payDetail: z.string().max(160).nullable().optional(),
+});
+export type UpdateDocumentInput = z.infer<typeof UpdateDocumentSchema>;
 
 export const ListQuerySchema = z.object({
   q: z.string().max(100).optional(),
@@ -90,6 +122,11 @@ export const ListQuerySchema = z.object({
 // --- Bazar ---
 export const BazarKindSchema = z.enum(["LIBRO", "SCRUB", "INSTRUMENTO"]);
 export const BazarTxSchema = z.enum(["VENTA", "ALQUILER"]);
+const photoList = z
+  .array(z.string().url().or(z.string().startsWith("/uploads/")))
+  .max(4)
+  .default([]);
+
 export const CreateBazarItemSchema = z.object({
   title: z.string().min(4).max(160),
   kind: BazarKindSchema,
@@ -97,15 +134,39 @@ export const CreateBazarItemSchema = z.object({
   priceCents: z.number().int().min(0),
   depositCents: z.number().int().min(0).optional(),
   description: z.string().max(2000).optional(),
+  photos: photoList,
+  ...payFields,
 });
 export type CreateBazarItemInput = z.infer<typeof CreateBazarItemSchema>;
 
-// --- Orders / escrow ---
+// Edición por el dueño: solo campos seguros (sin kind/tx).
+export const UpdateBazarItemSchema = z.object({
+  title: z.string().min(4).max(160).optional(),
+  priceCents: z.number().int().min(0).optional(),
+  depositCents: z.number().int().min(0).nullable().optional(),
+  description: z.string().max(2000).nullable().optional(),
+  photos: z.array(z.string().url().or(z.string().startsWith("/uploads/"))).max(4).optional(),
+  payMethod: PayMethodSchema.optional(),
+  payQrUrl: z.string().url().or(z.string().startsWith("/uploads/")).nullable().optional(),
+  payDetail: z.string().max(160).nullable().optional(),
+});
+export type UpdateBazarItemInput = z.infer<typeof UpdateBazarItemSchema>;
+
+// --- Orders / pago por pasos: PENDING → PAID → ESCROW → RELEASED ---
 export const CreateOrderSchema = z.object({
   itemType: z.enum(["document", "bazar"]),
   itemId: z.string().min(1),
+  // Alquiler de bazar: fechas solicitadas (requeridas solo en ese caso).
+  rentalStart: z.string().datetime({ offset: true }).optional(),
+  rentalEnd: z.string().datetime({ offset: true }).optional(),
 });
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
+
+export const MarkPaidSchema = z.object({
+  // Constancia del comprador (n° operación Yape/Plin u otro comprobante).
+  payProof: z.string().min(3).max(160).optional(),
+});
+export type MarkPaidInput = z.infer<typeof MarkPaidSchema>;
 
 // --- Monetizacion: calculadora pura (testeable) ---
 export const SimulateSchema = z.object({

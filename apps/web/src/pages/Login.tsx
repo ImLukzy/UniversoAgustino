@@ -7,7 +7,7 @@ import { apiError } from "../lib/api";
 // sin valores precargados ni autocompletado, botón volver al inicio,
 // sin caja de cuentas de prueba y envío anti-duplicados.
 const AVATARS = [
-  { init: "R", bg: "#0d9488" },
+  { init: "R", bg: "rgb(var(--hub-p, 0 104 95))" },
   { init: "M", bg: "#4648d4" },
   { init: "J", bg: "#b45309" },
   { init: "A", bg: "#be123c" },
@@ -25,7 +25,8 @@ export function Login() {
   const sending = useRef(false);
 
   const clean = email.trim().toLowerCase();
-  const emailOk = clean.endsWith("@unsa.edu.pe");
+  // Excepción autorizada del propietario (igual que ALLOWED_EMAIL_EXCEPTIONS en el backend).
+  const emailOk = clean.endsWith("@unsa.edu.pe") || clean === "lukas.melgar@tecsup.edu.pe";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,12 +51,14 @@ export function Login() {
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-10 md:grid-cols-2 md:py-16">
         {/* Marca */}
         <div className="flex flex-col justify-center gap-5">
-          <Link to="/" className="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">
-            Wawki
-            <span className="ml-2 align-middle text-lg font-bold text-slate-400">Arequipa</span>
+          <Link to="/" className="flex items-center gap-3">
+            <img src="/logo-ua.svg" alt="Universo Agustino" className="h-11 w-auto" />
+            <span className="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">
+              Universo <span className="text-primary">Agustino</span>
+            </span>
           </Link>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
-            Bienvenido de <span style={{ color: "#0d9488" }}>vuelta.</span>
+            Bienvenido de <span className="text-primary">vuelta.</span>
           </h1>
           <p className="max-w-md leading-relaxed text-slate-500">
             Sigue donde lo dejaste: tus apuntes, tus pedidos en custodia y tu billetera agustina.
@@ -70,10 +73,10 @@ export function Login() {
             </div>
             <p className="text-sm leading-tight text-slate-500">
               <span className="font-bold text-slate-800">+1,240 agustinos</span>
-              <br />ya son parte de Wawki
+              <br />ya son parte de Universo Agustino
             </p>
           </div>
-          <Link to="/" className="mt-2 inline-flex w-fit items-center gap-1 text-sm font-bold text-teal-700 hover:underline">
+          <Link to="/" className="mt-2 inline-flex w-fit items-center gap-1 text-sm font-bold text-primary hover:underline">
             <span className="material-symbols-outlined text-base">arrow_back</span>
             Volver al inicio
           </Link>
@@ -125,7 +128,7 @@ export function Login() {
               </span>
             </label>
             <div className="text-right">
-              <Link to="/forgot-password" className="text-xs font-bold text-teal-700 hover:underline">
+              <Link to="/forgot-password" className="text-xs font-bold text-primary hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
@@ -133,7 +136,7 @@ export function Login() {
             <button
               disabled={busy}
               className="w-full rounded-xl py-3.5 font-bold text-white shadow-lg transition-all hover:brightness-110 disabled:opacity-60"
-              style={{ background: "linear-gradient(90deg,#0d9488,#0a5f58)" }}
+              style={{ background: "linear-gradient(90deg, rgb(var(--hub-p, 0 104 95)), rgb(var(--hub-p, 0 104 95) / 0.72))" }}
             >
               {busy ? "Entrando…" : "→  Iniciar sesión"}
             </button>
@@ -143,7 +146,7 @@ export function Login() {
             ¿No tienes cuenta?
             <span className="h-px flex-1 bg-slate-200"></span>
           </div>
-          <Link to="/register" className="w-full rounded-xl border border-slate-200 bg-white py-3 text-center text-sm font-bold text-slate-800 shadow-sm transition-colors hover:border-teal-600 hover:text-teal-700">
+          <Link to="/register" className="w-full rounded-xl border border-slate-200 bg-white py-3 text-center text-sm font-bold text-slate-800 shadow-sm transition-colors hover:border-primary hover:text-primary">
             Crear cuenta gratis
           </Link>
         </div>

@@ -23,7 +23,7 @@ export function Forgot() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-col items-center gap-4 px-6 py-14 text-center">
       <p className="text-2xl font-extrabold tracking-tight text-slate-900">
-        Wawki<span style={{ color: "#0d9488" }}>.</span>
+        Universo Agustino<span className="text-primary">.</span>
       </p>
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">¿Olvidaste tu contraseña?</h1>
@@ -48,12 +48,12 @@ export function Forgot() {
           </span>
         </label>
         {err && <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{err}</p>}
-        {msg && <p className="rounded-xl bg-teal-50 px-3 py-2 text-sm font-medium text-teal-800">{msg}</p>}
-        <button className="w-full rounded-xl py-3.5 font-bold text-white shadow-lg transition-all hover:brightness-110" style={{ background: "linear-gradient(90deg,#0d9488,#0a5f58)" }}>
+        {msg && <p className="rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium text-primary">{msg}</p>}
+        <button className="w-full rounded-xl py-3.5 font-bold text-white shadow-lg transition-all hover:brightness-110" style={{ background: "linear-gradient(90deg, rgb(var(--hub-p, 0 104 95)), rgb(var(--hub-p, 0 104 95) / 0.72))" }}>
           →  Enviarme el enlace
         </button>
       </form>
-      <Link to="/login" className="inline-flex items-center gap-1 text-sm font-bold text-teal-700 hover:underline">
+      <Link to="/login" className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:underline">
         <span className="material-symbols-outlined text-base">arrow_back</span>
         Volver a iniciar sesión
       </Link>

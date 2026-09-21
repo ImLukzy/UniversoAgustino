@@ -13,6 +13,13 @@ interface CareerTheme {
   accent: UnsaCareer | null;
 }
 
+function hexToRgbTriplet(hex: string): string {
+  const h = hex.replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const n = parseInt(full, 16);
+  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+}
+
 const Ctx = createContext<CareerTheme>({ career: "all", setCareer: () => {}, accent: null });
 
 // Tema global: todo acento de la página (barra superior, filtros, precios, botones)
@@ -59,6 +66,18 @@ export function CareerThemeProvider({ children }: { children: ReactNode }) {
   }, [setCareer]);
 
   const accent = career === "all" ? null : careerOf(career);
+
+  // El color primario de TODA la app (todas las pestañas) sigue a la carrera:
+  // primary y primary-container de Tailwind leen --hub-p. Sin carrera → teal por defecto.
+  useEffect(() => {
+    try {
+      if (accent) document.documentElement.style.setProperty("--hub-p", hexToRgbTriplet(accent.color));
+      else document.documentElement.style.removeProperty("--hub-p");
+    } catch {
+      /* sin DOM */
+    }
+  }, [accent]);
+
   const value = useMemo(() => ({ career, setCareer, accent }), [career, setCareer, accent]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -5,6 +5,9 @@
 :root {
   --hub-primary: #00685f;
   --hub-secondary: #4648d4;
+  /* Triplete RGB del color de carrera (lo fija el tema global; por defecto, teal UNSA #00685f).
+     Los tokens `primary` y `primary-container` de Tailwind lo consumen. */
+  --hub-p: 0 104 95;
 }
 
 body {
@@ -29,15 +32,14 @@ button:active { transform: scale(0.95); }
   box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
 }
 .btn-primary {
-  background: #0d9488;
+  background: rgb(var(--hub-p, 0 104 95));
   color: #fff;
   border-radius: 0.5rem;
   padding: 0.65rem 1.1rem;
   font-weight: 600;
 }
-.btn-primary:hover { background: #0f766e; }
+.btn-primary:hover { filter: brightness(0.9); }
 .badge-uni { background: #f1f5f9; color: #475569; border-radius: 9999px; padding: 0.15rem 0.6rem; font-size: 0.72rem; font-weight: 600; }
-.badge-price { background: #f0fdfa; color: #0f766e; border-radius: 9999px; padding: 0.15rem 0.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .badge-cep { background: #ecfdf5; color: #047857; border-radius: 9999px; padding: 0.15rem 0.6rem; font-size: 0.72rem; font-weight: 600; }
 .input { background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.6rem 0.8rem; width: 100%; }
-.input:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
+.input:focus { outline: none; border-color: rgb(var(--hub-p, 0 104 95)); box-shadow: 0 0 0 3px rgb(var(--hub-p, 0 104 95) / 0.15); }

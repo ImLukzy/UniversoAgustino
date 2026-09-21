@@ -27,10 +27,10 @@ export const reportsRouter = Router();
 
 reportsRouter.post(
   "/",
-  asyncHandler(async (req, res) => {
+  requireAuth,
+  asyncHandler(async (req: AuthedRequest, res) => {
     const input = CreateReportSchema.parse(req.body);
-    const reporterId = (req as any).user?.sub ?? null;
-    const report = await prisma.report.create({ data: { ...input, reporterId } });
+    const report = await prisma.report.create({ data: { ...input, reporterId: req.user!.sub } });
     res.status(201).json({ data: report });
   })
 );
@@ -39,6 +39,16 @@ reportsRouter.get("/", requireAuth, requireRole("moderator", "admin"), asyncHand
   const rows = await prisma.report.findMany({ orderBy: { createdAt: "desc" }, take: 50 });
   res.json({ data: rows });
 }));
+
+// Mis reportes enviados (para el centro de soporte del vendedor/comprador).
+reportsRouter.get(
+  "/mine",
+  requireAuth,
+  asyncHandler(async (req: AuthedRequest, res) => {
+    const rows = await prisma.report.findMany({ where: { reporterId: req.user!.sub }, orderBy: { createdAt: "desc" }, take: 50 });
+    res.json({ data: rows });
+  })
+);
 
 reportsRouter.post(
   "/:id/action",

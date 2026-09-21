@@ -30,6 +30,8 @@ enum BazarStatus {
 
 enum OrderStatus {
   PENDING
+  ACCEPTED
+  PAID
   ESCROW
   RELEASED
   REFUNDED
@@ -77,6 +79,9 @@ model Document {
   priceCents  Int       @default(0)
   fileUrl     String?
   description String?
+  payMethod   String    @default("YAPE")
+  payQrUrl    String?
+  payDetail   String?
   status      DocStatus @default(PUBLISHED)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -95,6 +100,10 @@ model BazarItem {
   priceCents   Int
   depositCents Int?
   description  String?
+  photos       String[]    @default([])
+  payMethod    String      @default("YAPE")
+  payQrUrl     String?
+  payDetail    String?
   status       BazarStatus @default(AVAILABLE)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -109,7 +118,16 @@ model Order {
   amountCents Int
   feeCents   Int
   netCents   Int
-  status     OrderStatus @default(ESCROW)
+  // Foto del cobro al crear el pedido (método + QR + dato del vendedor).
+  payMethod  String?
+  payQrUrl   String?
+  payDetail  String?
+  // Constancia que declara el comprador (n° operación Yape/Plin).
+  payProof   String?
+  // Alquiler de bazar: periodo solicitado por el comprador.
+  rentalStart DateTime?
+  rentalEnd   DateTime?
+  status     OrderStatus @default(PENDING)
   escrow     Escrow?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt

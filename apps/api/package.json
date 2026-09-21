@@ -6,8 +6,6 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
-    "lint": "eslint src --max-warnings=0",
-    "test": "vitest run",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:deploy": "prisma migrate deploy",
@@ -16,7 +14,6 @@
   "dependencies": {
     "@hub/shared": "0.1.0",
     "@prisma/client": "^5.22.0",
-    "@types/multer": "^2.2.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -37,10 +34,10 @@
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/morgan": "^1.9.9",
+    "@types/multer": "^2.2.0",
     "@types/node": "^20.16.10",
     "prisma": "^5.22.0",
     "tsx": "^4.19.1",
-    "typescript": "^5.5.4",
-    "vitest": "^2.1.8"
+    "typescript": "^5.5.4"
   }
 }
