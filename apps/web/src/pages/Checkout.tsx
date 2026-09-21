@@ -100,8 +100,8 @@ export function Checkout() {
     try {
       await api.post(`/orders/${o.id}/pay`, { payProof: proof.trim() || undefined });
       toast.success("Pago declarado", "El vendedor lo confirmará y pasará a custodia.");
-      qc.invalidateQueries({ queryKey: ["order", orderId] });
-      qc.invalidateQueries({ queryKey: ["orders", "mine"] });
+      void qc.invalidateQueries({ queryKey: ["order", orderId] });
+      void qc.invalidateQueries({ queryKey: ["orders", "mine"] });
     } catch (e) {
       toast.error("No se pudo declarar el pago", apiError(e));
     } finally {

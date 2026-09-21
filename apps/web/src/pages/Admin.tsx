@@ -29,7 +29,7 @@ export function Admin() {
       (await api.post(`/reports/${id}/action`, { decision })).data,
     onSuccess: () => {
       setMsg("Reporte accionado (si era document → TAKEDOWN).");
-      qc.invalidateQueries({ queryKey: ["reports"] });
+      void qc.invalidateQueries({ queryKey: ["reports"] });
     },
     onError: (e) => setMsg(apiError(e)),
   });

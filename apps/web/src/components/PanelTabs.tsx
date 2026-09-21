@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
 import { api, type HubOrder, type HubReport } from "../lib/api";
+import { prefetchRoute } from "../lib/prefetch";
 
 // Barra inferior fija para moverse entre Resumen y los módulos de Mi Espacio.
 export function PanelTabs() {
@@ -53,6 +54,8 @@ export function PanelTabs() {
           <NavLink
             key={t.to}
             to={t.to}
+            onMouseEnter={() => prefetchRoute(t.to)}
+            onFocus={() => prefetchRoute(t.to)}
             className={({ isActive }) =>
               `relative flex items-center gap-1.5 whitespace-nowrap px-3 py-3 text-xs font-semibold transition-colors ${
                 isActive ? "text-primary" : "text-slate-500 hover:text-slate-800"

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import type { Prisma } from "@prisma/client";
 import { CreateDocumentSchema, DocumentTypeSchema, ListQuerySchema, UpdateDocumentSchema } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
@@ -13,7 +14,7 @@ documentsRouter.get(
       course: ListQuerySchema.shape.course.optional(),
       type: DocumentTypeSchema.optional(),
     }).parse(req.query);
-    const where: any = { status: "PUBLISHED", university: "UNSA" };
+    const where: Prisma.DocumentWhereInput = { status: "PUBLISHED", university: "UNSA" };
     if (q.university) where.university = q.university;
     if (q.career) where.career = q.career;
     if (q.type) where.type = q.type;

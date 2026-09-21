@@ -28,7 +28,7 @@ export function PanelOrderRow({ order }: { order: HubOrder }) {
     setMsg("");
     try {
       await api.post(`/orders/${order.id}/confirm-receipt`);
-      qc.invalidateQueries({ queryKey: ["orders", "mine"] });
+      void qc.invalidateQueries({ queryKey: ["orders", "mine"] });
     } catch (e) {
       setMsg(apiError(e));
     } finally {

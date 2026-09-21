@@ -56,8 +56,8 @@ export function StitchAuth() {
 
   const markAllRead = async () => {
     await api.post("/notifications/read-all");
-    notifs.refetch();
-    unread.refetch();
+    void notifs.refetch();
+    void unread.refetch();
   };
   const openNotif = async (n: HubNotification) => {
     setBellOpen(false);
@@ -67,8 +67,8 @@ export function StitchAuth() {
       } catch {
         /* noop: igual navega */
       }
-      notifs.refetch();
-      unread.refetch();
+      void notifs.refetch();
+      void unread.refetch();
     }
     if (n.link?.startsWith("/")) nav(n.link);
   };
@@ -131,7 +131,7 @@ export function StitchAuth() {
           <div className="absolute right-0 top-12 w-80 max-w-[85vw] rounded-xl bg-surface-container-lowest shadow-lg p-space-xs flex flex-col z-50">
             <div className="flex items-center justify-between px-space-sm py-space-xs">
               <span className="font-label-md text-label-md font-bold">Notificaciones</span>
-              <button onClick={() => { markAllRead(); }} className="text-xs font-semibold text-primary hover:underline">
+              <button onClick={() => { void markAllRead(); }} className="text-xs font-semibold text-primary hover:underline">
                 Marcar leídas
               </button>
             </div>

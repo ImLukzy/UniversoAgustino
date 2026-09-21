@@ -5,6 +5,7 @@
     "moduleResolution": "NodeNext",
     "lib": ["ES2022"],
     "strict": true,
+    "useUnknownInCatchVariables": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,

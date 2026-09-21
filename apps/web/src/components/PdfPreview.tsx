@@ -14,7 +14,7 @@ export function PdfPage({ url, page, fallback, scale = 1.5 }: { url: string; pag
     let cancelled = false;
     setLoading(true);
     setFailed(false);
-    (async () => {
+    void (async () => {
       const task = pdfjsLib.getDocument({ url, withCredentials: false });
       try {
         const doc = await task.promise;

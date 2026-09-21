@@ -31,7 +31,7 @@ export default tseslint.config(
       "react-hooks/exhaustive-deps": "warn",
       "jsx-a11y/alt-text": "warn",
       "jsx-a11y/aria-props": "warn",
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-floating-promises": "off", // F2-07: requiere typed linting (projectService)
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
@@ -40,10 +40,27 @@ export default tseslint.config(
     files: ["apps/api/**/*.ts", "packages/shared/**/*.ts", "scripts/**/*.mjs"],
     languageOptions: { globals: globals.node },
     rules: {
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-floating-promises": "off", // F2-07: requiere typed linting (projectService)
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "no-console": "off",
+    },
+  },
+  {
+    files: ["apps/api/**/*.ts", "packages/shared/**/*.ts", "apps/web/src/**/*.{ts,tsx}"],
+    // seed.ts y vitest.config.ts viven fuera de los "include" de cada
+    // tsconfig: se lintan sin tipos (sin no-floating-promises).
+    ignores: [
+      "apps/api/prisma/seed.ts",
+      "apps/api/vitest.config.ts",
+      "packages/shared/vitest.config.ts",
+      "apps/web/vitest.config.ts",
+    ],
+    languageOptions: {
+      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+    },
+    rules: {
+      "@typescript-eslint/no-floating-promises": "error",
     },
   },
 );

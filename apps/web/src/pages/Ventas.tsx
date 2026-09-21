@@ -64,7 +64,7 @@ export function Ventas() {
       setRepMsg("Reporte enviado. Lo revisaremos en menos de 48h.");
       setTId("");
       setReason("");
-      reports.refetch();
+      void reports.refetch();
     } catch (ex) {
       setRepMsg(apiError(ex));
     } finally {

@@ -38,7 +38,7 @@ export function MonetizaStitch() {
   const [sim, setSim] = useState<{ gross: number; fee: number; net: number } | null>(null);
   useEffect(() => {
     let alive = true;
-    (async () => {
+    void (async () => {
       try {
         const r = await fetch(API_URL + "/monetization/simulate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ avgPrice: price, salesPerMonth: sales, bazarExtra: 0, feePct: 13 }) });
         const j = await r.json();

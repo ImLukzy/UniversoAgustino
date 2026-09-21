@@ -16,7 +16,7 @@ export function SaleActions({ order, accentColor }: { order: HubOrder; accentCol
     try {
       await api.post(path);
       toast.success(okMsg);
-      qc.invalidateQueries({ queryKey: ["orders", "sales"] });
+      void qc.invalidateQueries({ queryKey: ["orders", "sales"] });
     } catch (e) {
       toast.error("No se pudo completar la acción", apiError(e));
     } finally {

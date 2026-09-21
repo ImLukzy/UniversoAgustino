@@ -97,7 +97,7 @@ function PayFields({
   );
 }
 
-function EditDoc({ doc, onDone }: { doc: HubDocument; onDone: () => void }) {
+function EditDoc({ doc, liveOrders, onDone }: { doc: HubDocument; liveOrders: number; onDone: () => void }) {
   const qc = useQueryClient();
   const [f, setF] = useState({
     title: doc.title,
@@ -126,7 +126,7 @@ function EditDoc({ doc, onDone }: { doc: HubDocument; onDone: () => void }) {
         payDetail: f.payDetail.trim() || null,
         payQrUrl: f.payQrUrl || null,
       });
-      qc.invalidateQueries({ queryKey: ["docs-mine"] });
+      void qc.invalidateQueries({ queryKey: ["docs-mine"] });
       setMsg("Guardado.");
       onDone();
     } catch (e) {
@@ -139,7 +139,7 @@ function EditDoc({ doc, onDone }: { doc: HubDocument; onDone: () => void }) {
     setBusy(true);
     try {
       await api.delete(`/documents/${doc.id}`);
-      qc.invalidateQueries({ queryKey: ["docs-mine"] });
+      void qc.invalidateQueries({ queryKey: ["docs-mine"] });
       onDone();
     } catch (e) {
       setMsg(apiError(e));
@@ -166,6 +166,11 @@ function EditDoc({ doc, onDone }: { doc: HubDocument; onDone: () => void }) {
         onQr={(v) => setF((s) => ({ ...s, payQrUrl: v }))}
       />
       {msg && <p className="text-xs font-semibold text-slate-600">{msg}</p>}
+      {liveOrders > 0 && Math.round(Number(f.soles) * 100) !== doc.priceCents && (
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+          Tienes {liveOrders} pedido(s) activos con el precio anterior ({pen(doc.priceCents)}). El cambio solo aplicará a nuevas reservas.
+        </p>
+      )}
       <div className="flex gap-2">
         <button disabled={busy} onClick={save} className="btn-primary text-sm disabled:opacity-50">Guardar cambios</button>
         <button disabled={busy} onClick={() => setConfirming(true)} className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-bold text-red-600 disabled:opacity-50">Eliminar</button>
@@ -180,7 +185,7 @@ function EditDoc({ doc, onDone }: { doc: HubDocument; onDone: () => void }) {
   );
 }
 
-function EditBazar({ item, onDone }: { item: HubBazarItem; onDone: () => void }) {
+function EditBazar({ item, liveOrders, onDone }: { item: HubBazarItem; liveOrders: number; onDone: () => void }) {
   const qc = useQueryClient();
   const [f, setF] = useState({
     title: item.title,
@@ -207,7 +212,7 @@ function EditBazar({ item, onDone }: { item: HubBazarItem; onDone: () => void })
         payDetail: f.payDetail.trim() || null,
         payQrUrl: f.payQrUrl || null,
       });
-      qc.invalidateQueries({ queryKey: ["bazar-mine"] });
+      void qc.invalidateQueries({ queryKey: ["bazar-mine"] });
       setMsg("Guardado.");
       onDone();
     } catch (e) {
@@ -220,7 +225,7 @@ function EditBazar({ item, onDone }: { item: HubBazarItem; onDone: () => void })
     setBusy(true);
     try {
       await api.delete(`/bazar/${item.id}`);
-      qc.invalidateQueries({ queryKey: ["bazar-mine"] });
+      void qc.invalidateQueries({ queryKey: ["bazar-mine"] });
       onDone();
     } catch (e) {
       setMsg(apiError(e));
@@ -247,6 +252,11 @@ function EditBazar({ item, onDone }: { item: HubBazarItem; onDone: () => void })
         onQr={(v) => setF((s) => ({ ...s, payQrUrl: v }))}
       />
       {msg && <p className="text-xs font-semibold text-slate-600">{msg}</p>}
+      {liveOrders > 0 && Math.round(Number(f.soles) * 100) !== item.priceCents && (
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+          Tienes {liveOrders} pedido(s) activos con el precio anterior ({pen(item.priceCents)}). El cambio solo aplicará a nuevas reservas.
+        </p>
+      )}
       <div className="flex gap-2">
         <button disabled={busy} onClick={save} className="btn-primary text-sm disabled:opacity-50">Guardar cambios</button>
         <button disabled={busy} onClick={() => setConfirming(true)} className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-bold text-red-600 disabled:opacity-50">Eliminar</button>
@@ -284,6 +294,13 @@ function itemStats(sales: HubOrder[], id: string) {
   const rows = sales.filter((o) => o.itemId === id && o.status !== "CANCELLED" && o.status !== "REFUNDED");
   const rel = rows.filter((o) => o.status === "RELEASED");
   return { pedidos: rows.length, ventas: rel.length, neto: rel.reduce((a, o) => a + o.netCents, 0) };
+}
+
+// Sprint F2-09: pedidos que congelaron el precio anterior (el cambio de
+// precio solo aplica a nuevas reservas).
+const LIVE_STATUSES = ["PENDING", "ACCEPTED", "PAID", "ESCROW"];
+function liveCount(sales: HubOrder[], id: string) {
+  return sales.filter((o) => o.itemId === id && LIVE_STATUSES.includes(o.status)).length;
 }
 
 export function Publicaciones() {
@@ -580,8 +597,8 @@ export function Publicaciones() {
                 </div>
                 {open && (
                   <div className="mt-2">
-                    {isDoc && doc ? <EditDoc doc={doc} onDone={() => setOpenDoc("")} /> : null}
-                    {!isDoc && item ? <EditBazar item={item} onDone={() => setOpenBazar("")} /> : null}
+                    {isDoc && doc ? <EditDoc doc={doc} liveOrders={liveCount(mySales, r.id)} onDone={() => setOpenDoc("")} /> : null}
+                    {!isDoc && item ? <EditBazar item={item} liveOrders={liveCount(mySales, r.id)} onDone={() => setOpenBazar("")} /> : null}
                   </div>
                 )}
               </div>

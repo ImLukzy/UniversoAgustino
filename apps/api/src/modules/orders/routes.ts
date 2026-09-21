@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { CreateOrderSchema, MarkPaidSchema } from "@hub/shared";
+import { CreateOrderSchema, MarkPaidSchema, computePrice } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
 import { env } from "../../env.js";
 import { asyncHandler } from "../../middleware/errors.js";
@@ -99,9 +99,7 @@ ordersRouter.post(
         return res.status(409).json({ error: { code: "NOT_AVAILABLE", message: "Este ítem ya está reservado", details: { availableAt: blocking.expiresAt } } });
       }
     }
-    const amountCents = item.priceCents;
-    const feeCents = Math.round(amountCents * (env.FEE_PCT / 100));
-    const feeBps = Math.round(env.FEE_PCT * 100);
+    const { amountCents, feeCents, netCents, feeBps } = computePrice(item.priceCents, env.FEE_PCT);
     const order = await prisma.order.create({
       data: {
         buyerId: req.user!.sub,
@@ -110,7 +108,7 @@ ordersRouter.post(
         itemId: input.itemId,
         amountCents,
         feeCents,
-        netCents: amountCents - feeCents,
+        netCents,
         payMethod: item.payMethod,
         payQrUrl: item.payQrUrl,
         payDetail: item.payDetail,
@@ -141,7 +139,19 @@ ordersRouter.get(
   requireAuth,
   asyncHandler(async (req: AuthedRequest, res) => {
     const rows = await prisma.order.findMany({ where: { buyerId: req.user!.sub }, orderBy: { createdAt: "desc" }, include: { escrow: true } });
-    res.json({ data: rows });
+    // Sprint 2B+: el comprador puede descargar sus digitales RELEASED sin
+    // fetch extra por fila. Solo se expone el fileUrl de SUS pedidos
+    // liberados (una sola consulta acotada, no N+1).
+    const docIds = [...new Set(rows.filter((o) => o.itemType === "document" && o.status === "RELEASED").map((o) => o.itemId))];
+    const docs = docIds.length
+      ? await prisma.document.findMany({ where: { id: { in: docIds } }, select: { id: true, fileUrl: true } })
+      : [];
+    const files = new Map(docs.map((d) => [d.id, d.fileUrl ?? null]));
+    const data = rows.map((o) => ({
+      ...o,
+      fileUrl: o.itemType === "document" && o.status === "RELEASED" ? (files.get(o.itemId) ?? null) : null,
+    }));
+    res.json({ data });
   })
 );
 

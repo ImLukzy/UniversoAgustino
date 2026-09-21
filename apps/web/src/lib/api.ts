@@ -165,6 +165,7 @@ export interface HubOrder {
   itemTx?: string | null;
   itemPriceCents?: number | null;
   feeBps?: number | null;
+  fileUrl?: string | null;
   buyerCompleted?: number;
   buyer?: { id: string; email: string; profile?: { fullName: string; career?: string | null; cycle?: string | null } | null } | null;
 }

@@ -269,6 +269,27 @@ export function canTransition(from: OrderStatus, to: OrderStatus): boolean {
   return ORDER_TRANSITIONS[from].includes(to);
 }
 
+// --- Precio de pedido (Sprint F2-09): la ÚNICA forma de calcular montos.
+// Invariante: netCents + feeCents === amountCents (testeada abajo en
+// price.test.ts y usada por POST /orders). feeBps congela la tasa vigente.
+export interface PriceSnapshot {
+  amountCents: number;
+  feeCents: number;
+  netCents: number;
+  feeBps: number;
+}
+
+export function computePrice(priceCents: number, feePct: number): PriceSnapshot {
+  const amountCents = Math.max(0, Math.round(priceCents));
+  const feeCents = Math.round((amountCents * feePct) / 100);
+  return {
+    amountCents,
+    feeCents,
+    netCents: amountCents - feeCents,
+    feeBps: Math.round(feePct * 100),
+  };
+}
+
 // --- Microcopy de dominio (Sprint F3-06): etiquetas en minúsculas porque
 // así están los valores reales (CreateOrderSchema, CreateReportSchema).
 // El alquiler NO es un itemType: es un pedido con fechas (rentalStart).

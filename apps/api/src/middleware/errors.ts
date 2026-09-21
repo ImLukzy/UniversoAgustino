@@ -3,6 +3,14 @@ import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
 import { MulterError } from "multer";
 
+function isRecord(e: unknown): e is Record<string, unknown> {
+  return typeof e === "object" && e !== null;
+}
+
+function prop(e: unknown, key: string): unknown {
+  return isRecord(e) ? e[key] : undefined;
+}
+
 function requestId(req: Request): string {
   const h = req.headers["x-request-id"];
   if (typeof h === "string" && h.length > 0) return h.slice(0, 64);
@@ -22,9 +30,11 @@ function send(res: Response, status: number, code: string, message: string, requ
   return res.status(status).json(body);
 }
 
-// Sprint 1A: contrato de error tipado. Todo error sale con
+// Sprint 4 (F1-03) + F2-07: contrato de error tipado. Todo error sale con
 // { error: { code, message, details?, requestId } }.
-export function errorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
+// `err` es unknown (compatible con ErrorRequestHandler por contravarianza);
+// se estrecha con instanceof y guardas antes de leer propiedades.
+export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
   const rid = requestId(req);
 
   if (err instanceof ZodError) {
@@ -49,7 +59,7 @@ export function errorHandler(err: any, req: Request, res: Response, _next: NextF
     if (err.code === "LIMIT_FILE_SIZE") {
       return send(res, 413, "FILE_TOO_LARGE", "El archivo supera el tamaño máximo permitido", rid, {
         limitBytes: Number(process.env.MAX_UPLOAD_MB ?? 25) * 1024 * 1024,
-        field: (err as { field?: string }).field,
+        field: typeof prop(err, "field") === "string" ? (prop(err, "field") as string) : undefined,
       });
     }
     if (err.code === "LIMIT_FILE_COUNT" || err.code === "LIMIT_UNEXPECTED_FILE") {
@@ -59,14 +69,18 @@ export function errorHandler(err: any, req: Request, res: Response, _next: NextF
   }
 
   // Rechazos del fileFilter de uploads (extensión no permitida).
-  if (typeof err?.message === "string" && err.message.startsWith("Tipo no permitido")) {
+  const fileFilterMsg = prop(err, "message");
+  if (typeof fileFilterMsg === "string" && fileFilterMsg.startsWith("Tipo no permitido")) {
     return send(res, 415, "UNSUPPORTED_FILE_TYPE", "Formato no permitido. Usa PDF, JPG, PNG o EPUB.", rid);
   }
 
-  const status = typeof err?.status === "number" ? err.status : 500;
-  const code = typeof err?.code === "string" ? err.code : status === 500 ? "INTERNAL" : "REQUEST_ERROR";
+  const statusRaw = prop(err, "status");
+  const status = typeof statusRaw === "number" ? statusRaw : 500;
+  const codeRaw = prop(err, "code");
+  const code = typeof codeRaw === "string" ? codeRaw : status === 500 ? "INTERNAL" : "REQUEST_ERROR";
   if (status >= 500) console.error(`[${rid}]`, err);
-  const message = status === 500 ? "Error interno" : (err?.message ?? "Error en la solicitud");
+  const messageRaw = prop(err, "message");
+  const message = status === 500 ? "Error interno" : typeof messageRaw === "string" ? messageRaw : "Error en la solicitud";
   return send(res, status, code, message, rid);
 }
 

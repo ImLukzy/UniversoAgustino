@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Bootstrap: /auth/me dispara la rotación silenciosa vía interceptor si
     // el access venció pero la cookie de refresh sigue válida (Sprint 1A).
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const r = await api.get("/auth/me");
         if (!cancelled) setUser(r.data.data);

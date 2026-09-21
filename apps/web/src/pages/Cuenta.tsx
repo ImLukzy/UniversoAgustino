@@ -80,7 +80,7 @@ export function Cuenta() {
     try {
       await api.patch("/auth/profile", { fullName: fullName.trim(), career: fCareer, cycle: fCycle.trim() || undefined });
       await refreshMe();
-      qc.invalidateQueries({ queryKey: ["docs-mine"] });
+      void qc.invalidateQueries({ queryKey: ["docs-mine"] });
       setSaveMsg("Datos guardados.");
     } catch (ex) {
       setSaveMsg(apiError(ex));

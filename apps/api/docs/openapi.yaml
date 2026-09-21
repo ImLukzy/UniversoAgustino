@@ -232,7 +232,7 @@ paths:
   /orders/mine:
     get:
       tags: [orders]
-      summary: Mis compras como comprador (auth, incluye snapshot itemTitle)
+      summary: Mis compras como comprador (auth, incluye snapshot itemTitle y fileUrl en digitales RELEASED)
       security: [{ bearerAuth: [] }]
       responses: { '200': { description: OK } }
   /orders/sales:

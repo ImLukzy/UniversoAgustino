@@ -21,7 +21,7 @@ function PedidoRow({ order }: { order: HubOrder }) {
     try {
       await api.post(path);
       if (okMsg) setMsg(okMsg);
-      qc.invalidateQueries({ queryKey: ["orders", "mine"] });
+      void qc.invalidateQueries({ queryKey: ["orders", "mine"] });
     } catch (e) {
       setMsg(apiError(e));
     } finally {
@@ -98,11 +98,15 @@ function PedidoRow({ order }: { order: HubOrder }) {
               Confirmar recepción
             </button>
           )}
-          {order.status === "RELEASED" && isDoc && (
+          {order.status === "RELEASED" && isDoc && order.fileUrl ? (
+            <a href={order.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110">
+              <span className="material-symbols-outlined text-base">download</span> Descargar
+            </a>
+          ) : order.status === "RELEASED" && isDoc ? (
             <Link to={`/v/${order.itemId}`} className="flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110">
               <span className="material-symbols-outlined text-base">visibility</span> Abrir apunte
             </Link>
-          )}
+          ) : null}
           {order.status === "RELEASED" && !isDoc && (
             <Link to={`/p/bazar/${order.itemId}`} className="rounded-lg bg-slate-200 px-4 py-2 text-xs font-bold transition-all hover:bg-slate-300">
               Ver publicación
