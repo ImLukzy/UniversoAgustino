@@ -4,7 +4,8 @@ import { prisma } from "../../lib/prisma.js";
 import { env } from "../../env.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, requireRole, type AuthedRequest } from "../../middleware/auth.js";
-import { blockingOrderWhere, expiredPatch, isExpired, nextExpiry } from "./reservation.js";
+import { blockingOrderWhere, expiredPatch, isExpired, nextExpiry, RESERVATION_TTL_MINUTES } from "./reservation.js";
+import { notify, orderLink } from "../../lib/notify.js";
 
 export const ordersRouter = Router();
 
@@ -124,6 +125,13 @@ ordersRouter.post(
       },
     });
     await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.created", entity: "order", entityId: order.id } });
+    await notify({
+      userId: item.ownerId,
+      type: "ORDER_CREATED",
+      title: "Nueva reserva en tu publicación",
+      body: `${item.title} — la reserva expira en ${RESERVATION_TTL_MINUTES} minutos.`,
+      link: orderLink(order.id),
+    });
     res.status(201).json({ data: order });
   })
 );
@@ -225,6 +233,13 @@ ordersRouter.post(
     }
     const upd = await prisma.order.update({ where: { id: order.id }, data: { status: "ACCEPTED", acceptedAt: new Date(), expiresAt: null }, include: { escrow: true } });
     await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.accept", entity: "order", entityId: order.id } });
+    await notify({
+      userId: order.buyerId,
+      type: "ORDER_ACCEPTED",
+      title: "Alquiler aceptado",
+      body: `${item.title} — ya puedes pagar al vendedor.`,
+      link: "/pedidos",
+    });
     res.json({ data: upd });
   })
 );
@@ -262,6 +277,13 @@ ordersRouter.post(
       include: { escrow: true },
     });
     await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.paid", entity: "order", entityId: order.id } });
+    await notify({
+      userId: order.sellerId,
+      type: "ORDER_PAID",
+      title: "Pago declarado por el comprador",
+      body: `${order.itemTitle} — confirma el abono para pasar a custodia.`,
+      link: orderLink(order.id),
+    });
     res.json({ data: upd });
   })
 );
@@ -303,6 +325,14 @@ ordersRouter.post(
     }
     const cancelledReason = order.buyerId === req.user!.sub ? "BUYER_CANCELLED" : "SELLER_REJECTED";
     const upd = await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED", cancelledAt: new Date(), cancelledReason, expiresAt: null }, include: { escrow: true } });
+    await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.cancel", entity: "order", entityId: order.id } });
+    await notify({
+      userId: order.buyerId === req.user!.sub ? order.sellerId : order.buyerId,
+      type: "ORDER_CANCELLED",
+      title: cancelledReason === "BUYER_CANCELLED" ? "Reserva cancelada por el comprador" : "Reserva rechazada por el vendedor",
+      body: order.itemTitle,
+      link: orderLink(order.id),
+    });
     if (order.itemType === "bazar") {
       await prisma.bazarItem.updateMany({ where: { id: order.itemId, status: "RESERVED" }, data: { status: "AVAILABLE" } });
     }
@@ -335,6 +365,13 @@ ordersRouter.post(
       }
     }
     await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.release", entity: "order", entityId: order.id } });
+    await notify({
+      userId: order.sellerId,
+      type: "ORDER_RELEASED",
+      title: "Pago liberado",
+      body: `${order.itemTitle} — el comprador confirmó la recepción.`,
+      link: orderLink(order.id),
+    });
     res.json({ data: upd });
   })
 );

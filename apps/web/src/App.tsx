@@ -29,6 +29,7 @@ const Panel = lazy(() => import("./pages/Panel").then((m) => ({ default: m.Panel
 const Publicar = lazy(() => import("./pages/Publicar").then((m) => ({ default: m.Publicar })));
 const Ventas = lazy(() => import("./pages/Ventas").then((m) => ({ default: m.Ventas })));
 const Admin = lazy(() => import("./pages/Admin").then((m) => ({ default: m.Admin })));
+const ResetPassword = lazy(() => import("./pages/ResetPassword").then((m) => ({ default: m.ResetPassword })));
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,7 @@ export function App() {
               <Route path="/login" element={<StitchLayout><Login /></StitchLayout>} />
               <Route path="/register" element={<StitchLayout><Register /></StitchLayout>} />
               <Route path="/forgot-password" element={<StitchLayout><Forgot /></StitchLayout>} />
+              <Route path="/reset-password" element={<StitchLayout><ResetPassword /></StitchLayout>} />
               <Route path="/cuenta" element={<PanelLayout><Cuenta /></PanelLayout>} />
               <Route path="/pedidos" element={<PanelLayout><Pedidos /></PanelLayout>} />
               <Route path="/publicaciones" element={<PanelLayout><Publicaciones /></PanelLayout>} />

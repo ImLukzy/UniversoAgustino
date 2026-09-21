@@ -68,6 +68,41 @@ paths:
       tags: [auth]
       summary: Revoca el refresh y limpia la cookie
       responses: { '200': { description: OK } }
+  /auth/forgot:
+    post:
+      tags: [auth]
+      summary: Solicita enlace de recuperación (202 neutro, anti-enumeración, 5/15min por IP + 3/hora por email)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '202': { description: Aceptado (idéntico exista o no el usuario) }
+        '400': { description: VALIDATION }
+        '429': { description: RATE_LIMITED }
+  /auth/reset:
+    post:
+      tags: [auth]
+      summary: Restablece con token (un uso, 30min) y revoca sesiones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string, minLength: 32 }
+                password: { type: string, minLength: 10, description: "10+, minúscula, mayúscula y número" }
+      responses:
+        '200': { description: OK }
+        '400': { description: VALIDATION }
+        '410': { description: TOKEN_EXPIRED }
   /auth/me:
     get:
       tags: [auth]
@@ -317,6 +352,29 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '403': { description: FORBIDDEN } }
+  /notifications:
+    get:
+      tags: [reports]
+      summary: Mis notificaciones (auth, ?unread=1, paginado máx 50)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: unread, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: pageSize, in: query, schema: { type: integer } }
+      responses: { '200': { description: OK } }
+  /notifications/read-all:
+    post:
+      tags: [reports]
+      summary: Marca todo como leído (auth)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK (read: N) } }
+  /notifications/{id}/read:
+    post:
+      tags: [reports]
+      summary: Marca una notificación propia como leída (auth)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
   /legal/summary:
     get:
       tags: [legal]

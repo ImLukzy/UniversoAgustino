@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { expiredPatch } from "../modules/orders/reservation.js";
+import { notify } from "../lib/notify.js";
 
 export interface ExpireResult {
   expired: number;
@@ -27,8 +28,8 @@ export async function expireReservations(now: Date = new Date()): Promise<Expire
   try {
     for (;;) {
       const batch = await prisma.$transaction(async (tx) => {
-        const rows = await tx.$queryRaw<Array<{ id: string }>>`
-          SELECT id FROM "Order"
+        const rows = await tx.$queryRaw<Array<{ id: string; buyerId: string; itemTitle: string }>>`
+          SELECT id, "buyerId", "itemTitle" FROM "Order"
           WHERE status = 'PENDING' AND "expiresAt" IS NOT NULL AND "expiresAt" <= ${now}
           ORDER BY "expiresAt" ASC
           LIMIT 500
@@ -39,10 +40,20 @@ export async function expireReservations(now: Date = new Date()): Promise<Expire
           where: { id: { in: ids }, status: "PENDING" },
           data: expiredPatch(now),
         });
-        return ids;
+        return rows;
       });
       if (batch.length === 0) break;
-      claimed.push(...batch);
+      claimed.push(...batch.map((r) => r.id));
+      // Aviso al comprador (fuera de la transacción; notify nunca lanza).
+      for (const r of batch) {
+        await notify({
+          userId: r.buyerId,
+          type: "ORDER_EXPIRED",
+          title: "Tu reserva expiró",
+          body: `${r.itemTitle} — genera un nuevo pedido si aún la quieres.`,
+          link: "/pedidos",
+        });
+      }
       if (batch.length < 500) break;
     }
     return { expired: claimed.length, mode: direct ? "direct" : "pooled", claimed };

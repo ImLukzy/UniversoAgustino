@@ -63,6 +63,25 @@ export const LoginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof LoginSchema>;
 
+// Sprint F1-01: recuperación de contraseña (el backend nunca confirma si el
+// email existe: misma respuesta 202 en ambos casos).
+export const ForgotSchema = z.object({
+  email: z.string().email().max(160),
+});
+export type ForgotInput = z.infer<typeof ForgotSchema>;
+
+export const ResetSchema = z.object({
+  token: z.string().min(32).max(128),
+  password: z
+    .string()
+    .min(10)
+    .max(128)
+    .regex(/[a-z]/, "Debe incluir minúscula")
+    .regex(/[A-Z]/, "Debe incluir mayúscula")
+    .regex(/[0-9]/, "Debe incluir número"),
+});
+export type ResetInput = z.infer<typeof ResetSchema>;
+
 // Edición del perfil propio (Mi cuenta).
 export const UpdateProfileSchema = z.object({
   fullName: z.string().min(2).max(120),

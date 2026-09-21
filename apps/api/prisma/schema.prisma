@@ -50,6 +50,9 @@ model User {
   orders       Order[]  @relation("BuyerOrders")
   ordersAsSeller Order[] @relation("OrdersAsSeller")
   uploads      Upload[]
+  passwordChangedAt DateTime?
+  passwordResetTokens PasswordResetToken[]
+  notifications Notification[]
   payouts      Payout[]
   reports      Report[]
   refreshTokens RefreshToken[]
@@ -215,6 +218,46 @@ model RefreshToken {
   expiresAt DateTime
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+// Sprint F1-01: tokens de recuperación (se guarda solo el sha256, nunca el token).
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  requestIp String?
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+}
+
+// Sprint F1-08: notificaciones in-app (campana). El email es opt-in posterior.
+enum NotificationType {
+  ORDER_CREATED
+  ORDER_ACCEPTED
+  ORDER_PAID
+  ORDER_RELEASED
+  ORDER_EXPIRED
+  ORDER_CANCELLED
+  REPORT_RESOLVED
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, readAt, createdAt])
 }
 
 // Sprint 4 (F4-01): registro de archivos subidos. Permite verificar firma,

@@ -11,6 +11,7 @@ import { documentsRouter } from "./modules/documents/routes.js";
 import { bazarRouter } from "./modules/bazar/routes.js";
 import { ordersRouter } from "./modules/orders/routes.js";
 import { monetizationRouter, reportsRouter } from "./modules/extra/routes.js";
+import { notificationsRouter } from "./modules/notifications/routes.js";
 import { uploadsRouter } from "./modules/uploads/routes.js";
 
 export function buildRouter() {
@@ -37,6 +38,7 @@ export function buildRouter() {
   r.use("/orders", ordersRouter);
   r.use("/monetization", monetizationRouter);
   r.use("/reports", reportsRouter);
+  r.use("/notifications", notificationsRouter);
   r.use("/uploads", uploadsRouter);
 
   r.get("/legal/summary", (_req, res) => {

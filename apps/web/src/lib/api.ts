@@ -178,6 +178,16 @@ export interface HubReport {
   createdAt: string;
 }
 
+export interface HubNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  link?: string | null;
+  readAt?: string | null;
+  createdAt: string;
+}
+
 // Motivos de cancelación (espejo de CANCEL_REASON_LABEL en @hub/shared).
 const CANCEL_LABELS: Record<string, string> = {
   TTL_EXPIRED: "Reserva expirada",

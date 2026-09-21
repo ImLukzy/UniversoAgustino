@@ -4,9 +4,9 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import rateLimit from "express-rate-limit";
 import { env } from "./env.js";
 import { buildRouter, mountDocs } from "./app.js";
+import { limit } from "./middleware/rateLimit.js";
 import { errorHandler, notFound } from "./middleware/errors.js";
 import { serveUpload } from "./middleware/serveUploads.js";
 import { startJobs } from "./jobs/index.js";
@@ -49,7 +49,7 @@ app.use(cors({ origin: env.WEB_ORIGIN, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 app.use(morgan("dev"));
-app.use(rateLimit({ windowMs: 60_000, max: 300 }));
+app.use(limit({ windowMs: 60_000, max: 300 }));
 
 app.use(env.PREFIX, buildRouter());
 // Sprint 4 (F4-01): servicio controlado (cabeceras defensivas + UUID).

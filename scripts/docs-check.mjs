@@ -16,6 +16,7 @@ const SOURCES = [
   ["modules/orders/routes.ts", ["/orders"]],
   ["modules/extra/routes.ts", ["/monetization", "/reports"]],
   ["modules/uploads/routes.ts", ["/uploads"]],
+  ["modules/notifications/routes.ts", []],
   ["server.ts", [""]],
 ];
 
@@ -32,6 +33,7 @@ const ROUTER_PREFIX = {
   monetizationRouter: ["/monetization"],
   reportsRouter: ["/reports"],
   uploadsRouter: ["/uploads"],
+  notificationsRouter: ["/notifications"],
 };
 const found = new Set();
 for (const [file] of SOURCES) {
