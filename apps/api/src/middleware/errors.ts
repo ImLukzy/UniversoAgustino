@@ -1,16 +1,73 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
+import { Prisma } from "@prisma/client";
+import { MulterError } from "multer";
 
-export function errorHandler(err: any, _req: Request, res: Response, _next: NextFunction) {
+function requestId(req: Request): string {
+  const h = req.headers["x-request-id"];
+  if (typeof h === "string" && h.length > 0) return h.slice(0, 64);
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+interface ApiErrorBody {
+  code: string;
+  message: string;
+  details?: unknown;
+  requestId: string;
+}
+
+function send(res: Response, status: number, code: string, message: string, requestId: string, details?: unknown) {
+  const body: { error: ApiErrorBody } = { error: { code, message, requestId } };
+  if (details !== undefined) body.error.details = details;
+  return res.status(status).json(body);
+}
+
+// Sprint 1A: contrato de error tipado. Todo error sale con
+// { error: { code, message, details?, requestId } }.
+export function errorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
+  const rid = requestId(req);
+
   if (err instanceof ZodError) {
     const first = err.issues[0];
     const where = first?.path?.length ? ` (${String(first.path.join("."))})` : "";
-    return res.status(400).json({ error: { code: "VALIDATION", message: `${first?.message ?? "Dato inválido"}${where}` } });
+    return send(res, 400, "VALIDATION", `${first?.message ?? "Dato inválido"}${where}`, rid);
   }
-  const status = err.status ?? 500;
-  const code = err.code ?? (status === 500 ? "INTERNAL" : "REQUEST_ERROR");
-  if (status >= 500) console.error(err);
-  res.status(status).json({ error: { code, message: err.message ?? "Error interno" } });
+
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === "P2025") {
+      return send(res, 404, "NOT_FOUND", "Recurso no encontrado", rid);
+    }
+    if (err.code === "P2002") {
+      return send(res, 409, "NOT_AVAILABLE", "El recurso ya está reservado o no está disponible", rid);
+    }
+    if (err.code === "P2003" || err.code === "P2014") {
+      return send(res, 409, "CONFLICT_ACTIVE_ORDERS", "Existen registros relacionados", rid);
+    }
+  }
+
+  if (err instanceof MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return send(res, 413, "FILE_TOO_LARGE", "El archivo supera el tamaño máximo permitido", rid, {
+        limitBytes: Number(process.env.MAX_UPLOAD_MB ?? 25) * 1024 * 1024,
+        field: (err as { field?: string }).field,
+      });
+    }
+    if (err.code === "LIMIT_FILE_COUNT" || err.code === "LIMIT_UNEXPECTED_FILE") {
+      return send(res, 400, "VALIDATION", "Archivo no permitido (máximo 4 por publicación)", rid);
+    }
+    return send(res, 400, "VALIDATION", "Error al subir el archivo", rid);
+  }
+
+  // Rechazos del fileFilter de uploads (extensión no permitida).
+  if (typeof err?.message === "string" && err.message.startsWith("Tipo no permitido")) {
+    return send(res, 415, "UNSUPPORTED_FILE_TYPE", "Formato no permitido. Usa PDF, JPG, PNG o EPUB.", rid);
+  }
+
+  const status = typeof err?.status === "number" ? err.status : 500;
+  const code = typeof err?.code === "string" ? err.code : status === 500 ? "INTERNAL" : "REQUEST_ERROR";
+  if (status >= 500) console.error(`[${rid}]`, err);
+  const message = status === 500 ? "Error interno" : (err?.message ?? "Error en la solicitud");
+  return send(res, status, code, message, rid);
 }
 
 export function notFound(_req: Request, res: Response) {

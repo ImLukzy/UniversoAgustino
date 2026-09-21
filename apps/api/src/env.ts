@@ -26,4 +26,8 @@ export const env = {
   JWT_REFRESH_TTL: process.env.JWT_REFRESH_TTL ?? "7d",
   DATABASE_URL: process.env.DATABASE_URL ?? "",
   FEE_PCT: Number(process.env.PLATFORM_FEE_PCT ?? 13),
+  // Sprint 1A: TTL de reservas PENDING (minutos) y flags del job de expiración.
+  RESERVATION_TTL_MINUTES: Number(process.env.RESERVATION_TTL_MINUTES ?? 30),
+  DIRECT_DATABASE_URL: process.env.DIRECT_DATABASE_URL ?? "",
+  ENABLE_JOBS: process.env.ENABLE_JOBS ?? "false",
 };

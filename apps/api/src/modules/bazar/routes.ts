@@ -75,9 +75,22 @@ bazarRouter.delete(
     if (!canEditBazar(req.user!.role, item.sellerId, req.user!.sub)) {
       return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el dueño elimina su publicación" } });
     }
-    const active = await prisma.order.count({ where: { itemId: item.id, status: { in: ["PENDING", "PAID", "ESCROW"] } } });
-    if (active > 0) {
-      return res.status(409).json({ error: { code: "HAS_ORDERS", message: "Tiene pedidos en curso, no se puede eliminar" } });
+    const active = await prisma.order.findMany({
+      where: { itemId: item.id, status: { in: ["PENDING", "ACCEPTED", "PAID", "ESCROW"] } },
+      select: { status: true, expiresAt: true },
+    });
+    if (active.length > 0) {
+      const statuses = [...new Set(active.map((o) => o.status))];
+      const onlyPending = active.every((o) => o.status === "PENDING");
+      return res.status(409).json({
+        error: {
+          code: "CONFLICT_ACTIVE_ORDERS",
+          message: onlyPending
+            ? "Hay una reserva activa. Podrás eliminarla cuando expire o si la cancelas."
+            : "Tiene pedidos en curso, no se puede eliminar",
+          details: { activeOrders: active.length, statuses, canForce: onlyPending },
+        },
+      });
     }
     await prisma.bazarItem.delete({ where: { id: item.id } });
     await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "bazar.delete", entity: "bazar", entityId: item.id } });

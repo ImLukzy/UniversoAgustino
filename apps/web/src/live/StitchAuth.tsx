@@ -22,7 +22,19 @@ export function StitchAuth() {
     enabled: !!user,
     refetchInterval: 30000,
   });
+  // Sprint 1A: como vendedor, PENDING de bazar (por aceptar) y PAID (por
+  // confirmar) requieren acción. El punto avisa y lleva a /ventas.
+  const sales = useQuery({
+    queryKey: ["auth-sales-pending"],
+    queryFn: async () => (await api.get("/orders/sales")).data.data as Array<{ status: string; itemType: string }>,
+    enabled: !!user,
+    refetchInterval: 30000,
+    retry: false,
+  });
   const escrow = (pending.data ?? []).filter((o) => o.status === "ESCROW").length;
+  const needSeller = (sales.data ?? []).filter(
+    (o) => (o.status === "PENDING" && o.itemType === "bazar") || o.status === "PAID",
+  ).length;
 
   if (!user) {
     return (
@@ -56,13 +68,19 @@ export function StitchAuth() {
   return (
     <div className="relative flex items-center gap-space-sm">
       <button
-        onClick={() => nav("/pedidos")}
-        aria-label="Notificaciones"
-        title={escrow > 0 ? `${escrow} pedido(s) en custodia` : "Mis pedidos"}
+        onClick={() => nav(needSeller > 0 ? "/ventas" : "/pedidos")}
+        aria-label="Mis pedidos y ventas"
+        title={
+          needSeller > 0
+            ? `${needSeller} venta(s) por atender`
+            : escrow > 0
+              ? `${escrow} pedido(s) en custodia`
+              : "Mis pedidos"
+        }
         className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors relative"
       >
         <span className="material-symbols-outlined text-title-lg">notifications</span>
-        {escrow > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full" />}
+        {(escrow > 0 || needSeller > 0) && <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full" />}
       </button>
       <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-space-sm pl-space-xs" aria-label="Mi cuenta">
         <span className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-label-lg shrink-0" style={{ backgroundColor: accent?.color ?? "rgb(var(--hub-p, 0 104 95))" }}>

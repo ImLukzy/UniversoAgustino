@@ -48,6 +48,7 @@ model User {
   documents    Document[]
   bazarItems   BazarItem[]
   orders       Order[]  @relation("BuyerOrders")
+  ordersAsSeller Order[] @relation("OrdersAsSeller")
   payouts      Payout[]
   reports      Report[]
   refreshTokens RefreshToken[]
@@ -113,11 +114,21 @@ model Order {
   id         String      @id @default(cuid())
   buyerId    String
   buyer      User        @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
-  itemType   String      // document | bazar
+  // Vendedor materializado al crear el pedido (Sprint 1A): evita resolverlo
+  // vía Document.authorId / BazarItem.sellerId en cada lectura y habilita
+  // índices por vendedor + notificaciones.
+  sellerId   String
+  seller     User        @relation("OrdersAsSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  itemType   String      // document | bazar (minúsculas)
   itemId     String
   amountCents Int
   feeCents   Int
   netCents   Int
+  // Snapshot congelado al crear el pedido (Sprint 1A): el precio y la tasa
+  // vigentes al reservar. Cambios posteriores del ítem no reescriben historia.
+  itemTitle      String
+  itemPriceCents Int
+  feeBps         Int
   // Foto del cobro al crear el pedido (método + QR + dato del vendedor).
   payMethod  String?
   payQrUrl   String?
@@ -127,10 +138,19 @@ model Order {
   // Alquiler de bazar: periodo solicitado por el comprador.
   rentalStart DateTime?
   rentalEnd   DateTime?
+  // Reserva con TTL (Sprint 1A): expiresAt solo vive mientras PENDING.
+  // Al aceptar/pagar/cancelar/expirar se limpia a null.
+  expiresAt       DateTime?
+  acceptedAt      DateTime?
+  cancelledAt     DateTime?
+  cancelledReason String?
   status     OrderStatus @default(PENDING)
   escrow     Escrow?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+
+  // Índices parciales en SQL (Prisma no los expresa): ver migración
+  // sprint1a_reservation_ttl (order_active_item_unique y siguientes).
 }
 
 model Escrow {

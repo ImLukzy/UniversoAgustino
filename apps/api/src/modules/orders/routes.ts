@@ -4,17 +4,20 @@ import { prisma } from "../../lib/prisma.js";
 import { env } from "../../env.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, requireRole, type AuthedRequest } from "../../middleware/auth.js";
+import { blockingOrderWhere, expiredPatch, isExpired, nextExpiry } from "./reservation.js";
 
 export const ordersRouter = Router();
 
 const ACTIVE = ["PENDING", "ACCEPTED", "PAID", "ESCROW"] as const;
 
 // Dueño del ítem (para impedir auto-compra y autorizar al vendedor).
+// Devuelve también título y precio para el snapshot del pedido.
 async function itemOwner(itemType: string, itemId: string) {
   if (itemType === "document") {
     const d = await prisma.document.findUniqueOrThrow({ where: { id: itemId } });
     return {
       ownerId: d.authorId,
+      title: d.title,
       priceCents: d.priceCents,
       payMethod: d.payMethod,
       payQrUrl: d.payQrUrl,
@@ -25,6 +28,7 @@ async function itemOwner(itemType: string, itemId: string) {
   const b = await prisma.bazarItem.findUniqueOrThrow({ where: { id: itemId } });
   return {
     ownerId: b.sellerId,
+    title: b.title,
     priceCents: b.priceCents,
     payMethod: b.payMethod,
     payQrUrl: b.payQrUrl,
@@ -44,6 +48,26 @@ ordersRouter.post(
     if (item.ownerId === req.user!.sub) {
       return res.status(400).json({ error: { code: "SELF_PURCHASE", message: "No puedes comprar tu propia publicación" } });
     }
+    // (a) Expiración perezosa (Sprint 1A): libera PENDING vencidos de este
+    // ítem para que el cron caído no bloquee el inventario.
+    const expiredNow = await prisma.order.updateMany({
+      where: { itemType: input.itemType, itemId: input.itemId, status: "PENDING", expiresAt: { lte: new Date() } },
+      data: expiredPatch(),
+    });
+    // Si se liberó una reserva de bazar y no queda otra viva, el ítem vuelve
+    // a AVAILABLE (su RESERVED quedó huérfano).
+    if (expiredNow.count > 0 && input.itemType === "bazar") {
+      const stillBlocked = await prisma.order.findFirst({
+        where: blockingOrderWhere(input.itemType, input.itemId),
+        select: { id: true },
+      });
+      if (!stillBlocked) {
+        await prisma.bazarItem.updateMany({
+          where: { id: input.itemId, status: "RESERVED" },
+          data: { status: "AVAILABLE" },
+        });
+      }
+    }
     let rentalStart: Date | undefined;
     let rentalEnd: Date | undefined;
     if (input.itemType === "bazar") {
@@ -62,12 +86,25 @@ ordersRouter.post(
         }
       }
       await prisma.bazarItem.update({ where: { id: input.itemId }, data: { status: "RESERVED" } });
+      // (b) Chequeo explícito de reserva viva en bazar (mensaje legible con
+      // fecha de liberación). El árbitro final es el índice único parcial
+      // order_active_item_unique (P2002 → 409). Los documentos digitales
+      // admiten N pedidos vivos y nunca bloquean.
+      const blocking = await prisma.order.findFirst({
+        where: blockingOrderWhere(input.itemType, input.itemId),
+        select: { id: true, status: true, expiresAt: true },
+      });
+      if (blocking) {
+        return res.status(409).json({ error: { code: "NOT_AVAILABLE", message: "Este ítem ya está reservado", details: { availableAt: blocking.expiresAt } } });
+      }
     }
     const amountCents = item.priceCents;
     const feeCents = Math.round(amountCents * (env.FEE_PCT / 100));
+    const feeBps = Math.round(env.FEE_PCT * 100);
     const order = await prisma.order.create({
       data: {
         buyerId: req.user!.sub,
+        sellerId: item.ownerId,
         itemType: input.itemType,
         itemId: input.itemId,
         amountCents,
@@ -79,6 +116,11 @@ ordersRouter.post(
         rentalStart,
         rentalEnd,
         status: "PENDING",
+        expiresAt: nextExpiry(),
+        // Snapshot congelado: título, precio y tasa vigentes al reservar.
+        itemTitle: item.title,
+        itemPriceCents: amountCents,
+        feeBps,
       },
     });
     await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.created", entity: "order", entityId: order.id } });
@@ -154,10 +196,21 @@ ordersRouter.post(
     if (order.itemType !== "bazar") {
       return res.status(409).json({ error: { code: "NOT_RENTAL", message: "Las ventas digitales no requieren aceptación" } });
     }
+    // Reserva ya expirada (por cron o expiración perezosa): mensaje accionable
+    // en vez del genérico "está en CANCELLED".
+    if (order.status === "CANCELLED" && (order.cancelledReason === "TTL_EXPIRED" || order.cancelledReason === "TTL_BACKFILL")) {
+      return res.status(409).json({ error: { code: "RESERVATION_EXPIRED", message: "La reserva expiró. El comprador debe generar un nuevo pedido." } });
+    }
     if (order.status !== "PENDING") {
       return res.status(409).json({ error: { code: "BAD_STATE", message: `La solicitud está en ${order.status}` } });
     }
-    const upd = await prisma.order.update({ where: { id: order.id }, data: { status: "ACCEPTED" }, include: { escrow: true } });
+    // La reserva vencida no se puede aceptar: se marca expirada y el
+    // comprador debe generar un nuevo pedido.
+    if (isExpired(order)) {
+      await prisma.order.update({ where: { id: order.id }, data: expiredPatch() });
+      return res.status(409).json({ error: { code: "RESERVATION_EXPIRED", message: "La reserva expiró. El comprador debe generar un nuevo pedido." } });
+    }
+    const upd = await prisma.order.update({ where: { id: order.id }, data: { status: "ACCEPTED", acceptedAt: new Date(), expiresAt: null }, include: { escrow: true } });
     await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.accept", entity: "order", entityId: order.id } });
     res.json({ data: upd });
   })
@@ -173,10 +226,18 @@ ordersRouter.post(
     if (order.buyerId !== req.user!.sub) {
       return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el comprador declara el pago" } });
     }
+    // Nunca se cobra sobre una reserva muerta.
+    if (isExpired(order)) {
+      await prisma.order.update({ where: { id: order.id }, data: expiredPatch() });
+      return res.status(409).json({ error: { code: "RESERVATION_EXPIRED", message: "La reserva expiró. Genera un nuevo pedido para continuar." } });
+    }
     const canPay =
       order.status === "ACCEPTED" ||
       (order.status === "PENDING" && !(order.itemType === "bazar" && order.rentalStart));
     if (!canPay) {
+      if (order.status === "CANCELLED" && (order.cancelledReason === "TTL_EXPIRED" || order.cancelledReason === "TTL_BACKFILL")) {
+        return res.status(409).json({ error: { code: "RESERVATION_EXPIRED", message: "La reserva expiró. Genera un nuevo pedido para continuar." } });
+      }
       const hint = order.status === "PENDING"
         ? "El vendedor debe aceptar tu solicitud de alquiler primero"
         : `El pedido ya está en ${order.status}`;
@@ -227,7 +288,8 @@ ordersRouter.post(
     if (!["PENDING", "ACCEPTED", "PAID"].includes(order.status)) {
       return res.status(409).json({ error: { code: "BAD_STATE", message: `Ya no se puede cancelar (está ${order.status})` } });
     }
-    const upd = await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED" }, include: { escrow: true } });
+    const cancelledReason = order.buyerId === req.user!.sub ? "BUYER_CANCELLED" : "SELLER_REJECTED";
+    const upd = await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED", cancelledAt: new Date(), cancelledReason, expiresAt: null }, include: { escrow: true } });
     if (order.itemType === "bazar") {
       await prisma.bazarItem.updateMany({ where: { id: order.itemId, status: "RESERVED" }, data: { status: "AVAILABLE" } });
     }

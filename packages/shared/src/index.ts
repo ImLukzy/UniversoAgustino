@@ -184,6 +184,72 @@ export function simulateEarnings(input: SimulateInput) {
   return { gross: +gross.toFixed(2), fee, net, currency: "PEN" as const };
 }
 
+// --- Pedidos / reservas: estados, motivos de cancelación y transiciones ---
+// Fuente única de la máquina de estados (Sprint 1A). Los estados viven en
+// mayúsculas (enum OrderStatus de Prisma); itemType vive en minúsculas
+// ('document' | 'bazar') según CreateOrderSchema. No mezclar.
+export const ORDER_STATUS = [
+  "PENDING",
+  "ACCEPTED",
+  "PAID",
+  "ESCROW",
+  "RELEASED",
+  "REFUNDED",
+  "CANCELLED",
+] as const;
+export type OrderStatus = (typeof ORDER_STATUS)[number];
+
+// Pedidos que bloquean el ítem (impiden una segunda reserva viva).
+export const LIVE_ORDER_STATUS: readonly OrderStatus[] = [
+  "PENDING",
+  "ACCEPTED",
+  "PAID",
+  "ESCROW",
+];
+
+// Motivos de cancelación. El estado es CANCELLED en todos los casos;
+// el motivo es lo que cambia el texto de cara al usuario.
+export const CANCEL_REASONS = [
+  "TTL_EXPIRED",
+  "TTL_BACKFILL",
+  "BUYER_CANCELLED",
+  "SELLER_REJECTED",
+  "ORPHAN_ITEM",
+] as const;
+export type CancelReason = (typeof CANCEL_REASONS)[number];
+
+export const CANCEL_REASON_LABEL: Record<CancelReason, string> = {
+  TTL_EXPIRED: "Reserva expirada",
+  TTL_BACKFILL: "Reserva expirada",
+  BUYER_CANCELLED: "Cancelado por el comprador",
+  SELLER_REJECTED: "Rechazado por el vendedor",
+  ORPHAN_ITEM: "Publicación no disponible",
+};
+
+export function isCancelReason(v: unknown): v is CancelReason {
+  return typeof v === "string" && (CANCEL_REASONS as readonly string[]).includes(v);
+}
+
+/** Etiqueta de cancelación si aplica, si no null (el llamador usa su mapa local). */
+export function cancelLabel(reason: string | null | undefined): string | null {
+  if (!reason) return null;
+  return isCancelReason(reason) ? CANCEL_REASON_LABEL[reason] : null;
+}
+
+export const ORDER_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
+  PENDING: ["ACCEPTED", "CANCELLED"],
+  ACCEPTED: ["PAID", "CANCELLED"],
+  PAID: ["ESCROW", "CANCELLED"],
+  ESCROW: ["RELEASED"],
+  RELEASED: [],
+  REFUNDED: [],
+  CANCELLED: [],
+};
+
+export function canTransition(from: OrderStatus, to: OrderStatus): boolean {
+  return ORDER_TRANSITIONS[from].includes(to);
+}
+
 // --- Moderacion / legal ---
 export const CreateReportSchema = z.object({
   targetType: z.enum(["document", "bazar", "user"]),

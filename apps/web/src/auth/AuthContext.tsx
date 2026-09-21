@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { api, type HubUser } from "../lib/api";
+import { api, setAccessToken, type HubUser } from "../lib/api";
 
 interface AuthState {
   user: HubUser | null;
@@ -18,17 +18,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refreshMe = useCallback(async () => {
-    const token = localStorage.getItem("hub_access");
-    if (!token) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
     try {
       const r = await api.get("/auth/me");
       setUser(r.data.data);
     } catch {
-      localStorage.removeItem("hub_access");
+      // El interceptor ya intentó rotar vía /auth/refresh; si seguimos
+      // aquí, no hay sesión válida.
       setUser(null);
     } finally {
       setLoading(false);
@@ -36,12 +31,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    refreshMe();
-  }, [refreshMe]);
+    // Bootstrap: /auth/me dispara la rotación silenciosa vía interceptor si
+    // el access venció pero la cookie de refresh sigue válida (Sprint 1A).
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await api.get("/auth/me");
+        if (!cancelled) setUser(r.data.data);
+      } catch {
+        if (!cancelled) setUser(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    const onLogout = () => setUser(null);
+    window.addEventListener("auth:logout", onLogout);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("auth:logout", onLogout);
+    };
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const r = await api.post("/auth/login", { email, password });
-    localStorage.setItem("hub_access", r.data.data.access);
+    setAccessToken(r.data.data.access);
     const me = await api.get("/auth/me");
     setUser(me.data.data);
   }, []);
@@ -49,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (input: { email: string; password: string; fullName: string; university: string; career?: string; cycle?: string }) => {
     const r = await api.post("/auth/register", input);
     // /register devuelve access directo
-    if (r.data?.data?.access) localStorage.setItem("hub_access", r.data.data.access);
+    if (r.data?.data?.access) setAccessToken(r.data.data.access);
     try {
       const me = await api.get("/auth/me");
       setUser(me.data.data);
@@ -64,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       /* noop */
     }
-    localStorage.removeItem("hub_access");
+    setAccessToken(null);
     setUser(null);
   }, []);
 

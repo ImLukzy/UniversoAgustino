@@ -9,6 +9,7 @@ import { env } from "./env.js";
 import { buildRouter, mountDocs } from "./app.js";
 import { errorHandler, notFound } from "./middleware/errors.js";
 import { uploadsDir } from "./modules/uploads/routes.js";
+import { startJobs } from "./jobs/index.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -24,6 +25,8 @@ app.use("/uploads", express.static(uploadsDir));
 mountDocs(app);
 app.use(notFound);
 app.use(errorHandler);
+
+startJobs();
 
 app.listen(env.PORT, () => {
   console.log(`[api] http://localhost:${env.PORT}${env.PREFIX}  docs http://localhost:${env.PORT}/docs`);

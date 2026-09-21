@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, apiError, fmtDate, pen, type HubOrder, type HubReport } from "../lib/api";
+import { api, apiError, displayOrderStatus, fmtDate, pen, type HubOrder, type HubReport } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
 import { careerLabel } from "../data/unsa";
@@ -99,7 +99,7 @@ function RentalCard({ order }: { order: HubOrder }) {
           </div>
         </div>
         <span className="shrink-0 rounded-full bg-indigo-100 px-2 py-1 text-[11px] font-semibold text-indigo-800">
-          {ORDER_LABEL[order.status] ?? order.status}
+          {displayOrderStatus(order) ?? ORDER_LABEL[order.status] ?? order.status}
         </span>
       </div>
 
@@ -160,11 +160,13 @@ export function Ventas() {
     queryKey: ["orders-sales"],
     queryFn: async () => (await api.get("/orders/sales")).data.data as HubOrder[],
     enabled: !!user,
+    refetchInterval: 30000,
   });
   const reports = useQuery({
     queryKey: ["reports-mine"],
     queryFn: async () => (await api.get("/reports/mine")).data.data as HubReport[],
     enabled: !!user,
+    refetchInterval: 30000,
   });
 
   if (!user) {
@@ -381,7 +383,7 @@ export function Ventas() {
                     <td className="whitespace-nowrap px-3 py-3 text-right text-sm font-extrabold text-emerald-700">+{pen(o.netCents)}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-center">
                       <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] text-emerald-800">
-                        {o.status === "RELEASED" ? "Completado" : ORDER_LABEL[o.status] ?? o.status}
+                        {o.status === "RELEASED" ? "Completado" : (displayOrderStatus(o) ?? ORDER_LABEL[o.status] ?? o.status)}
                       </span>
                     </td>
                   </tr>

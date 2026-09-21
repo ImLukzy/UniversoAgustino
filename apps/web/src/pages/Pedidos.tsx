@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, apiError, fmtDate, pen, type HubDocument, type HubOrder } from "../lib/api";
+import { api, apiError, displayOrderStatus, fmtDate, pen, type HubDocument, type HubOrder } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
 import { careerContent } from "../data/careerContent";
@@ -61,7 +61,7 @@ function PedidoRow({ order }: { order: HubOrder }) {
             {isDoc ? (order.status === "RELEASED" ? "Digital" : "Apunte") : "Bazar"}
           </span>
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary" style={accent ? { color: accent.color } : undefined}>
-            {ORDER_LABEL[order.status] ?? order.status}
+            {displayOrderStatus(order) ?? ORDER_LABEL[order.status] ?? order.status}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -98,6 +98,7 @@ function PedidoRow({ order }: { order: HubOrder }) {
           {order.status === "ACCEPTED" && "Solicitud aceptada. Ya puedes pagar."}
           {order.status === "PAID" && "El vendedor debe confirmar tu pago."}
           {order.status === "RELEASED" && "Pedido completado."}
+          {order.status === "CANCELLED" && (displayOrderStatus(order) ?? "Pedido cancelado.")}
         </span>
         <div className="flex items-center gap-1.5">
           {(order.status === "PENDING" || order.status === "ACCEPTED") && (
