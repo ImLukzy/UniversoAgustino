@@ -8,6 +8,14 @@ import { CareerAvatar, CareerVisual } from "../components/CareerVisual";
 
 const PAY_LABEL: Record<string, string> = { YAPE: "Yape", PLIN: "Plin", AMBAS: "Yape y Plin" };
 
+// Fecha local YYYY-MM-DD (evita el desfase de toISOString, que es UTC).
+function todayLocal(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
 interface Person {
   fullName: string;
   career?: string | null;
@@ -63,6 +71,16 @@ export function Detalle() {
       if (isRental) {
         if (!rentalStart || !rentalEnd) {
           setErr("Elige las fechas de inicio y fin del alquiler.");
+          setBusy(false);
+          return;
+        }
+        if (rentalStart < todayLocal()) {
+          setErr("La fecha de inicio no puede ser anterior a hoy.");
+          setBusy(false);
+          return;
+        }
+        if (rentalEnd <= rentalStart) {
+          setErr("La fecha de fin debe ser posterior a la de inicio.");
           setBusy(false);
           return;
         }
@@ -206,11 +224,11 @@ export function Detalle() {
               <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-sm">
                 <label className="flex flex-col gap-1 text-xs font-bold text-slate-500">
                   Inicio del alquiler
-                  <input type="date" className="input" value={rentalStart} onChange={(e) => setRentalStart(e.target.value)} />
+                  <input type="date" className="input" value={rentalStart} min={todayLocal()} max={rentalEnd || undefined} onChange={(e) => setRentalStart(e.target.value)} />
                 </label>
                 <label className="flex flex-col gap-1 text-xs font-bold text-slate-500">
                   Fin del alquiler
-                  <input type="date" className="input" value={rentalEnd} min={rentalStart} onChange={(e) => setRentalEnd(e.target.value)} />
+                  <input type="date" className="input" value={rentalEnd} min={rentalStart || todayLocal()} onChange={(e) => setRentalEnd(e.target.value)} />
                 </label>
                 <p className="col-span-2 text-[11px] text-slate-400">El vendedor debe aceptar tu solicitud antes de que pagues.</p>
               </div>

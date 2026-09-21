@@ -8,6 +8,7 @@ import { careerContent } from "../data/careerContent";
 import { careerLabel } from "../data/unsa";
 import { CareerVisual } from "../components/CareerVisual";
 import { PhotoManager } from "../components/PhotoManager";
+import { ConfirmModal } from "../components/ConfirmModal";
 
 const PAY_LABEL: Record<string, string> = { YAPE: "Yape", PLIN: "Plin", AMBAS: "Yape y Plin" };
 const ORDER_LABEL: Record<string, string> = {
@@ -117,6 +118,7 @@ function EditDoc({ doc, onDone }: { doc: HubDocument; onDone: () => void }) {
   });
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const save = async () => {
     setBusy(true);
     setMsg("");
@@ -141,7 +143,6 @@ function EditDoc({ doc, onDone }: { doc: HubDocument; onDone: () => void }) {
     }
   };
   const remove = async () => {
-    if (!window.confirm(`¿Eliminar "${doc.title}"?`)) return;
     setBusy(true);
     try {
       await api.delete(`/documents/${doc.id}`);
@@ -151,6 +152,7 @@ function EditDoc({ doc, onDone }: { doc: HubDocument; onDone: () => void }) {
       setMsg(apiError(e));
     } finally {
       setBusy(false);
+      setConfirming(false);
     }
   };
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -173,8 +175,14 @@ function EditDoc({ doc, onDone }: { doc: HubDocument; onDone: () => void }) {
       {msg && <p className="text-xs font-semibold text-slate-600">{msg}</p>}
       <div className="flex gap-2">
         <button disabled={busy} onClick={save} className="btn-primary text-sm disabled:opacity-50">Guardar cambios</button>
-        <button disabled={busy} onClick={remove} className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-bold text-red-600 disabled:opacity-50">Eliminar</button>
+        <button disabled={busy} onClick={() => setConfirming(true)} className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-bold text-red-600 disabled:opacity-50">Eliminar</button>
       </div>
+      <ConfirmModal
+        info={confirming ? { title: "Eliminar publicación", message: `¿Eliminar "${doc.title}"? Esta acción no se puede deshacer.` } : null}
+        busy={busy}
+        onConfirm={remove}
+        onClose={() => { if (!busy) setConfirming(false); }}
+      />
     </div>
   );
 }
@@ -192,6 +200,7 @@ function EditBazar({ item, onDone }: { item: HubBazarItem; onDone: () => void })
   const [photos, setPhotos] = useState<string[]>(item.photos ?? []);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const save = async () => {
     setBusy(true);
     setMsg("");
@@ -215,7 +224,6 @@ function EditBazar({ item, onDone }: { item: HubBazarItem; onDone: () => void })
     }
   };
   const remove = async () => {
-    if (!window.confirm(`¿Eliminar "${item.title}"?`)) return;
     setBusy(true);
     try {
       await api.delete(`/bazar/${item.id}`);
@@ -225,6 +233,7 @@ function EditBazar({ item, onDone }: { item: HubBazarItem; onDone: () => void })
       setMsg(apiError(e));
     } finally {
       setBusy(false);
+      setConfirming(false);
     }
   };
   return (
@@ -247,8 +256,14 @@ function EditBazar({ item, onDone }: { item: HubBazarItem; onDone: () => void })
       {msg && <p className="text-xs font-semibold text-slate-600">{msg}</p>}
       <div className="flex gap-2">
         <button disabled={busy} onClick={save} className="btn-primary text-sm disabled:opacity-50">Guardar cambios</button>
-        <button disabled={busy} onClick={remove} className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-bold text-red-600 disabled:opacity-50">Eliminar</button>
+        <button disabled={busy} onClick={() => setConfirming(true)} className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-bold text-red-600 disabled:opacity-50">Eliminar</button>
       </div>
+      <ConfirmModal
+        info={confirming ? { title: "Eliminar publicación", message: `¿Eliminar "${item.title}"? Esta acción no se puede deshacer.` } : null}
+        busy={busy}
+        onConfirm={remove}
+        onClose={() => { if (!busy) setConfirming(false); }}
+      />
     </div>
   );
 }
@@ -295,6 +310,10 @@ function SaleRow({ order }: { order: HubOrder }) {
   );
 }
 
+const SORTS = ["recent", "sold", "price_asc", "price_desc"] as const;
+type SortKey = (typeof SORTS)[number];
+const isSortKey = (v: string): v is SortKey => (SORTS as readonly string[]).includes(v);
+
 function itemStats(sales: HubOrder[], id: string) {
   const rows = sales.filter((o) => o.itemId === id && o.status !== "CANCELLED" && o.status !== "REFUNDED");
   const rel = rows.filter((o) => o.status === "RELEASED");
@@ -307,7 +326,7 @@ export function Publicaciones() {
   const cc = careerContent(career);
   const [filter, setFilter] = useState<"all" | "digital" | "bazar">("all");
   const [q, setQ] = useState("");
-  const [sort, setSort] = useState<"recent" | "sold" | "asc" | "desc">("recent");
+  const [sort, setSort] = useState<SortKey>("recent");
   const [openDoc, setOpenDoc] = useState("");
   const [openBazar, setOpenBazar] = useState("");
   const [qr, setQr] = useState<QrInfo | null>(null);
@@ -366,8 +385,8 @@ export function Publicaciones() {
     .filter((r) => (filter === "all" ? true : filter === "digital" ? r.kind === "doc" : r.kind === "bazar"))
     .filter((r) => !needle || r.title.toLowerCase().includes(needle) || r.sub.toLowerCase().includes(needle))
     .sort((a, b) => {
-      if (sort === "asc") return a.price - b.price;
-      if (sort === "desc") return b.price - a.price;
+      if (sort === "price_asc") return a.price - b.price;
+      if (sort === "price_desc") return b.price - a.price;
       if (sort === "sold") return itemStats(mySales, b.id).ventas - itemStats(mySales, a.id).ventas;
       return (b.createdAt || "").localeCompare(a.createdAt || "");
     });
@@ -488,7 +507,7 @@ export function Publicaciones() {
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <span className="hidden text-xs text-slate-500 lg:inline">Ordenar:</span>
-            <select value={sort} onChange={(e) => setSort(e.target.value as "recent" | "sold" | "asc" | "desc")} className="cursor-pointer rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold focus:outline-none">
+            <select value={sort} onChange={(e) => setSort(isSortKey(e.target.value) ? e.target.value : "recent")} className="cursor-pointer rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold focus:outline-none">
               <option value="sold">Más vendidos</option>
               <option value="recent">Recientes</option>
               <option value="price_asc">Precio: menor a mayor</option>
