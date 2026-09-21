@@ -7,7 +7,6 @@ async function main() {
   await prisma.auditLog.deleteMany();
   await prisma.refreshToken.deleteMany();
   await prisma.order.deleteMany();
-  await prisma.payout.deleteMany();
   await prisma.report.deleteMany();
   await prisma.bazarItem.deleteMany();
   await prisma.document.deleteMany();
@@ -43,7 +42,7 @@ async function main() {
     },
   });
 
-  // DB vacía por defecto: solo usuarios (sin apuntes/bazar/payouts predeterminados).
+  // DB vacía por defecto: solo usuarios (sin apuntes/bazar predeterminados).
   // Cada cuenta empieza sin nada y el usuario crea su propio contenido desde la web.
   console.log(`Seed OK (vacío). admin=${admin.email} creator=${creator.email} owner=${owner.email}`);
 }

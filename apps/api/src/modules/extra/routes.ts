@@ -14,15 +14,6 @@ monetizationRouter.post(
   })
 );
 
-monetizationRouter.get(
-  "/payouts/mine",
-  requireAuth,
-  asyncHandler(async (req: AuthedRequest, res) => {
-    const rows = await prisma.payout.findMany({ where: { creatorId: req.user!.sub }, orderBy: { createdAt: "desc" } });
-    res.json({ data: rows });
-  })
-);
-
 export const reportsRouter = Router();
 
 reportsRouter.post(

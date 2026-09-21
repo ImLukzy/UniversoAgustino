@@ -54,12 +54,11 @@ for (const [file] of SOURCES) {
 const yaml = fs.readFileSync(path.join(root, "apps/api/docs/openapi.yaml"), "utf8");
 const inPaths = yaml.slice(yaml.indexOf("\npaths:"));
 const documented = new Set(
-  [...inPaths.matchAll(/^  (\/[A-Za-z0-9/_{}\-]+):/gm)].map((m) => m[1]),
+  [...inPaths.matchAll(/^ {2}(\/[A-Za-z0-9/_{}().-]+):/gm)].map((m) => m[1]),
 );
 
 let fail = 0;
 for (const r of [...found].sort()) {
-  if (r === "/uploads" && false) continue;
   if (!documented.has(r)) {
     console.error("FALTA en openapi.yaml:", r);
     fail = 1;

@@ -41,3 +41,17 @@ export function getOrderLabel(
   const map = role === "seller" ? SELLER_LABEL : BUYER_LABEL;
   return map[status] ?? status;
 }
+
+// Microcopy de dominio (Sprint F3-06, espejo de @hub/shared sin traer zod
+// al bundle web). Claves en minúsculas como los valores reales.
+export const ITEM_TYPE_LABEL: Record<string, string> = {
+  document: "Apunte digital",
+  bazar: "Artículo de bazar",
+  user: "Usuario",
+};
+
+export const REPORT_STATUS_LABEL: Record<string, string> = {
+  OPEN: "Abierto",
+  ACTIONED: "Atendido",
+  DISMISSED: "Descartado",
+};

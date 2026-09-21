@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, apiError } from "../lib/api";
+import { ITEM_TYPE_LABEL, REPORT_STATUS_LABEL } from "../lib/orderLabels";
 import { useAuth } from "../auth/AuthContext";
 
 interface Report {
@@ -58,10 +59,10 @@ export function Admin() {
       {reports.data?.length === 0 && <div className="card p-6 text-sm">Sin reportes. Usa el formulario legal para crear uno.</div>}
       {reports.data?.map((r) => (
         <div key={r.id} className="card p-4 text-sm">
-          <p className="font-bold">{r.targetType} · {r.targetId}</p>
+          <p className="font-bold">{ITEM_TYPE_LABEL[r.targetType] ?? r.targetType} · <span className="font-mono font-normal text-slate-500">Ref. {r.targetId.slice(0, 8)}…</span></p>
           <p className="mt-1 text-slate-600">{r.reason}</p>
           <div className="mt-2 flex items-center gap-2">
-            <span className="badge-uni">{r.status}</span>
+            <span className="badge-uni">{REPORT_STATUS_LABEL[r.status] ?? r.status}</span>
             <button onClick={() => act.mutate({ id: r.id, decision: "ACTIONED" })} className="btn-primary text-sm">Aplicar takedown</button>
             <button onClick={() => act.mutate({ id: r.id, decision: "DISMISSED" })} className="rounded-lg border px-3 py-1.5 text-sm font-semibold">Desestimar</button>
           </div>

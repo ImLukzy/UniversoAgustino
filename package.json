@@ -7,11 +7,21 @@
     "apps/*",
     "packages/*"
   ],
+  "overrides": {
+    "vite": "5.4.21"
+  },
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
     "dev:api": "npm run dev -w apps/api",
     "dev:web": "npm run dev -w apps/web",
     "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "docs:check": "node scripts/docs-check.mjs",
+    "secrets": "bash scripts/check-secrets.sh",
+    "budget:any": "node scripts/any-budget.mjs --check",
+    "budget:size": "node scripts/check-file-size.mjs",
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "prisma:generate": "npm run prisma:generate -w apps/api",
@@ -20,5 +30,14 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^2.1.9"
   }
 }

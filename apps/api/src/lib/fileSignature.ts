@@ -108,9 +108,13 @@ export function sha256File(filePath: string): Promise<string> {
 
 /** Nombre mostrado saneado: sin rutas, sin controles, máx 200 chars. */
 export function sanitizeFilename(name: string): string {
-  return path
-    .basename(name)
-    .replace(/[\u0000-\u001f\u007f]/g, "")
-    .replace(/^\.+/, "")
-    .slice(0, 200) || "archivo";
+  const base = path.basename(name);
+  let out = "";
+  for (const ch of base) {
+    const code = ch.codePointAt(0) ?? 32;
+    if (code < 32 || code === 127) continue;
+    out += ch;
+  }
+  out = out.replace(/^\.+/, "").slice(0, 200);
+  return out || "archivo";
 }

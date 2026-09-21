@@ -68,7 +68,7 @@ export function RentalCard({ order }: { order: HubOrder }) {
         <div className="flex flex-col justify-between rounded-lg bg-slate-100 p-2">
           <span className="text-[11px] text-slate-500">Cobro</span>
           <span className="text-xs font-bold">{order.payMethod === "PLIN" ? "Plin" : order.payMethod === "AMBAS" ? "Yape / Plin" : "Yape"}</span>
-          <span className="truncate text-[11px] text-slate-500">{order.payDetail || "Ver en Mis publicaciones"}</span>
+          <span className="truncate text-[11px] text-slate-500">{order.payDetail || "Ver en Mi Bazar"}</span>
           {order.payProof && <span className="text-[11px]">Constancia: <b>{order.payProof}</b></span>}
         </div>
       </div>

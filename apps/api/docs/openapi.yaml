@@ -306,12 +306,6 @@ paths:
       summary: Sirve archivo con cabeceras defensivas (inline solo pdf/jpg/png, resto attachment)
       parameters: [{ name: name, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: Archivo }, '400': { description: VALIDATION }, '404': { description: NOT_FOUND } }
-  /monetization/payouts/mine:
-    get:
-      tags: [monetization]
-      summary: Mis payouts (auth, sin UI)
-      security: [{ bearerAuth: [] }]
-      responses: { '200': { description: OK } }
   /monetization/simulate:
     post:
       tags: [monetization]

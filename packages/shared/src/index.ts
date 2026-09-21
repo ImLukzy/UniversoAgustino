@@ -269,6 +269,23 @@ export function canTransition(from: OrderStatus, to: OrderStatus): boolean {
   return ORDER_TRANSITIONS[from].includes(to);
 }
 
+// --- Microcopy de dominio (Sprint F3-06): etiquetas en minúsculas porque
+// así están los valores reales (CreateOrderSchema, CreateReportSchema).
+// El alquiler NO es un itemType: es un pedido con fechas (rentalStart).
+export const ITEM_TYPE_LABEL: Record<string, string> = {
+  document: "Apunte digital",
+  bazar: "Artículo de bazar",
+  user: "Usuario",
+};
+
+// Estados de reporte observados en el modelo Report (status String con
+// default OPEN; la moderación escribe ACTIONED/DISMISSED).
+export const REPORT_STATUS_LABEL: Record<string, string> = {
+  OPEN: "Abierto",
+  ACTIONED: "Atendido",
+  DISMISSED: "Descartado",
+};
+
 // --- Moderacion / legal ---
 export const CreateReportSchema = z.object({
   targetType: z.enum(["document", "bazar", "user"]),

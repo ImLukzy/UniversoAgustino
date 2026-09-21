@@ -6,7 +6,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
 import { careerLabel } from "../data/unsa";
 import { RentalCard } from "../components/RentalCard";
-import { getOrderLabel } from "../lib/orderLabels";
+import { getOrderLabel, ITEM_TYPE_LABEL, REPORT_STATUS_LABEL } from "../lib/orderLabels";
 import { CardGridSkeleton } from "../components/Skeleton";
 
 export function Ventas() {
@@ -291,10 +291,10 @@ export function Ventas() {
               <div className="flex items-start justify-between gap-2">
                 <p className="font-bold">Caso #{r.id.slice(0, 6).toUpperCase()}</p>
                 <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${r.status === "OPEN" ? "bg-red-100 text-red-700" : "bg-emerald-50 text-emerald-700"}`}>
-                  {r.status === "OPEN" ? "Abierto" : r.status}
+                  {REPORT_STATUS_LABEL[r.status] ?? r.status}
                 </span>
               </div>
-              <p className="text-xs text-slate-500">{r.targetType} · {r.targetId.slice(0, 8)}… · {fmtDate(r.createdAt)}</p>
+              <p className="text-xs text-slate-500">{ITEM_TYPE_LABEL[r.targetType] ?? r.targetType} · Ref. {r.targetId.slice(0, 8)}… · {fmtDate(r.createdAt)}</p>
               <p className="text-sm">“{r.reason}”</p>
             </div>
           ))}
