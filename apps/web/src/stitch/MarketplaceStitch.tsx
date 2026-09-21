@@ -162,7 +162,7 @@ export function MarketplaceStitch() {
 <div className="relative bg-surface-container-low rounded-lg p-space-xxs flex items-center gap-space-xxs" style={accent ? { boxShadow: `0 0 0 2px ${accent.color}` } : undefined}>
 {accent && <span className="w-3 h-3 rounded-full flex-shrink-0 ml-space-xs" style={{ backgroundColor: accent.color }} />}
 <div className="relative w-full" ref={careerMenuRef}>
-<button type="button" onClick={() => setCareerMenuOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={careerMenuOpen} className="w-full bg-transparent font-label-md text-label-md text-on-surface p-space-xs font-semibold focus:outline-none cursor-pointer flex items-center justify-between gap-space-xs text-left">
+<button type="button" onClick={() => setCareerMenuOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={careerMenuOpen} className="w-full bg-transparent font-label-md text-label-md text-on-surface p-space-xs font-semibold focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer flex items-center justify-between gap-space-xs text-left">
 <span className="truncate">{accent ? accent.label : "Todas las carreras UNSA"}</span>
 <span className="material-symbols-outlined text-title-md flex-shrink-0">expand_more</span>
 </button>
@@ -199,7 +199,7 @@ return (
             Ciclo de Formación
           </label>
 <div className="relative bg-surface-container-low rounded-lg p-space-xxs">
-<select value={liveCycle} onChange={(e) => setLiveCycle(e.target.value)} className="w-full bg-transparent font-label-md text-label-md text-on-surface p-space-xs font-semibold focus:outline-none cursor-pointer">
+<select value={liveCycle} onChange={(e) => setLiveCycle(e.target.value)} className="w-full bg-transparent font-label-md text-label-md text-on-surface p-space-xs font-semibold focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer">
 <option value="all">Cualquier ciclo (I – X)</option>
 <option value="c1-3">Ciclos iniciales (I – III)</option>
 <option value="c4-6">Ciclos intermedios (IV – VI)</option>
@@ -211,7 +211,7 @@ return (
 {/*Search Action & Clear*/}
 <div className="flex items-end gap-space-xs pt-space-xs lg:pt-0">
 <div className="relative flex-1">
-<input className="w-full bg-surface-container-low rounded-lg pl-space-lg pr-space-sm py-space-xs font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none" placeholder={cc.searchPlaceholder} value={liveQ} onChange={(e) => setLiveQ(e.target.value)} type="text"/>
+<input className="w-full bg-surface-container-low rounded-lg pl-space-lg pr-space-sm py-space-xs font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" placeholder={cc.searchPlaceholder} value={liveQ} onChange={(e) => setLiveQ(e.target.value)} type="text"/>
 <span className="material-symbols-outlined absolute left-2 top-2 text-outline text-title-md">search</span>
 </div>
 <button className="h-10 px-space-md bg-primary text-on-primary rounded-lg font-label-md text-label-md font-semibold flex items-center justify-center hover:bg-primary-container transition-colors shadow-sm" onClick={() => document.getElementById("recursos")?.scrollIntoView({ behavior: "smooth" })} style={{ backgroundColor: accentBg }}>Filtrar</button>

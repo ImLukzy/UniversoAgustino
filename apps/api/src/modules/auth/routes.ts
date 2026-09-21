@@ -5,6 +5,7 @@ import { prisma } from "../../lib/prisma.js";
 import { hashPassword, newJti, sha256, signAccess, signRefresh, verifyPassword, verifyRefresh } from "../../lib/auth.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth.js";
+import { requireSameOrigin } from "../../middleware/csrf.js";
 
 export const authRouter = Router();
 
@@ -58,6 +59,7 @@ authRouter.post(
 
 authRouter.post(
   "/refresh",
+  requireSameOrigin,
   asyncHandler(async (req, res) => {
     const raw = req.cookies?.["hub_refresh"] ?? req.body?.refresh;
     if (!raw) return res.status(401).json({ error: { code: "NO_REFRESH", message: "Falta refresh token" } });

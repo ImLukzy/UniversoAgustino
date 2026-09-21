@@ -5,19 +5,19 @@ import fs from "node:fs";
 import crypto from "node:crypto";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth.js";
+import { uploadsDir } from "../../middleware/serveUploads.js";
+import { sanitizeFilename, sha256File, verifyUpload } from "../../lib/fileSignature.js";
+import { prisma } from "../../lib/prisma.js";
 
 export const uploadsRouter = Router();
-
-const dir = path.resolve(process.cwd(), process.env.STORAGE_LOCAL_DIR ?? "./uploads");
-fs.mkdirSync(dir, { recursive: true });
 
 const MAX_MB = Number(process.env.MAX_UPLOAD_MB ?? 25);
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, dir),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext}`);
+  destination: (_req, _file, cb) => cb(null, uploadsDir),
+  // Nombre temporal: el definitivo (UUID) se decide tras verificar la firma.
+  filename: (_req, _file, cb) => {
+    cb(null, `tmp-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`);
   },
 });
 
@@ -33,16 +33,57 @@ const upload = multer({
   },
 });
 
-// Sube un archivo real (PDF/imagen, máx 25 MB). Devuelve { url } servida en /uploads/*.
+// Sube un archivo real (PDF/imagen/EPUB, máx 25 MB). Sprint 4 (F4-01):
+// verifica firma mágica, renombra a UUID, deduplica por checksum+dueño y
+// registra en BD. Devuelve { url, name, size, mime }.
 uploadsRouter.post(
   "/",
   requireAuth,
   upload.single("file"),
   asyncHandler(async (req: AuthedRequest, res) => {
     const f = (req as unknown as { file?: Express.Multer.File }).file;
-    if (!f) return res.status(400).json({ error: { code: "NO_FILE", message: "Adjunte el archivo en el campo 'file'" } });
-    res.status(201).json({ data: { url: `/uploads/${f.filename}`, name: f.originalname, size: f.size } });
+    if (!f) return res.status(400).json({ error: { code: "VALIDATION", message: "Adjunte el archivo en el campo 'file'" } });
+    const tmp = f.path;
+    try {
+      const detectedMime = await verifyUpload(tmp, f.originalname);
+      const checksum = await sha256File(tmp);
+
+      // Deduplicación: mismo dueño + mismo contenido reutiliza el registro.
+      const existing = await prisma.upload.findFirst({
+        where: { ownerId: req.user!.sub, checksum },
+        select: { storedName: true, originalName: true, bytes: true, detectedMime: true },
+      });
+      if (existing) {
+        await fs.promises.unlink(tmp).catch(() => {});
+        return res.status(201).json({
+          data: {
+            url: `/uploads/${existing.storedName}`,
+            name: existing.originalName,
+            size: existing.bytes,
+            mime: existing.detectedMime,
+          },
+        });
+      }
+
+      const ext = path.extname(f.originalname).toLowerCase();
+      const stored = `${crypto.randomUUID()}${ext}`;
+      await fs.promises.rename(tmp, path.join(uploadsDir, stored));
+      const record = await prisma.upload.create({
+        data: {
+          ownerId: req.user!.sub,
+          storedName: stored,
+          originalName: sanitizeFilename(f.originalname),
+          bytes: f.size,
+          detectedMime,
+          checksum,
+        },
+      });
+      return res.status(201).json({
+        data: { url: `/uploads/${record.storedName}`, name: record.originalName, size: record.bytes, mime: record.detectedMime },
+      });
+    } catch (e) {
+      await fs.promises.unlink(tmp).catch(() => {});
+      throw e;
+    }
   })
 );
-
-export const uploadsDir = dir;

@@ -9,17 +9,10 @@ import { careerLabel } from "../data/unsa";
 import { CareerVisual } from "../components/CareerVisual";
 import { PhotoManager } from "../components/PhotoManager";
 import { ConfirmModal } from "../components/ConfirmModal";
+import { SaleActions } from "../components/SaleActions";
+import { getOrderLabel } from "../lib/orderLabels";
 
 const PAY_LABEL: Record<string, string> = { YAPE: "Yape", PLIN: "Plin", AMBAS: "Yape y Plin" };
-const ORDER_LABEL: Record<string, string> = {
-  PENDING: "Esperando pago",
-  ACCEPTED: "Aceptado",
-  PAID: "Pagado",
-  ESCROW: "En custodia",
-  RELEASED: "Completado",
-  REFUNDED: "Reembolsado",
-  CANCELLED: "Cancelado",
-};
 
 type QrInfo = { title: string; price: string; method: string; qr: string | null; detail: string };
 
@@ -269,43 +262,16 @@ function EditBazar({ item, onDone }: { item: HubBazarItem; onDone: () => void })
 }
 
 function SaleRow({ order }: { order: HubOrder }) {
-  const qc = useQueryClient();
-  const [msg, setMsg] = useState("");
-  const [busy, setBusy] = useState(false);
-  const act = async (path: string, okMsg: string) => {
-    setBusy(true);
-    setMsg("");
-    try {
-      await api.post(path);
-      setMsg(okMsg);
-      qc.invalidateQueries({ queryKey: ["orders-sales"] });
-    } catch (e) {
-      setMsg(apiError(e));
-    } finally {
-      setBusy(false);
-    }
-  };
+  const { accent } = useCareerTheme();
   return (
     <div className="card flex flex-col gap-2 p-4 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <p className="mr-auto font-bold">{order.itemType} · {order.itemId.slice(0, 8)}…</p>
-        <span className="badge-uni">{ORDER_LABEL[order.status] ?? order.status}</span>
+        <span className="badge-uni">{getOrderLabel(order.status, "seller", order.cancelledReason)}</span>
         <span className="font-bold text-primary">{pen(order.amountCents)}</span>
       </div>
       {order.payProof && <p className="text-slate-500">Constancia del comprador: <b>{order.payProof}</b></p>}
-      {msg && <p className="text-xs font-semibold text-slate-600">{msg}</p>}
-      <div className="flex gap-2">
-        {order.status === "PAID" && (
-          <button disabled={busy} onClick={() => act(`/orders/${order.id}/confirm-payment`, "Pago confirmado → en custodia.")} className="btn-primary text-sm disabled:opacity-50">
-            Confirmar pago recibido
-          </button>
-        )}
-        {(order.status === "PENDING" || order.status === "ACCEPTED" || order.status === "PAID") && (
-          <button disabled={busy} onClick={() => act(`/orders/${order.id}/cancel`, "Pedido cancelado.")} className="rounded-lg border px-3 py-1.5 text-sm font-semibold disabled:opacity-50">
-            Cancelar venta
-          </button>
-        )}
-      </div>
+      <SaleActions order={order} accentColor={accent?.color ?? null} />
     </div>
   );
 }
@@ -343,7 +309,7 @@ export function Publicaciones() {
     enabled: !!user,
   });
   const sales = useQuery({
-    queryKey: ["orders-sales"],
+    queryKey: ["orders", "sales"],
     queryFn: async () => (await api.get("/orders/sales")).data.data as HubOrder[],
     enabled: !!user,
   });

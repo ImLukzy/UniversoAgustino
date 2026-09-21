@@ -1,29 +1,45 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MarketplaceStitch } from "./stitch/MarketplaceStitch";
-import { BazarStitch } from "./stitch/BazarStitch";
-import { MonetizaStitch } from "./stitch/MonetizaStitch";
-import { LegalStitch } from "./stitch/LegalStitch";
 import { AuthProvider } from "./auth/AuthContext";
 import { CareerThemeProvider } from "./live/careerTheme";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Forgot } from "./pages/Forgot";
-import { Cuenta } from "./pages/Cuenta";
-import { Pedidos } from "./pages/Pedidos";
-import { Publicaciones } from "./pages/Publicaciones";
-import { Detalle } from "./pages/Detalle";
-import { Checkout } from "./pages/Checkout";
-import { Visor } from "./pages/Visor";
-import { Panel } from "./pages/Panel";
-import { Publicar } from "./pages/Publicar";
-import { Ventas } from "./pages/Ventas";
-import { Admin } from "./pages/Admin";
 import { StitchLayout } from "./components/StitchLayout";
 import { PanelLayout } from "./components/PanelLayout";
+import { ToastProvider } from "./context/ToastContext";
+import { RouteFallback } from "./components/RouteFallback";
+import { RouteErrorBoundary } from "./components/RouteErrorBoundary";
 
-const qc = new QueryClient();
+// Sprint 4 (F4-04): rutas pesadas en lazy (Visor arrastra pdfjs-dist).
+// Eager solo home + auth (entradas). Fallback con skeletons + boundary
+// con mensaje de recarga si un chunk falla.
+const BazarStitch = lazy(() => import("./stitch/BazarStitch").then((m) => ({ default: m.BazarStitch })));
+const MonetizaStitch = lazy(() => import("./stitch/MonetizaStitch").then((m) => ({ default: m.MonetizaStitch })));
+const LegalStitch = lazy(() => import("./stitch/LegalStitch").then((m) => ({ default: m.LegalStitch })));
+const Cuenta = lazy(() => import("./pages/Cuenta").then((m) => ({ default: m.Cuenta })));
+const Pedidos = lazy(() => import("./pages/Pedidos").then((m) => ({ default: m.Pedidos })));
+const Publicaciones = lazy(() => import("./pages/Publicaciones").then((m) => ({ default: m.Publicaciones })));
+const Detalle = lazy(() => import("./pages/Detalle").then((m) => ({ default: m.Detalle })));
+const Checkout = lazy(() => import("./pages/Checkout").then((m) => ({ default: m.Checkout })));
+const Visor = lazy(() => import("./pages/Visor").then((m) => ({ default: m.Visor })));
+const Panel = lazy(() => import("./pages/Panel").then((m) => ({ default: m.Panel })));
+const Publicar = lazy(() => import("./pages/Publicar").then((m) => ({ default: m.Publicar })));
+const Ventas = lazy(() => import("./pages/Ventas").then((m) => ({ default: m.Ventas })));
+const Admin = lazy(() => import("./pages/Admin").then((m) => ({ default: m.Admin })));
+
+const qc = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Sprint 2A: 5 min sin refetch al enfocar (los badges con
+      // refetchInterval propio siguen actualizándose solos).
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Los headers Stitch navegan con <a data-path="slug" href="#">.
 // Este puente los convierte en navegación SPA sin tocar el diseño.
@@ -68,10 +84,13 @@ export function App() {
     <QueryClientProvider client={qc}>
       <AuthProvider>
         <CareerThemeProvider>
+        <ToastProvider>
         <BrowserRouter>
           <StitchNavBridge />
           {/* Clases del <body> original de Stitch */}
           <div className="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen">
+            <RouteErrorBoundary>
+            <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route path="/" element={<MarketplaceStitch />} />
               <Route path="/bazar" element={<BazarStitch />} />
@@ -92,8 +111,11 @@ export function App() {
               <Route path="/checkout/:orderId" element={<StitchLayout><Checkout /></StitchLayout>} />
               <Route path="/admin" element={<PanelLayout><Admin /></PanelLayout>} />
             </Routes>
+            </Suspense>
+            </RouteErrorBoundary>
           </div>
         </BrowserRouter>
+        </ToastProvider>
         </CareerThemeProvider>
       </AuthProvider>
     </QueryClientProvider>

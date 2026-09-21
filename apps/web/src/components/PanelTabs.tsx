@@ -11,21 +11,21 @@ export function PanelTabs() {
   const isMod = user?.role === "admin" || user?.role === "moderator";
 
   const sales = useQuery({
-    queryKey: ["tabs-sales"],
+    queryKey: ["orders", "sales"],
     queryFn: async () => (await api.get("/orders/sales")).data.data as HubOrder[],
     enabled: !!user,
     staleTime: 30000,
     retry: false,
   });
   const mineReports = useQuery({
-    queryKey: ["tabs-reports-mine"],
+    queryKey: ["reports", "mine"],
     queryFn: async () => (await api.get("/reports/mine")).data.data as HubReport[],
     enabled: !!user,
     staleTime: 30000,
     retry: false,
   });
   const globalReports = useQuery({
-    queryKey: ["tabs-reports-open"],
+    queryKey: ["reports", "open"],
     queryFn: async () => (await api.get("/reports")).data.data as Array<{ status: string }>,
     enabled: !!user && isMod,
     staleTime: 30000,

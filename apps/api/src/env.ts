@@ -31,3 +31,23 @@ export const env = {
   DIRECT_DATABASE_URL: process.env.DIRECT_DATABASE_URL ?? "",
   ENABLE_JOBS: process.env.ENABLE_JOBS ?? "false",
 };
+
+// Sprint 4 (F4-03): la API se niega a arrancar en producción con secretos
+// de plantilla. En development/test solo avisa (para no bloquear el flujo
+// local con .env de ejemplo).
+const PLACEHOLDER = /cambia-este|changeme|your-secret|secret123/i;
+function assertProdSecrets(): void {
+  if (env.NODE_ENV !== "production") return;
+  for (const key of ["JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"] as const) {
+    if (PLACEHOLDER.test(env[key])) {
+      throw new Error(`${key} conserva un valor de plantilla. Rota el secreto antes de desplegar (ver docs/runbook-rotacion.md).`);
+    }
+  }
+  if (env.JWT_ACCESS_SECRET === env.JWT_REFRESH_SECRET) {
+    throw new Error("JWT_ACCESS_SECRET y JWT_REFRESH_SECRET deben ser distintos.");
+  }
+  if (env.DIRECT_DATABASE_URL && PLACEHOLDER.test(env.DIRECT_DATABASE_URL)) {
+    throw new Error("DIRECT_DATABASE_URL conserva un valor de plantilla.");
+  }
+}
+assertProdSecrets();

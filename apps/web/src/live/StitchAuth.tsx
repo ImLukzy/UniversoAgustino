@@ -17,7 +17,7 @@ export function StitchAuth() {
   const [open, setOpen] = useState(false);
 
   const pending = useQuery({
-    queryKey: ["auth-pending"],
+    queryKey: ["orders", "mine"],
     queryFn: async () => (await api.get("/orders/mine")).data.data as Array<{ status: string }>,
     enabled: !!user,
     refetchInterval: 30000,
@@ -25,7 +25,7 @@ export function StitchAuth() {
   // Sprint 1A: como vendedor, PENDING de bazar (por aceptar) y PAID (por
   // confirmar) requieren acción. El punto avisa y lleva a /ventas.
   const sales = useQuery({
-    queryKey: ["auth-sales-pending"],
+    queryKey: ["orders", "sales"],
     queryFn: async () => (await api.get("/orders/sales")).data.data as Array<{ status: string; itemType: string }>,
     enabled: !!user,
     refetchInterval: 30000,

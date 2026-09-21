@@ -83,7 +83,7 @@ export function StitchHeader({ active }: { active: StitchSection }) {
               value={career}
               onChange={(e) => setCareer(e.target.value)}
               aria-label="Carrera UNSA"
-              className="bg-transparent font-label-sm text-label-sm text-on-surface font-semibold focus:outline-none cursor-pointer pr-space-xs"
+              className="bg-transparent font-label-sm text-label-sm text-on-surface font-semibold focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer pr-space-xs"
             >
               <option value="all">Todas las carreras</option>
               {UNSA_CAREERS.map((c) => (

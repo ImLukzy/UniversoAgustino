@@ -139,6 +139,7 @@ ordersRouter.get(
 
 // Ventas: pedidos sobre MIS publicaciones (soy el vendedor), con comprador,
 // título del ítem y reputación del comprador (pedidos completados previos).
+// Sprint 2A: el conteo por comprador es UN solo groupBy (antes: 1 count por fila).
 ordersRouter.get(
   "/sales",
   requireAuth,
@@ -157,12 +158,24 @@ ordersRouter.get(
       orderBy: { createdAt: "desc" },
       include: { escrow: true, buyer: { select: { id: true, email: true, profile: true } } },
     });
-    const data = await Promise.all(
-      rows.map(async (o) => {
-        const completed = await prisma.order.count({ where: { buyerId: o.buyerId, status: "RELEASED" } });
-        return { ...o, itemTitle: meta.get(o.itemId)?.title ?? o.itemId, itemDesc: meta.get(o.itemId)?.desc ?? null, itemTx: meta.get(o.itemId)?.tx ?? null, buyerCompleted: completed };
-      })
-    );
+    // Compras completadas por comprador en UNA sola agregación.
+    // El IN lleva IDs de comprador deduplicados (no IDs de pedido).
+    const buyerIds = [...new Set(rows.map((o) => o.buyerId))];
+    const completedByBuyer = buyerIds.length
+      ? await prisma.order.groupBy({
+          by: ["buyerId"],
+          where: { buyerId: { in: buyerIds }, status: "RELEASED" },
+          _count: { _all: true },
+        })
+      : [];
+    const completions = new Map(completedByBuyer.map((r) => [r.buyerId, r._count._all]));
+    const data = rows.map((o) => ({
+      ...o,
+      itemTitle: meta.get(o.itemId)?.title ?? o.itemId,
+      itemDesc: meta.get(o.itemId)?.desc ?? null,
+      itemTx: meta.get(o.itemId)?.tx ?? null,
+      buyerCompleted: completions.get(o.buyerId) ?? 0,
+    }));
     res.json({ data });
   })
 );

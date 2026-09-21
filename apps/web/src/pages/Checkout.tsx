@@ -5,6 +5,7 @@ import { api, apiError, fmtDate, pen, resolveQr, type HubOrder } from "../lib/ap
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
 import { CareerAvatar, CareerVisual } from "../components/CareerVisual";
+import { useToast } from "../context/ToastContext";
 
 const PAY_LABEL: Record<string, string> = { YAPE: "Yape", PLIN: "Plin", AMBAS: "Yape / Plin" };
 
@@ -31,9 +32,9 @@ export function Checkout() {
   const { accent } = useCareerTheme();
   const qc = useQueryClient();
   const [proof, setProof] = useState("");
-  const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
+  const toast = useToast();
 
   const order = useQuery({
     queryKey: ["order", orderId],
@@ -96,14 +97,13 @@ export function Checkout() {
   };
   const pay = async () => {
     setBusy(true);
-    setMsg("");
     try {
       await api.post(`/orders/${o.id}/pay`, { payProof: proof.trim() || undefined });
-      setMsg("Pago declarado. El vendedor lo confirmará y pasará a custodia.");
+      toast.success("Pago declarado", "El vendedor lo confirmará y pasará a custodia.");
       qc.invalidateQueries({ queryKey: ["order", orderId] });
-      qc.invalidateQueries({ queryKey: ["orders-mine"] });
+      qc.invalidateQueries({ queryKey: ["orders", "mine"] });
     } catch (e) {
-      setMsg(apiError(e));
+      toast.error("No se pudo declarar el pago", apiError(e));
     } finally {
       setBusy(false);
     }
@@ -247,7 +247,7 @@ export function Checkout() {
                     <span className="flex items-center rounded-lg bg-slate-50 px-3 py-2">
                       <span className="material-symbols-outlined mr-2 text-slate-400">numbers</span>
                       <input
-                        className="w-full bg-transparent font-bold focus:outline-none"
+                        className="w-full bg-transparent font-bold focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         value={proof}
                         onChange={(e) => setProof(e.target.value)}
                         placeholder="Ej. 7842 o 094821"
@@ -258,7 +258,6 @@ export function Checkout() {
                   </label>
                 </div>
 
-                {msg && <p className="rounded-xl bg-primary/10 px-3 py-2 text-sm font-semibold text-primary" style={accent ? { color: accent.color } : undefined}>{msg}</p>}
                 <button disabled={busy} onClick={pay} className="btn-primary flex w-full items-center justify-center gap-2 py-3 text-base disabled:opacity-50" style={accent ? { backgroundColor: accent.color } : undefined}>
                   <span className="material-symbols-outlined text-xl">download_for_offline</span>
                   <span>{busy ? "Enviando…" : "Validar Pago y Pasar a Custodia"}</span>

@@ -49,6 +49,7 @@ model User {
   bazarItems   BazarItem[]
   orders       Order[]  @relation("BuyerOrders")
   ordersAsSeller Order[] @relation("OrdersAsSeller")
+  uploads      Upload[]
   payouts      Payout[]
   reports      Report[]
   refreshTokens RefreshToken[]
@@ -209,9 +210,26 @@ model AuditLog {
 model RefreshToken {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   hash      String   @unique
   expiresAt DateTime
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+// Sprint 4 (F4-01): registro de archivos subidos. Permite verificar firma,
+// deduplicar por checksum y aplicar autorización al servir.
+model Upload {
+  id           String   @id @default(cuid())
+  ownerId      String
+  owner        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  storedName   String   @unique
+  originalName String
+  bytes        Int
+  detectedMime String
+  checksum     String
+  createdAt    DateTime @default(now())
+
+  @@index([ownerId])
+  @@index([checksum])
 }

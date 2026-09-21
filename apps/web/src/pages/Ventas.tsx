@@ -1,150 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, apiError, displayOrderStatus, fmtDate, pen, type HubOrder, type HubReport } from "../lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { api, apiError, fmtDate, pen, type HubOrder, type HubReport } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
 import { careerLabel } from "../data/unsa";
-import { CareerAvatar } from "../components/CareerVisual";
-
-const ORDER_LABEL: Record<string, string> = {
-  PENDING: "Pendiente de aprobación",
-  ACCEPTED: "Aceptado · pago en espera",
-  PAID: "Pagado · por confirmar",
-  ESCROW: "En custodia",
-  RELEASED: "Completado",
-  REFUNDED: "Reembolsado",
-  CANCELLED: "Cancelado",
-};
-
-function SaleActions({ order }: { order: HubOrder }) {
-  const { accent } = useCareerTheme();
-  const qc = useQueryClient();
-  const [msg, setMsg] = useState("");
-  const [busy, setBusy] = useState(false);
-  const act = async (path: string, okMsg: string) => {
-    setBusy(true);
-    setMsg("");
-    try {
-      await api.post(path);
-      setMsg(okMsg);
-      qc.invalidateQueries({ queryKey: ["orders-sales"] });
-    } catch (e) {
-      setMsg(apiError(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <div className="flex flex-col gap-2">
-      {msg && <p className="text-xs font-semibold text-slate-600">{msg}</p>}
-      <div className="flex flex-wrap items-center gap-2">
-        {order.status === "PENDING" && (
-          <>
-            <button disabled={busy} onClick={() => act(`/orders/${order.id}/accept`, "Alquiler aceptado. Avisamos al comprador para que pague.")} className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:brightness-110 disabled:opacity-50" style={accent ? { backgroundColor: accent.color } : undefined}>
-              <span className="material-symbols-outlined text-sm">check</span> Aceptar alquiler
-            </button>
-            <button disabled={busy} onClick={() => act(`/orders/${order.id}/cancel`, "Solicitud denegada.")} className="rounded-lg bg-slate-100 px-4 py-2 text-xs transition-colors hover:bg-slate-200 disabled:opacity-50">
-              Denegar
-            </button>
-          </>
-        )}
-        {order.status === "PAID" && (
-          <button disabled={busy} onClick={() => act(`/orders/${order.id}/confirm-payment`, "Pago confirmado → en custodia.")} className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:brightness-110 disabled:opacity-50">
-            <span className="material-symbols-outlined text-sm">verified</span>
-            Confirmar recepción de pago ({pen(order.amountCents)})
-          </button>
-        )}
-        {order.status === "ACCEPTED" && (
-          <button disabled={busy} onClick={() => act(`/orders/${order.id}/cancel`, "Solicitud cancelada.")} className="rounded-lg bg-slate-100 px-4 py-2 text-xs transition-colors hover:bg-slate-200 disabled:opacity-50">
-            Cancelar
-          </button>
-        )}
-        {order.status === "PAID" && (
-          <button disabled={busy} onClick={() => act(`/orders/${order.id}/cancel`, "Venta cancelada.")} className="rounded-lg bg-slate-100 px-4 py-2 text-xs transition-colors hover:bg-slate-200 disabled:opacity-50">
-            Cancelar
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function RentalCard({ order }: { order: HubOrder }) {
-  const { accent } = useCareerTheme();
-  const buyerName = order.buyer?.profile?.fullName?.trim() || order.buyer?.email || "Comprador";
-  const buyerMeta = [
-    order.buyer?.profile?.career ? careerLabel(order.buyer.profile.career) : null,
-    order.buyer?.profile?.cycle ? `Ciclo ${order.buyer.profile.cycle}` : null,
-  ].filter(Boolean).join(" · ");
-  const days = order.rentalStart && order.rentalEnd
-    ? Math.max(1, Math.round((new Date(order.rentalEnd).getTime() - new Date(order.rentalStart).getTime()) / 86400000))
-    : null;
-  return (
-    <div className="flex flex-col justify-between gap-3 rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <CareerAvatar name={buyerName} className="h-12 w-12" />
-          <div className="flex min-w-0 flex-col">
-            <p className="flex items-center gap-1 font-bold">
-              <span className="truncate">{buyerName}</span>
-              <span className="flex items-center gap-0.5 rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] text-emerald-800">
-                <span className="material-symbols-outlined text-xs">verified</span> Verificado
-              </span>
-            </p>
-            <p className="truncate text-xs text-slate-500">
-              {buyerMeta || "Universo Agustino"}
-              <span className="font-semibold text-emerald-700"> · ★ {order.buyerCompleted ?? 0} alquileres previos</span>
-            </p>
-          </div>
-        </div>
-        <span className="shrink-0 rounded-full bg-indigo-100 px-2 py-1 text-[11px] font-semibold text-indigo-800">
-          {displayOrderStatus(order) ?? ORDER_LABEL[order.status] ?? order.status}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3">
-        <span className="material-symbols-outlined text-2xl text-primary" style={accent ? { color: accent.color } : undefined}>storefront</span>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-primary" style={accent ? { color: accent.color } : undefined}>
-            Alquiler de bazar
-          </span>
-          <span className="truncate font-bold">{order.itemTitle ?? order.itemId}</span>
-          <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
-            <span className="flex items-center gap-0.5">
-              <span className="material-symbols-outlined text-sm">event</span>
-              {order.rentalStart && order.rentalEnd ? `${fmtDate(order.rentalStart)} → ${fmtDate(order.rentalEnd)}${days ? ` (${days} días)` : ""}` : "Fechas a coordinar"}
-            </span>
-          </span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <div className="flex flex-col rounded-lg bg-slate-100 p-2">
-          <span className="text-[11px] text-slate-500">Desglose económico</span>
-          <span className="flex items-baseline justify-between text-xs"><span>Alquiler</span><b>{pen(order.amountCents)}</b></span>
-          <span className="flex items-baseline justify-between text-xs text-slate-500"><span>Comisión (13%)</span><span>{pen(order.feeCents)}</span></span>
-          <span className="mt-1 flex items-baseline justify-between rounded bg-slate-200/60 px-1 text-xs font-bold">
-            <span>Total</span><span className="text-sm text-primary" style={accent ? { color: accent.color } : undefined}>{pen(order.amountCents)}</span>
-          </span>
-        </div>
-        <div className="flex flex-col justify-between rounded-lg bg-slate-100 p-2">
-          <span className="text-[11px] text-slate-500">Cobro</span>
-          <span className="text-xs font-bold">{order.payMethod === "PLIN" ? "Plin" : order.payMethod === "AMBAS" ? "Yape / Plin" : "Yape"}</span>
-          <span className="truncate text-[11px] text-slate-500">{order.payDetail || "Ver en Mis publicaciones"}</span>
-          {order.payProof && <span className="text-[11px]">Constancia: <b>{order.payProof}</b></span>}
-        </div>
-      </div>
-
-      {order.status === "PAID" && (
-        <div className="rounded-lg bg-indigo-50 p-2 text-xs text-indigo-900">
-          El comprador declara el pago{order.payProof ? <> con constancia <b>{order.payProof}</b></> : ""}. Confírmalo solo si recibiste el abono en tu cuenta.
-        </div>
-      )}
-      <SaleActions order={order} />
-    </div>
-  );
-}
+import { RentalCard } from "../components/RentalCard";
+import { getOrderLabel } from "../lib/orderLabels";
+import { CardGridSkeleton } from "../components/Skeleton";
 
 export function Ventas() {
   const { user } = useAuth();
@@ -157,13 +20,13 @@ export function Ventas() {
   const [repBusy, setRepBusy] = useState(false);
 
   const sales = useQuery({
-    queryKey: ["orders-sales"],
+    queryKey: ["orders", "sales"],
     queryFn: async () => (await api.get("/orders/sales")).data.data as HubOrder[],
     enabled: !!user,
     refetchInterval: 30000,
   });
   const reports = useQuery({
-    queryKey: ["reports-mine"],
+    queryKey: ["reports", "mine"],
     queryFn: async () => (await api.get("/reports/mine")).data.data as HubReport[],
     enabled: !!user,
     refetchInterval: 30000,
@@ -302,7 +165,7 @@ export function Ventas() {
             </p>
           </div>
         </div>
-        {sales.isLoading && <p className="text-sm text-slate-500">Cargando…</p>}
+        {sales.isLoading && <CardGridSkeleton count={4} gridClassName="grid grid-cols-1 gap-3 lg:grid-cols-2" />}
         {!sales.isLoading && rentals.length === 0 && (
           <div className="rounded-xl bg-white p-6 text-center text-sm text-slate-500 shadow-sm">
             Sin solicitudes de alquiler. <Link to="/publicar" className="font-bold text-primary underline">Publica un artículo de bazar</Link>.
@@ -383,7 +246,7 @@ export function Ventas() {
                     <td className="whitespace-nowrap px-3 py-3 text-right text-sm font-extrabold text-emerald-700">+{pen(o.netCents)}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-center">
                       <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] text-emerald-800">
-                        {o.status === "RELEASED" ? "Completado" : (displayOrderStatus(o) ?? ORDER_LABEL[o.status] ?? o.status)}
+                        {getOrderLabel(o.status, "seller", o.cancelledReason)}
                       </span>
                     </td>
                   </tr>

@@ -6,6 +6,7 @@ import { StitchFooter } from "../components/StitchFooter";
 import { useCareerTheme } from "../live/careerTheme";
 import { careerContent } from "../data/careerContent";
 import { CareerPhoto } from "../components/CareerVisual";
+import { Accordion } from "../components/Accordion";
 /* LIVE-CAREER v1 */
 /* LIVE-HEADER v1 */
 export function LegalStitch() {
@@ -363,35 +364,42 @@ export function LegalStitch() {
           </div>
 </div>
 </div>
-{/*Extended Secondary Clauses Grid*/}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-space-md pt-space-xs">
-<div className="bg-surface-container p-space-md rounded-xl flex items-start gap-space-sm">
-<span className="material-symbols-outlined text-primary text-title-lg shrink-0 mt-0.5">fingerprint</span>
-<div>
-<h4 className="font-title-md text-title-md text-on-surface font-semibold">5. Anonimización de Casos Clínicos</h4>
-<p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xxs">
-              Bajo la Ley N° 29733 (Protección de Datos Personales), jamás incluyas nombres, DNI ni números de cama de pacientes reales del Goyeneche o Honorio Delgado.
-            </p>
-</div>
-</div>
-<div className="bg-surface-container p-space-md rounded-xl flex items-start gap-space-sm">
-<span className="material-symbols-outlined text-primary text-title-lg shrink-0 mt-0.5">price_change</span>
-<div>
-<h4 className="font-title-md text-title-md text-on-surface font-semibold">6. Precios Transparentes y Comisiones Justas</h4>
-<p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xxs">
-              El creador fija el precio (rango sugerido S/ 2.50 a S/ 15.00). La retención de plataforma oscila entre el 15% y 20% para sustentar costos de servidor y verificación.
-            </p>
-</div>
-</div>
-<div className="bg-surface-container p-space-md rounded-xl flex items-start gap-space-sm">
-<span className="material-symbols-outlined text-primary text-title-lg shrink-0 mt-0.5">rate_review</span>
-<div>
-<h4 className="font-title-md text-title-md text-on-surface font-semibold">7. Calificación por Pares y Calidad</h4>
-<p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xxs">
-              Los compradores evalúan la exactitud biomédica. Documentos con errores graves de cálculo farmacológico son pausados para revisión médica de emergencia.
-            </p>
-</div>
-</div>
+{/*Extended Secondary Clauses (colapsables para escaneo rápido)*/}
+<div className="pt-space-xs">
+<Accordion
+  items={[
+    {
+      id: "anonimizacion",
+      icon: "fingerprint",
+      title: "5. Anonimización de Casos Clínicos",
+      body: (
+        <p>
+          Bajo la Ley N° 29733 (Protección de Datos Personales), jamás incluyas nombres, DNI ni números de cama de pacientes reales del Goyeneche o Honorio Delgado.
+        </p>
+      ),
+    },
+    {
+      id: "precios",
+      icon: "price_change",
+      title: "6. Precios Transparentes y Comisiones Justas",
+      body: (
+        <p>
+          El creador fija el precio (rango sugerido S/ 2.50 a S/ 15.00). La retención de plataforma oscila entre el 15% y 20% para sustentar costos de servidor y verificación.
+        </p>
+      ),
+    },
+    {
+      id: "calificacion",
+      icon: "rate_review",
+      title: "7. Calificación por Pares y Calidad",
+      body: (
+        <p>
+          Los compradores evalúan la exactitud biomédica. Documentos con errores graves de cálculo farmacológico son pausados para revisión médica de emergencia.
+        </p>
+      ),
+    },
+  ]}
+/>
 </div>
 </div>
 </section>
@@ -422,7 +430,7 @@ export function LegalStitch() {
 <div className="lg:w-2/3 flex flex-col gap-space-sm" id="faq-accordion-container">
 {/*FAQ 1*/}
 <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden faq-item">
-<button className="w-full p-space-lg text-left flex items-center justify-between gap-space-md faq-btn" onClick={() => setOpenFaq(openFaq === 0 ? -1 : 0)}>
+<button className="w-full p-space-lg text-left flex items-center justify-between gap-space-md faq-btn" onClick={() => setOpenFaq(openFaq === 0 ? -1 : 0)} aria-expanded={openFaq === 0}>
 <span className="font-title-lg text-title-lg text-on-surface font-bold">
                 ¿Puedo citar la dosis de medicamentos, el NANDA o las Guías Clínicas del MINSA?
               </span>
@@ -441,7 +449,7 @@ export function LegalStitch() {
 </div>
 {/*FAQ 2*/}
 <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden faq-item">
-<button className="w-full p-space-lg text-left flex items-center justify-between gap-space-md faq-btn" onClick={() => setOpenFaq(openFaq === 1 ? -1 : 1)}>
+<button className="w-full p-space-lg text-left flex items-center justify-between gap-space-md faq-btn" onClick={() => setOpenFaq(openFaq === 1 ? -1 : 1)} aria-expanded={openFaq === 1}>
 <span className="font-title-lg text-title-lg text-on-surface font-bold">
                 ¿Qué sucede si un docente de mi facultad reconoce su caso clínico en mis notas?
               </span>
@@ -460,7 +468,7 @@ export function LegalStitch() {
 </div>
 {/*FAQ 3*/}
 <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden faq-item">
-<button className="w-full p-space-lg text-left flex items-center justify-between gap-space-md faq-btn" onClick={() => setOpenFaq(openFaq === 2 ? -1 : 2)}>
+<button className="w-full p-space-lg text-left flex items-center justify-between gap-space-md faq-btn" onClick={() => setOpenFaq(openFaq === 2 ? -1 : 2)} aria-expanded={openFaq === 2}>
 <span className="font-title-lg text-title-lg text-on-surface font-bold">
                 ¿Cómo emitir boleta o recibo por honorarios si mis ventas mensuales superan los S/ 1,500?
               </span>
@@ -483,7 +491,7 @@ export function LegalStitch() {
 </div>
 {/*FAQ 4*/}
 <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden faq-item">
-<button className="w-full p-space-lg text-left flex items-center justify-between gap-space-md faq-btn" onClick={() => setOpenFaq(openFaq === 3 ? -1 : 3)}>
+<button className="w-full p-space-lg text-left flex items-center justify-between gap-space-md faq-btn" onClick={() => setOpenFaq(openFaq === 3 ? -1 : 3)} aria-expanded={openFaq === 3}>
 <span className="font-title-lg text-title-lg text-on-surface font-bold">
                 ¿Puedo usar grabaciones de voz de las clases teóricas para transcribir resúmenes?
               </span>
@@ -516,28 +524,44 @@ export function LegalStitch() {
           Procedimiento sumario para catedráticos, autores y representantes de universidades que soliciten la suspensión de un recurso en línea.
         </p>
 </div>
-<div className="grid grid-cols-1 md:grid-cols-3 gap-space-md">
-<div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm relative">
-<span className="font-label-sm text-label-sm font-bold text-primary mb-space-xs block">PASO 1</span>
-<h3 className="font-title-md text-title-md text-on-surface font-bold mb-space-xs">Recepción del Reclamo</h3>
-<p className="font-body-sm text-body-sm text-on-surface-variant">
-            El docente o titular remite un correo a <code>etica@wawki.pe</code> adjuntando el enlace del recurso e indicando el fragmento o titularidad vulnerada.
-          </p>
-</div>
-<div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm relative">
-<span className="font-label-sm text-label-sm font-bold text-secondary mb-space-xs block">PASO 2</span>
-<h3 className="font-title-md text-title-md text-on-surface font-bold mb-space-xs">Baja Preventiva (&lt; 24h)</h3>
-<p className="font-body-sm text-body-sm text-on-surface-variant">
-            El archivo es desindexado automáticamente del marketplace y se retiene el balance generado mientras la comisión de ética efectúa la compulsa jurídica.
-          </p>
-</div>
-<div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm relative">
-<span className="font-label-sm text-label-sm font-bold text-tertiary mb-space-xs block">PASO 3</span>
-<h3 className="font-title-md text-title-md text-on-surface font-bold mb-space-xs">Descargo y Resolución</h3>
-<p className="font-body-sm text-body-sm text-on-surface-variant">
-            Se otorga 48 horas al creador para sustentar autoría. Si se confirma copia no autorizada, se elimina el archivo y se notifica la sanción al usuario.
-          </p>
-</div>
+<div className="max-w-3xl">
+<Accordion
+  items={[
+    {
+      id: "paso-1",
+      icon: "mark_email_read",
+      eyebrow: "Paso 1",
+      title: "Recepción del Reclamo",
+      body: (
+        <p>
+          El docente o titular remite un reporte desde el Centro de soporte (Gestión de Ventas) adjuntando el enlace del recurso e indicando el fragmento o titularidad vulnerada.
+        </p>
+      ),
+    },
+    {
+      id: "paso-2",
+      icon: "block",
+      eyebrow: "Paso 2",
+      title: "Baja Preventiva (< 24h)",
+      body: (
+        <p>
+          El archivo es desindexado automáticamente del marketplace y se retiene el balance generado mientras la comisión de ética efectúa la compulsa jurídica.
+        </p>
+      ),
+    },
+    {
+      id: "paso-3",
+      icon: "rule",
+      eyebrow: "Paso 3",
+      title: "Descargo y Resolución",
+      body: (
+        <p>
+          Se otorga 48 horas al creador para sustentar autoría. Si se confirma copia no autorizada, se elimina el archivo y se notifica la sanción al usuario.
+        </p>
+      ),
+    },
+  ]}
+/>
 </div>
 </div>
 </section>

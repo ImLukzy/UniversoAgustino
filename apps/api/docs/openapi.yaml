@@ -1,61 +1,286 @@
 openapi: 3.0.3
 info:
-    title: Wawki API
-  version: 0.1.0
-  description: API v1 - marketplace academico UNSA (comunidad @unsa.edu.pe)
+  title: Universo Agustino API
+  version: 1.0.0
+  description: API v1 - marketplace académico UNSA (comunidad @unsa.edu.pe). Compra en custodia con comisión del 13%.
 servers:
   - url: http://localhost:4000/api/v1
+tags:
+  - { name: auth }
+  - { name: documents }
+  - { name: bazar }
+  - { name: orders }
+  - { name: uploads }
+  - { name: monetization }
+  - { name: reports }
+  - { name: legal }
 paths:
   /health:
     get:
+      tags: [auth]
       summary: Liveness
+      responses: { '200': { description: OK } }
+  /ready:
+    get:
+      tags: [auth]
+      summary: Readiness (SELECT 1 en BD)
       responses: { '200': { description: OK } }
   /auth/register:
     post:
-      summary: Registro creator
+      tags: [auth]
+      summary: Registro (rol inicial creator, solo @unsa.edu.pe + excepción)
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required: [email, password, fullName]
               properties:
-                email: { type: string }
-                password: { type: string }
+                email: { type: string, example: rosa.quispe@unsa.edu.pe }
+                password: { type: string, minLength: 8 }
                 fullName: { type: string }
                 university: { type: string, enum: [UNSA] }
-                career: { type: string, description: "Clave de carrera UNSA (p. ej. ENFERMERIA)" }
-      responses: { '201': { description: Creado } }
+                career: { type: string, description: "Clave de CareerSchema (p. ej. ENFERMERIA)" }
+                cycle: { type: string }
+      responses:
+        '201': { description: Creado (devuelve access) }
+        '400': { description: VALIDATION }
+        '403': { description: EMAIL_NO_AUTORIZADO }
+        '409': { description: EMAIL_TAKEN }
   /auth/login:
     post:
-      summary: Login
+      tags: [auth]
+      summary: Login (emite access + cookie httpOnly hub_refresh)
+      responses:
+        '200': { description: OK }
+        '401': { description: BAD_CREDENTIALS }
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: Rota el refresh (cookie) y emite access. Requiere Origin permitido
+      responses:
+        '200': { description: OK }
+        '401': { description: UNAUTHENTICATED o TOKEN_EXPIRED }
+        '403': { description: Origen no permitido }
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Revoca el refresh y limpia la cookie
       responses: { '200': { description: OK } }
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Perfil propio (auth)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK }, '401': { description: UNAUTHENTICATED } }
+  /auth/profile:
+    patch:
+      tags: [auth]
+      summary: Edita fullName/career/cycle propios (auth)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK }, '400': { description: VALIDATION } }
   /documents:
     get:
-      summary: Listar apuntes publicados
+      tags: [documents]
+      summary: Listar apuntes PUBLISHED (público, paginado)
       parameters:
         - { name: q, in: query, schema: { type: string } }
         - { name: university, in: query, schema: { type: string } }
+        - { name: career, in: query, schema: { type: string } }
+        - { name: course, in: query, schema: { type: string } }
+        - { name: type, in: query, schema: { type: string, enum: [APUNTE, PAE, BALOTARIO, GUIA] } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, default: 12 } }
+      responses: { '200': { description: OK } }
+    post:
+      tags: [documents]
+      summary: Crear apunte (auth, hereda career del perfil)
+      security: [{ bearerAuth: [] }]
+      responses: { '201': { description: Creado }, '400': { description: VALIDATION } }
+  /documents/mine:
+    get:
+      tags: [documents]
+      summary: Mis apuntes (auth)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK } }
+  /documents/{id}:
+    get:
+      tags: [documents]
+      summary: Detalle público (404 si no existe)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
+    patch:
+      tags: [documents]
+      summary: Edita el dueño (auth)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND } }
+    delete:
+      tags: [documents]
+      summary: Elimina el dueño; 409 si hay pedidos vivos (auth)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
+  /documents/{id}/takedown:
+    post:
+      tags: [documents]
+      summary: Baja por moderación D.L. 822 (moderator/admin)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN } }
+  /bazar:
+    get:
+      tags: [bazar]
+      summary: Listar bazar AVAILABLE (público, paginado)
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
         - { name: page, in: query, schema: { type: integer } }
       responses: { '200': { description: OK } }
     post:
-      summary: Crear apunte (auth)
+      tags: [bazar]
+      summary: Publicar ítem (auth, photos máx 4)
       security: [{ bearerAuth: [] }]
-      responses: { '201': { description: Creado } }
-  /bazar:
-    get: { summary: Listar bazar, responses: { '200': { description: OK } } }
-    post: { summary: Publicar item (auth), responses: { '201': { description: Creado } } }
+      responses: { '201': { description: Creado }, '400': { description: VALIDATION } }
+  /bazar/mine:
+    get:
+      tags: [bazar]
+      summary: Mis ítems (auth)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK } }
+  /bazar/{id}:
+    get:
+      tags: [bazar]
+      summary: Detalle público con vendedor (404 si no existe)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
+    patch:
+      tags: [bazar]
+      summary: Edita el dueño (auth)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND } }
+    delete:
+      tags: [bazar]
+      summary: Elimina el dueño; 409 si hay pedidos vivos (auth)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
+  /bazar/{id}/reserve:
+    post:
+      tags: [bazar]
+      summary: Marca RESERVED (auth)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK } }
   /orders:
-    post: { summary: Crear orden en escrow (auth), responses: { '201': { description: Creado } } }
+    post:
+      tags: [orders]
+      summary: Crea pedido PENDING con TTL 30min + snapshot (auth). Alquiler bazar exige rentalStart/End
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [itemType, itemId]
+              properties:
+                itemType: { type: string, enum: [document, bazar] }
+                itemId: { type: string }
+                rentalStart: { type: string, format: date-time }
+                rentalEnd: { type: string, format: date-time }
+      responses:
+        '201': { description: Creado (sellerId, expiresAt, itemTitle, itemPriceCents, feeBps) }
+        '400': { description: SELF_PURCHASE, DATES_REQUIRED o BAD_DATES }
+        '409': { description: NOT_AVAILABLE (con details.availableAt) }
   /orders/mine:
-    get: { summary: Mis pedidos (auth), responses: { '200': { description: OK } } }
+    get:
+      tags: [orders]
+      summary: Mis compras como comprador (auth, incluye snapshot itemTitle)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK } }
+  /orders/sales:
+    get:
+      tags: [orders]
+      summary: Ventas sobre mis publicaciones con comprador y reputación (auth)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK } }
+  /orders/{id}:
+    get:
+      tags: [orders]
+      summary: Detalle (comprador, vendedor o moderación)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND } }
+  /orders/{id}/accept:
+    post:
+      tags: [orders]
+      summary: El vendedor acepta alquiler bazar PENDING → ACCEPTED (409 si expiró o no es bazar)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '409': { description: BAD_STATE, NOT_RENTAL o RESERVATION_EXPIRED } }
+  /orders/{id}/pay:
+    post:
+      tags: [orders]
+      summary: El comprador declara el pago → PAID (payProof = n° operación)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '409': { description: BAD_STATE o RESERVATION_EXPIRED } }
+  /orders/{id}/confirm-payment:
+    post:
+      tags: [orders]
+      summary: El vendedor confirma el abono → ESCROW (custodia)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '409': { description: BAD_STATE } }
+  /orders/{id}/cancel:
+    post:
+      tags: [orders]
+      summary: Cancela comprador o vendedor (PENDING/ACCEPTED/PAID) con motivo
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK (cancelledReason BUYER_CANCELLED/SELLER_REJECTED) }, '409': { description: BAD_STATE } }
+  /orders/{id}/confirm-receipt:
+    post:
+      tags: [orders]
+      summary: El comprador confirma recepción ESCROW → RELEASED
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '409': { description: BAD_STATE } }
+  /orders/{id}/refund:
+    post:
+      tags: [orders]
+      summary: Reembolso por moderación (moderator/admin)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN } }
   /uploads:
-    post: { summary: Subir PDF/imagen real 25MB (auth, campo file), responses: { '201': { description: Creado } } }
+    post:
+      tags: [uploads]
+      summary: Sube PDF/JPG/PNG/EPUB 25MB (auth, campo file). Verifica firma, UUID, dedup. 413 si excede, 415 si el contenido no coincide
+      security: [{ bearerAuth: [] }]
+      responses:
+        '201': { description: Creado (url, name, size, mime) }
+        '400': { description: VALIDATION }
+        '413': { description: FILE_TOO_LARGE }
+        '415': { description: UNSUPPORTED_FILE_TYPE }
+  /uploads/{name}:
+    get:
+      tags: [uploads]
+      summary: Sirve archivo con cabeceras defensivas (inline solo pdf/jpg/png, resto attachment)
+      parameters: [{ name: name, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Archivo }, '400': { description: VALIDATION }, '404': { description: NOT_FOUND } }
   /monetization/payouts/mine:
-    get: { summary: Mis payouts (auth), responses: { '200': { description: OK } } }
+    get:
+      tags: [monetization]
+      summary: Mis payouts (auth, sin UI)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK } }
   /monetization/simulate:
     post:
-      summary: Calculadora de ingresos
+      tags: [monetization]
+      summary: Calculadora de ingresos (comisión 13% por defecto)
       requestBody:
         required: true
         content:
@@ -66,9 +291,37 @@ paths:
                 avgPrice: { type: number, example: 15 }
                 salesPerMonth: { type: integer, example: 40 }
                 bazarExtra: { type: number, example: 100 }
+                feePct: { type: number, example: 13 }
       responses: { '200': { description: OK } }
   /reports:
-    post: { summary: Reportar contenido (takedown D.L. 822), responses: { '201': { description: Creado } } }
+    post:
+      tags: [reports]
+      summary: Crea reporte D.L. 822 (auth, reason mín 10)
+      security: [{ bearerAuth: [] }]
+      responses: { '201': { description: Creado }, '400': { description: VALIDATION } }
+    get:
+      tags: [reports]
+      summary: Cola global (moderator/admin, máx 50)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN } }
+  /reports/mine:
+    get:
+      tags: [reports]
+      summary: Mis reportes enviados (auth, máx 50)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK } }
+  /reports/{id}/action:
+    post:
+      tags: [reports]
+      summary: Acción de moderación ACTIONED/DISMISSED; ACTIONED en document = TAKEDOWN (moderator/admin)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '403': { description: FORBIDDEN } }
+  /legal/summary:
+    get:
+      tags: [legal]
+      summary: Resumen D.L. 822 (SLA takedown 48h)
+      responses: { '200': { description: OK } }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }

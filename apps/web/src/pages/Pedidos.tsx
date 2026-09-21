@@ -1,40 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, apiError, displayOrderStatus, fmtDate, pen, type HubDocument, type HubOrder } from "../lib/api";
+import { api, apiError, fmtDate, pen, type HubOrder } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
 import { careerContent } from "../data/careerContent";
-
-const ORDER_LABEL: Record<string, string> = {
-  PENDING: "Esperando pago",
-  ACCEPTED: "Aceptado",
-  PAID: "Pagado",
-  ESCROW: "En custodia",
-  RELEASED: "Completado",
-  REFUNDED: "Reembolsado",
-  CANCELLED: "Cancelado",
-};
-
-type Item = { title: string; description?: string | null; fileUrl?: string | null };
-
-function useItem(order: HubOrder) {
-  const path = order.itemType === "document" ? `/documents/${order.itemId}` : `/bazar/${order.itemId}`;
-  return useQuery({
-    queryKey: ["pedido-item", order.itemType, order.itemId],
-    queryFn: async () => (await api.get(path)).data.data as Item,
-    staleTime: 60000,
-    retry: false,
-  });
-}
+import { getOrderLabel } from "../lib/orderLabels";
 
 function PedidoRow({ order }: { order: HubOrder }) {
   const { accent } = useCareerTheme();
   const qc = useQueryClient();
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
-  const item = useItem(order);
   const isDoc = order.itemType === "document";
+  // Sprint 2B: título del snapshot (itemTitle). Cero fetches por fila.
 
   const mutate = async (path: string, okMsg?: string) => {
     setBusy(true);
@@ -42,15 +21,13 @@ function PedidoRow({ order }: { order: HubOrder }) {
     try {
       await api.post(path);
       if (okMsg) setMsg(okMsg);
-      qc.invalidateQueries({ queryKey: ["orders-mine"] });
+      qc.invalidateQueries({ queryKey: ["orders", "mine"] });
     } catch (e) {
       setMsg(apiError(e));
     } finally {
       setBusy(false);
     }
   };
-
-  const fileUrl = isDoc ? (item.data as HubDocument | undefined)?.fileUrl : undefined;
 
   return (
     <div className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md">
@@ -61,7 +38,7 @@ function PedidoRow({ order }: { order: HubOrder }) {
             {isDoc ? (order.status === "RELEASED" ? "Digital" : "Apunte") : "Bazar"}
           </span>
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary" style={accent ? { color: accent.color } : undefined}>
-            {displayOrderStatus(order) ?? ORDER_LABEL[order.status] ?? order.status}
+            {getOrderLabel(order.status, "buyer", order.cancelledReason)}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -76,7 +53,7 @@ function PedidoRow({ order }: { order: HubOrder }) {
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
           <h2 className="truncate font-bold">
-            {item.data?.title ?? `${order.itemType} · ${order.itemId.slice(0, 8)}…`}
+            {order.itemTitle?.trim() || `${order.itemType} · ${order.itemId.slice(0, 8)}…`}
           </h2>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
             <span>{order.createdAt ? new Date(order.createdAt).toLocaleDateString("es-PE", { day: "numeric", month: "short", year: "numeric" }) : ""}</span>
@@ -98,7 +75,7 @@ function PedidoRow({ order }: { order: HubOrder }) {
           {order.status === "ACCEPTED" && "Solicitud aceptada. Ya puedes pagar."}
           {order.status === "PAID" && "El vendedor debe confirmar tu pago."}
           {order.status === "RELEASED" && "Pedido completado."}
-          {order.status === "CANCELLED" && (displayOrderStatus(order) ?? "Pedido cancelado.")}
+          {order.status === "CANCELLED" && getOrderLabel(order.status, "buyer", order.cancelledReason)}
         </span>
         <div className="flex items-center gap-1.5">
           {(order.status === "PENDING" || order.status === "ACCEPTED") && (
@@ -121,10 +98,10 @@ function PedidoRow({ order }: { order: HubOrder }) {
               Confirmar recepción
             </button>
           )}
-          {order.status === "RELEASED" && fileUrl && (
-            <a href={fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110">
-              <span className="material-symbols-outlined text-base">download</span> Descargar
-            </a>
+          {order.status === "RELEASED" && isDoc && (
+            <Link to={`/v/${order.itemId}`} className="flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110">
+              <span className="material-symbols-outlined text-base">visibility</span> Abrir apunte
+            </Link>
           )}
           {order.status === "RELEASED" && !isDoc && (
             <Link to={`/p/bazar/${order.itemId}`} className="rounded-lg bg-slate-200 px-4 py-2 text-xs font-bold transition-all hover:bg-slate-300">
@@ -144,7 +121,7 @@ export function Pedidos() {
   const [filter, setFilter] = useState<"all" | "curso" | "digital" | "done">("all");
 
   const orders = useQuery({
-    queryKey: ["orders-mine"],
+    queryKey: ["orders", "mine"],
     queryFn: async () => (await api.get("/orders/mine")).data.data as HubOrder[],
     enabled: !!user,
   });

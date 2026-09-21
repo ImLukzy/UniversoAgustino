@@ -9,6 +9,7 @@ import { useCareerTheme } from "../live/careerTheme";
 import { UNSA_CAREERS } from "../data/unsa";
 import { careerContent } from "../data/careerContent";
 import { CareerAvatar } from "../components/CareerVisual";
+import { Accordion } from "../components/Accordion";
 /* LIVE-HEADER v1 */
 /* LIVE-PATCH v1 */
 export function MonetizaStitch() {
@@ -310,13 +311,13 @@ export function MonetizaStitch() {
 <p className="font-body-sm text-body-sm text-on-surface-variant">Facilita que compañeros de ciclos menores encuentren con precisión tu aporte.</p>
 <div>
 <label className="block font-label-md text-label-md text-on-surface font-semibold mb-space-xxs">Título Descriptivo del Material</label>
-<input className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus:bg-surface-container-low" placeholder={cc.publishTitlePh} name="wTitle" required type="text"/>
+<input className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:bg-surface-container-low" placeholder={cc.publishTitlePh} name="wTitle" required type="text"/>
 <span className="font-body-sm text-body-sm text-on-surface-variant block mt-space-xxs">Sé explícito: incluye el tema central y taxonomía utilizada.</span>
 </div>
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
 <div>
 <label className="block font-label-md text-label-md text-on-surface font-semibold mb-space-xxs">Carrera UNSA</label>
-<select name="wCareer" value={wCareer} onChange={(e) => setWCareer(e.target.value)} className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus:bg-surface-container-low cursor-pointer">
+<select name="wCareer" value={wCareer} onChange={(e) => setWCareer(e.target.value)} className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:bg-surface-container-low cursor-pointer">
 {UNSA_CAREERS.map((c) => (
 <option key={c.key} value={c.key}>{c.label} — {c.faculty}</option>
 ))}
@@ -324,13 +325,13 @@ export function MonetizaStitch() {
 </div>
 <div>
 <label className="block font-label-md text-label-md text-on-surface font-semibold mb-space-xxs">Asignatura / Módulo</label>
-<input className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus:bg-surface-container-low" placeholder={cc.publishCoursePh} name="wCourse" required type="text"/>
+<input className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:bg-surface-container-low" placeholder={cc.publishCoursePh} name="wCourse" required type="text"/>
 </div>
 </div>
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
 <div>
 <label className="block font-label-md text-label-md text-on-surface font-semibold mb-space-xxs">Ciclo Académico Correspondiente</label>
-<select name="wCycle" className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus:bg-surface-container-low cursor-pointer">
+<select name="wCycle" className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:bg-surface-container-low cursor-pointer">
 <option>3er Ciclo ({cc.cycleFocus[0]})</option>
 <option>4to Ciclo ({cc.cycleFocus[1]})</option>
 <option>5to Ciclo ({cc.cycleFocus[2]})</option>
@@ -342,7 +343,7 @@ export function MonetizaStitch() {
 </div>
 <div>
 <label className="block font-label-md text-label-md text-on-surface font-semibold mb-space-xxs">Precio Deseado (Soles PEN)</label>
-<input className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus:bg-surface-container-low" max="50" min="5" required type="number" defaultValue={10} name="wPrice"/>
+<input className="w-full p-space-sm bg-surface-container-lowest rounded-lg font-body-md text-body-md text-on-surface shadow-sm focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:bg-surface-container-low" max="50" min="5" required type="number" defaultValue={10} name="wPrice"/>
 </div>
 </div>
 <div className="flex justify-end pt-space-sm">
@@ -463,49 +464,50 @@ export function MonetizaStitch() {
 </section>
 {/*SECCIÓN: Métodos de Cobro y Garantías de Liquidación*/}
 <section className="max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-tablet lg:px-margin-desktop py-space-3xl">
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
-<div className="p-space-lg bg-surface-container-lowest rounded-xl shadow-sm flex flex-col justify-between">
-<div>
-<div className="w-12 h-12 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center mb-space-sm">
-<span className="material-symbols-outlined text-headline-md">send_to_mobile</span>
-</div>
-<h3 className="font-title-lg text-title-lg text-on-surface font-bold">Retiros por Yape &amp; Plin</h3>
-<p className="font-body-md text-body-md text-on-surface-variant mt-space-xs">
+<div className="max-w-3xl">
+<Accordion
+  items={[
+    {
+      id: "retiros",
+      icon: "send_to_mobile",
+      eyebrow: "Desembolso al instante",
+      title: "Retiros por Yape & Plin",
+      body: (
+        <div className="flex flex-col gap-space-xs">
+          <p>
             Sin montos mínimos excesivos. Solicita la liquidación de tu saldo desde <strong>S/ 20.00</strong> y recíbelo en tu número registrado en menos de 15 minutos en horario de 8:00 AM a 10:00 PM.
           </p>
-</div>
-<div className="pt-space-md mt-space-md flex items-center gap-space-xs text-primary font-label-sm text-label-sm font-semibold" style={accent ? { color: accent.color } : undefined}>
-<span className="material-symbols-outlined text-title-md">schedule</span> Desembolso al instante
         </div>
-</div>
-<div className="p-space-lg bg-surface-container-lowest rounded-xl shadow-sm flex flex-col justify-between">
-<div>
-<div className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-space-sm" style={accent ? { backgroundColor: accent.soft, color: accent.color } : undefined}>
-<span className="material-symbols-outlined text-headline-md">account_balance</span>
-</div>
-<h3 className="font-title-lg text-title-lg text-on-surface font-bold">Transferencia BCP &amp; Interbank</h3>
-<p className="font-body-md text-body-md text-on-surface-variant mt-space-xs">
+      ),
+    },
+    {
+      id: "transferencia",
+      icon: "account_balance",
+      eyebrow: "Reporte fiscal descargable",
+      title: "Transferencia BCP & Interbank",
+      body: (
+        <div className="flex flex-col gap-space-xs">
+          <p>
             Liquidación consolidada y automática cada fin de mes para creadores que generan más de S/ 200.00 mensuales. Recibes un comprobante contable en PDF para tu control tributario.
           </p>
-</div>
-<div className="pt-space-md mt-space-md flex items-center gap-space-xs text-tertiary font-label-sm text-label-sm font-semibold">
-<span className="material-symbols-outlined text-title-md">receipt_long</span> Reporte fiscal descargable
         </div>
-</div>
-<div className="p-space-lg bg-surface-container-lowest rounded-xl shadow-sm flex flex-col justify-between">
-<div>
-<div className="w-12 h-12 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center mb-space-sm">
-<span className="material-symbols-outlined text-headline-md">security</span>
-</div>
-<h3 className="font-title-lg text-title-lg text-on-surface font-bold">Protección Antifraude</h3>
-<p className="font-body-md text-body-md text-on-surface-variant mt-space-xs">
+      ),
+    },
+    {
+      id: "antifraude",
+      icon: "security",
+      eyebrow: "100% cobro garantizado",
+      title: "Protección Antifraude",
+      body: (
+        <div className="flex flex-col gap-space-xs">
+          <p>
             Los alumnos pagan mediante QR verificado antes de recibir la descarga cifrada. El saldo ingresa a tu bóveda segura y queda disponible de forma irrevocable.
           </p>
-</div>
-<div className="pt-space-md mt-space-md flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm font-semibold">
-<span className="material-symbols-outlined text-title-md">lock</span> 100% cobro garantizado
         </div>
-</div>
+      ),
+    },
+  ]}
+/>
 </div>
 </section>
 {/*SECCIÓN: Historias de Éxito de Estudiantes Reales*/}

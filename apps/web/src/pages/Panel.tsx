@@ -1,21 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, apiError, pen, type HubBazarItem, type HubDocument, type HubOrder } from "../lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { api, pen, type HubBazarItem, type HubDocument, type HubOrder } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
 import { careerContent } from "../data/careerContent";
 import { careerLabel } from "../data/unsa";
-
-const ORDER_LABEL: Record<string, string> = {
-  PENDING: "Esperando pago",
-  ACCEPTED: "Aceptado",
-  PAID: "Pagado",
-  ESCROW: "En custodia",
-  RELEASED: "Completado",
-  REFUNDED: "Reembolsado",
-  CANCELLED: "Cancelado",
-};
+import { PanelOrderRow } from "../components/PanelOrderRow";
+import { ListRowSkeleton } from "../components/Skeleton";
 
 const ROLE_LABEL: Record<string, string> = {
   admin: "Admin",
@@ -23,92 +15,6 @@ const ROLE_LABEL: Record<string, string> = {
   creator: "Creador",
   student: "Estudiante",
 };
-
-function OrderTitle({ order }: { order: HubOrder }) {
-  const path = order.itemType === "document" ? `/documents/${order.itemId}` : `/bazar/${order.itemId}`;
-  const to = order.itemType === "document" ? `/v/${order.itemId}` : `/p/bazar/${order.itemId}`;
-  const q = useQuery({
-    queryKey: ["panel-item", order.itemType, order.itemId],
-    queryFn: async () => (await api.get(path)).data.data as { title: string },
-    staleTime: 60000,
-    retry: false,
-  });
-  if (!q.data) return <span className="font-semibold">{order.itemType} · {order.itemId.slice(0, 8)}…</span>;
-  return <Link to={to} className="font-semibold hover:underline">{q.data.title}</Link>;
-}
-
-function PanelOrderRow({ order }: { order: HubOrder }) {
-  const qc = useQueryClient();
-  const [msg, setMsg] = useState("");
-  const [busy, setBusy] = useState(false);
-  const confirm = async () => {
-    setBusy(true);
-    setMsg("");
-    try {
-      await api.post(`/orders/${order.id}/confirm-receipt`);
-      qc.invalidateQueries({ queryKey: ["orders-mine"] });
-    } catch (e) {
-      setMsg(apiError(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-  const isDoc = order.itemType === "document";
-  return (
-    <div className="flex flex-col items-start justify-between gap-3 rounded-xl bg-surface-container-low p-4 transition-all hover:bg-surface-container lg:flex-row lg:items-center">
-      <div className="flex items-start gap-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-primary shadow-sm" style={{}}>
-          <span className="material-symbols-outlined text-2xl">{isDoc ? "picture_as_pdf" : "storefront"}</span>
-        </div>
-        <div className="flex flex-col">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="font-mono text-xs font-bold">#ORD-{order.id.slice(0, 4).toUpperCase()}</span>
-            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-              {isDoc ? "Digital" : "Bazar"} · {order.itemType}
-            </span>
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{ORDER_LABEL[order.status] ?? order.status}</span>
-          </div>
-          <h4 className="mt-1 text-sm font-bold"><OrderTitle order={order} /></h4>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
-            <span>{o_date(order.createdAt)}</span>
-            <span>•</span>
-            <span>{pen(order.amountCents)}</span>
-            {order.payProof && (<><span>•</span><span>Constancia: <b>{order.payProof}</b></span></>)}
-          </div>
-          {msg && <p className="mt-1 text-xs font-semibold text-red-600">{msg}</p>}
-        </div>
-      </div>
-      <div className="flex w-full items-center justify-between gap-3 self-end lg:w-auto lg:self-center">
-        <div className="text-right">
-          <div className="font-display text-lg font-extrabold">{pen(order.amountCents)}</div>
-          <span className="text-[11px] text-slate-400">Protegido en custodia</span>
-        </div>
-        <div className="flex items-center gap-1">
-          {order.status === "PENDING" && (
-            <Link to={`/checkout/${order.id}`} className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110">
-              Continuar pago
-            </Link>
-          )}
-          {order.status === "ESCROW" && (
-            <button disabled={busy} onClick={confirm} className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110 disabled:opacity-50">
-              Liberar fondos
-            </button>
-          )}
-          {(order.status === "RELEASED" || order.status === "PAID") && (
-            <Link to={`/checkout/${order.id}`} className="rounded-lg bg-white p-2 text-slate-500 shadow-sm transition-all hover:bg-slate-50" title="Ver detalle">
-              <span className="material-symbols-outlined text-lg">info</span>
-            </Link>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function o_date(iso?: string) {
-  if (!iso) return "";
-  return new Date(iso).toLocaleDateString("es-PE", { day: "numeric", month: "short" });
-}
 
 export function Panel() {
   const { user } = useAuth();
@@ -118,7 +24,7 @@ export function Panel() {
   const [filter, setFilter] = useState<"all" | "escrow" | "digital" | "bazar">("all");
 
   const orders = useQuery({
-    queryKey: ["orders-mine"],
+    queryKey: ["orders", "mine"],
     queryFn: async () => (await api.get("/orders/mine")).data.data as HubOrder[],
     enabled: !!user,
   });
@@ -133,19 +39,19 @@ export function Panel() {
     enabled: !!user,
   });
   const sales = useQuery({
-    queryKey: ["orders-sales"],
+    queryKey: ["orders", "sales"],
     queryFn: async () => (await api.get("/orders/sales")).data.data as HubOrder[],
     enabled: !!user,
   });
   const isMod = user?.role === "admin" || user?.role === "moderator";
   const reports = useQuery({
-    queryKey: ["reports-open"],
+    queryKey: ["reports", "open"],
     queryFn: async () => (await api.get("/reports")).data.data as Array<{ status: string }>,
     enabled: !!user && isMod,
     retry: false,
   });
   const mineReports = useQuery({
-    queryKey: ["reports-mine"],
+    queryKey: ["reports", "mine"],
     queryFn: async () => (await api.get("/reports/mine")).data.data as Array<{ status: string }>,
     enabled: !!user,
     retry: false,
@@ -449,7 +355,7 @@ export function Panel() {
         </div>
 
         <div className="flex flex-col gap-2">
-          {orders.isLoading && <p className="text-sm text-slate-500">Cargando…</p>}
+          {orders.isLoading && <ListRowSkeleton count={6} />}
           {!orders.isLoading && filtered.length === 0 && (
             <div className="flex flex-col items-center gap-1 rounded-xl bg-slate-50 px-4 py-10 text-center">
               <span className="material-symbols-outlined text-5xl text-slate-300">inbox</span>

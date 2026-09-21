@@ -10,26 +10,14 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-// Sprint 1A: access token en memoria + persistencia local. El interceptor
-// lo inyecta y, ante 401, rota vía POST /auth/refresh una sola vez
-// (single-flight) y reintenta la petición original. Sin refresh válido,
-// limpia y avisa con el evento "auth:logout" (sin bucles).
-const TOKEN_KEY = "hub_access";
+// Sprint 4 (F4-02): access SOLO en memoria. Sin persistencia legible por JS:
+// un XSS ya no puede exfiltrar un token persistente. La sesión se rehidrata
+// en cada carga vía cookie httpOnly (POST /auth/refresh) gracias al
+// interceptor. Tokens viejos en localStorage quedan huérfanos e inertes.
 let accessToken: string | null = null;
-try {
-  accessToken = localStorage.getItem(TOKEN_KEY);
-} catch {
-  accessToken = null;
-}
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
-  try {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
-  } catch {
-    /* almacenamiento no disponible */
-  }
 }
 
 export function getAccessToken(): string | null {

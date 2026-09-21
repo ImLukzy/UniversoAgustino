@@ -8,12 +8,43 @@ import rateLimit from "express-rate-limit";
 import { env } from "./env.js";
 import { buildRouter, mountDocs } from "./app.js";
 import { errorHandler, notFound } from "./middleware/errors.js";
-import { uploadsDir } from "./modules/uploads/routes.js";
+import { serveUpload } from "./middleware/serveUploads.js";
 import { startJobs } from "./jobs/index.js";
 
 const app = express();
 app.disable("x-powered-by");
-app.use(helmet({ crossOriginResourcePolicy: false }));
+// Sprint 4 (F4-02): endurecimiento de cabeceras. CSP en modo report-only:
+// primero 48 h de observación (consola del navegador) y solo entonces
+// CSP_ENFORCE=true. No enforcing a ciegas: pdf.js (blob: workers),
+// Google Fonts y el HMR de Vite romperían en modo bloqueante sin la lista
+// exacta. crossOriginResourcePolicy se mantiene desactivado porque los
+// <img> y previews cargan /uploads desde otro origen en dev.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        workerSrc: ["'self'", "blob:"],
+        styleSrc: ["'self'", "https://fonts.googleapis.com"],
+        imgSrc: ["'self'", "data:", "blob:", "http://localhost:4000", "http://localhost:5173"],
+        connectSrc: ["'self'", "http://localhost:4000", "http://localhost:5173", "ws:", "wss:"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
+      reportOnly: process.env.CSP_ENFORCE !== "true",
+    },
+    crossOriginResourcePolicy: false,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  }),
+);
+app.use((_req, res, next) => {
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  next();
+});
 app.use(cors({ origin: env.WEB_ORIGIN, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
@@ -21,7 +52,9 @@ app.use(morgan("dev"));
 app.use(rateLimit({ windowMs: 60_000, max: 300 }));
 
 app.use(env.PREFIX, buildRouter());
-app.use("/uploads", express.static(uploadsDir));
+// Sprint 4 (F4-01): servicio controlado (cabeceras defensivas + UUID).
+// Reemplaza express.static directo sobre el directorio de subidas.
+app.get("/uploads/:name", serveUpload);
 mountDocs(app);
 app.use(notFound);
 app.use(errorHandler);

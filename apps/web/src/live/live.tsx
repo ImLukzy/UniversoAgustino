@@ -5,6 +5,7 @@ import { api, pen, type HubBazarItem, type HubDocument } from "../lib/api";
 import { careerColor, careerLabel, careerSoft } from "../data/unsa";
 import { careerContent } from "../data/careerContent";
 import { PagePreview } from "../components/PdfPreview";
+import { CardGridSkeleton } from "../components/Skeleton";
 import { useAuth } from "../auth/AuthContext";
 
 const PAGE_SIZE = 9;
@@ -69,7 +70,7 @@ export function LiveDocuments({ q, cycle, career, docType, accentColor, emptyHin
 
   return (
     <div>
-      {isLoading && <p className="font-body-md text-body-md text-on-surface-variant">Cargando recursos reales…</p>}
+      {isLoading && <CardGridSkeleton count={PAGE_SIZE} gridClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg" />}
       {isError && (
         <p className="font-body-md text-body-md text-on-surface-variant">
           No se pudo conectar con la API. <button className="underline font-semibold" onClick={() => refetch()}>Reintentar</button>
@@ -189,7 +190,7 @@ export function LiveBazarItems({ filter, q, accentColor }: { filter: string; q: 
 
   return (
     <div>
-      {isLoading && <p className="font-body-md text-body-md text-on-surface-variant">Cargando bazar real…</p>}
+      {isLoading && <CardGridSkeleton count={6} gridClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg" />}
       {isError && (
         <p className="font-body-md text-body-md text-on-surface-variant">
           No se pudo conectar con la API. <button className="underline font-semibold" onClick={() => refetch()}>Reintentar</button>
