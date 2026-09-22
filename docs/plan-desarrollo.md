@@ -676,9 +676,10 @@ actualizar §4 y los deltas de §3/§8-apéndice; al reactivar R2, actualizar §
 - **Baseline re-medido** (`docs/baseline-2026-09.md`, HEAD `982ab59`): tests 51, `any` 0,
   rutas 38/38, migraciones 10 dirs, warnings 13. Pendiente: queries sales/mine, migraciones
   aplicadas, huérfanos (requieren DB).
-- **Sesión paralela F4-04** (otra terminal, mismo equipo): implementa subset `text=` de
-  Material Symbols (~111 iconos) + test de paridad + Lighthouse Detalle antes/después.
-  Escribe en `docs/followup-f404.md`. No toca API/DB/baseline.
+- **F1-05 concurrencia (2026-09-22, PASS):** `scripts/f1-05-concurrency.mjs` — 50 `POST /orders`
+  simultáneos sobre el mismo item bazar VENTA → exactamente **1 éxito (201) + 49 rechazos
+  409 `NOT_AVAILABLE`**, 0 otros. Sin doble-venta (índice único parcial como árbitro).
+  Limpieza total incluida (pedido cancelado + item DELETE 200).
 - **Optimización p95 `/sales` (commit `dab9470`, verificado en vivo):** migración
   `sales_perf_indexes` 11/11 (`Order(itemId,createdAt↓)`, `Order(buyerId,status)`,
   `Document(authorId)`, `BazarItem(sellerId)`) + paginación keyset en `GET /sales`
