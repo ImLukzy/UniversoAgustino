@@ -6,7 +6,7 @@ Fecha: 2026-09-22 - bucle secuencial con fetch (N=25), API local :4000 contra Ne
 
 | Endpoint | n | min | p50 | p95 | max |
 |---|---|---|---|---|---|
-| `POST /api/v1/orders` | 25 | 950ms | 994ms | 1189ms | 1708ms |
-| `POST /api/v1/orders/:id/pay` | 25 | 755ms | 771ms | 856ms | 1236ms |
-| `GET /api/v1/orders/sales` | 25 | 567ms | 579ms | 1035ms | 1181ms |
-| `GET /api/v1/orders/mine` | 25 | 191ms | 193ms | 292ms | 383ms |
+| `POST /api/v1/orders` | 25 | 743ms | 754ms | 1034ms | 1299ms |
+| `POST /api/v1/orders/:id/pay` | 25 | 741ms | 749ms | 837ms | 855ms |
+| `GET /api/v1/orders/sales` | 25 | 555ms | 655ms | 1111ms | 1292ms |
+| `GET /api/v1/orders/mine` | 25 | 187ms | 195ms | 372ms | 376ms |

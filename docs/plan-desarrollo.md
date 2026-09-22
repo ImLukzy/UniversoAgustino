@@ -679,8 +679,15 @@ actualizar §4 y los deltas de §3/§8-apéndice; al reactivar R2, actualizar §
 - **Sesión paralela F4-04** (otra terminal, mismo equipo): implementa subset `text=` de
   Material Symbols (~111 iconos) + test de paridad + Lighthouse Detalle antes/después.
   Escribe en `docs/followup-f404.md`. No toca API/DB/baseline.
-- **Análisis p95 `/sales` (solo lectura):** 3 etapas secuenciales (2×findMany en paralelo →
-  orders IN + join buyer/escrow → groupBy) ≈ 3 RTT a São Paulo + sort sin índice
-  (`Order` no indexa `itemId`/`sellerId`/`buyerId`; `Document` no indexa `authorId`) +
-  `buyer.profile` JSON por fila + **sin paginación** (crece sin cota). Propuesta: P1 paginar,
-  P2 índices, P3 recortar select buyer, P4 tuning pooler. Sin código aún.
+- **Optimización p95 `/sales` (commit `dab9470`, verificado en vivo):** migración
+  `sales_perf_indexes` 11/11 (`Order(itemId,createdAt↓)`, `Order(buyerId,status)`,
+  `Document(authorId)`, `BazarItem(sellerId)`) + paginación keyset en `GET /sales`
+  (`?limit` 1–100, `?cursor`, responde `{data, nextCursor}`, 400 ante cursor inválido) +
+  `Ventas.tsx` con `useInfiniteQuery` y botón "Cargar más ventas". P3 descartado
+  (`buyer.profile` sí se usa: nombre/carrera). Paginación probada con 32 ventas reales.
+- **Optimización p95 `POST /orders` (commit tras re-medir 2026-09-22):** O1 audit+notify en
+  `Promise.all`, O4 `itemOwner` con select recortado, O5 sin re-fetch de bazar. Re-medición
+  N=25 misma metodología: orders p95 1189→**1034ms** (−13%), pay 856→**837ms** (−2%),
+  sales 1035→**1111ms** (+7%: más filas en dev + primera página de 50; pendiente re-medir
+  con cursor), mine 292→**372ms** (+80ms: el comprador tiene +25 pedidos; endpoint sin tocar).
+  tsc 0, eslint 0 errores, api 18/18, E2E base verde.

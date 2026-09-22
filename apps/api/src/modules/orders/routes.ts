@@ -13,9 +13,14 @@ const ACTIVE = ["PENDING", "ACCEPTED", "PAID", "ESCROW"] as const;
 
 // Dueño del ítem (para impedir auto-compra y autorizar al vendedor).
 // Devuelve también título y precio para el snapshot del pedido.
+// F0-c p95: select recortado (sin description/photos/fileUrl) + status/tx para
+// que el POST / de bazar no re-lea el ítem (ver O5 abajo).
 async function itemOwner(itemType: string, itemId: string) {
   if (itemType === "document") {
-    const d = await prisma.document.findUniqueOrThrow({ where: { id: itemId } });
+    const d = await prisma.document.findUniqueOrThrow({
+      where: { id: itemId },
+      select: { authorId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true },
+    });
     return {
       ownerId: d.authorId,
       title: d.title,
@@ -23,10 +28,15 @@ async function itemOwner(itemType: string, itemId: string) {
       payMethod: d.payMethod,
       payQrUrl: d.payQrUrl,
       payDetail: d.payDetail,
+      status: "PUBLISHED",
+      tx: "VENTA",
       releaseStatus: null as "SOLD" | "RENTED" | null,
     };
   }
-  const b = await prisma.bazarItem.findUniqueOrThrow({ where: { id: itemId } });
+  const b = await prisma.bazarItem.findUniqueOrThrow({
+    where: { id: itemId },
+    select: { sellerId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true, status: true, tx: true },
+  });
   return {
     ownerId: b.sellerId,
     title: b.title,
@@ -34,6 +44,8 @@ async function itemOwner(itemType: string, itemId: string) {
     payMethod: b.payMethod,
     payQrUrl: b.payQrUrl,
     payDetail: b.payDetail,
+    status: b.status,
+    tx: b.tx,
     releaseStatus: (b.tx === "ALQUILER" ? "RENTED" : "SOLD") as "SOLD" | "RENTED",
   };
 }
@@ -72,11 +84,11 @@ ordersRouter.post(
     let rentalStart: Date | undefined;
     let rentalEnd: Date | undefined;
     if (input.itemType === "bazar") {
-      const cur = await prisma.bazarItem.findUniqueOrThrow({ where: { id: input.itemId } });
-      if (cur.status !== "AVAILABLE") {
+      // O5: status/tx ya vienen de itemOwner (un solo read del ítem).
+      if (item.status !== "AVAILABLE") {
         return res.status(409).json({ error: { code: "NOT_AVAILABLE", message: "Este ítem ya está reservado o vendido" } });
       }
-      if (cur.tx === "ALQUILER") {
+      if (item.tx === "ALQUILER") {
         if (!input.rentalStart || !input.rentalEnd) {
           return res.status(400).json({ error: { code: "DATES_REQUIRED", message: "El alquiler requiere fecha de inicio y fin" } });
         }
@@ -122,14 +134,18 @@ ordersRouter.post(
         feeBps,
       },
     });
-    await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.created", entity: "order", entityId: order.id } });
-    await notify({
-      userId: item.ownerId,
-      type: "ORDER_CREATED",
-      title: "Nueva reserva en tu publicación",
-      body: `${item.title} — la reserva expira en ${RESERVATION_TTL_MINUTES} minutos.`,
-      link: orderLink(order.id),
-    });
+    // O1: audit + notify son independientes entre sí → en paralelo (ahorra 1 RTT
+    // a Neon por pedido; el p95 de POST /orders es RTT-bound, ver F0-c).
+    await Promise.all([
+      prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.created", entity: "order", entityId: order.id } }),
+      notify({
+        userId: item.ownerId,
+        type: "ORDER_CREATED",
+        title: "Nueva reserva en tu publicación",
+        body: `${item.title} — la reserva expira en ${RESERVATION_TTL_MINUTES} minutos.`,
+        link: orderLink(order.id),
+      }),
+    ]);
     res.status(201).json({ data: order });
   })
 );
