@@ -5,11 +5,16 @@ import fs from "node:fs";
 import crypto from "node:crypto";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth.js";
+import { limit } from "../../middleware/rateLimit.js";
 import { sanitizeFilename, sha256File, verifyUpload } from "../../lib/fileSignature.js";
 import { putObject, storageConfig, tmpDir } from "../../lib/storage.js";
 import { prisma } from "../../lib/prisma.js";
 
 export const uploadsRouter = Router();
+
+// Pre-despliegue: cada subida cuesta disco/R2 (hasta 25 MB). 30/hora por IP
+// frena el abuso sin afectar el uso normal (publicar usa 1-4 archivos).
+const uploadLimiter = limit({ windowMs: 60 * 60 * 1000, max: 30 });
 
 const MAX_MB = Number(process.env.MAX_UPLOAD_MB ?? 25);
 
@@ -40,6 +45,7 @@ const upload = multer({
 // registra en BD. Devuelve { url, name, size, mime }.
 uploadsRouter.post(
   "/",
+  uploadLimiter,
   requireAuth,
   upload.single("file"),
   asyncHandler(async (req: AuthedRequest, res) => {

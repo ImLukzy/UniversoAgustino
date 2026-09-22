@@ -700,3 +700,6 @@ actualizar §4 y los deltas de §3/§8-apéndice; al reactivar R2, actualizar §
 - **Rotación graceful JWT:** `lib/auth.ts` acepta `*_PREV` en ventana de gracia (solo
   errores de firma; expirados no resucitan) + `*_PREV` en `env.ts`. O1 aplicado también
   en `/pay` (audit+notify en paralelo). tsc+eslint+18 tests+E2E base verdes.
+- **Rate limit uploads (2026-09-22):** brecha del checklist cerrada — `POST /uploads`
+  con 30/hora por IP (cada subida cuesta disco/R2). Login 50/15min, global 300/min y
+  doble limiter de forgot ya existían y aplicados. Cadena verificada en vivo (201+302).
