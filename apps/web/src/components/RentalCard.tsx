@@ -4,6 +4,7 @@ import { careerLabel } from "../data/unsa";
 import { CareerAvatar } from "./CareerVisual";
 import { SaleActions } from "./SaleActions";
 import { getOrderLabel } from "../lib/orderLabels";
+import { motion } from "framer-motion";
 
 // Tarjeta de solicitud de alquiler (Sprint 2B). Extraída de Ventas.tsx sin
 // cambios visuales; usa el helper único de etiquetas y SaleActions.
@@ -18,7 +19,12 @@ export function RentalCard({ order }: { order: HubOrder }) {
     ? Math.max(1, Math.round((new Date(order.rentalEnd).getTime() - new Date(order.rentalStart).getTime()) / 86400000))
     : null;
   return (
-    <div className="flex flex-col justify-between gap-3 rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md">
+    <motion.div
+      className="flex flex-col justify-between gap-3 rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md"
+      whileHover={{ scale: 1.015, y: -2 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <CareerAvatar name={buyerName} className="h-12 w-12" />
@@ -79,6 +85,6 @@ export function RentalCard({ order }: { order: HubOrder }) {
         </div>
       )}
       <SaleActions order={order} accentColor={accent?.color ?? null} />
-    </div>
+    </motion.div>
   );
 }

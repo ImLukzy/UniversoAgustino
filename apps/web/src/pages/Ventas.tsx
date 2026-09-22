@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { api, apiError, fmtDate, pen, type HubOrder, type HubReport } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
@@ -178,7 +179,21 @@ export function Ventas() {
           </div>
         )}
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          {rentals.map((o) => <RentalCard key={o.id} order={o} />)}
+          {/* Enter/exit con spring al cambiar el filtro; el hover/tap lo
+              maneja el motion root de RentalCard (sin doble animación). */}
+          <AnimatePresence mode="popLayout" initial={false}>
+            {rentals.map((o) => (
+              <motion.div
+                key={o.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                <RentalCard order={o} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </section>
 

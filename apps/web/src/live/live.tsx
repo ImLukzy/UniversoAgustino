@@ -1,5 +1,6 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { api, pen, type HubBazarItem, type HubDocument } from "../lib/api";
 import { careerColor, careerLabel, careerSoft } from "../data/unsa";
@@ -92,58 +93,73 @@ export function LiveDocuments({ q, cycle, career, docType, accentColor, emptyHin
           )}
         </div>
       )}
+      {/* Craftsmanship: AnimatePresence + enter/exit con spring (stiffness 400,
+          damping 25). Sin prop `layout` a propósito: las imágenes lazy del
+          preview recalculan geometría y el layout-anim layout haría jank. */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
-        {rows.map((d) => (
-          <div key={d.id} className="bg-surface-container-lowest rounded-xl flex flex-col justify-between shadow-sm hover:shadow-md transition-all overflow-hidden">
-            <div className="relative h-44 overflow-hidden bg-surface-container">
-              {d.fileUrl ? (
-                <Suspense fallback={<div className="h-full w-full animate-pulse bg-slate-200" aria-hidden="true" />}>
-                  <PagePreview fileUrl={d.fileUrl} page={1} scale={0.7} careerImg={cc.imgQuote} title={d.title} imgClassName="h-full w-full object-cover object-top" />
-                </Suspense>
-              ) : (
-                <div className="flex h-full w-full items-center gap-space-sm p-space-md">
-                  <span className="material-symbols-outlined text-display" style={{ color: accent }}>description</span>
-                  <div className="flex flex-col gap-space-xxs">
-                    <span className="font-label-sm text-label-sm font-bold" style={{ color: accent }}>UNSA · {d.career ? careerLabel(d.career) : "General"}</span>
-                    <span className="font-body-sm text-body-sm text-on-surface-variant">{d.type} · Ciclo {d.cycle}</span>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {rows.map((d) => (
+            <motion.article
+              key={d.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              whileHover={{ scale: 1.015, y: -2 }}
+              whileTap={{ scale: 0.985 }}
+              className="bg-surface-container-lowest rounded-xl flex flex-col justify-between border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow overflow-hidden group"
+              style={{ "--card-accent": accent } as CSSProperties}
+            >
+              <div className="relative h-44 overflow-hidden bg-surface-container">
+                {d.fileUrl ? (
+                  <Suspense fallback={<div className="h-full w-full animate-pulse bg-slate-200" aria-hidden="true" />}>
+                    <PagePreview fileUrl={d.fileUrl} page={1} scale={0.7} careerImg={cc.imgQuote} title={d.title} imgClassName="h-full w-full object-cover object-top" />
+                  </Suspense>
+                ) : (
+                  <div className="flex h-full w-full items-center gap-space-sm p-space-md">
+                    <span className="material-symbols-outlined text-display" style={{ color: accent }}>description</span>
+                    <div className="flex flex-col gap-space-xxs">
+                      <span className="font-label-sm text-label-sm font-bold" style={{ color: accent }}>UNSA · {d.career ? careerLabel(d.career) : "General"}</span>
+                      <span className="font-body-sm text-body-sm text-on-surface-variant">{d.type} · Ciclo {d.cycle}</span>
+                    </div>
                   </div>
-                </div>
-              )}
-              <span className="absolute bottom-2 right-2 px-space-sm py-space-xxs text-white rounded-lg font-price-tag text-price-tag shadow" style={{ backgroundColor: accent }}>{pen(d.priceCents)}</span>
-            </div>
-            <div className="flex flex-col gap-space-sm p-space-md">
-              <div className="flex flex-wrap gap-space-xxs">
-                <span className="px-space-xs py-space-xxs bg-surface-container-lowest/95 rounded-full font-label-sm text-label-sm font-bold" style={{ color: accent }}>UNSA</span>
-                {d.career && (
-                  <span
-                    className="px-space-xs py-space-xxs rounded-full font-label-sm text-label-sm font-semibold"
-                    style={{ backgroundColor: careerSoft(d.career), color: careerColor(d.career) }}
-                  >
-                    {careerLabel(d.career)}
-                  </span>
                 )}
-                <span className="px-space-xs py-space-xxs bg-tertiary text-on-tertiary rounded-full font-label-sm text-label-sm font-semibold">{d.type}</span>
+                <span className="absolute bottom-2 right-2 px-space-sm py-space-xxs text-white rounded-lg font-price-tag text-price-tag shadow" style={{ backgroundColor: accent }}>{pen(d.priceCents)}</span>
               </div>
-              <h3 className="font-title-lg text-title-lg text-on-surface font-bold line-clamp-2 leading-snug">{d.title}</h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
-                {d.course} · Ciclo {d.cycle}
-                {d.author?.profile?.fullName ? ` · ${d.author.profile.fullName}` : ""}
-              </p>
-              {d.description && <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">{d.description}</p>}
-            </div>
-            <div className="flex flex-col gap-space-xs p-space-md pt-0">
-              <button
-                onClick={() => goDetail("document", d.id)}
-                className="px-space-sm py-space-xs rounded-lg text-white font-label-md text-label-md font-bold transition-colors flex items-center justify-center gap-space-xxs shadow-sm"
-                style={{ backgroundColor: accent }}
-              >
-                <span className="material-symbols-outlined text-title-sm">visibility</span>
-                {user ? "Ver detalle" : "Entrar y ver detalle"}
-              </button>
-              <span className="text-[10px] text-center text-outline">Compra en custodia: se libera al confirmar recepción</span>
-            </div>
-          </div>
-        ))}
+              <div className="flex flex-col gap-space-sm p-space-md">
+                <div className="flex flex-wrap items-center gap-space-xxs">
+                  <span className="px-space-xs py-space-xxs bg-surface-container-lowest/95 rounded-full font-label-sm text-label-sm font-bold" style={{ color: accent }}>UNSA</span>
+                  {d.career && (
+                    <span
+                      className="px-space-xs py-space-xxs rounded-full font-label-sm text-label-sm font-semibold"
+                      style={{ backgroundColor: careerSoft(d.career), color: careerColor(d.career) }}
+                    >
+                      {careerLabel(d.career)}
+                    </span>
+                  )}
+                  <span className="px-space-xs py-space-xxs bg-tertiary text-on-tertiary rounded-full font-label-sm text-label-sm font-semibold">{d.type}</span>
+                </div>
+                <h3 className="font-title-lg text-title-lg text-on-surface font-bold line-clamp-2 leading-snug transition-colors group-hover:text-[var(--card-accent)]">{d.title}</h3>
+                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                  {d.course} · Ciclo {d.cycle}
+                  {d.author?.profile?.fullName ? ` · ${d.author.profile.fullName}` : ""}
+                </p>
+                {d.description && <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">{d.description}</p>}
+              </div>
+              <div className="flex flex-col gap-space-xs p-space-md pt-0">
+                <button
+                  onClick={() => goDetail("document", d.id)}
+                  className="px-space-sm py-space-xs rounded-lg text-white font-label-md text-label-md font-bold transition-colors flex items-center justify-center gap-space-xxs shadow-sm"
+                  style={{ backgroundColor: accent }}
+                >
+                  <span className="material-symbols-outlined text-title-sm">visibility</span>
+                  {user ? "Ver detalle" : "Entrar y ver detalle"}
+                </button>
+                <span className="text-[10px] text-center text-outline">Compra en custodia: se libera al confirmar recepción</span>
+              </div>
+            </motion.article>
+          ))}
+        </AnimatePresence>
       </div>
       {data && total > 0 && (
         <div className="mt-space-xl flex flex-col sm:flex-row items-center justify-between gap-space-md p-space-md bg-surface-container-lowest rounded-xl shadow-sm">
@@ -215,43 +231,55 @@ export function LiveBazarItems({ filter, q, accentColor }: { filter: string; q: 
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
-        {rows.map((b) => (
-          <article key={b.id} className="flex flex-col rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group">
-            {b.photos?.[0] && (
-              <div className="relative">
-                <img src={b.photos[0]} alt={b.title} loading="lazy" className="h-44 w-full object-cover" />
-                {(b.photos?.length ?? 0) > 1 && (
-                  <span className="absolute bottom-2 right-2 rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-bold text-white">
-                    +{(b.photos?.length ?? 1) - 1} fotos
-                  </span>
-                )}
-              </div>
-            )}
-            <div className="p-space-lg flex flex-col flex-1 justify-between">
-              <div>
-                <div className="flex flex-wrap items-center gap-space-xs mb-space-xs">
-                  <span className="px-space-sm py-space-xxs rounded-full bg-surface-container-lowest/90 font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">{b.kind}</span>
-                  <span className="px-space-sm py-space-xxs rounded-full bg-tertiary text-on-tertiary font-label-sm text-label-sm shadow-sm">{b.tx}</span>
-                  <span className="px-space-sm py-space-xxs rounded-full bg-surface-container font-label-sm text-label-sm text-on-surface-variant">{b.status}</span>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {rows.map((b) => (
+            <motion.article
+              key={b.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              whileHover={{ scale: 1.015, y: -2 }}
+              whileTap={{ scale: 0.985 }}
+              className="flex flex-col rounded-xl bg-surface-container-lowest border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow overflow-hidden group"
+              style={{ "--card-accent": accentColor ?? "rgb(var(--hub-p, 0 104 95))" } as CSSProperties}
+            >
+              {b.photos?.[0] && (
+                <div className="relative">
+                  <img src={b.photos[0]} alt={b.title} loading="lazy" className="h-44 w-full object-cover" />
+                  {(b.photos?.length ?? 0) > 1 && (
+                    <span className="absolute bottom-2 right-2 rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-bold text-white">
+                      +{(b.photos?.length ?? 1) - 1} fotos
+                    </span>
+                  )}
                 </div>
-                <h3 className="font-title-lg text-title-lg text-on-surface group-hover:text-primary transition-colors leading-snug">{b.title}</h3>
-                {b.description && <p className="mt-space-xs font-body-sm text-body-sm text-on-surface-variant line-clamp-2">{b.description}</p>}
-              </div>
-              <div className="mt-space-md pt-space-md bg-surface-container-low -mx-space-lg -mb-space-lg p-space-lg rounded-b-xl flex flex-col gap-space-sm">
-                <div className="flex items-center justify-between">
-                  <span className="px-space-sm py-space-xxs bg-primary text-on-primary rounded-lg font-price-tag text-price-tag shadow" style={accentBg}>{pen(b.priceCents)}</span>
-                  {b.depositCents ? <span className="font-label-sm text-label-sm text-on-surface-variant">Garantía {pen(b.depositCents)}</span> : null}
+              )}
+              <div className="p-space-lg flex flex-col flex-1 justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center gap-space-xs mb-space-xs">
+                    <span className="px-space-sm py-space-xxs rounded-full bg-surface-container-lowest/90 font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">{b.kind}</span>
+                    <span className="px-space-sm py-space-xxs rounded-full bg-tertiary text-on-tertiary font-label-sm text-label-sm shadow-sm">{b.tx}</span>
+                    <span className="px-space-sm py-space-xxs rounded-full bg-surface-container font-label-sm text-label-sm text-on-surface-variant">{b.status}</span>
+                  </div>
+                  <h3 className="font-title-lg text-title-lg text-on-surface transition-colors group-hover:text-[var(--card-accent)] leading-snug">{b.title}</h3>
+                  {b.description && <p className="mt-space-xs font-body-sm text-body-sm text-on-surface-variant line-clamp-2">{b.description}</p>}
                 </div>
-                <button
-                  onClick={() => goDetail("bazar", b.id)}
-                  className="px-space-sm py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-primary-container transition-colors shadow-sm disabled:opacity-60" style={accentBg}
-                >
-                  {user ? "Ver y reservar" : "Entrar y reservar"}
-                </button>
+                <div className="mt-space-md pt-space-md bg-surface-container-low -mx-space-lg -mb-space-lg p-space-lg rounded-b-xl flex flex-col gap-space-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="px-space-sm py-space-xxs bg-primary text-on-primary rounded-lg font-price-tag text-price-tag shadow" style={accentBg}>{pen(b.priceCents)}</span>
+                    {b.depositCents ? <span className="font-label-sm text-label-sm text-on-surface-variant">Garantía {pen(b.depositCents)}</span> : null}
+                  </div>
+                  <button
+                    onClick={() => goDetail("bazar", b.id)}
+                    className="px-space-sm py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-primary-container transition-colors shadow-sm disabled:opacity-60" style={accentBg}
+                  >
+                    {user ? "Ver y reservar" : "Entrar y reservar"}
+                  </button>
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
+            </motion.article>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );
