@@ -1,5 +1,6 @@
 import path from "node:path";
 import fs from "node:fs";
+import { Readable } from "node:stream";
 import { prisma } from "../lib/prisma.js";
 import { asyncHandler } from "./errors.js";
 import { getServeUrl, hasObject, storageConfig } from "../lib/storage.js";
@@ -51,6 +52,30 @@ export const serveUpload = asyncHandler(async (req, res) => {
       return res.status(404).json({ error: { code: "NOT_FOUND", message: "Archivo no encontrado" } });
     }
     const url = await getServeUrl(name, mime, original, inline);
+    // ?stream=1: transmite los bytes por la API (mismo origen efectivo para
+    // la web). Lo usa el Visor PDF: evita por completo el fetch cross-origen
+    // a R2 (CORS del bucket, preflights de Range, bloqueadores y firmas
+    // cacheadas dejan de importar). El Range del cliente se reenvía a R2.
+    if (req.query.stream === "1") {
+      if (!url) {
+        return res.status(502).json({ error: { code: "STORAGE_UPSTREAM", message: "No se pudo leer el archivo" } });
+      }
+      const range = req.headers.range;
+      const upstream = await fetch(url, { headers: range ? { Range: range } : {} });
+      if (!upstream.ok && upstream.status !== 206) {
+        return res.status(502).json({ error: { code: "STORAGE_UPSTREAM", message: "No se pudo leer el archivo" } });
+      }
+      res.status(upstream.status === 206 ? 206 : 200);
+      for (const h of ["content-type", "content-range", "accept-ranges", "content-length"] as const) {
+        const v = upstream.headers.get(h);
+        if (v) res.setHeader(h === "content-type" ? "Content-Type" : h.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("-"), v);
+      }
+      res.setHeader("Content-Disposition", `${inline ? "inline" : "attachment"}; filename="${rfc5987(original)}"`);
+      // Bytes inmutables por storedName (UUID): cacheables sin riesgo.
+      res.setHeader("Cache-Control", "private, max-age=86400");
+      if (!upstream.body) return res.end();
+      return Readable.fromWeb(upstream.body as unknown as Parameters<typeof Readable.fromWeb>[0]).pipe(res);
+    }
     // La Location lleva una firma de 15 min: NUNCA cachear este 302.
     // (Un 302 cacheado reutiliza una firma expirada → R2 responde 403 sin
     // cabeceras CORS y el navegador lo reporta como "CORS error".)

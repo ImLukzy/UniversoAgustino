@@ -5,17 +5,21 @@ import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
 // Renderiza UNA página real del PDF en canvas. Si falla, muestra el respaldo.
+// Los bytes viajan por la API (?stream=1, mismo origen efectivo) en lugar
+// de un fetch directo a R2: así no dependen del CORS del bucket, de
+// preflights ni de bloqueadores del navegador.
 export function PdfPage({ url, page, fallback, scale = 1.5 }: { url: string; page: number; fallback?: ReactNode; scale?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const streamUrl = url.includes("?") ? `${url}&stream=1` : `${url}?stream=1`;
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setFailed(false);
     void (async () => {
-      const task = pdfjsLib.getDocument({ url, withCredentials: false });
+      const task = pdfjsLib.getDocument({ url: streamUrl, withCredentials: false });
       try {
         const doc = await task.promise;
         if (cancelled) {
@@ -61,7 +65,7 @@ export function PdfPage({ url, page, fallback, scale = 1.5 }: { url: string; pag
     return () => {
       cancelled = true;
     };
-  }, [url, page, scale]);
+  }, [url, streamUrl, page, scale]);
 
   if (failed) return <>{fallback ?? null}</>;
   return (

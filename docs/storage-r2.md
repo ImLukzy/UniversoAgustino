@@ -51,6 +51,10 @@ CORS). Cloudflare Dashboard → R2 → `ua-uploads` → **Settings → CORS Poli
 ]
 ```
 - `Range` es lo que pdf.js usa para traer solo las páginas 1–2.
+- El Visor PDF no depende del CORS: `PdfPage` pide `?stream=1` y la API
+  transmite los bytes (reenvía el `Range` a R2). Así el fetch es al origen de
+  la API — inmune a bloqueadores y firmas cacheadas. El 302 directo sigue
+  para `<img>` y descargas.
 - Al desplegar a producción, **agrega el dominio real** a `AllowedOrigins`.
 - Verificación: abre el Visor de un PDF y debe renderizar la página real;
   o `curl -sI -H "Origin: http://localhost:5173" <url-prefirmada>` debe traer
