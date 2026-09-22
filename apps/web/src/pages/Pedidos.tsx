@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { api, apiError, fmtDate, pen, type HubOrder } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
@@ -37,9 +38,22 @@ function PedidoRow({ order }: { order: HubOrder }) {
           <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-600">
             {isDoc ? (order.status === "RELEASED" ? "Digital" : "Apunte") : "Bazar"}
           </span>
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary" style={accent ? { color: accent.color } : undefined}>
-            {getOrderLabel(order.status, "buyer", order.cancelledReason)}
-          </span>
+          {/* Badge de custodia: escala+opacidad al cambiar PENDING→PAID→ESCROW.
+              La key por estado re-dispara enter/exit cuando el refetch trae
+              el nuevo estado (sin saltos). */}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={order.status}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary"
+              style={accent ? { color: accent.color } : undefined}
+            >
+              {getOrderLabel(order.status, "buyer", order.cancelledReason)}
+            </motion.span>
+          </AnimatePresence>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-slate-500">Total:</span>
@@ -69,14 +83,23 @@ function PedidoRow({ order }: { order: HubOrder }) {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2">
-        <span className="text-xs text-slate-500">
-          {order.status === "ESCROW" && "No liberes el pago hasta verificar tu pedido."}
-          {order.status === "PENDING" && (order.rentalStart ? "Esperando que el vendedor acepte tu alquiler." : "Paga al vendedor para continuar.")}
-          {order.status === "ACCEPTED" && "Solicitud aceptada. Ya puedes pagar."}
-          {order.status === "PAID" && "El vendedor debe confirmar tu pago."}
-          {order.status === "RELEASED" && "Pedido completado."}
-          {order.status === "CANCELLED" && getOrderLabel(order.status, "buyer", order.cancelledReason)}
-        </span>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={order.status}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-xs text-slate-500"
+          >
+            {order.status === "ESCROW" && "No liberes el pago hasta verificar tu pedido."}
+            {order.status === "PENDING" && (order.rentalStart ? "Esperando que el vendedor acepte tu alquiler." : "Paga al vendedor para continuar.")}
+            {order.status === "ACCEPTED" && "Solicitud aceptada. Ya puedes pagar."}
+            {order.status === "PAID" && "El vendedor debe confirmar tu pago."}
+            {order.status === "RELEASED" && "Pedido completado."}
+            {order.status === "CANCELLED" && getOrderLabel(order.status, "buyer", order.cancelledReason)}
+          </motion.span>
+        </AnimatePresence>
         <div className="flex items-center gap-1.5">
           {(order.status === "PENDING" || order.status === "ACCEPTED") && (
             <>
@@ -94,9 +117,16 @@ function PedidoRow({ order }: { order: HubOrder }) {
             </Link>
           )}
           {order.status === "ESCROW" && (
-            <button disabled={busy} onClick={() => mutate(`/orders/${order.id}/confirm-receipt`)} className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110 disabled:opacity-50" style={accent ? { backgroundColor: accent.color } : undefined}>
+            <motion.button
+              disabled={busy}
+              onClick={() => mutate(`/orders/${order.id}/confirm-receipt`)}
+              className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110 disabled:opacity-50"
+              style={accent ? { backgroundColor: accent.color } : undefined}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
               Confirmar recepción
-            </button>
+            </motion.button>
           )}
           {order.status === "RELEASED" && isDoc && order.fileUrl ? (
             <a href={order.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110">

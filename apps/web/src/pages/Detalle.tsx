@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
+import { computePrice } from "@hub/shared";
 import { api, apiError, pen, resolveQr, type HubBazarItem, type HubDocument } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { careerLabel } from "../data/unsa";
+import { useCareerTheme } from "../live/careerTheme";
+import { careerColor, careerLabel, careerSoft } from "../data/unsa";
 import { CareerAvatar, CareerVisual } from "../components/CareerVisual";
 
 const PAY_LABEL: Record<string, string> = { YAPE: "Yape", PLIN: "Plin", AMBAS: "Yape y Plin" };
@@ -30,6 +33,8 @@ export function Detalle() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [photo, setPhoto] = useState(0);
+  const [showFee, setShowFee] = useState(false);
+  const { accent: themeAccent } = useCareerTheme();
   const kind = type === "bazar" ? "bazar" : "document";
 
   const doc = useQuery({
@@ -56,6 +61,13 @@ export function Detalle() {
   const available =
     kind === "document" ? !!doc.data : item.data?.status === "AVAILABLE";
   const isRental = kind === "bazar" && item.data?.tx === "ALQUILER";
+  // Accent: tema de carrera activo; si no hay filtro, identidad de la
+  // carrera del documento. Desglose con computePrice (misma función que la
+  // API): net + fee = amount, tasa fija 13%.
+  const accentColor = themeAccent?.color ?? (career ? careerColor(career) : null);
+  const accentStyle = accentColor ? { color: accentColor } : undefined;
+  const accentBg = accentColor ? { backgroundColor: accentColor } : undefined;
+  const quote = computePrice(price ?? 0, 13);
   const [rentalStart, setRentalStart] = useState("");
   const [rentalEnd, setRentalEnd] = useState("");
 
@@ -115,14 +127,27 @@ export function Detalle() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl space-y-4 px-4 py-8">
+    // Entrada: fadeIn + slideUp 10px con ease-out (desacelera al entrar).
+    <motion.main
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="mx-auto max-w-6xl space-y-4 px-4 py-8"
+    >
       <Link to={kind === "document" ? "/" : "/bazar"} className="inline-flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-slate-800">
         <span className="material-symbols-outlined text-base">arrow_back</span>
         Volver a {kind === "document" ? "explorar" : "bazar"}
       </Link>
 
       <div className="flex flex-wrap items-center gap-2">
-        {career && <span className="badge-uni">{careerLabel(career)}</span>}
+        {career && (
+          <span
+            className="badge-uni"
+            style={{ backgroundColor: careerSoft(career), color: careerColor(career) }}
+          >
+            {careerLabel(career)}
+          </span>
+        )}
         <span className="badge-uni">{kind === "document" ? doc.data!.type : `${item.data!.kind} · ${item.data!.tx}`}</span>
         {kind === "bazar" && <span className="badge-uni">{item.data!.status}</span>}
         <span className="badge-uni">{kind === "bazar" && photos.length > 0 ? `${photos.length} foto${photos.length > 1 ? "s" : ""} del producto` : "Vista previa protegida"}</span>
@@ -137,8 +162,8 @@ export function Detalle() {
                 <img src={photos[Math.min(photo, photos.length - 1)]} alt={title} className="h-80 w-full object-cover" />
                 {photos.length > 1 && (
                   <div className="flex gap-2 overflow-x-auto border-t border-slate-100 p-3">
-                    {photos.map((u, i) => (
-                      <button key={`${u}-${i}`} type="button" onClick={() => setPhoto(i)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 ${i === Math.min(photo, photos.length - 1) ? "border-primary" : "border-transparent"}`}>
+                      {photos.map((u, i) => (
+                        <button key={`${u}-${i}`} type="button" onClick={() => setPhoto(i)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 ${i === Math.min(photo, photos.length - 1) ? "border-primary" : "border-transparent"}`} style={i === Math.min(photo, photos.length - 1) && accentColor ? { borderColor: accentColor } : undefined}>
                         <img src={u} alt={`Foto ${i + 1} de ${title}`} loading="lazy" className="h-full w-full object-cover" />
                       </button>
                     ))}
@@ -158,9 +183,17 @@ export function Detalle() {
                     <span className="material-symbols-outlined text-3xl text-slate-300">lock</span>
                     <p className="font-bold">Contenido completo bloqueado</p>
                     <p className="text-sm text-slate-500">El archivo y los datos de entrega se desbloquean al comprar por {pen(price ?? 0)}.</p>
-                    <button disabled={!available || busy} onClick={buy} className="btn-primary text-sm disabled:opacity-50">
+                    <motion.button
+                      disabled={!available || busy}
+                      onClick={buy}
+                      className="btn-primary text-sm disabled:opacity-50"
+                      style={accentBg}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
                       Desbloquear por {pen(price ?? 0)}
-                    </button>
+                    </motion.button>
                   </div>
                 )}
               </>
@@ -209,7 +242,39 @@ export function Detalle() {
               <span className="material-symbols-outlined text-base">verified</span>
               Vendedor verificado UNSA
             </p>
-            <p className="font-display text-3xl font-extrabold text-primary">{pen(price ?? 0)}</p>
+            <div className="rounded-xl border border-slate-200/80 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Precio total</span>
+                <button
+                  type="button"
+                  onClick={() => setShowFee((v) => !v)}
+                  aria-expanded={showFee}
+                  className="flex items-center gap-0.5 text-[11px] font-bold text-slate-500 hover:text-slate-800"
+                >
+                  <span className="material-symbols-outlined text-sm">info</span>
+                  Comisión 13%
+                </button>
+              </div>
+              <p className="font-display text-3xl font-extrabold text-primary" style={accentStyle}>{pen(price ?? 0)}</p>
+              <AnimatePresence initial={false}>
+                {showFee && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="overflow-hidden"
+                  >
+                    <dl className="mt-2 space-y-1 border-t border-slate-200/80 pt-2 text-xs">
+                      <div className="flex items-baseline justify-between"><dt className="text-slate-500">Precio de venta</dt><dd className="font-bold">{pen(quote.amountCents)}</dd></div>
+                      <div className="flex items-baseline justify-between"><dt className="text-slate-500">Comisión plataforma (13%)</dt><dd className="font-semibold text-red-600">−{pen(quote.feeCents)}</dd></div>
+                      <div className="flex items-baseline justify-between"><dt className="text-slate-500">Neto para el vendedor</dt><dd className="font-extrabold text-emerald-700">+{pen(quote.netCents)}</dd></div>
+                    </dl>
+                    <p className="mt-1 text-[11px] text-slate-500">Tasa fija: neto + comisión = precio. Se liquida solo al liberar la custodia.</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             <p className="text-xs text-slate-500">Precio final. La comisión de custodia se calcula al confirmar.</p>
             <div className="rounded-xl bg-slate-50 p-3 text-sm space-y-2">
               <p className="font-bold">Cobro por {PAY_LABEL[payMethod ?? "YAPE"]}</p>
@@ -234,9 +299,17 @@ export function Detalle() {
               </div>
             )}
             {err && <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{err}</p>}
-            <button disabled={!available || busy} onClick={buy} className="btn-primary w-full disabled:opacity-50">
+            <motion.button
+              disabled={!available || busy}
+              onClick={buy}
+              className="btn-primary w-full disabled:opacity-50"
+              style={accentBg}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
               {!available ? "No disponible" : busy ? "Creando pedido…" : user ? (isRental ? "Solicitar alquiler" : "Comprar ahora") : "Entrar y comprar"}
-            </button>
+            </motion.button>
             <p className="text-center text-xs text-slate-500">Compra en custodia: pagas al vendedor y se libera al confirmar recepción.</p>
           </div>
 
@@ -248,6 +321,6 @@ export function Detalle() {
           </div>
         </div>
       </div>
-    </main>
+    </motion.main>
   );
 }
