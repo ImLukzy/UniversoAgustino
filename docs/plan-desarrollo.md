@@ -665,3 +665,22 @@ npm run prisma:seed -w apps/api
 
 *Fin del plan. Última actualización: 2026-09-22, HEAD `b24147d`. Al avanzar la Fase 0,
 actualizar §4 y los deltas de §3/§8-apéndice; al reactivar R2, actualizar §6 y §5.4.*
+
+## Anexo 2026-09-22 — Fase 0 medida + trabajo en paralelo
+
+- **Otro equipo (commit `982ab59`, ya en main):** axe 82→0 violaciones (contraste: 4 acentos
+  oscurecidos, slate global, pulse/grayscale), Lighthouse a11y 100/100/100/100 (Perf 83–100;
+  Material Symbols 3.9 MB = 91% del peso, LCP Detalle 23s frío → follow-up F4-04), p95
+  N=25 en Neon dev: orders 1189ms, pay 856ms, sales 1035ms, mine 292ms. Reportes:
+  `docs/auditoria-axe.md`, `auditoria-lighthouse.md`, `medicion-p95.md` + scripts `f0-*`.
+- **Baseline re-medido** (`docs/baseline-2026-09.md`, HEAD `982ab59`): tests 51, `any` 0,
+  rutas 38/38, migraciones 10 dirs, warnings 13. Pendiente: queries sales/mine, migraciones
+  aplicadas, huérfanos (requieren DB).
+- **Sesión paralela F4-04** (otra terminal, mismo equipo): implementa subset `text=` de
+  Material Symbols (~111 iconos) + test de paridad + Lighthouse Detalle antes/después.
+  Escribe en `docs/followup-f404.md`. No toca API/DB/baseline.
+- **Análisis p95 `/sales` (solo lectura):** 3 etapas secuenciales (2×findMany en paralelo →
+  orders IN + join buyer/escrow → groupBy) ≈ 3 RTT a São Paulo + sort sin índice
+  (`Order` no indexa `itemId`/`sellerId`/`buyerId`; `Document` no indexa `authorId`) +
+  `buyer.profile` JSON por fila + **sin paginación** (crece sin cota). Propuesta: P1 paginar,
+  P2 índices, P3 recortar select buyer, P4 tuning pooler. Sin código aún.
