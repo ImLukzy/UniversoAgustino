@@ -51,7 +51,10 @@ export const serveUpload = asyncHandler(async (req, res) => {
       return res.status(404).json({ error: { code: "NOT_FOUND", message: "Archivo no encontrado" } });
     }
     const url = await getServeUrl(name, mime, original, inline);
-    res.setHeader("Cache-Control", "private, max-age=900");
+    // La Location lleva una firma de 15 min: NUNCA cachear este 302.
+    // (Un 302 cacheado reutiliza una firma expirada → R2 responde 403 sin
+    // cabeceras CORS y el navegador lo reporta como "CORS error".)
+    res.setHeader("Cache-Control", "private, no-store, max-age=0");
     return res.redirect(url ?? "/");
   }
 
