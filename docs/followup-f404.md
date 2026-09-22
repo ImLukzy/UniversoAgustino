@@ -41,7 +41,18 @@ creado y cancelado (`BUYER_CANCELLED`) tras medir — sin residuos.
   cantar victoria en Performance. **Gate: NO commiteado por decisión del Tech Lead —
   pendiente tu confirmación.**
 
-## Notas operativas de la medición
+## Parte 2 — el LCP no era la fuente (2026-09-22, sin commit)
+
+- Descomposición con Performance API: TTFB 18ms, DOM 371ms, API 386ms, CSS 329ms —
+  red sana. Pero el chunk Detalle traía `import"./vendor-pdf-*.js"` estático: **pdfjs
+  (471 KB raw / 144 KB gzip) se descargaba y parseaba en cada visita a Detalle sin
+  renderizar ningún PDF** (0 usos en el chunk; `PagePreview` solo vive en `live.tsx:97`
+  y `Visor.tsx`).
+- Fix (1 archivo, `apps/web/src/live/live.tsx`): `PagePreview` → `React.lazy` +
+  `Suspense` con skeleton. Tras rebuild, el chunk Detalle tiene **0 refs a vendor-pdf**.
+- Medición Detalle desktop post-fix: **perf 91, a11y 100, LCP 2810ms, FCP 2810ms, TBT 0**
+  (antes: 79–85, LCP 3356–4326). Gate Fase 0 (≥85) superado de forma estable en este equipo.
+- tsc 0, eslint 0. Falta: commit de `live.tsx` + esta sección.
 
 - `scripts/f0-lighthouse.mjs` falla desde la 2da página en este entorno (navegador CDP
   compartido → `INVALID_URL`); además su login vía UI falla si `WEB_ORIGIN` no incluye `:4173`

@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, pen, type HubBazarItem, type HubDocument } from "../lib/api";
 import { careerColor, careerLabel, careerSoft } from "../data/unsa";
 import { careerContent } from "../data/careerContent";
-import { PagePreview } from "../components/PdfPreview";
+// F4-04 p2: PagePreview arrastra pdfjs-dist (471 KB). Lazy para que el parseo
+// solo ocurra cuando una tarjeta con preview realmente se renderiza, no en
+// cada página que importa este módulo (/, /bazar y —por el grafo— /p/*).
+const PagePreview = lazy(() => import("../components/PdfPreview").then((m) => ({ default: m.PagePreview })));
 import { CardGridSkeleton } from "../components/Skeleton";
 import { useAuth } from "../auth/AuthContext";
 
@@ -94,7 +97,9 @@ export function LiveDocuments({ q, cycle, career, docType, accentColor, emptyHin
           <div key={d.id} className="bg-surface-container-lowest rounded-xl flex flex-col justify-between shadow-sm hover:shadow-md transition-all overflow-hidden">
             <div className="relative h-44 overflow-hidden bg-surface-container">
               {d.fileUrl ? (
-                <PagePreview fileUrl={d.fileUrl} page={1} scale={0.7} careerImg={cc.imgQuote} title={d.title} imgClassName="h-full w-full object-cover object-top" />
+                <Suspense fallback={<div className="h-full w-full animate-pulse bg-slate-200" aria-hidden="true" />}>
+                  <PagePreview fileUrl={d.fileUrl} page={1} scale={0.7} careerImg={cc.imgQuote} title={d.title} imgClassName="h-full w-full object-cover object-top" />
+                </Suspense>
               ) : (
                 <div className="flex h-full w-full items-center gap-space-sm p-space-md">
                   <span className="material-symbols-outlined text-display" style={{ color: accent }}>description</span>
