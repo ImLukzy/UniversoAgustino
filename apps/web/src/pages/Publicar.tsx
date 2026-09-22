@@ -470,7 +470,7 @@ export function Publicar() {
               <>
                 <div className="flex flex-col gap-1">
                   <span className="text-sm font-semibold">Fotos del producto (máx 4, se muestran tal cual, sin marcas)</span>
-                  <PhotoManager value={photos} onChange={setPhotos} />
+                  <PhotoManager value={photos} onChange={setPhotos} accentColor={selColor} />
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <label className="flex flex-col gap-1 text-sm font-semibold">

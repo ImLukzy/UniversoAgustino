@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, apiError, pen, resolveQr, uploadFile, type HubBazarItem, type HubDocument, type HubOrder, type PayMethod } from "../lib/api";
@@ -13,6 +13,16 @@ import { SaleActions } from "../components/SaleActions";
 import { getOrderLabel } from "../lib/orderLabels";
 
 const PAY_LABEL: Record<string, string> = { YAPE: "Yape", PLIN: "Plin", AMBAS: "Yape y Plin" };
+
+// Estados visibles del bazar (BazarStatus del backend): etiqueta en español
+// y color propio por estado. Sin inventos: AVAILABLE=Disponible,
+// RESERVED=En custodia, SOLD=Vendido, RENTED=Alquilado.
+const BAZAR_STATUS: Record<string, { label: string; cls: string; dot: string }> = {
+  AVAILABLE: { label: "Disponible", cls: "bg-emerald-50 text-emerald-800", dot: "bg-emerald-600" },
+  RESERVED: { label: "En custodia", cls: "bg-amber-50 text-amber-800", dot: "bg-amber-500" },
+  SOLD: { label: "Vendido", cls: "bg-slate-200 text-slate-700", dot: "bg-slate-500" },
+  RENTED: { label: "Alquilado", cls: "bg-indigo-50 text-indigo-800", dot: "bg-indigo-600" },
+};
 
 type QrInfo = { title: string; price: string; method: string; qr: string | null; detail: string };
 
@@ -151,7 +161,7 @@ function EditDoc({ doc, liveOrders, onDone }: { doc: HubDocument; liveOrders: nu
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3">
+    <div className="flex flex-col gap-2 rounded-xl border border-slate-200/80 bg-white p-3">
       <input className="input font-bold" value={f.title} onChange={set("title")} placeholder="Título" />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <input className="input" value={f.course} onChange={set("course")} placeholder="Curso" />
@@ -187,6 +197,7 @@ function EditDoc({ doc, liveOrders, onDone }: { doc: HubDocument; liveOrders: nu
 
 function EditBazar({ item, liveOrders, onDone }: { item: HubBazarItem; liveOrders: number; onDone: () => void }) {
   const qc = useQueryClient();
+  const { accent } = useCareerTheme();
   const [f, setF] = useState({
     title: item.title,
     soles: String(item.priceCents / 100),
@@ -235,7 +246,7 @@ function EditBazar({ item, liveOrders, onDone }: { item: HubBazarItem; liveOrder
     }
   };
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3">
+    <div className="flex flex-col gap-2 rounded-xl border border-slate-200/80 bg-white p-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <input className="input font-bold" value={f.title} onChange={(e) => setF((s) => ({ ...s, title: e.target.value }))} placeholder="Título" />
         <input className="input" type="number" min={0} value={f.soles} onChange={(e) => setF((s) => ({ ...s, soles: e.target.value }))} placeholder="Precio S/" />
@@ -243,7 +254,7 @@ function EditBazar({ item, liveOrders, onDone }: { item: HubBazarItem; liveOrder
       <textarea className="input" rows={2} value={f.description} onChange={(e) => setF((s) => ({ ...s, description: e.target.value }))} placeholder="Descripción" />
       <div className="flex flex-col gap-1">
         <span className="text-xs font-bold text-slate-500">Fotos del producto (máx 4, se muestran sin marcas)</span>
-        <PhotoManager value={photos} onChange={setPhotos} />
+        <PhotoManager value={photos} onChange={setPhotos} accentColor={accent?.color ?? null} />
       </div>
       <PayFields
         method={f.payMethod} detail={f.payDetail} qr={f.payQrUrl}
@@ -517,7 +528,7 @@ export function Publicaciones() {
             ? <img src={item.photos[0]} alt={r.title} loading="lazy" className="h-full w-full object-cover" />
             : <CareerVisual className="h-full w-full" iconClassName="text-title-lg" />;
           return (
-            <div key={r.id} className="flex flex-col gap-3 rounded-xl bg-white p-3 shadow-sm transition-all hover:shadow-md md:flex-row md:p-4">
+            <div key={r.id} className="group flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm transition-all hover:shadow-md md:flex-row md:p-4" style={{ "--card-accent": accent?.color ?? "#0f766e" } as CSSProperties}>
               <div className="relative h-44 w-full shrink-0 overflow-hidden rounded-lg bg-slate-100 md:w-52">
                 {cover}
                 <span className="absolute left-2 top-2 flex items-center gap-0.5 rounded-full bg-indigo-600 px-1.5 py-0.5 text-[11px] font-semibold text-white shadow-sm">
@@ -533,17 +544,24 @@ export function Publicaciones() {
                   <div className="mb-1 flex flex-wrap items-start justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1">
                       <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-600">{r.sub.split("·")[0]}</span>
-                      <span className="flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[11px] font-bold text-emerald-800">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
-                        {isDoc ? (doc?.status === "PUBLISHED" ? "Activa" : doc?.status) : (item?.status === "AVAILABLE" ? "Disponible" : item?.status)}
-                      </span>
+                      {isDoc ? (
+                        <span className="flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[11px] font-bold text-emerald-800">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
+                          {doc?.status === "PUBLISHED" ? "Activa" : doc?.status}
+                        </span>
+                      ) : (
+                        <span className={`flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-bold ${BAZAR_STATUS[item?.status ?? ""]?.cls ?? "bg-slate-100 text-slate-600"}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${BAZAR_STATUS[item?.status ?? ""]?.dot ?? "bg-slate-400"}`}></span>
+                          {BAZAR_STATUS[item?.status ?? ""]?.label ?? item?.status}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs text-slate-500">Precio:</span>
                       <span className="font-display text-lg font-extrabold text-primary" style={accent ? { color: accent.color } : undefined}>{pen(r.price)}</span>
                     </div>
                   </div>
-                  <Link to={isDoc ? `/v/${r.id}` : `/p/bazar/${r.id}`} className="truncate font-display text-lg font-extrabold hover:text-primary hover:underline" style={{}}>
+                  <Link to={isDoc ? `/v/${r.id}` : `/p/bazar/${r.id}`} className="truncate font-display text-lg font-extrabold transition-colors group-hover:text-[var(--card-accent)] hover:underline">
                     {r.title}
                   </Link>
                   <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">
