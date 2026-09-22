@@ -52,11 +52,21 @@ creado y cancelado (`BUYER_CANCELLED`) tras medir — sin residuos.
   `Suspense` con skeleton. Tras rebuild, el chunk Detalle tiene **0 refs a vendor-pdf**.
 - Medición Detalle desktop post-fix: **perf 91, a11y 100, LCP 2810ms, FCP 2810ms, TBT 0**
   (antes: 79–85, LCP 3356–4326). Gate Fase 0 (≥85) superado de forma estable en este equipo.
-- tsc 0, eslint 0. Falta: commit de `live.tsx` + esta sección.
+- tsc 0, eslint 0. Commiteado en `fdc0d07`.
+
+## Cobertura móvil (2026-09-22)
+
+| Página | Perf | A11y | LCP | Veredicto |
+|---|---|---|---|---|
+| Checkout | 89 | 100 | 3063ms | ✓ |
+| Panel | 90 | 100 | 2902ms | ✓ |
+| Publicar | 95 | 100 | 2576ms | ✓ |
+
+Fixture PENDING creado y cancelado (`BUYER_CANCELLED`); sin residuos. Con esto, las 5
+páginas cumplen A11y 100 y Perf ≥85 (Detalle desktop 85–91 según varianza, ver Parte 2).
 
 - `scripts/f0-lighthouse.mjs` falla desde la 2da página en este entorno (navegador CDP
   compartido → `INVALID_URL`); además su login vía UI falla si `WEB_ORIGIN` no incluye `:4173`
   (CORS bloquea el preflight). Se midió con runner propio de navegador fresco por página.
-- Durante la auditoría se observó (fuera de alcance, no corregido): `GET /documents`
-  expone `passwordHash` del autor en la respuesta. Registrar como hallazgo de seguridad
-  para la fase de hardening pre-despliegue.
+- Hallazgo `GET /documents` exponiendo `passwordHash`: CORREGIDO en `a8592cf`
+  (author/seller con select explícito en documents list/detail + bazar detail).
