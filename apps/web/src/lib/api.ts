@@ -212,13 +212,24 @@ export function fmtDate(iso?: string | null) {
 }
 
 // Sube imagen/PDF (QR, archivos) y devuelve URL absoluta lista para guardar.
-export async function uploadFile(file: File): Promise<string> {
+// Con onProgress opcional (0-100) para barras de subida animadas.
+export async function uploadFileWithProgress(file: File, onProgress?: (pct: number) => void): Promise<string> {
   const fd = new FormData();
   fd.append("file", file);
-  const r = await api.post("/uploads", fd, { headers: { "Content-Type": "multipart/form-data" } });
+  const r = await api.post("/uploads", fd, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (e) => {
+      const total = e.total ?? file.size ?? 0;
+      if (total > 0) onProgress?.(Math.min(100, Math.round((e.loaded / total) * 100)));
+    },
+  });
   const url = String(r.data?.data?.url ?? "");
   if (!url) throw new Error("Subida sin URL");
   return url.startsWith("http") ? url : API_ORIGIN + url;
+}
+
+export async function uploadFile(file: File): Promise<string> {
+  return uploadFileWithProgress(file);
 }
 
 // Normaliza QR guardado (absoluto o /uploads/...) a URL visible.

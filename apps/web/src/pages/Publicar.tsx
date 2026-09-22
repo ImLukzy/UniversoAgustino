@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api, apiError, pen, resolveQr, uploadFile } from "../lib/api";
+import { motion, AnimatePresence } from "framer-motion";
+import { api, apiError, pen, resolveQr, uploadFile, uploadFileWithProgress } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
-import { UNSA_CAREERS, careerLabel } from "../data/unsa";
+import { UNSA_CAREERS, careerLabel, careerOf } from "../data/unsa";
 import { careerContent } from "../data/careerContent";
 import { CareerVisual } from "../components/CareerVisual";
 import { PhotoManager } from "../components/PhotoManager";
@@ -45,6 +46,8 @@ export function Publicar() {
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
+  const [dragActive, setDragActive] = useState(false);
   const [pageStart, setPageStart] = useState(1);
   const [pageEnd, setPageEnd] = useState(2);
   const [watermark, setWatermark] = useState(true);
@@ -77,6 +80,10 @@ export function Publicar() {
   const fee = +(priceNum * (FEE_PCT / 100)).toFixed(2);
   const net = +(priceNum - fee).toFixed(2);
   const authorName = user.profile?.fullName?.trim() || user.email;
+  // Accent de la carrera SELECCIONADA en el formulario (no del tema global):
+  // alimenta --career-accent para pills, focos, dropzone y vista previa.
+  const selCareer = careerOf(career);
+  const selColor = selCareer?.color ?? accent?.color ?? "#0f766e";
 
   const step1 = mode === "digital"
     ? title.trim().length >= 4 && course.trim().length >= 2 && !!cycle
@@ -107,11 +114,14 @@ export function Publicar() {
     }
     setFile(f);
     setUploading(true);
+    setProgress(0);
     try {
-      setFileUrl(await uploadFile(f));
+      setFileUrl(await uploadFileWithProgress(f, setProgress));
+      setProgress(100);
     } catch (e) {
       setErr(apiError(e));
       setFile(null);
+      setProgress(null);
     } finally {
       setUploading(false);
     }
@@ -257,7 +267,10 @@ export function Publicar() {
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 items-start gap-4 lg:grid-cols-12">
+      {/* Scope --career-accent: la vista previa y los focos muestran la carrera
+          SELECCIONADA en el formulario (lo que verá el comprador), no el tema
+          global. El chrome de página (modos, pasos, CTA) conserva el accent. */}
+      <div className="career-scope mt-4 grid grid-cols-1 items-start gap-4 lg:grid-cols-12" style={{ "--career-accent": selColor } as CSSProperties}>
         {/* Formulario */}
         <div className="flex flex-col gap-4 lg:col-span-8">
           {/* Paso 1 */}
@@ -273,12 +286,39 @@ export function Publicar() {
             {mode === "digital" ? (
               <>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <label className="flex flex-col gap-1 text-sm font-semibold">
-                    Carrera UNSA *
-                    <select className="input" value={career} onChange={(e) => setCareer(e.target.value)}>
-                      {UNSA_CAREERS.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
-                    </select>
-                  </label>
+                  <div className="flex flex-col gap-1 text-sm font-semibold md:col-span-2">
+                    <span id="career-pick-label">Carrera UNSA *</span>
+                    <div role="group" aria-labelledby="career-pick-label" className="flex flex-wrap gap-1.5">
+                      {UNSA_CAREERS.map((c) => {
+                        const activePill = career === c.key;
+                        return (
+                          <motion.button
+                            key={c.key}
+                            type="button"
+                            aria-pressed={activePill}
+                            onClick={() => setCareer(c.key)}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.97 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                            className={`relative rounded-full px-3 py-1.5 text-xs font-bold ${activePill ? "" : "border border-slate-200/80 bg-white text-slate-600"}`}
+                          >
+                            {activePill && (
+                              <motion.span
+                                layoutId="selectedCareer"
+                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                className="absolute inset-0 rounded-full border"
+                                style={{ backgroundColor: c.soft, borderColor: c.color }}
+                              />
+                            )}
+                            <span className="relative z-10 flex items-center gap-1.5" style={activePill ? { color: c.color } : undefined}>
+                              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
+                              {c.label}
+                            </span>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </div>
                   <label className="flex flex-col gap-1 text-sm font-semibold">
                     Ciclo *
                     <select className="input" value={cycle} onChange={(e) => setCycle(e.target.value)}>
@@ -345,14 +385,24 @@ export function Publicar() {
             {mode === "digital" ? (
               <>
                 {!file ? (
-                  <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl bg-slate-50 p-8 text-center transition-colors hover:bg-slate-100">
-                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary" style={accent ? { color: accent.color } : undefined}>
+                  <motion.label
+                    animate={{
+                      scale: dragActive ? 1.02 : 1,
+                      borderColor: dragActive ? selColor : "rgba(203, 213, 225, 0)",
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                    onDragLeave={() => setDragActive(false)}
+                    onDrop={(e) => { e.preventDefault(); setDragActive(false); void pickFile(e.dataTransfer.files?.[0]); }}
+                    className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed bg-slate-50 p-8 text-center transition-colors hover:bg-slate-100"
+                  >
+                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary" style={{ color: selColor }}>
                       <span className="material-symbols-outlined text-3xl">cloud_upload</span>
                     </span>
-                    <span className="font-bold">{uploading ? "Subiendo…" : "Arrastra tu documento o haz clic"}</span>
+                    <span className="font-bold">{dragActive ? "Suelta tu documento aquí" : uploading ? "Subiendo…" : "Arrastra tu documento o haz clic"}</span>
                     <span className="max-w-sm text-sm text-slate-600">PDF de texto editable o vectorial de alta resolución.</span>
                     <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.epub" onChange={(e) => pickFile(e.target.files?.[0])} />
-                  </label>
+                  </motion.label>
                 ) : (
                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-4">
                     <div className="flex items-center gap-3">
@@ -369,12 +419,36 @@ export function Publicar() {
                         <span className="material-symbols-outlined">sync</span>
                         <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.epub" onChange={(e) => pickFile(e.target.files?.[0])} />
                       </label>
-                      <button type="button" className="rounded-lg p-2 text-red-600 hover:bg-red-50" title="Eliminar archivo" onClick={() => { setFile(null); setFileUrl(""); }}>
+                      <button type="button" className="rounded-lg p-2 text-red-600 hover:bg-red-50" title="Eliminar archivo" onClick={() => { setFile(null); setFileUrl(""); setProgress(null); }}>
                         <span className="material-symbols-outlined">delete</span>
                       </button>
                     </div>
                   </div>
                 )}
+                <AnimatePresence initial={false}>
+                  {progress !== null && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="rounded-xl border border-slate-200/80 p-3"
+                    >
+                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
+                        <span>{fileUrl ? "Subida completa · listo para publicar" : "Subiendo archivo…"}</span>
+                        <span>{progress}%</span>
+                      </div>
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-200">
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{ backgroundColor: selColor }}
+                          initial={false}
+                          animate={{ width: `${progress}%` }}
+                          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <div className="grid grid-cols-3 gap-2 rounded-xl bg-primary/5 p-3">
                   <label className="flex flex-col gap-1 text-xs font-bold">Pág. inicial muestra
                     <input className="input text-center font-bold" type="number" min={1} max={99} value={pageStart} onChange={(e) => setPageStart(Number(e.target.value))} />
@@ -432,7 +506,7 @@ export function Publicar() {
               <label className="flex flex-col gap-1 font-bold md:col-span-5">
                 Precio de venta (PEN)
                 <span className="flex items-center gap-2">
-                  <span className="font-display text-xl font-bold text-primary" style={accent ? { color: accent.color } : undefined}>S/</span>
+                  <span className="font-display text-xl font-bold text-[var(--career-accent)]">S/</span>
                   <input className="input w-full font-display text-xl font-bold" type="number" min={0} max={500} step={1} value={price} onChange={(e) => setPrice(Number(e.target.value))} />
                 </span>
                 <span className="text-xs font-normal text-slate-600">Sugerido{accent ? ` · ${accent.label}` : ""}: {soles(cc.suggestPrice)}</span>
@@ -512,7 +586,7 @@ export function Publicar() {
         <div className="flex flex-col gap-4 lg:col-span-4 lg:sticky lg:top-24">
           <div className="card space-y-3 p-4">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary" style={accent ? { color: accent.color } : undefined}>
+              <span className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[var(--career-accent)]">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
                 Vista previa en tienda
               </span>
@@ -521,7 +595,7 @@ export function Publicar() {
             <div className="overflow-hidden rounded-xl shadow-md">
               <div className="relative">
                 <CareerVisual className="h-44 w-full" />
-                <div className="pointer-events-none absolute inset-0 flex flex-col justify-between bg-primary/20 p-2" style={accent ? { backgroundColor: `${accent.color}33` } : undefined}>
+                <div className="pointer-events-none absolute inset-0 flex flex-col justify-between bg-primary/20 p-2" style={{ backgroundColor: `${selColor}33` }}>
                   <div className="flex items-start justify-between">
                     <span className="rounded-full bg-black/70 px-2 py-0.5 text-[10px] text-white">Muestra: {mode === "digital" ? `${pageEnd - pageStart + 1} págs` : "Físico"}</span>
                     <span className="flex items-center gap-0.5 rounded-full bg-emerald-700 px-2 py-0.5 text-[10px] font-bold text-white">
@@ -530,7 +604,7 @@ export function Publicar() {
                     </span>
                   </div>
                   {watermark && mode === "digital" && (
-                    <span className="self-center -rotate-12 rounded bg-white/85 px-2 py-1 text-[11px] font-bold text-primary" style={accent ? { color: accent.color } : undefined}>
+                    <span className="self-center -rotate-12 rounded bg-white/85 px-2 py-1 text-[11px] font-bold text-[var(--career-accent)]">
                       © Universo Agustino · {authorName}
                     </span>
                   )}
@@ -539,7 +613,7 @@ export function Publicar() {
               <div className="flex flex-col gap-1 p-3">
                 <div className="flex items-center justify-between">
                   <span className="badge-uni">{mode === "digital" ? `${careerLabel(career)} · ${docType}` : `${BAZAR_KINDS[kindIdx]} · ${tx}`}</span>
-                  <span className="font-display text-xl font-extrabold text-primary" style={accent ? { color: accent.color } : undefined}>{soles(priceNum)}</span>
+                  <span className="font-display text-xl font-extrabold text-[var(--career-accent)]">{soles(priceNum)}</span>
                 </div>
                 <h3 className="font-bold leading-tight line-clamp-2">{title || "Tu título aparecerá aquí…"}</h3>
                 <p className="text-xs text-slate-600 line-clamp-2">{description || (mode === "digital" ? course || "Tu descripción…" : campus)}</p>
@@ -560,7 +634,7 @@ export function Publicar() {
 
           <div className="card space-y-2 p-4">
             <h4 className="flex items-center gap-1 font-bold">
-              <span className="material-symbols-outlined text-primary" style={accent ? { color: accent.color } : undefined}>checklist_rtl</span>
+              <span className="material-symbols-outlined text-[var(--career-accent)]">checklist_rtl</span>
               Checklist de aprobación exprés
             </h4>
             <p className="text-xs text-slate-600">Revisión del equipo moderador en menos de 2 horas:</p>
@@ -584,7 +658,7 @@ export function Publicar() {
               <span className="text-sm font-bold">¿Dudas con tu material?</span>
               <span className="text-xs text-slate-600">Revisa el marco legal antes de publicar.</span>
             </div>
-            <Link to="/legal" className="flex shrink-0 items-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-bold text-primary shadow-sm hover:bg-slate-50" style={accent ? { color: accent.color } : undefined}>
+            <Link to="/legal" className="flex shrink-0 items-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-bold text-[var(--career-accent)] shadow-sm hover:bg-slate-50">
               <span className="material-symbols-outlined text-base">gavel</span> D.L. 822
             </Link>
           </div>

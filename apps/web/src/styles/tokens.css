@@ -43,3 +43,11 @@ button:active { transform: scale(0.95); }
 .badge-cep { background: #ecfdf5; color: #047857; border-radius: 9999px; padding: 0.15rem 0.6rem; font-size: 0.72rem; font-weight: 600; }
 .input { background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.6rem 0.8rem; width: 100%; }
 .input:focus { outline: none; border-color: rgb(var(--hub-p, 0 104 95)); box-shadow: 0 0 0 3px rgb(var(--hub-p, 0 104 95) / 0.15); }
+/* Publicar: anillo de foco con el accent de la carrera SELECCIONADA
+   (--career-accent) en lugar del azul/tema genérico. El fallback respeta
+   el tema cuando el scope no define la variable. */
+.career-scope .input:focus-visible {
+  outline: 2px solid var(--career-accent, rgb(var(--hub-p, 0 104 95)));
+  outline-offset: 1px;
+  border-color: var(--career-accent, rgb(var(--hub-p, 0 104 95)));
+}
