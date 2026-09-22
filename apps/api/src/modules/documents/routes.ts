@@ -27,7 +27,8 @@ documentsRouter.get(
         orderBy: { createdAt: "desc" },
         skip: (q.page - 1) * q.pageSize,
         take: q.pageSize,
-        include: { author: { include: { profile: true } } },
+        // Hardening: author con select explícito (nunca passwordHash).
+        include: { author: { select: { id: true, email: true, profile: true } } },
       }),
     ]);
     res.json({ data: rows, page: q.page, pageSize: q.pageSize, total });
@@ -62,7 +63,8 @@ documentsRouter.get(
 documentsRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
-    const doc = await prisma.document.findUnique({ where: { id: req.params.id }, include: { author: { include: { profile: true } } } });
+    // Hardening: author con select explícito (nunca passwordHash).
+    const doc = await prisma.document.findUnique({ where: { id: req.params.id }, include: { author: { select: { id: true, email: true, profile: true } } } });
     if (!doc) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Documento no existe" } });
     res.json({ data: doc });
   })

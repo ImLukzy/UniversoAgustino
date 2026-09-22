@@ -43,7 +43,8 @@ bazarRouter.get(
 bazarRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
-    const item = await prisma.bazarItem.findUnique({ where: { id: req.params.id }, include: { seller: { include: { profile: true } } } });
+    // Hardening: seller con select explícito (nunca passwordHash).
+    const item = await prisma.bazarItem.findUnique({ where: { id: req.params.id }, include: { seller: { select: { id: true, email: true, profile: true } } } });
     if (!item) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Ítem no existe" } });
     res.json({ data: item });
   })
