@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { api, type HubNotification } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "./careerTheme";
 
 const itemCls =
-  "px-space-sm py-space-xs rounded-lg text-left font-label-md text-label-md text-on-surface hover:bg-surface-container transition-colors w-full";
+  "px-space-sm py-space-xs rounded-lg text-left font-label-md text-label-md text-on-surface hover:bg-surface-container transition-colors w-full min-h-[44px] flex items-center";
 
 // Reemplaza la cuenta falsa del header Stitch ("Lic. Sofía V.") por sesión real:
 // sin login muestra Iniciar sesión + Registrarse; con login muestra el usuario real y su menú.
@@ -117,52 +118,69 @@ export function StitchAuth() {
                   ? `${unreadCount} notificación(es) sin leer`
                   : "Sin novedades"
           }
-          className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors relative"
+          className="relative flex h-11 w-11 items-center justify-center rounded-full bg-surface-container text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface"
         >
           <span className="material-symbols-outlined text-title-lg">notifications</span>
-          {hasAlert && <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full" />}
+          {/* Punto con el acento de la carrera (pulso) en vez del rojo genérico;
+              el contador de no leídas conserva el rojo como color de estado. */}
+          {hasAlert && (
+            <motion.span
+              animate={{ scale: [1, 1.5, 1] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full"
+              style={{ backgroundColor: accent?.color ?? "#dc2626" }}
+            />
+          )}
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </button>
-        {bellOpen && (
-          <div className="absolute right-0 top-12 w-80 max-w-[85vw] rounded-xl bg-surface-container-lowest shadow-lg p-space-xs flex flex-col z-50">
-            <div className="flex items-center justify-between px-space-sm py-space-xs">
-              <span className="font-label-md text-label-md font-bold">Notificaciones</span>
-              <button onClick={() => { void markAllRead(); }} className="text-xs font-semibold text-primary hover:underline">
-                Marcar leídas
-              </button>
-            </div>
-            {(notifs.data ?? []).length === 0 && (
-              <p className="px-space-sm py-space-md text-sm text-slate-500">
-                Sin novedades. Tus reservas, pagos y avisos de custodia aparecen aquí.
-              </p>
-            )}
-            {(notifs.data ?? []).map((n) => (
-              <button
-                key={n.id}
-                onClick={() => openNotif(n)}
-                className={`w-full rounded-lg px-space-sm py-space-xs text-left transition-colors hover:bg-surface-container ${n.readAt ? "" : "bg-primary/5"}`}
-              >
-                <span className="flex items-center gap-1 text-sm font-bold">
-                  {!n.readAt && <span className="h-2 w-2 shrink-0 rounded-full bg-error" />}
-                  <span className="truncate">{n.title}</span>
-                </span>
-                <span className="mt-0.5 line-clamp-2 block text-xs text-slate-500">{n.body}</span>
-              </button>
-            ))}
-            <button
-              onClick={() => { setBellOpen(false); nav(needSeller > 0 ? "/ventas" : "/pedidos"); }}
-              className="mt-1 rounded-lg bg-slate-100 px-space-sm py-space-xs text-center text-xs font-bold hover:bg-slate-200"
+        <AnimatePresence>
+          {bellOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: -4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -4 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="absolute right-0 top-12 z-50 flex w-80 max-w-[85vw] flex-col divide-y divide-slate-100 rounded-xl border border-slate-200/80 bg-surface-container-lowest p-space-xs shadow-md"
             >
-              {needSeller > 0 ? "Ir a Gestión de Ventas" : "Ver mis pedidos"}
-            </button>
-          </div>
-        )}
+              <div className="flex items-center justify-between px-space-sm py-space-xs">
+                <span className="font-label-md text-label-md font-bold">Notificaciones</span>
+                <button onClick={() => { void markAllRead(); }} className="min-h-[44px] px-2 text-xs font-semibold text-primary hover:underline">
+                  Marcar leídas
+                </button>
+              </div>
+              {(notifs.data ?? []).length === 0 && (
+                <p className="px-space-sm py-space-md text-sm text-slate-500">
+                  Sin novedades. Tus reservas, pagos y avisos de custodia aparecen aquí.
+                </p>
+              )}
+              {(notifs.data ?? []).map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => openNotif(n)}
+                  className={`w-full rounded-lg px-space-sm py-space-xs text-left transition-colors hover:bg-surface-container ${n.readAt ? "" : "bg-primary/5"}`}
+                >
+                  <span className="flex items-center gap-1 text-sm font-bold">
+                    {!n.readAt && <span className="h-2 w-2 shrink-0 rounded-full bg-error" />}
+                    <span className="truncate">{n.title}</span>
+                  </span>
+                  <span className="mt-0.5 line-clamp-2 block text-xs text-slate-500">{n.body}</span>
+                </button>
+              ))}
+              <button
+                onClick={() => { setBellOpen(false); nav(needSeller > 0 ? "/ventas" : "/pedidos"); }}
+                className="mt-1 min-h-[44px] rounded-lg bg-slate-100 px-space-sm py-space-xs text-center text-xs font-bold hover:bg-slate-200"
+              >
+                {needSeller > 0 ? "Ir a Gestión de Ventas" : "Ver mis pedidos"}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-space-sm pl-space-xs" aria-label="Mi cuenta">
+      <button onClick={() => setOpen((v) => !v)} className="flex min-h-[44px] items-center gap-space-sm pl-space-xs" aria-label="Mi cuenta" aria-expanded={open}>
         <span className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-label-lg shrink-0" style={{ backgroundColor: accent?.color ?? "rgb(var(--hub-p, 0 104 95))" }}>
           {initial}
         </span>
@@ -174,12 +192,20 @@ export function StitchAuth() {
           </span>
         </span>
       </button>
-      {open && (
-        <div className="absolute right-0 top-12 w-56 rounded-xl bg-surface-container-lowest shadow-lg p-space-xs flex flex-col z-50">
-          <Link to="/panel" onClick={() => setOpen(false)} className={itemCls}>Panel</Link>
-          <button onClick={out} className={itemCls}>Salir</button>
-        </div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: -4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: -4 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="absolute right-0 top-12 z-50 flex w-56 flex-col divide-y divide-slate-100 rounded-xl border border-slate-200/80 bg-surface-container-lowest p-space-xs shadow-md"
+          >
+            <Link to="/panel" onClick={() => setOpen(false)} className={itemCls}>Panel</Link>
+            <button onClick={out} className={itemCls}>Salir</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
