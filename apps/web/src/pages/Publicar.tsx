@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, apiError, pen, resolveQr, uploadFile, uploadFileWithProgress } from "../lib/api";
@@ -12,12 +12,14 @@ import { PhotoManager } from "../components/PhotoManager";
 const FEE_PCT = 13; // Igual que PLATFORM_FEE_PCT del backend.
 const MAX_MB = 25;
 const CYCLES = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
-const DOC_TYPES = [
-  { v: "APUNTE", l: "Apunte / Resumen" },
-  { v: "PAE", l: "Guía PAE" },
-  { v: "BALOTARIO", l: "Balotario" },
-  { v: "GUIA", l: "Guía de estudio" },
-];
+// Etiquetas genéricas por valor del enum backend (DocumentTypeSchema).
+// Solo respaldo: la etiqueta contextual sale de los chips de cada carrera.
+const DOC_TYPE_FALLBACK: Record<string, string> = {
+  APUNTE: "Apunte / Resumen",
+  PAE: "Guía PAE",
+  BALOTARIO: "Balotario",
+  GUIA: "Guía de estudio",
+};
 const BAZAR_KINDS = ["Libros y Manuales", "Instrumentos y Herramientas", "Uniformes y Vestimenta", "Accesorios y Materiales"];
 const BAZAR_KIND_ENUM = ["LIBRO", "INSTRUMENTO", "SCRUB", "INSTRUMENTO"] as const;
 
@@ -65,6 +67,29 @@ export function Publicar() {
 
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Tipos de material según la carrera SELECCIONADA: salen de sus chips
+  // contextuales (ej. PAE solo existe en Enfermería). Valores siempre del
+  // enum backend; si la carrera no trae ninguno, respaldo genérico.
+  // Antes del return temprano: los hooks nunca van tras un return.
+  const docTypeOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const chip of careerContent(career).chips) {
+      if (chip.docType === "all" || seen.has(chip.docType)) continue;
+      seen.set(chip.docType, chip.label);
+    }
+    if (seen.size === 0) {
+      return Object.entries(DOC_TYPE_FALLBACK).map(([v, l]) => ({ v, l }));
+    }
+    return [...seen].map(([v, l]) => ({ v, l }));
+  }, [career]);
+  const docTypeLabel = docTypeOptions.find((o) => o.v === docType)?.l ?? docType;
+  // Al cambiar de carrera, si el tipo elegido no existe ahí, vuelve al primero.
+  useEffect(() => {
+    if (!docTypeOptions.some((o) => o.v === docType)) {
+      setDocType(docTypeOptions[0]?.v ?? "APUNTE");
+    }
+  }, [docTypeOptions, docType]);
 
   if (!user) {
     return (
@@ -334,7 +359,7 @@ export function Publicar() {
                   <label className="flex flex-col gap-1 text-sm font-semibold">
                     Tipo de material
                     <select className="input" value={docType} onChange={(e) => setDocType(e.target.value)}>
-                      {DOC_TYPES.map((t) => <option key={t.v} value={t.v}>{t.l}</option>)}
+                      {docTypeOptions.map((t) => <option key={t.v} value={t.v}>{t.l}</option>)}
                     </select>
                   </label>
                 </div>
@@ -612,7 +637,7 @@ export function Publicar() {
               </div>
               <div className="flex flex-col gap-1 p-3">
                 <div className="flex items-center justify-between">
-                  <span className="badge-uni">{mode === "digital" ? `${careerLabel(career)} · ${docType}` : `${BAZAR_KINDS[kindIdx]} · ${tx}`}</span>
+                  <span className="badge-uni">{mode === "digital" ? `${careerLabel(career)} · ${docTypeLabel}` : `${BAZAR_KINDS[kindIdx]} · ${tx}`}</span>
                   <span className="font-display text-xl font-extrabold text-[var(--career-accent)]">{soles(priceNum)}</span>
                 </div>
                 <h3 className="font-bold leading-tight line-clamp-2">{title || "Tu título aparecerá aquí…"}</h3>
