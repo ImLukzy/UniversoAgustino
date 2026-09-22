@@ -21,7 +21,7 @@ export const UNSA_CAREERS: UnsaCareer[] = [
   { key: "CONTABILIDAD", label: "Contabilidad", faculty: "Fac. de Contabilidad", color: "#0e7490", soft: "#cffafe" },
   { key: "ECONOMIA", label: "Economía", faculty: "Facultad de Economía", color: "#b91c1c", soft: "#fee2e2" },
   { key: "ING_SISTEMAS", label: "Ing. de Sistemas", faculty: "Fac. de Ing. de Producción y Servicios", color: "#4338ca", soft: "#e0e7ff" },
-  { key: "ING_CIVIL", label: "Ing. Civil", faculty: "Facultad de Ing. Civil", color: "#ea580c", soft: "#ffedd5" },
+  { key: "ING_CIVIL", label: "Ing. Civil", faculty: "Facultad de Ing. Civil", color: "#c2410c", soft: "#ffedd5" },
   { key: "ING_INDUSTRIAL", label: "Ing. Industrial", faculty: "Fac. de Ing. de Producción y Servicios", color: "#475569", soft: "#e2e8f0" },
   { key: "ARQUITECTURA", label: "Arquitectura", faculty: "Facultad de Arquitectura", color: "#be123c", soft: "#ffe4e6" },
   { key: "AGRONOMIA", label: "Agronomía", faculty: "Fac. de Agronomía", color: "#4d7c0f", soft: "#ecfccb" },
