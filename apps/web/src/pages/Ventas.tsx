@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { api, apiError, fmtDate, pen, type HubOrder, type HubReport } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
@@ -19,9 +19,15 @@ export function Ventas() {
   const [repMsg, setRepMsg] = useState("");
   const [repBusy, setRepBusy] = useState(false);
 
-  const sales = useQuery({
+  // F0-c p95: /sales pagina en servidor (keyset). "Cargar más" agrega páginas.
+  const sales = useInfiniteQuery({
     queryKey: ["orders", "sales"],
-    queryFn: async () => (await api.get("/orders/sales")).data.data as HubOrder[],
+    queryFn: async ({ pageParam }: { pageParam: string | null }) => {
+      const q = pageParam ? `?cursor=${pageParam}&limit=50` : "?limit=50";
+      return (await api.get(`/orders/sales${q}`)).data as { data: HubOrder[]; nextCursor: string | null };
+    },
+    initialPageParam: null as string | null,
+    getNextPageParam: (last) => last.nextCursor,
     enabled: !!user,
     refetchInterval: 30000,
   });
@@ -42,7 +48,7 @@ export function Ventas() {
     );
   }
 
-  const rows = sales.data ?? [];
+  const rows = (sales.data?.pages ?? []).flatMap((p) => p.data);
   const rentals = rows.filter((o) => o.itemType === "bazar");
   const digitals = rows.filter((o) => o.itemType === "document");
   const pendingRentals = rentals.filter((o) => o.status === "PENDING");
@@ -255,6 +261,15 @@ export function Ventas() {
             </table>
           </div>
         </div>
+        {sales.hasNextPage && (
+          <button
+            onClick={() => void sales.fetchNextPage()}
+            disabled={sales.isFetchingNextPage}
+            className="w-full rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-60"
+          >
+            {sales.isFetchingNextPage ? "Cargando…" : "Cargar más ventas"}
+          </button>
+        )}
       </section>
 
       {/* Sección C */}

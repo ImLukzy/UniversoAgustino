@@ -238,7 +238,7 @@ paths:
   /orders/sales:
     get:
       tags: [orders]
-      summary: Ventas sobre mis publicaciones con comprador y reputación (auth)
+      summary: Ventas sobre mis publicaciones con comprador y reputación (auth, paginado keyset ?limit=50&cursor=orderId, responde {data, nextCursor})
       security: [{ bearerAuth: [] }]
       responses: { '200': { description: OK } }
   /orders/{id}:

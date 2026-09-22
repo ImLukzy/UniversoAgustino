@@ -92,6 +92,7 @@ model Document {
 
   @@index([university, career, status])
   @@index([title])
+  @@index([authorId])
 }
 
 model BazarItem {
@@ -111,6 +112,8 @@ model BazarItem {
   status       BazarStatus @default(AVAILABLE)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+
+  @@index([sellerId])
 }
 
 model Order {
@@ -154,6 +157,10 @@ model Order {
 
   // Índices parciales en SQL (Prisma no los expresa): ver migración
   // sprint1a_reservation_ttl (order_active_item_unique y siguientes).
+  // Rendimiento de lectura (F0-c p95): /sales filtra por itemId y ordena por
+  // createdAt; el groupBy de completadas filtra por buyerId+status.
+  @@index([itemId, createdAt(sort: Desc)])
+  @@index([buyerId, status])
 }
 
 model Escrow {

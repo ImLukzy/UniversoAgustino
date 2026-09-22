@@ -171,9 +171,27 @@ ordersRouter.get(
       ...docs.map((d): [string, { title: string }] => [d.id, { title: d.title }]),
       ...items.map((b): [string, { title: string; desc?: string | null; tx?: string }] => [b.id, { title: b.title, desc: b.description, tx: b.tx }]),
     ]);
+    // F0-c p95: paginación keyset (createdAt desc, id desc) para que /sales no
+    // devuelva el historial completo. Aditivo: sin params devuelve la 1ª página.
+    const rawLimit = Number(req.query.limit ?? 50);
+    const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(Math.floor(rawLimit), 1), 100) : 50;
+    const cursor = typeof req.query.cursor === "string" && req.query.cursor ? req.query.cursor : null;
+    let cursorRow: { id: string; createdAt: Date } | null = null;
+    if (cursor) {
+      cursorRow = await prisma.order.findUnique({ where: { id: cursor }, select: { id: true, createdAt: true } });
+      if (!cursorRow) {
+        return res.status(400).json({ error: { code: "VALIDATION", message: "Cursor inválido" } });
+      }
+    }
     const rows = await prisma.order.findMany({
-      where: { itemId: { in: [...meta.keys()] } },
-      orderBy: { createdAt: "desc" },
+      where: {
+        itemId: { in: [...meta.keys()] },
+        ...(cursorRow
+          ? { OR: [{ createdAt: { lt: cursorRow.createdAt } }, { createdAt: cursorRow.createdAt, id: { lt: cursorRow.id } }] }
+          : {}),
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: limit + 1,
       include: { escrow: true, buyer: { select: { id: true, email: true, profile: true } } },
     });
     // Compras completadas por comprador en UNA sola agregación.
@@ -187,14 +205,15 @@ ordersRouter.get(
         })
       : [];
     const completions = new Map(completedByBuyer.map((r) => [r.buyerId, r._count._all]));
-    const data = rows.map((o) => ({
+    const page = rows.slice(0, limit);
+    const data = page.map((o) => ({
       ...o,
       itemTitle: meta.get(o.itemId)?.title ?? o.itemId,
       itemDesc: meta.get(o.itemId)?.desc ?? null,
       itemTx: meta.get(o.itemId)?.tx ?? null,
       buyerCompleted: completions.get(o.buyerId) ?? 0,
     }));
-    res.json({ data });
+    res.json({ data, nextCursor: rows.length > limit ? page[page.length - 1]?.id ?? null : null });
   })
 );
 
