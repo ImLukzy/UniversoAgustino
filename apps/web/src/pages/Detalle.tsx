@@ -8,6 +8,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
 import { careerColor, careerLabel, careerSoft } from "../data/unsa";
 import { CareerAvatar, CareerVisual } from "../components/CareerVisual";
+import { DetailSkeleton } from "../components/Skeleton";
 
 const PAY_LABEL: Record<string, string> = { YAPE: "Yape", PLIN: "Plin", AMBAS: "Yape y Plin" };
 
@@ -109,11 +110,7 @@ export function Detalle() {
   };
 
   if (loading) {
-    return (
-      <main className="mx-auto max-w-6xl px-4 py-10">
-        <p>Cargando detalle…</p>
-      </main>
-    );
+    return <DetailSkeleton />;
   }
   if ((kind === "document" && !doc.data) || (kind === "bazar" && !item.data)) {
     return (

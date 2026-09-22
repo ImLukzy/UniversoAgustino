@@ -8,7 +8,8 @@ import { useCareerTheme } from "../live/careerTheme";
 import { careerLabel } from "../data/unsa";
 import { RentalCard } from "../components/RentalCard";
 import { getOrderLabel, ITEM_TYPE_LABEL, REPORT_STATUS_LABEL } from "../lib/orderLabels";
-import { CardGridSkeleton } from "../components/Skeleton";
+import { RentalSkeleton } from "../components/Skeleton";
+import { EmptyState } from "../components/EmptyState";
 
 export function Ventas() {
   const { user } = useAuth();
@@ -172,10 +173,20 @@ export function Ventas() {
             </p>
           </div>
         </div>
-        {sales.isLoading && <CardGridSkeleton count={4} gridClassName="grid grid-cols-1 gap-3 lg:grid-cols-2" />}
+        {sales.isLoading && (
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2" role="status" aria-label="Cargando solicitudes">
+            <span className="sr-only">Cargando solicitudes…</span>
+            {Array.from({ length: 4 }, (_, i) => <RentalSkeleton key={i} />)}
+          </div>
+        )}
         {!sales.isLoading && rentals.length === 0 && (
-          <div className="rounded-xl bg-white p-6 text-center text-sm text-slate-500 shadow-sm">
-            Sin solicitudes de alquiler. <Link to="/publicar" className="font-bold text-primary underline">Publica un artículo de bazar</Link>.
+          <div className="rounded-xl bg-white p-6 shadow-sm">
+            <EmptyState
+              icon="storefront"
+              title="Sin solicitudes de alquiler"
+              hint="Cuando alguien reserve tu bazar, la verás aquí para aceptarla."
+              action={<Link to="/publicar" className="font-bold text-primary underline">Publica un artículo de bazar</Link>}
+            />
           </div>
         )}
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">

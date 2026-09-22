@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { api, apiError, pen, resolveQr, uploadFile, type HubBazarItem, type HubDocument, type HubOrder, type PayMethod } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { useCareerTheme } from "../live/careerTheme";
@@ -27,30 +28,51 @@ const BAZAR_STATUS: Record<string, { label: string; cls: string; dot: string }> 
 type QrInfo = { title: string; price: string; method: string; qr: string | null; detail: string };
 
 function QrModal({ info, onClose }: { info: QrInfo | null; onClose: () => void }) {
-  if (!info) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/60 p-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="relative flex w-full max-w-sm flex-col items-center rounded-2xl bg-white p-5 text-center shadow-2xl">
-        <button onClick={onClose} className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100" aria-label="Cerrar">
-          <span className="material-symbols-outlined">close</span>
-        </button>
-        <span className="material-symbols-outlined mb-1 text-4xl text-primary">qr_code_2</span>
-        <h3 className="font-display text-lg font-extrabold">Cobro de material</h3>
-        <p className="max-w-full truncate text-sm text-slate-500">{info.title}</p>
-        <div className="my-3 rounded-xl bg-slate-50 p-3">
-          {info.qr ? (
-            <img src={info.qr} alt={`QR de cobro · ${info.title}`} className="h-44 w-44 rounded-lg border object-cover" />
-          ) : (
-            <p className="max-w-[220px] text-xs text-slate-500">Esta publicación aún no tiene QR. Edítala para subirlo.</p>
-          )}
-        </div>
-        <div className="w-full rounded-lg bg-primary/10 px-2 py-1 text-lg font-extrabold text-primary">{info.price}</div>
-        <p className="mt-1 text-xs text-slate-500">{info.method}{info.detail ? ` · ${info.detail}` : ""}</p>
-        <button onClick={onClose} className="mt-3 w-full rounded-lg bg-primary py-2 text-sm font-bold text-white">
-          Listo / Cerrar
-        </button>
-      </div>
-    </div>
+    <AnimatePresence>
+      {info && (
+        <motion.div
+          key="qr-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/60 p-4 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        >
+          <motion.div
+            key="qr-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Cobro de ${info.title}`}
+            initial={{ opacity: 0, scale: 0.95, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 8 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="relative flex w-full max-w-sm flex-col items-center rounded-2xl border border-slate-200/80 bg-white p-5 text-center shadow-xl"
+          >
+            <button onClick={onClose} className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100" aria-label="Cerrar">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <span className="material-symbols-outlined mb-1 text-4xl text-primary">qr_code_2</span>
+            <h3 className="font-display text-lg font-extrabold">Cobro de material</h3>
+            <p className="max-w-full truncate text-sm text-slate-500">{info.title}</p>
+            <div className="my-3 rounded-xl bg-slate-50 p-3">
+              {info.qr ? (
+                <img src={info.qr} alt={`QR de cobro · ${info.title}`} className="h-44 w-44 rounded-lg border object-cover" />
+              ) : (
+                <p className="max-w-[220px] text-xs text-slate-500">Esta publicación aún no tiene QR. Edítala para subirlo.</p>
+              )}
+            </div>
+            <div className="w-full rounded-lg bg-primary/10 px-2 py-1 text-lg font-extrabold text-primary">{info.price}</div>
+            <p className="mt-1 text-xs text-slate-500">{info.method}{info.detail ? ` · ${info.detail}` : ""}</p>
+            <button onClick={onClose} className="mt-3 w-full rounded-lg bg-primary py-2 text-sm font-bold text-white">
+              Listo / Cerrar
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

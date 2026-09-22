@@ -10,6 +10,7 @@ import { careerContent } from "../data/careerContent";
 // cada página que importa este módulo (/, /bazar y —por el grafo— /p/*).
 const PagePreview = lazy(() => import("../components/PdfPreview").then((m) => ({ default: m.PagePreview })));
 import { CardGridSkeleton } from "../components/Skeleton";
+import { EmptyState } from "../components/EmptyState";
 import { useAuth } from "../auth/AuthContext";
 
 const PAGE_SIZE = 9;
@@ -81,16 +82,17 @@ export function LiveDocuments({ q, cycle, career, docType, accentColor, emptyHin
         </p>
       )}
       {data && rows.length === 0 && (
-        <div className="p-space-lg bg-surface-container-low rounded-xl text-center">
-          <p className="font-title-md text-title-md text-on-surface font-semibold">Aún no hay recursos aquí</p>
-          <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xxs">
-            {user ? (emptyHint ?? "Sé la primera persona en publicar con el asistente de Monetiza.") : "Entra o crea tu cuenta para publicar el primer apunte."}
-          </p>
-          {!user && (
-            <p className="mt-space-sm">
-              <Link to="/register" className="px-space-md py-space-xs rounded-lg text-white font-label-md text-label-md font-bold" style={{ backgroundColor: accent }}>Crear cuenta gratis</Link>
-            </p>
-          )}
+        <div className="p-space-lg bg-surface-container-low rounded-xl">
+          <EmptyState
+            icon="description"
+            title="Aún no hay recursos aquí"
+            hint={user ? (emptyHint ?? "Sé la primera persona en publicar con el asistente de Monetiza.") : "Entra o crea tu cuenta para publicar el primer apunte."}
+            action={
+              !user ? (
+                <Link to="/register" className="px-space-md py-space-xs rounded-lg text-white font-label-md text-label-md font-bold" style={{ backgroundColor: accent }}>Crear cuenta gratis</Link>
+              ) : undefined
+            }
+          />
         </div>
       )}
       {/* Craftsmanship: AnimatePresence + enter/exit con spring (stiffness 400,
@@ -218,16 +220,17 @@ export function LiveBazarItems({ filter, q, accentColor }: { filter: string; q: 
         </p>
       )}
       {data && rows.length === 0 && (
-        <div className="p-space-lg bg-surface-container-low rounded-xl text-center">
-          <p className="font-title-md text-title-md text-on-surface font-semibold">Bazar vacío en este filtro</p>
-          <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xxs">
-            {user ? "Publica el primer artículo con el botón Publicar." : "Entra o crea tu cuenta para publicar."}
-          </p>
-          {!user && (
-            <p className="mt-space-sm">
-              <Link to="/register" className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold" style={accentBg}>Crear cuenta gratis</Link>
-            </p>
-          )}
+        <div className="p-space-lg bg-surface-container-low rounded-xl">
+          <EmptyState
+            icon="storefront"
+            title="Bazar vacío en este filtro"
+            hint={user ? "Publica el primer artículo con el botón Publicar." : "Entra o crea tu cuenta para publicar."}
+            action={
+              !user ? (
+                <Link to="/register" className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold" style={accentBg}>Crear cuenta gratis</Link>
+              ) : undefined
+            }
+          />
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
