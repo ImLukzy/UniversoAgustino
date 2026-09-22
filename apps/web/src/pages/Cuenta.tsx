@@ -272,7 +272,7 @@ export function Cuenta() {
                   </Link>
                 </div>
               </div>
-              <p className="text-xs text-slate-400">Los pagos van directo a tu Yape/Plin. Universo Agustino solo custodia hasta la confirmación de entrega.</p>
+              <p className="text-xs text-slate-500">Los pagos van directo a tu Yape/Plin. Universo Agustino solo custodia hasta la confirmación de entrega.</p>
             </div>
           )}
 
@@ -283,12 +283,12 @@ export function Cuenta() {
                 <h2 className="font-display text-xl">Sesión y acceso</h2>
               </div>
               <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-400">Correo</dt><dd className="break-all font-semibold">{user.email}</dd></div>
-                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-400">Rol</dt><dd className="font-semibold">{ROLE_LABEL[user.role] ?? user.role}</dd></div>
-                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-400">Carrera</dt><dd className="font-semibold">{user.profile?.career ? careerLabel(user.profile.career) : "—"}</dd></div>
-                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-400">Miembro desde</dt><dd className="font-semibold">Universo Agustino</dd></div>
+                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-500">Correo</dt><dd className="break-all font-semibold">{user.email}</dd></div>
+                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-500">Rol</dt><dd className="font-semibold">{ROLE_LABEL[user.role] ?? user.role}</dd></div>
+                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-500">Carrera</dt><dd className="font-semibold">{user.profile?.career ? careerLabel(user.profile.career) : "—"}</dd></div>
+                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-500">Miembro desde</dt><dd className="font-semibold">Universo Agustino</dd></div>
               </dl>
-              <p className="text-xs text-slate-400">Tu sesión se mantiene en este dispositivo hasta que salgas.</p>
+              <p className="text-xs text-slate-500">Tu sesión se mantiene en este dispositivo hasta que salgas.</p>
               <button onClick={out} className="flex items-center justify-center gap-1 rounded-lg bg-red-50 py-2.5 text-sm font-bold text-red-700 transition-colors hover:bg-red-100">
                 <span className="material-symbols-outlined text-base">logout</span>
                 <span>Cerrar sesión segura</span>

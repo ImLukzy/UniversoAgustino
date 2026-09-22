@@ -42,7 +42,7 @@ function PedidoRow({ order }: { order: HubOrder }) {
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-400">Total:</span>
+          <span className="text-xs text-slate-500">Total:</span>
           <span className="font-display text-lg font-extrabold">{pen(order.amountCents)}</span>
         </div>
       </div>
@@ -69,7 +69,7 @@ function PedidoRow({ order }: { order: HubOrder }) {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2">
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-slate-500">
           {order.status === "ESCROW" && "No liberes el pago hasta verificar tu pedido."}
           {order.status === "PENDING" && (order.rentalStart ? "Esperando que el vendedor acepte tu alquiler." : "Paga al vendedor para continuar.")}
           {order.status === "ACCEPTED" && "Solicitud aceptada. Ya puedes pagar."}
@@ -201,7 +201,7 @@ export function Pedidos() {
                 {orders.isLoading ? "…" : s.value}
               </span>
             </div>
-            <div className={`z-10 mt-2 text-xs ${s.subCls ?? "text-slate-400"}`}>{s.sub}</div>
+            <div className={`z-10 mt-2 text-xs ${s.subCls ?? "text-slate-500"}`}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -227,7 +227,7 @@ export function Pedidos() {
           {!orders.isLoading && filtered.length === 0 && (
             <div className="flex flex-col items-center gap-1 rounded-xl bg-white px-4 py-12 text-center shadow-sm">
               <span className="material-symbols-outlined text-5xl text-slate-300">inbox</span>
-              <p className="mt-2 text-sm text-slate-400">{list.length === 0 ? "Aún no tienes pedidos" : "Nada en este filtro"}</p>
+              <p className="mt-2 text-sm text-slate-500">{list.length === 0 ? "Aún no tienes pedidos" : "Nada en este filtro"}</p>
               {list.length === 0 && (
                 <Link to="/" className="text-sm font-bold text-primary hover:underline" style={accent ? { color: accent.color } : undefined}>
                   Compra tu primer apunte →
@@ -314,7 +314,7 @@ export function Pedidos() {
                   <span className="material-symbols-outlined text-sm text-emerald-600">check_circle</span>
                 </div>
               ))}
-              <p className="px-1 text-[11px] text-slate-400">{cc.meetTimes.join(" · ")}</p>
+              <p className="px-1 text-[11px] text-slate-500">{cc.meetTimes.join(" · ")}</p>
             </div>
           </div>
         </div>

@@ -98,7 +98,7 @@ export function Visor() {
           <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-bold text-primary" style={accent ? { color: accent.color } : undefined}>
             <span className="material-symbols-outlined text-sm">shield</span> D.L. 822 Verificado
           </span>
-          <span className="hidden text-slate-400 sm:inline">ID: {d.id.slice(0, 8).toUpperCase()}</span>
+          <span className="hidden text-slate-500 sm:inline">ID: {d.id.slice(0, 8).toUpperCase()}</span>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export function Visor() {
                   <span className="material-symbols-outlined text-base">chevron_right</span>
                 </button>
               </div>
-              <span className="flex cursor-not-allowed items-center gap-1 rounded-lg bg-slate-100 px-2 py-1.5 text-xs text-slate-400" title="Completa tu compra para modo pantalla completa">
+              <span className="flex cursor-not-allowed items-center gap-1 rounded-lg bg-slate-100 px-2 py-1.5 text-xs text-slate-500" title="Completa tu compra para modo pantalla completa">
                 <span className="material-symbols-outlined text-base">fullscreen</span>
                 <span className="material-symbols-outlined text-sm text-red-500">lock</span>
               </span>
@@ -250,7 +250,7 @@ export function Visor() {
                 <span className="material-symbols-outlined text-indigo-600">format_list_numbered</span>
                 Estructura &amp; Temario completo
               </h4>
-              <span className="text-xs text-slate-400">{careerName}</span>
+              <span className="text-xs text-slate-500">{careerName}</span>
             </div>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               {cc.visorTemario.map((s, i) => (
@@ -302,7 +302,7 @@ export function Visor() {
               <span className="font-display text-4xl font-extrabold text-primary" style={accent ? { color: accent.color } : undefined}>
                 {pen(d.priceCents)}
               </span>
-              <span className="text-xs text-slate-400">Compra única · sin suscripción</span>
+              <span className="text-xs text-slate-500">Compra única · sin suscripción</span>
             </div>
             <div className="flex flex-col gap-2">
               <button disabled={busy} onClick={buy} className="btn-primary flex w-full items-center justify-center gap-2 py-3 disabled:opacity-50" style={accent ? { backgroundColor: accent.color } : undefined}>

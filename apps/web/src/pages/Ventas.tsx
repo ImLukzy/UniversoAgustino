@@ -199,9 +199,9 @@ export function Ventas() {
           </div>
           <div className="flex flex-wrap items-center gap-1 rounded-lg bg-slate-50 px-4 py-2 text-sm">
             <span className="font-bold">[Precio venta]</span>
-            <span className="text-slate-400">-</span>
+            <span className="text-slate-500">-</span>
             <span className="font-semibold text-red-600">[Comisión 13%]</span>
-            <span className="text-slate-400">=</span>
+            <span className="text-slate-500">=</span>
             <span className="font-bold text-emerald-700">[Neto para ti]</span>
           </div>
         </div>
@@ -220,7 +220,7 @@ export function Ventas() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {digitals.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-6 text-center text-sm text-slate-400">Aún no vendes apuntes.</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-6 text-center text-sm text-slate-500">Aún no vendes apuntes.</td></tr>
                 )}
                 {digitals.map((o) => (
                   <tr key={o.id} className="transition-colors hover:bg-slate-50/60">
@@ -282,7 +282,7 @@ export function Ventas() {
         </div>
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {shownReports.length === 0 && (
-            <div className="rounded-xl bg-white p-6 text-center text-sm text-slate-400 shadow-sm lg:col-span-2">
+            <div className="rounded-xl bg-white p-6 text-center text-sm text-slate-500 shadow-sm lg:col-span-2">
               Sin reportes en este filtro. Todo en orden.
             </div>
           )}
@@ -290,7 +290,7 @@ export function Ventas() {
             <div key={r.id} className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-2">
                 <p className="font-bold">Caso #{r.id.slice(0, 6).toUpperCase()}</p>
-                <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${r.status === "OPEN" ? "bg-red-100 text-red-700" : "bg-emerald-50 text-emerald-700"}`}>
+                <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${r.status === "OPEN" ? "bg-red-100 text-red-800" : "bg-emerald-50 text-emerald-700"}`}>
                   {REPORT_STATUS_LABEL[r.status] ?? r.status}
                 </span>
               </div>

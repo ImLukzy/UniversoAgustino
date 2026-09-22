@@ -190,7 +190,7 @@ export function Publicar() {
             </span>
           </div>
           <h1 className="font-display text-3xl font-extrabold tracking-tight md:text-4xl">Publica tu Material y Comienza a Generar Ingresos</h1>
-          <p className="max-w-3xl leading-relaxed text-slate-500">
+          <p className="max-w-3xl leading-relaxed text-slate-600">
             Comparte apuntes originales o artículos de bazar con la comunidad agustina de Arequipa. Todo pago pasa por tu Yape/Plin y la custodia de Universo Agustino.
           </p>
         </div>
@@ -211,7 +211,7 @@ export function Publicar() {
                 <span className="font-bold">Apunte Digital (PDF)</span>
                 {mode === "digital" && <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold text-white" style={accent ? { backgroundColor: accent.color } : undefined}>Activo</span>}
               </div>
-              <p className="mt-1 text-sm text-slate-500">{cc.digitalEx}. Liquidación digital con custodia.</p>
+              <p className="mt-1 text-sm text-slate-600">{cc.digitalEx}. Liquidación digital con custodia.</p>
             </div>
           </button>
           <button
@@ -220,7 +220,7 @@ export function Publicar() {
             className={`group relative flex items-start gap-3 rounded-xl p-4 text-left transition-all ${mode === "fisico" ? "bg-white shadow-sm hover:shadow-md" : "bg-surface-container-low/70 hover:bg-surface-container-low"}`}
           >
             {mode === "fisico" && <div className="absolute bottom-0 left-0 top-0 w-1.5 rounded-l-xl bg-primary" style={accent ? { backgroundColor: accent.color } : undefined}></div>}
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-surface-container-high text-slate-500">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-surface-container-high text-slate-600">
               <span className="material-symbols-outlined text-3xl">{cc.visualIcon}</span>
             </div>
             <div className="flex flex-col">
@@ -228,9 +228,9 @@ export function Publicar() {
                 <span className="font-bold">Artículo Físico de Bazar</span>
                 {mode === "fisico"
                   ? <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold text-white" style={accent ? { backgroundColor: accent.color } : undefined}>Activo</span>
-                  : <span className="rounded-full bg-surface-container px-2 py-0.5 text-[11px] text-slate-500">Cambiar</span>}
+                  : <span className="rounded-full bg-surface-container px-2 py-0.5 text-[11px] text-slate-600">Cambiar</span>}
               </div>
-              <p className="mt-1 text-sm text-slate-500">{cc.fisicoEx}, con entrega coordinada en Arequipa.</p>
+              <p className="mt-1 text-sm text-slate-600">{cc.fisicoEx}, con entrega coordinada en Arequipa.</p>
             </div>
           </button>
         </div>
@@ -240,17 +240,17 @@ export function Publicar() {
       <div className="mt-4 rounded-xl bg-white p-4 shadow-sm">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {steps.map((s, i) => (
-            <div key={s.t} className={`flex items-center gap-2 ${!s.done && i > 0 ? "opacity-60" : ""}`}>
+            <div key={s.t} className={`flex items-center gap-2 ${!s.done && i > 0 ? "grayscale" : ""}`}>
               <div
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold"
                 style={s.done ? { backgroundColor: accent?.color ?? "rgb(var(--hub-p, 0 104 95))", color: "#fff" } : undefined}
               >
-                {!s.done && <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-high font-bold text-slate-500">{i + 1}</span>}
+                {!s.done && <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-high font-bold text-slate-600">{i + 1}</span>}
                 {s.done && (i + 1)}
               </div>
               <div className="flex min-w-0 flex-col">
                 <span className={`truncate text-xs font-bold ${s.done ? "text-primary" : "text-slate-800"}`} style={s.done && accent ? { color: accent.color } : undefined}>{s.t}</span>
-                <span className="truncate text-[11px] text-slate-500">{s.d}</span>
+                <span className="truncate text-[11px] text-slate-600">{s.d}</span>
               </div>
             </div>
           ))}
@@ -350,22 +350,22 @@ export function Publicar() {
                       <span className="material-symbols-outlined text-3xl">cloud_upload</span>
                     </span>
                     <span className="font-bold">{uploading ? "Subiendo…" : "Arrastra tu documento o haz clic"}</span>
-                    <span className="max-w-sm text-sm text-slate-500">PDF de texto editable o vectorial de alta resolución.</span>
+                    <span className="max-w-sm text-sm text-slate-600">PDF de texto editable o vectorial de alta resolución.</span>
                     <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.epub" onChange={(e) => pickFile(e.target.files?.[0])} />
                   </label>
                 ) : (
                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-4">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 text-red-600">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 text-red-800">
                         <span className="material-symbols-outlined text-2xl">picture_as_pdf</span>
                       </span>
                       <div className="flex flex-col">
                         <span className="text-sm font-bold">{file.name}</span>
-                        <span className="text-xs text-slate-500">{mbOf(file)} · listo para publicar</span>
+                        <span className="text-xs text-slate-600">{mbOf(file)} · listo para publicar</span>
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <label className="cursor-pointer rounded-lg p-2 text-slate-500 hover:bg-slate-200" title="Reemplazar archivo">
+                      <label className="cursor-pointer rounded-lg p-2 text-slate-600 hover:bg-slate-200" title="Reemplazar archivo">
                         <span className="material-symbols-outlined">sync</span>
                         <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.epub" onChange={(e) => pickFile(e.target.files?.[0])} />
                       </label>
@@ -383,7 +383,7 @@ export function Publicar() {
                     <input className="input text-center font-bold" type="number" min={1} max={99} value={pageEnd} onChange={(e) => setPageEnd(Number(e.target.value))} />
                   </label>
                   <div className="flex flex-col justify-end rounded-lg bg-white p-2 text-center">
-                    <span className="text-[11px] text-slate-500">Resto bloqueado</span>
+                    <span className="text-[11px] text-slate-600">Resto bloqueado</span>
                     <span className="text-xs font-bold text-primary" style={accent ? { color: accent.color } : undefined}>~{blockedPct}%</span>
                   </div>
                 </div>
@@ -413,7 +413,7 @@ export function Publicar() {
                   </label>
                 </div>
                 <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl bg-slate-50 p-6 text-center hover:bg-slate-100">
-                  <span className="material-symbols-outlined text-3xl text-slate-400">qr_code_2</span>
+                  <span className="material-symbols-outlined text-3xl text-slate-600">qr_code_2</span>
                   <span className="text-sm font-bold">{qrBusy ? "Subiendo QR…" : payQr ? "Cambiar imagen QR" : "Subir imagen de tu QR"}</span>
                   <input type="file" className="hidden" accept="image/*" onChange={(e) => pickQr(e.target.files?.[0])} />
                 </label>
@@ -435,12 +435,12 @@ export function Publicar() {
                   <span className="font-display text-xl font-bold text-primary" style={accent ? { color: accent.color } : undefined}>S/</span>
                   <input className="input w-full font-display text-xl font-bold" type="number" min={0} max={500} step={1} value={price} onChange={(e) => setPrice(Number(e.target.value))} />
                 </span>
-                <span className="text-xs font-normal text-slate-500">Sugerido{accent ? ` · ${accent.label}` : ""}: {soles(cc.suggestPrice)}</span>
+                <span className="text-xs font-normal text-slate-600">Sugerido{accent ? ` · ${accent.label}` : ""}: {soles(cc.suggestPrice)}</span>
               </label>
               <div className="rounded-xl bg-slate-50 p-4 text-sm md:col-span-7">
                 <p className="font-bold">Desglose por cada venta</p>
-                <div className="flex justify-between py-1 text-slate-500"><span>Precio pagado:</span><b className="text-slate-800">{soles(priceNum)}</b></div>
-                <div className="flex justify-between py-1 text-slate-500"><span>Comisión plataforma ({FEE_PCT}%):</span><b className="text-red-600">- {soles(fee)}</b></div>
+                <div className="flex justify-between py-1 text-slate-600"><span>Precio pagado:</span><b className="text-slate-800">{soles(priceNum)}</b></div>
+                <div className="flex justify-between py-1 text-slate-600"><span>Comisión plataforma ({FEE_PCT}%):</span><b className="text-red-600">- {soles(fee)}</b></div>
                 <div className="my-1 h-0.5 bg-slate-200"></div>
                 <div className="flex items-center justify-between py-1">
                   <span className="font-bold text-emerald-700">Tu ganancia ({100 - FEE_PCT}%):</span>
@@ -475,9 +475,9 @@ export function Publicar() {
           <section className="card space-y-3 p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-display font-bold">4 · Declaración Jurada (D.L. 822)</h2>
-              <span className="rounded-md bg-red-100 px-2 py-1 text-[11px] font-bold text-red-600">Indispensable</span>
+              <span className="rounded-md bg-red-100 px-2 py-1 text-[11px] font-bold text-red-800">Indispensable</span>
             </div>
-            <div className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500">
+            <div className="rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
               Universo Agustino promueve el estudio colaborativo y sanciona el plagio. Tu publicación puede pasar por revisión antes de listarse.
             </div>
             <label className="flex cursor-pointer items-start gap-2 text-sm">
@@ -524,7 +524,7 @@ export function Publicar() {
                 <div className="pointer-events-none absolute inset-0 flex flex-col justify-between bg-primary/20 p-2" style={accent ? { backgroundColor: `${accent.color}33` } : undefined}>
                   <div className="flex items-start justify-between">
                     <span className="rounded-full bg-black/70 px-2 py-0.5 text-[10px] text-white">Muestra: {mode === "digital" ? `${pageEnd - pageStart + 1} págs` : "Físico"}</span>
-                    <span className="flex items-center gap-0.5 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                    <span className="flex items-center gap-0.5 rounded-full bg-emerald-700 px-2 py-0.5 text-[10px] font-bold text-white">
                       <span className="material-symbols-outlined text-xs">lock_open</span>
                       {mode === "digital" ? "PDF Digital" : tx === "VENTA" ? "Venta" : "Alquiler"}
                     </span>
@@ -542,7 +542,7 @@ export function Publicar() {
                   <span className="font-display text-xl font-extrabold text-primary" style={accent ? { color: accent.color } : undefined}>{soles(priceNum)}</span>
                 </div>
                 <h3 className="font-bold leading-tight line-clamp-2">{title || "Tu título aparecerá aquí…"}</h3>
-                <p className="text-xs text-slate-500 line-clamp-2">{description || (mode === "digital" ? course || "Tu descripción…" : campus)}</p>
+                <p className="text-xs text-slate-600 line-clamp-2">{description || (mode === "digital" ? course || "Tu descripción…" : campus)}</p>
                 <div className="my-1 h-0.5 bg-slate-100"></div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium">Por {authorName}</span>
@@ -563,7 +563,7 @@ export function Publicar() {
               <span className="material-symbols-outlined text-primary" style={accent ? { color: accent.color } : undefined}>checklist_rtl</span>
               Checklist de aprobación exprés
             </h4>
-            <p className="text-xs text-slate-500">Revisión del equipo moderador en menos de 2 horas:</p>
+            <p className="text-xs text-slate-600">Revisión del equipo moderador en menos de 2 horas:</p>
             <ul className="space-y-1 text-xs">
               {[
                 "Título claro y archivo legible, sin fotos borrosas.",
@@ -582,7 +582,7 @@ export function Publicar() {
           <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-100 p-3">
             <div className="flex flex-col">
               <span className="text-sm font-bold">¿Dudas con tu material?</span>
-              <span className="text-xs text-slate-500">Revisa el marco legal antes de publicar.</span>
+              <span className="text-xs text-slate-600">Revisa el marco legal antes de publicar.</span>
             </div>
             <Link to="/legal" className="flex shrink-0 items-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-bold text-primary shadow-sm hover:bg-slate-50" style={accent ? { color: accent.color } : undefined}>
               <span className="material-symbols-outlined text-base">gavel</span> D.L. 822

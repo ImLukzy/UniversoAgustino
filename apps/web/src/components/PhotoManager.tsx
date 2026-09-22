@@ -55,14 +55,14 @@ export function PhotoManager({
           </div>
         ))}
         {room > 0 && (
-          <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-slate-300 text-slate-400 transition-colors hover:border-primary hover:text-primary">
+          <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-slate-300 text-slate-500 transition-colors hover:border-primary hover:text-primary">
             <span className="material-symbols-outlined text-2xl">add_a_photo</span>
             <span className="px-1 text-center text-[11px] font-semibold">{busy ? "Subiendo…" : `Agregar (${room})`}</span>
             <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => { void add(e.target.files); e.target.value = ""; }} />
           </label>
         )}
       </div>
-      <p className="text-[11px] text-slate-400">Máximo {max} fotos. La primera es la portada. Se muestran tal cual, sin marcas.</p>
+      <p className="text-[11px] text-slate-500">Máximo {max} fotos. La primera es la portada. Se muestran tal cual, sin marcas.</p>
       {err && <p className="text-xs font-semibold text-red-600">{err}</p>}
     </div>
   );

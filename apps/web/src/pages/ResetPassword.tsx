@@ -103,7 +103,7 @@ export function ResetPassword() {
         <label className="flex flex-col gap-1 text-xs font-bold uppercase tracking-wider text-slate-500">
           Nueva contraseña
           <span className="relative block">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400">lock</span>
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-500">lock</span>
             <input
               className="input pr-11"
               style={{ borderRadius: "0.9rem", paddingTop: "0.85rem", paddingBottom: "0.85rem", paddingLeft: "2.75rem", paddingRight: "2.75rem" }}
@@ -115,7 +115,7 @@ export function ResetPassword() {
               minLength={10}
               autoComplete="new-password"
             />
-            <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600">
               <span className="material-symbols-outlined text-lg">{show ? "visibility_off" : "visibility"}</span>
             </button>
           </span>
@@ -127,7 +127,7 @@ export function ResetPassword() {
         </div>
         <ul className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
           {rules.map((r) => (
-            <li key={r.label} className={r.pass ? "font-semibold text-emerald-700" : "text-slate-400"}>
+            <li key={r.label} className={r.pass ? "font-semibold text-emerald-700" : "text-slate-500"}>
               {r.pass ? "✓" : "•"} {r.label}
             </li>
           ))}

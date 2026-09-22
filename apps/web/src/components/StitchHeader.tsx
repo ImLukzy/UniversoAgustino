@@ -29,6 +29,8 @@ export function StitchHeader({ active }: { active: StitchSection }) {
           <a className="flex items-center gap-space-sm group" data-path="explorar-marketplace" href="#">
             <img
               alt="Universo Agustino"
+              width="50"
+              height="40"
               className="h-10 w-auto object-contain"
               src="/logo-ua.svg"
             />

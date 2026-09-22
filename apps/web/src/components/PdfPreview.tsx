@@ -67,7 +67,7 @@ export function PdfPage({ url, page, fallback, scale = 1.5 }: { url: string; pag
   return (
     <div className="relative bg-white">
       {loading && (
-        <div className="flex items-center justify-center gap-2 bg-slate-100 py-16 text-xs text-slate-400">
+        <div className="flex items-center justify-center gap-2 bg-slate-100 py-16 text-xs text-slate-500">
           <span className="material-symbols-outlined animate-spin text-lg">sync</span>
           Cargando página {page}…
         </div>

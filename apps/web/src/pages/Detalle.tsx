@@ -175,17 +175,17 @@ export function Detalle() {
             <dl className="grid grid-cols-2 gap-2 pt-2 text-sm sm:grid-cols-4">
               {kind === "document" ? (
                 <>
-                  <div><dt className="text-xs text-slate-400">Curso</dt><dd className="font-semibold">{doc.data!.course}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Ciclo</dt><dd className="font-semibold">{doc.data!.cycle}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Tipo</dt><dd className="font-semibold">{doc.data!.type}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Universidad</dt><dd className="font-semibold">{doc.data!.university}</dd></div>
+                  <div><dt className="text-xs text-slate-500">Curso</dt><dd className="font-semibold">{doc.data!.course}</dd></div>
+                  <div><dt className="text-xs text-slate-500">Ciclo</dt><dd className="font-semibold">{doc.data!.cycle}</dd></div>
+                  <div><dt className="text-xs text-slate-500">Tipo</dt><dd className="font-semibold">{doc.data!.type}</dd></div>
+                  <div><dt className="text-xs text-slate-500">Universidad</dt><dd className="font-semibold">{doc.data!.university}</dd></div>
                 </>
               ) : (
                 <>
-                  <div><dt className="text-xs text-slate-400">Categoría</dt><dd className="font-semibold">{item.data!.kind}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Modalidad</dt><dd className="font-semibold">{item.data!.tx}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Garantía</dt><dd className="font-semibold">{item.data!.depositCents ? pen(item.data!.depositCents) : "—"}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Estado</dt><dd className="font-semibold">{item.data!.status}</dd></div>
+                  <div><dt className="text-xs text-slate-500">Categoría</dt><dd className="font-semibold">{item.data!.kind}</dd></div>
+                  <div><dt className="text-xs text-slate-500">Modalidad</dt><dd className="font-semibold">{item.data!.tx}</dd></div>
+                  <div><dt className="text-xs text-slate-500">Garantía</dt><dd className="font-semibold">{item.data!.depositCents ? pen(item.data!.depositCents) : "—"}</dd></div>
+                  <div><dt className="text-xs text-slate-500">Estado</dt><dd className="font-semibold">{item.data!.status}</dd></div>
                 </>
               )}
             </dl>
@@ -210,7 +210,7 @@ export function Detalle() {
               Vendedor verificado UNSA
             </p>
             <p className="font-display text-3xl font-extrabold text-primary">{pen(price ?? 0)}</p>
-            <p className="text-xs text-slate-400">Precio final. La comisión de custodia se calcula al confirmar.</p>
+            <p className="text-xs text-slate-500">Precio final. La comisión de custodia se calcula al confirmar.</p>
             <div className="rounded-xl bg-slate-50 p-3 text-sm space-y-2">
               <p className="font-bold">Cobro por {PAY_LABEL[payMethod ?? "YAPE"]}</p>
               {payQr ? (
@@ -230,14 +230,14 @@ export function Detalle() {
                   Fin del alquiler
                   <input type="date" className="input" value={rentalEnd} min={rentalStart || todayLocal()} onChange={(e) => setRentalEnd(e.target.value)} />
                 </label>
-                <p className="col-span-2 text-[11px] text-slate-400">El vendedor debe aceptar tu solicitud antes de que pagues.</p>
+                <p className="col-span-2 text-[11px] text-slate-500">El vendedor debe aceptar tu solicitud antes de que pagues.</p>
               </div>
             )}
             {err && <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{err}</p>}
             <button disabled={!available || busy} onClick={buy} className="btn-primary w-full disabled:opacity-50">
               {!available ? "No disponible" : busy ? "Creando pedido…" : user ? (isRental ? "Solicitar alquiler" : "Comprar ahora") : "Entrar y comprar"}
             </button>
-            <p className="text-center text-xs text-slate-400">Compra en custodia: pagas al vendedor y se libera al confirmar recepción.</p>
+            <p className="text-center text-xs text-slate-500">Compra en custodia: pagas al vendedor y se libera al confirmar recepción.</p>
           </div>
 
           <div className="card space-y-2 p-5 text-sm">

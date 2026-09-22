@@ -52,7 +52,7 @@ export function Login() {
         {/* Marca */}
         <div className="flex flex-col justify-center gap-5">
           <Link to="/" className="flex items-center gap-3">
-            <img src="/logo-ua.svg" alt="Universo Agustino" className="h-11 w-auto" />
+            <img src="/logo-ua.svg" alt="Universo Agustino" width="55" height="44" className="h-11 w-auto" />
             <span className="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">
               Universo <span className="text-primary">Agustino</span>
             </span>
@@ -92,7 +92,7 @@ export function Login() {
             <label className="flex flex-col gap-1 text-xs font-bold uppercase tracking-wider text-slate-500">
               Correo electrónico
               <span className="relative block">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400">mail</span>
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-500">mail</span>
                 <input
                   name="hub-email"
                   className="input pl-11"
@@ -110,7 +110,7 @@ export function Login() {
             <label className="flex flex-col gap-1 text-xs font-bold uppercase tracking-wider text-slate-500">
               Contraseña
               <span className="relative block">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400">lock</span>
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-500">lock</span>
                 <input
                   name="hub-pass"
                   className="input pl-11 pr-11"
@@ -122,7 +122,7 @@ export function Login() {
                   required
                   autoComplete="new-password"
                 />
-                <button type="button" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <button type="button" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600">
                   <span className="material-symbols-outlined text-lg">{showPw ? "visibility_off" : "visibility"}</span>
                 </button>
               </span>
@@ -141,7 +141,7 @@ export function Login() {
               {busy ? "Entrando…" : "→  Iniciar sesión"}
             </button>
           </form>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
+          <div className="flex items-center gap-3 text-xs text-slate-500">
             <span className="h-px flex-1 bg-slate-200"></span>
             ¿No tienes cuenta?
             <span className="h-px flex-1 bg-slate-200"></span>

@@ -8,7 +8,12 @@
 import fs from "node:fs";
 
 const BASE = "http://localhost:4000/api/v1";
-const LOG = "C:/Users/anton/AppData/Local/Temp/opencode/api-out.log";
+// LOG: ruta del stdout del API (driver console imprime el enlace de reset).
+// En otra PC: E2E_API_LOG=D:\ruta\al\api-out.log node scripts/e2e-f1.mjs phase-a
+const LOG = process.env.E2E_API_LOG ?? "C:/Users/anton/AppData/Local/Temp/opencode/api-out.log";
+// Token entre fases (phase-a -> reinicio API -> phase-b). En otra PC:
+// E2E_F1_TOKEN_FILE=D:\ruta\e2e-f1-token.txt (vive solo durante la corrida).
+const TOKEN_FILE = process.env.E2E_F1_TOKEN_FILE ?? "C:/Users/anton/AppData/Local/Temp/opencode/e2e-f1-token.txt";
 const SELLER = { email: "rosa.quispe@unsa.edu.pe", password: "Creadora123!" };
 const BUYER = { email: "lukas.melgar@tecsup.edu.pe", password: "Lukas123!" };
 const NEW_PASS = "Temporal123!";
@@ -72,13 +77,13 @@ console.log("login nueva ok / anterior 401 ok");
 r = await raw("POST", "/auth/refresh", { cookie: `hub_refresh=${preCookie}` });
 assert(r.status === 401, "refresh revocado debe ser 401, fue " + r.status);
 console.log("sesiones revocadas tras reset ok");
-fs.writeFileSync("C:/Users/anton/AppData/Local/Temp/opencode/e2e-f1-token.txt", tok1);
+fs.writeFileSync(TOKEN_FILE, tok1);
 console.log("E2E F1 phase-a OK (reinicia el API y corre phase-b)");
 }
 
 if (PHASE === "phase-b") {
 // reuso del token usado en phase-a -> 410 (el registro persiste en BD)
-const tok1 = fs.readFileSync("C:/Users/anton/AppData/Local/Temp/opencode/e2e-f1-token.txt", "utf8").trim();
+const tok1 = fs.readFileSync(TOKEN_FILE, "utf8").trim();
 let r = await raw("POST", "/auth/reset", { body: { token: tok1, password: "Otra123456!" } });
 assert(r.status === 410 && r.json?.error?.code === "TOKEN_EXPIRED", "reuso debe ser 410, fue " + r.status);
 console.log("reuso token 410 ok");

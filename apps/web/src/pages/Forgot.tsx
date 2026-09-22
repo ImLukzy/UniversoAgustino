@@ -39,7 +39,7 @@ export function Forgot() {
           <label className="flex flex-col gap-1 text-xs font-bold uppercase tracking-wider text-slate-500">
             Correo electrónico
             <span className="relative block">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400">mail</span>
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-500">mail</span>
               <input
                 name="hub-email"
                 className="input"

@@ -25,7 +25,7 @@ export function CareerVisual({
       <span
         className={`material-symbols-outlined ${iconClassName}`}
         style={{
-          color: accent?.color ?? "#0d9488",
+          color: accent?.color ?? "#0f766e",
           fontVariationSettings: "'FILL' 1",
           fontSize: "3.5rem",
         }}
@@ -33,7 +33,7 @@ export function CareerVisual({
         {cc.visualIcon}
       </span>
       {label && (
-        <span className="font-label-md text-label-md font-bold" style={{ color: accent?.color ?? "#0d9488" }}>
+        <span className="font-label-md text-label-md font-bold" style={{ color: accent?.color ?? "#0f766e" }}>
           {label}
         </span>
       )}
@@ -76,7 +76,7 @@ export function CareerAvatar({ name, className = "w-14 h-14" }: { name: string; 
   return (
     <span
       className={`${className} rounded-full text-white flex items-center justify-center font-bold text-title-lg shrink-0 shadow-sm`}
-      style={{ backgroundColor: accent?.color ?? "#0d9488" }}
+      style={{ backgroundColor: accent?.color ?? "#0f766e" }}
       aria-hidden
     >
       {initial}

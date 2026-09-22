@@ -15,13 +15,13 @@ function Step({ n, label, state }: { n: number; label: string; state: "done" | "
     <div className="flex items-center gap-2">
       <span
         className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-extrabold ${
-          state === "done" ? "bg-emerald-600 text-white" : state === "now" ? "bg-primary text-white" : "bg-slate-200 text-slate-500"
+          state === "done" ? "bg-emerald-700 text-white" : state === "now" ? "bg-primary text-white" : "bg-slate-200 text-slate-600"
         }`}
         style={state === "now" && accent ? { backgroundColor: accent.color } : undefined}
       >
         {state === "done" ? "✓" : n}
       </span>
-      <span className={`text-sm font-bold ${state === "todo" ? "text-slate-400" : ""}`}>{label}</span>
+      <span className={`text-sm font-bold ${state === "todo" ? "text-slate-600" : ""}`}>{label}</span>
     </div>
   );
 }
@@ -119,7 +119,7 @@ export function Checkout() {
             Pasarela protegida · Red estudiantil Arequipa
           </p>
           <h1 className="font-display text-2xl font-extrabold md:text-3xl">Finaliza tu compra en custodia</h1>
-          <p className="max-w-2xl text-sm text-slate-500">
+          <p className="max-w-2xl text-sm text-slate-600">
             Pagas directo al vendedor por {methodLabel}. El dinero queda en custodia hasta que confirmes recepción.
           </p>
         </div>
@@ -148,7 +148,7 @@ export function Checkout() {
                 </span>
                 <div>
                   <h2 className="font-display font-bold">Datos de entrega</h2>
-                  <p className="text-xs text-slate-500">Tu cuenta recibe el pedido automáticamente</p>
+                  <p className="text-xs text-slate-600">Tu cuenta recibe el pedido automáticamente</p>
                 </div>
               </div>
               <span className="hidden rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 sm:inline">
@@ -156,11 +156,11 @@ export function Checkout() {
               </span>
             </div>
             <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-              <p className="rounded-lg bg-slate-50 px-3 py-2"><span className="text-slate-400">Correo: </span><b>{user.email}</b></p>
-              <p className="rounded-lg bg-slate-50 px-3 py-2"><span className="text-slate-400">Nombre: </span><b>{user.profile?.fullName ?? "—"}</b></p>
-              <p className="rounded-lg bg-slate-50 px-3 py-2"><span className="text-slate-400">Universidad: </span><b>{user.profile?.university ?? "UNSA"}</b></p>
+              <p className="rounded-lg bg-slate-50 px-3 py-2"><span className="text-slate-600">Correo: </span><b>{user.email}</b></p>
+              <p className="rounded-lg bg-slate-50 px-3 py-2"><span className="text-slate-600">Nombre: </span><b>{user.profile?.fullName ?? "—"}</b></p>
+              <p className="rounded-lg bg-slate-50 px-3 py-2"><span className="text-slate-600">Universidad: </span><b>{user.profile?.university ?? "UNSA"}</b></p>
               <p className="rounded-lg bg-slate-50 px-3 py-2">
-                <span className="text-slate-400">Carrera/ciclo: </span>
+                <span className="text-slate-600">Carrera/ciclo: </span>
                 <b>{[user.profile?.career, user.profile?.cycle].filter(Boolean).join(" · ") || "—"}</b>
               </p>
             </div>
@@ -176,7 +176,7 @@ export function Checkout() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-extrabold text-white">2</span>
                 <div>
                   <h2 className="font-display font-bold">Método de pago · {methodLabel}</h2>
-                  <p className="text-xs text-slate-500">Sin comisiones ocultas para el comprador</p>
+                  <p className="text-xs text-slate-600">Sin comisiones ocultas para el comprador</p>
                 </div>
               </div>
               <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700">
@@ -203,15 +203,15 @@ export function Checkout() {
                       <img src={qr} alt="QR de cobro del vendedor" className="h-40 w-40 rounded-lg object-cover" />
                     ) : (
                       <div className="flex h-40 w-40 flex-col items-center justify-center rounded-lg bg-slate-100 p-2 text-center">
-                        <span className="material-symbols-outlined text-4xl text-slate-400">qr_code_2</span>
-                        <span className="mt-1 text-[11px] text-slate-500">El vendedor aún no sube su QR. Coordina el pago con él.</span>
+                        <span className="material-symbols-outlined text-4xl text-slate-600">qr_code_2</span>
+                        <span className="mt-1 text-[11px] text-slate-600">El vendedor aún no sube su QR. Coordina el pago con él.</span>
                       </div>
                     )}
                     <span className="mt-1 text-xs font-bold">{methodLabel} del vendedor</span>
                   </div>
                   <div className="flex w-full grow flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Dato receptor</span>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">Dato receptor</span>
                       {o.payDetail && (
                         <button onClick={copyDetail} className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:underline">
                           <span className="material-symbols-outlined text-sm">content_copy</span>
@@ -224,16 +224,16 @@ export function Checkout() {
                         <span className="font-display text-xl font-extrabold text-primary" style={accent ? { color: accent.color } : undefined}>
                           {o.payDetail || "A coordinar"}
                         </span>
-                        <span className="text-xs text-slate-500">Titular: {sellerName}</span>
+                        <span className="text-xs text-slate-600">Titular: {sellerName}</span>
                       </div>
                       <span className="material-symbols-outlined text-2xl text-emerald-600">verified</span>
                     </div>
                     <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
-                      <p className="flex items-start gap-1 rounded-lg bg-white/60 p-2 text-xs text-slate-500">
+                      <p className="flex items-start gap-1 rounded-lg bg-white/60 p-2 text-xs text-slate-600">
                         <span className="material-symbols-outlined text-base text-indigo-600">qr_code_scanner</span>
                         <span>1. Abre tu app y paga <b>{pen(o.amountCents)}</b> al dato de arriba.</span>
                       </p>
-                      <p className="flex items-start gap-1 rounded-lg bg-white/60 p-2 text-xs text-slate-500">
+                      <p className="flex items-start gap-1 rounded-lg bg-white/60 p-2 text-xs text-slate-600">
                         <span className="material-symbols-outlined text-base text-emerald-700">pin</span>
                         <span>2. Declara tu n° de operación abajo para avisar al vendedor.</span>
                       </p>
@@ -245,7 +245,7 @@ export function Checkout() {
                   <label className="flex flex-col gap-1 text-sm font-semibold">
                     <span>N° de operación o código de aprobación <span className="text-red-500">*</span></span>
                     <span className="flex items-center rounded-lg bg-slate-50 px-3 py-2">
-                      <span className="material-symbols-outlined mr-2 text-slate-400">numbers</span>
+                      <span className="material-symbols-outlined mr-2 text-slate-600">numbers</span>
                       <input
                         className="w-full bg-transparent font-bold focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         value={proof}
@@ -254,7 +254,7 @@ export function Checkout() {
                         maxLength={160}
                       />
                     </span>
-                    <span className="text-xs font-normal text-slate-500">Visible en la constancia de tu app Yape/Plin.</span>
+                    <span className="text-xs font-normal text-slate-600">Visible en la constancia de tu app Yape/Plin.</span>
                   </label>
                 </div>
 
@@ -263,7 +263,7 @@ export function Checkout() {
                   <span>{busy ? "Enviando…" : "Validar Pago y Pasar a Custodia"}</span>
                   <span className="material-symbols-outlined">arrow_forward</span>
                 </button>
-                <p className="flex items-center justify-center gap-1 text-center text-xs text-slate-500">
+                <p className="flex items-center justify-center gap-1 text-center text-xs text-slate-600">
                   <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
                   El vendedor confirma tu pago y el pedido queda en custodia.
                 </p>
@@ -286,7 +286,7 @@ export function Checkout() {
             <span className="material-symbols-outlined shrink-0 text-2xl text-primary" style={accent ? { color: accent.color } : undefined}>gavel</span>
             <div className="flex flex-col gap-0.5">
               <span className="font-bold">Respaldo regulatorio D.L. 822</span>
-              <p className="text-sm leading-relaxed text-slate-500">
+              <p className="text-sm leading-relaxed text-slate-600">
                 Universo Agustino promueve material original entre estudiantes. Queda prohibida la redistribución de copias sin autorización; los reportes se atienden en menos de 48 horas.
               </p>
             </div>
@@ -307,7 +307,7 @@ export function Checkout() {
               <div className="flex min-w-0 flex-col justify-between py-0.5">
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <span className="truncate text-sm font-bold">{item.data?.title ?? `${o.itemType} · ${o.itemId.slice(0, 8)}…`}</span>
-                  <span className="truncate text-xs text-slate-500">Vendido por {sellerName}</span>
+                  <span className="truncate text-xs text-slate-600">Vendido por {sellerName}</span>
                   {o.rentalStart && o.rentalEnd && (
                     <span className="truncate text-xs font-semibold text-indigo-700">
                       Alquiler: {fmtDate(o.rentalStart)} → {fmtDate(o.rentalEnd)}
@@ -320,7 +320,7 @@ export function Checkout() {
               </div>
               <span className="ml-auto font-display text-lg font-extrabold">{pen(o.amountCents)}</span>
             </div>
-            <div className="flex flex-col gap-1 text-sm text-slate-500">
+            <div className="flex flex-col gap-1 text-sm text-slate-600">
               <div className="flex items-center justify-between"><span>Subtotal del producto:</span><b className="text-slate-800">{pen(o.amountCents)}</b></div>
               <div className="flex items-center justify-between"><span>Comisión de custodia:</span><b className="text-emerald-700">Incluida</b></div>
               <div className="my-1 h-px bg-slate-100"></div>
@@ -335,7 +335,7 @@ export function Checkout() {
               <CareerAvatar name={sellerName} className="h-10 w-10" />
               <div className="flex flex-col text-sm">
                 <span className="font-bold">Apoyo directo al compañero</span>
-                <span className="text-xs text-slate-500">{pen(o.netCents)} van a {sellerName} tras tu confirmación.</span>
+                <span className="text-xs text-slate-600">{pen(o.netCents)} van a {sellerName} tras tu confirmación.</span>
               </div>
             </div>
           </div>
@@ -348,7 +348,7 @@ export function Checkout() {
               </span>
               <div className="flex flex-col">
                 <span className="text-sm font-bold">Custodia del 100%</span>
-                <p className="text-xs leading-relaxed text-slate-500">El dinero se retiene hasta que confirmas recepción. Si algo falla, se devuelve.</p>
+                <p className="text-xs leading-relaxed text-slate-600">El dinero se retiene hasta que confirmas recepción. Si algo falla, se devuelve.</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
@@ -357,7 +357,7 @@ export function Checkout() {
               </span>
               <div className="flex flex-col">
                 <span className="text-sm font-bold">Compra protegida D.L. 822</span>
-                <p className="text-xs leading-relaxed text-slate-500">Solo material original. Reportes con takedown en menos de 48 horas.</p>
+                <p className="text-xs leading-relaxed text-slate-600">Solo material original. Reportes con takedown en menos de 48 horas.</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
@@ -366,7 +366,7 @@ export function Checkout() {
               </span>
               <div className="flex flex-col">
                 <span className="text-sm font-bold">Soporte UNSA</span>
-                <p className="text-xs leading-relaxed text-slate-500">
+                <p className="text-xs leading-relaxed text-slate-600">
                   ¿Problemas con tu pago? Revisa el <Link to="/legal" className="font-bold text-primary hover:underline" style={accent ? { color: accent.color } : undefined}>marco legal</Link> o tus pedidos.
                 </p>
               </div>
@@ -376,17 +376,17 @@ export function Checkout() {
           <div className="flex items-center justify-around rounded-xl bg-slate-100 p-3 text-center">
             <div className="flex flex-col items-center">
               <span className="font-display text-lg font-extrabold text-primary" style={accent ? { color: accent.color } : undefined}>100%</span>
-              <span className="text-[11px] text-slate-500">Custodia</span>
+              <span className="text-[11px] text-slate-600">Custodia</span>
             </div>
             <div className="h-8 w-px bg-slate-300"></div>
             <div className="flex flex-col items-center">
               <span className="font-display text-lg font-extrabold text-indigo-700">48h</span>
-              <span className="text-[11px] text-slate-500">Takedown</span>
+              <span className="text-[11px] text-slate-600">Takedown</span>
             </div>
             <div className="h-8 w-px bg-slate-300"></div>
             <div className="flex flex-col items-center">
               <span className="font-display text-lg font-extrabold text-emerald-700">D.L. 822</span>
-              <span className="text-[11px] text-slate-500">Respaldo legal</span>
+              <span className="text-[11px] text-slate-600">Respaldo legal</span>
             </div>
           </div>
         </div>

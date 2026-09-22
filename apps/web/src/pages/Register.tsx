@@ -131,7 +131,7 @@ export function Register() {
                     </span>
                   )}
                 </span>
-                <span className={`text-xs font-medium ${!form.email || emailOk ? "text-slate-400" : "text-red-500"}`}>
+                <span className={`text-xs font-medium ${!form.email || emailOk ? "text-slate-500" : "text-red-500"}`}>
                   {!form.email || emailOk ? "Usa tu correo @unsa.edu.pe para validar tu identidad agustina." : "Ese correo no es @unsa.edu.pe."}
                 </span>
               </label>
@@ -150,12 +150,12 @@ export function Register() {
                     required
                     minLength={8}
                   />
-                  <button type="button" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <button type="button" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600">
                     <span className="material-symbols-outlined">{showPw ? "visibility_off" : "visibility"}</span>
                   </button>
                 </span>
                 {form.password && (
-                  <span className={`text-xs font-medium ${pwOk ? "text-emerald-600" : "text-slate-400"}`}>
+                  <span className={`text-xs font-medium ${pwOk ? "text-emerald-600" : "text-slate-500"}`}>
                     {pwOk ? "Contraseña válida." : `${8 - form.password.length} caracteres más…`}
                   </span>
                 )}
@@ -181,7 +181,7 @@ export function Register() {
                   </select>
                 </label>
               </div>
-              <p className="-mt-1 text-xs text-slate-400">{faculty}</p>
+              <p className="-mt-1 text-xs text-slate-500">{faculty}</p>
               {err && <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{err}</p>}
               <button
                 disabled={busy}
@@ -202,7 +202,7 @@ export function Register() {
             </p>
           </div>
         </div>
-        <p className="mt-4 text-center text-xs text-slate-400">Al registrarte aceptas el marco legal D.L. 822: solo material original.</p>
+        <p className="mt-4 text-center text-xs text-slate-500">Al registrarte aceptas el marco legal D.L. 822: solo material original.</p>
       </div>
     </main>
   );

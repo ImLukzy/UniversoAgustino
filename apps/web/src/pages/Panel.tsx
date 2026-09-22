@@ -154,16 +154,16 @@ export function Panel() {
                 {ROLE_LABEL[user.role] ?? user.role}
               </span>
               {user.profile?.cycle && (
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">{user.profile.cycle} Ciclo</span>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{user.profile.cycle} Ciclo</span>
               )}
             </div>
-            <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-slate-500">
+            <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-slate-600">
               <span className="inline-flex items-center gap-1 font-medium text-slate-800">
                 <span className="material-symbols-outlined text-base text-primary" style={accent ? { color: accent.color } : undefined}>school</span>
                 {user.profile?.career ? careerLabel(user.profile.career) : "Universo Agustino"}
               </span>
               <span>•</span>
-              <span className="font-mono text-xs text-slate-400">{user.email}</span>
+              <span className="font-mono text-xs text-slate-600">{user.email}</span>
             </p>
           </div>
         </div>
@@ -189,7 +189,7 @@ export function Panel() {
         {metrics.map((m) => (
           <div key={m.label} className="flex flex-col justify-between rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-slate-500">{m.label}</span>
+              <span className="text-sm font-medium text-slate-600">{m.label}</span>
               <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${m.iconWrap}`}>
                 <span className="material-symbols-outlined text-xl">{m.icon}</span>
               </div>
@@ -202,7 +202,7 @@ export function Panel() {
                 <Link to={m.link} className="text-xs font-semibold text-primary hover:underline" style={accent ? { color: accent.color } : undefined}>{m.linkLabel}</Link>
               ) : null}
             </div>
-            <div className="mt-2 text-xs text-slate-500">{m.sub}</div>
+            <div className="mt-2 text-xs text-slate-600">{m.sub}</div>
           </div>
         ))}
       </section>
@@ -257,19 +257,19 @@ export function Panel() {
                 <span className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-red-600">
                   <span className="material-symbols-outlined text-sm">gavel</span> Moderación · D.L. 822
                 </span>
-                <span className="animate-pulse rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-700">
+                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-800">
                   {openReports} pendientes
                 </span>
               </div>
               <h2 className="font-display text-xl font-extrabold tracking-tight">Reportes de propiedad intelectual</h2>
-              <p className="mt-1 text-xs text-slate-500">Auditoría de apuntes reportados. Tu Gestión de Ventas está en /ventas.</p>
+              <p className="mt-1 text-xs text-slate-600">Auditoría de apuntes reportados. Tu Gestión de Ventas está en /ventas.</p>
             </div>
             <div className="z-10 mt-3 flex items-center justify-between">
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700">
                 <span>Abrir cola de moderación</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </span>
-              <span className="font-mono text-[11px] text-slate-400">SLA &lt; 48h</span>
+              <span className="font-mono text-[11px] text-slate-600">SLA &lt; 48h</span>
             </div>
           </Link>
         ) : (
@@ -281,7 +281,7 @@ export function Panel() {
                 </span>
               </div>
               <h2 className="font-display text-xl font-extrabold tracking-tight">Vende y cobra por Yape</h2>
-              <p className="mt-1 text-xs text-slate-500">Publica en minutos con tu QR de cobro configurado.</p>
+              <p className="mt-1 text-xs text-slate-600">Publica en minutos con tu QR de cobro configurado.</p>
             </div>
             <div className="z-10 mt-3 flex items-center justify-between">
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700">
@@ -300,7 +300,7 @@ export function Panel() {
             <span className="material-symbols-outlined text-primary" style={accent ? { color: accent.color } : undefined}>widgets</span>
             Mi Espacio
           </h2>
-          <span className="text-xs text-slate-500">{spaces.length} módulos activos</span>
+          <span className="text-xs text-slate-600">{spaces.length} módulos activos</span>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {spaces.map((s) => (
@@ -309,15 +309,15 @@ export function Panel() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors group-hover:bg-primary group-hover:text-white">
                   <span className="material-symbols-outlined text-xl">{s.icon}</span>
                 </div>
-                <span className="material-symbols-outlined text-slate-400 transition-colors group-hover:text-primary">arrow_forward</span>
+                <span className="material-symbols-outlined text-slate-600 transition-colors group-hover:text-primary">arrow_forward</span>
               </div>
               <div className="mt-3">
                 <h3 className="font-bold transition-colors group-hover:text-primary">{s.title}</h3>
-                <p className="mt-0.5 truncate text-xs text-slate-500" title={s.desc}>{s.desc}</p>
+                <p className="mt-0.5 truncate text-xs text-slate-600" title={s.desc}>{s.desc}</p>
               </div>
               <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2">
                 <span className={`text-xs font-semibold ${s.footCls}`}>{s.foot}</span>
-                <span className="text-xs text-slate-400">{s.tail}</span>
+                <span className="text-xs text-slate-600">{s.tail}</span>
               </div>
             </Link>
           ))}
@@ -330,9 +330,9 @@ export function Panel() {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="font-display text-lg font-extrabold tracking-tight">Últimos pedidos</h2>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">{list.length} registros</span>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">{list.length} registros</span>
             </div>
-            <p className="mt-0.5 text-xs text-slate-500">Compras digitales, bazar en custodia y descargas autenticadas.</p>
+            <p className="mt-0.5 text-xs text-slate-600">Compras digitales, bazar en custodia y descargas autenticadas.</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="inline-flex rounded-lg bg-slate-100 p-1">
@@ -340,7 +340,7 @@ export function Panel() {
                 <button
                   key={v}
                   onClick={() => setFilter(v)}
-                  className={`rounded-md px-2 py-1 text-xs font-semibold transition-all ${filter === v ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+                  className={`rounded-md px-2 py-1 text-xs font-semibold transition-all ${filter === v ? "bg-white text-primary shadow-sm" : "text-slate-600 hover:text-slate-800"}`}
                   style={filter === v && accent ? { color: accent.color } : undefined}
                 >
                   {l}
@@ -359,7 +359,7 @@ export function Panel() {
           {!orders.isLoading && filtered.length === 0 && (
             <div className="flex flex-col items-center gap-1 rounded-xl bg-slate-50 px-4 py-10 text-center">
               <span className="material-symbols-outlined text-5xl text-slate-300">inbox</span>
-              <p className="mt-2 text-sm text-slate-400">{list.length === 0 ? "Aún no tienes pedidos" : "Nada en este filtro"}</p>
+              <p className="mt-2 text-sm text-slate-600">{list.length === 0 ? "Aún no tienes pedidos" : "Nada en este filtro"}</p>
               {list.length === 0 && (
                 <Link to="/" className="text-sm font-bold text-primary hover:underline" style={accent ? { color: accent.color } : undefined}>
                   Compra tu primer apunte →
@@ -377,10 +377,10 @@ export function Panel() {
             </span>
             <div className="flex flex-col">
               <span className="text-sm font-bold">¿Buscas material de tu ciclo?</span>
-              <span className="text-xs text-slate-500">Explora apuntes y bazar con sello D.L. 822.</span>
+              <span className="text-xs text-slate-600">Explora apuntes y bazar con sello D.L. 822.</span>
             </div>
           </div>
-          <Link to="/bazar" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg bg-slate-200 px-4 py-2 text-xs font-bold text-primary transition-colors hover:bg-slate-300" style={accent ? { color: accent.color } : undefined}>
+          <Link to="/bazar" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110">
             <span>Ver bazar</span>
             <span className="material-symbols-outlined text-base">arrow_forward</span>
           </Link>
@@ -391,18 +391,18 @@ export function Panel() {
       <section className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div className="flex flex-col justify-between gap-3 rounded-xl bg-white p-5 shadow-sm">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Cómo cobras</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Cómo cobras</span>
             <div className="mt-2 text-2xl font-extrabold text-primary" style={accent ? { color: accent.color } : undefined}>
               {paySummary(myDocs, myBazar)}
             </div>
-            <p className="mt-1 text-xs text-slate-500">Métodos configurados en tus publicaciones</p>
+            <p className="mt-1 text-xs text-slate-600">Métodos configurados en tus publicaciones</p>
           </div>
           <Link to="/publicaciones" className="btn-primary text-center text-sm">Configurar cobro</Link>
         </div>
         <div className="flex flex-col justify-between gap-3 rounded-xl bg-white p-5 shadow-sm">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Puntos de entrega</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Puntos de entrega</span>
               <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-semibold text-indigo-800">Arequipa</span>
             </div>
             <div className="mt-2 flex flex-col gap-1">
@@ -411,7 +411,7 @@ export function Panel() {
                   <span className="flex items-center gap-1 text-xs font-medium">
                     <span className="h-2 w-2 rounded-full bg-emerald-600"></span> {s}
                   </span>
-                  <span className="text-[11px] text-slate-500">{cc.meetTimes[i]}</span>
+                  <span className="text-[11px] text-slate-600">{cc.meetTimes[i]}</span>
                 </div>
               ))}
             </div>
@@ -423,7 +423,7 @@ export function Panel() {
         <div className="flex flex-col justify-between gap-3 rounded-xl bg-white p-5 shadow-sm">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Tu cuenta</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Tu cuenta</span>
               <span className="material-symbols-outlined text-emerald-600">health_and_safety</span>
             </div>
             <div className="mt-2 flex flex-col gap-1.5">

@@ -48,10 +48,10 @@ export function PanelOrderRow({ order }: { order: HubOrder }) {
             <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-600">
               {isDoc ? "Digital" : "Bazar"} · {order.itemType}
             </span>
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{getOrderLabel(order.status, "buyer", order.cancelledReason)}</span>
+            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-primary">{getOrderLabel(order.status, "buyer", order.cancelledReason)}</span>
           </div>
           <h4 className="mt-1 text-sm font-bold"><OrderTitle order={order} /></h4>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-600">
             <span>{o_date(order.createdAt)}</span>
             <span>•</span>
             <span>{pen(order.amountCents)}</span>
@@ -63,7 +63,7 @@ export function PanelOrderRow({ order }: { order: HubOrder }) {
       <div className="flex w-full items-center justify-between gap-3 self-end lg:w-auto lg:self-center">
         <div className="text-right">
           <div className="font-display text-lg font-extrabold">{pen(order.amountCents)}</div>
-          <span className="text-[11px] text-slate-400">Protegido en custodia</span>
+          <span className="text-[11px] text-slate-600">Protegido en custodia</span>
         </div>
         <div className="flex items-center gap-1">
           {order.status === "PENDING" && (

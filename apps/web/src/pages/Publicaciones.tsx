@@ -485,7 +485,7 @@ export function Publicaciones() {
         </div>
         <div className="flex flex-1 items-center gap-2 md:justify-end">
           <div className="relative w-full md:w-64">
-            <span className="material-symbols-outlined absolute left-3 top-2.5 text-lg text-slate-400">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-2.5 text-lg text-slate-500">search</span>
             <input value={q} onChange={(e) => setQ(e.target.value)} className="w-full rounded-lg bg-slate-100 py-1.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="Buscar por título o curso..." type="text" />
           </div>
           <div className="flex shrink-0 items-center gap-1">
@@ -628,7 +628,7 @@ export function Publicaciones() {
           <div className="flex h-44 w-full items-end justify-between gap-2 pt-2">
             {statusBars(mySales).map((b) => (
               <div key={b.label} className="group flex h-full flex-1 flex-col items-center justify-end">
-                <span className="mb-1 text-xs text-slate-400 opacity-0 transition-opacity group-hover:opacity-100">{b.n}</span>
+                <span className="mb-1 text-xs text-slate-500 opacity-0 transition-opacity group-hover:opacity-100">{b.n}</span>
                 <div
                   className="w-full max-w-[36px] rounded-t transition-all"
                   style={{ height: `${b.h}%`, backgroundColor: b.color }}

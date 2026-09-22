@@ -17,3 +17,7 @@ apps/web/dist/
 # Turbo / TS
 *.tsbuildinfo
 .turbo/
+# Artefactos crudos de auditorias F0 (los .md son el reporte; se regeneran con scripts/f0-*.mjs)
+docs/.axe-raw.json
+docs/.lighthouse-raw.json
+docs/.lhr-*.json
