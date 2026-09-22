@@ -5,8 +5,8 @@ import fs from "node:fs";
 import crypto from "node:crypto";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth.js";
-import { uploadsDir } from "../../middleware/serveUploads.js";
 import { sanitizeFilename, sha256File, verifyUpload } from "../../lib/fileSignature.js";
+import { putObject, storageConfig, tmpDir } from "../../lib/storage.js";
 import { prisma } from "../../lib/prisma.js";
 
 export const uploadsRouter = Router();
@@ -14,7 +14,9 @@ export const uploadsRouter = Router();
 const MAX_MB = Number(process.env.MAX_UPLOAD_MB ?? 25);
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
+  // En modo disco el temporal vive junto al destino final; en modo s3 en el
+  // tmp del SO (el objeto definitivo viaja al bucket tras verificar firma).
+  destination: (_req, _file, cb) => cb(null, tmpDir()),
   // Nombre temporal: el definitivo (UUID) se decide tras verificar la firma.
   filename: (_req, _file, cb) => {
     cb(null, `tmp-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`);
@@ -67,7 +69,12 @@ uploadsRouter.post(
 
       const ext = path.extname(f.originalname).toLowerCase();
       const stored = `${crypto.randomUUID()}${ext}`;
-      await fs.promises.rename(tmp, path.join(uploadsDir, stored));
+      if (storageConfig.backend === "s3") {
+        await putObject(stored, await fs.promises.readFile(tmp), detectedMime);
+        await fs.promises.unlink(tmp).catch(() => {});
+      } else {
+        await fs.promises.rename(tmp, path.join(tmpDir(), stored));
+      }
       const record = await prisma.upload.create({
         data: {
           ownerId: req.user!.sub,
