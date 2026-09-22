@@ -17,15 +17,15 @@ export const UNSA_CAREERS: UnsaCareer[] = [
   { key: "BIOLOGIA", label: "Biología", faculty: "Fac. de Ciencias Biológicas", color: "#047857", soft: "#d1fae5" },
   { key: "DERECHO", label: "Derecho", faculty: "Facultad de Derecho", color: "#b45309", soft: "#fef3c7" },
   { key: "EDUCACION", label: "Educación", faculty: "Facultad de Educación", color: "#0369a1", soft: "#e0f2fe" },
-  { key: "ADMINISTRACION", label: "Administración", faculty: "Fac. de Administración", color: "#4d7c0f", soft: "#fef9c3" },
+  { key: "ADMINISTRACION", label: "Administración", faculty: "Fac. de Administración", color: "#a16207", soft: "#fef9c3" },
   { key: "CONTABILIDAD", label: "Contabilidad", faculty: "Fac. de Contabilidad", color: "#0e7490", soft: "#cffafe" },
-  { key: "ECONOMIA", label: "Economía", faculty: "Facultad de Economía", color: "#9a3412", soft: "#ffedd5" },
+  { key: "ECONOMIA", label: "Economía", faculty: "Facultad de Economía", color: "#b91c1c", soft: "#fee2e2" },
   { key: "ING_SISTEMAS", label: "Ing. de Sistemas", faculty: "Fac. de Ing. de Producción y Servicios", color: "#4338ca", soft: "#e0e7ff" },
-  { key: "ING_CIVIL", label: "Ing. Civil", faculty: "Facultad de Ing. Civil", color: "#c2410c", soft: "#fed7aa" },
+  { key: "ING_CIVIL", label: "Ing. Civil", faculty: "Facultad de Ing. Civil", color: "#ea580c", soft: "#ffedd5" },
   { key: "ING_INDUSTRIAL", label: "Ing. Industrial", faculty: "Fac. de Ing. de Producción y Servicios", color: "#475569", soft: "#e2e8f0" },
   { key: "ARQUITECTURA", label: "Arquitectura", faculty: "Facultad de Arquitectura", color: "#be123c", soft: "#ffe4e6" },
   { key: "AGRONOMIA", label: "Agronomía", faculty: "Fac. de Agronomía", color: "#4d7c0f", soft: "#ecfccb" },
-  { key: "OTRA_UNSA", label: "Otra carrera UNSA", faculty: "UNSA", color: "#64748b", soft: "#f1f5f9" },
+  { key: "OTRA_UNSA", label: "Otra carrera UNSA", faculty: "UNSA", color: "#57534e", soft: "#f5f5f4" },
 ];
 
 const byKey: Record<string, UnsaCareer> = Object.fromEntries(UNSA_CAREERS.map((c) => [c.key, c]));
