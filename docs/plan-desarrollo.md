@@ -692,3 +692,11 @@ actualizar §4 y los deltas de §3/§8-apéndice; al reactivar R2, actualizar §
   sales 1035→**1111ms** (+7%: más filas en dev + primera página de 50; pendiente re-medir
   con cursor), mine 292→**372ms** (+80ms: el comprador tiene +25 pedidos; endpoint sin tocar).
   tsc 0, eslint 0 errores, api 18/18, E2E base verde.
+- **Pre-despliegue BD (2026-09-22, solo lectura):** PG 18.6, backfills sin nulos (0),
+  PENDING viejos 0, duplicados vivos bazar 0. **Hallazgo:** `order_status_expires_idx` y
+  `order_seller_created_idx` figuraban en la migración sprint1a (aplicada) pero no existían
+  en `pg_indexes` → migración correctiva `sprint1a_missing_indexes` 12/12. Regla: jamás
+  editar migraciones aplicadas.
+- **Rotación graceful JWT:** `lib/auth.ts` acepta `*_PREV` en ventana de gracia (solo
+  errores de firma; expirados no resucitan) + `*_PREV` en `env.ts`. O1 aplicado también
+  en `/pay` (audit+notify en paralelo). tsc+eslint+18 tests+E2E base verdes.

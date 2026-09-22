@@ -321,14 +321,17 @@ ordersRouter.post(
       data: { status: "PAID", payProof: input.payProof ?? null },
       include: { escrow: true },
     });
-    await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.paid", entity: "order", entityId: order.id } });
-    await notify({
-      userId: order.sellerId,
-      type: "ORDER_PAID",
-      title: "Pago declarado por el comprador",
-      body: `${order.itemTitle} — confirma el abono para pasar a custodia.`,
-      link: orderLink(order.id),
-    });
+    // O1 (igual que POST /): audit + notify en paralelo, independientes entre sí.
+    await Promise.all([
+      prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "order.paid", entity: "order", entityId: order.id } }),
+      notify({
+        userId: order.sellerId,
+        type: "ORDER_PAID",
+        title: "Pago declarado por el comprador",
+        body: `${order.itemTitle} — confirma el abono para pasar a custodia.`,
+        link: orderLink(order.id),
+      }),
+    ]);
     res.json({ data: upd });
   })
 );

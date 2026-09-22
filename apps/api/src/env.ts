@@ -22,6 +22,10 @@ export const env = {
   WEB_ORIGIN: (process.env.WEB_ORIGIN ?? "http://localhost:5173").split(","),
   JWT_ACCESS_SECRET: str("JWT_ACCESS_SECRET"),
   JWT_REFRESH_SECRET: str("JWT_REFRESH_SECRET"),
+  // Runbook de rotación (docs/runbook-rotacion.md): durante la ventana de gracia
+  // la API acepta el secreto nuevo y el previo. Vacíos = sin rotación en curso.
+  JWT_ACCESS_SECRET_PREV: process.env.JWT_ACCESS_SECRET_PREV ?? "",
+  JWT_REFRESH_SECRET_PREV: process.env.JWT_REFRESH_SECRET_PREV ?? "",
   JWT_ACCESS_TTL: process.env.JWT_ACCESS_TTL ?? "15m",
   JWT_REFRESH_TTL: process.env.JWT_REFRESH_TTL ?? "7d",
   DATABASE_URL: process.env.DATABASE_URL ?? "",
