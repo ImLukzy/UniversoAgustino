@@ -1,6 +1,8 @@
 import type { Response } from "express";
 import { prisma } from "./prisma.js";
 import { newJti, sha256, signAccess, signRefresh } from "./auth.js";
+import { refreshCookieOptions } from "./cookies.js";
+import { env } from "../env.js";
 
 // Sesión única para login, registro, rotación y OAuth: access JWT corto +
 // refresh rotativo (hash sha256 en BD, revocable) en cookie httpOnly.
@@ -14,7 +16,12 @@ export async function newSession(userId: string, role: string): Promise<{ access
 }
 
 export function setRefreshCookie(res: Response, refresh: string): void {
-  res.cookie("hub_refresh", refresh, { httpOnly: true, sameSite: "lax", maxAge: REFRESH_MS });
+  res.cookie("hub_refresh", refresh, { ...refreshCookieOptions(env.NODE_ENV), maxAge: REFRESH_MS });
+}
+
+// Mismos atributos que al fijarla: si no, el navegador no la borra.
+export function clearRefreshCookie(res: Response): void {
+  res.clearCookie("hub_refresh", refreshCookieOptions(env.NODE_ENV));
 }
 
 // Crea la sesión, fija la cookie y devuelve el access para el cuerpo JSON.

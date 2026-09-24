@@ -11,9 +11,12 @@ import { errorHandler, notFound } from "./middleware/errors.js";
 import { serveUpload } from "./middleware/serveUploads.js";
 import { optionalAuth } from "./middleware/auth.js";
 import { startJobs } from "./jobs/index.js";
+import { trustProxyHops } from "./lib/cookies.js";
 
 const app = express();
 app.disable("x-powered-by");
+// Render/Cloudflare: IP real del cliente para los límites por IP (lib/cookies.ts).
+app.set("trust proxy", trustProxyHops(env.NODE_ENV, process.env.TRUST_PROXY));
 // Sprint 4 (F4-02): endurecimiento de cabeceras. CSP en modo report-only:
 // primero 48 h de observación (consola del navegador) y solo entonces
 // CSP_ENFORCE=true. No enforcing a ciegas: pdf.js (blob: workers),

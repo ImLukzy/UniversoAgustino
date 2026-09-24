@@ -2,7 +2,7 @@ import type { Router } from "express";
 import { LoginSchema, RegisterSchema, isAllowedEmail } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
 import { hashPassword, sha256, verifyPassword, verifyRefresh } from "../../lib/auth.js";
-import { startSession } from "../../lib/session.js";
+import { clearRefreshCookie, startSession } from "../../lib/session.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { limit } from "../../middleware/rateLimit.js";
 import { requireSameOrigin } from "../../middleware/csrf.js";
@@ -83,10 +83,11 @@ export function registerAccount(router: Router) {
 
   router.post(
     "/logout",
+    requireSameOrigin,
     asyncHandler(async (req, res) => {
       const raw = req.cookies?.["hub_refresh"];
       if (raw) await prisma.refreshToken.updateMany({ where: { hash: sha256(raw) }, data: { revoked: true } });
-      res.clearCookie("hub_refresh");
+      clearRefreshCookie(res);
       res.json({ data: { ok: true } });
     }),
   );
