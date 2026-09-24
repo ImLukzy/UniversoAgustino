@@ -32,7 +32,7 @@ export function Perfil() {
 
         <div className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center">
           <p className="flex-1 text-zinc-700">Ayuda a tus compañeros y gana con cada venta subiendo tus apuntes.</p>
-          <Link to={ROUTES.subirMaterial} className="btn btn-primary"><span className="material-symbols-outlined">upload</span>Subir documentos</Link>
+          <Link to={ROUTES.publish} className="btn btn-primary"><span className="material-symbols-outlined">upload</span>Publicar apuntes</Link>
         </div>
 
         <section className="flex flex-col gap-3">

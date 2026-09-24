@@ -28,7 +28,7 @@ export function PublishPreview({ form, authorName }: { form: PublishForm; author
             <span className="tag truncate">{tag}</span>
             <span className="price text-xl text-primary">{pen(form.quote.amountCents)}</span>
           </div>
-          <h3 className="line-clamp-2 font-extrabold text-zinc-950">{f.title ||"Tu título aparecerá aquí…"}</h3>
+          <h3 className="line-clamp-2 font-extrabold text-zinc-950">{form.batch ? `${form.queue.items.length} apuntes${f.course.trim() ? ` de ${f.course.trim()}` : ""}` : f.title || "Tu título aparecerá aquí…"}</h3>
           <p className="line-clamp-2 text-xs text-zinc-600">{f.description || (digital ? f.course ||"Tu descripción…" : f.campus)}</p>
           <p className="border-t border-dashed border-zinc-300 pt-2 text-xs font-bold text-zinc-700">Por {authorName}</p>
         </div>

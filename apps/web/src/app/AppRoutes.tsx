@@ -1,5 +1,5 @@
 import { lazy, useEffect } from "react";
-import { Route, Routes, useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate, useSearchParams } from "react-router-dom";
 import { Explorar } from "../pages/Explorar";
 import { useAuth } from "../auth/AuthContext";
 import { Forgot } from "../pages/Forgot";
@@ -35,7 +35,6 @@ const Suscripcion = lazy(() => import("../pages/Suscripcion").then((m) => ({ def
 const Perfil = lazy(() => import("../pages/Perfil").then((m) => ({ default: m.Perfil })));
 const AuthCallback = lazy(() => import("../pages/AuthCallback").then((m) => ({ default: m.AuthCallback })));
 const Bienvenida = lazy(() => import("../pages/Bienvenida").then((m) => ({ default: m.Bienvenida })));
-const SubirMaterial = lazy(() => import("../pages/SubirMaterial").then((m) => ({ default: m.SubirMaterial })));
 
 // /login y /register no son páginas: abren el modal global sobre el destino
 // (?next=) o sobre el inicio. Tras entrar, el usuario sigue en esa página.
@@ -91,7 +90,8 @@ export function AppRoutes() {
         <Route path="/ajustes" element={<Ajustes />} />
         <Route path="/suscripcion" element={<Suscripcion />} />
         <Route path="/perfil" element={<Perfil />} />
-        <Route path="/subir-material" element={<SubirMaterial />} />
+        {/* Spec 24: la subida en lote vive en /publicar. */}
+        <Route path="/subir-material" element={<Navigate to="/publicar" replace />} />
       </Routes>
     </OnboardingGate>
   );

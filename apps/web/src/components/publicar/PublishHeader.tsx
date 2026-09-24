@@ -1,7 +1,7 @@
 import type { PublishForm } from "./usePublishForm";
 
 const MODES = [
-  { id: "digital" as const, icon: "description", title: "Apunte digital", sub: "PDF o imágenes con vista previa de 2 páginas." },
+  { id: "digital" as const, icon: "description", title: "Apunte digital", sub: "Uno o varios archivos (lote), con páginas de muestra gratis." },
   { id: "fisico" as const, icon: "storefront", title: "Artículo de bazar", sub: "Libros, instrumental o uniformes con entrega en persona." },
 ];
 
@@ -9,7 +9,7 @@ const MODES = [
 export function PublishHeader({ form }: { form: PublishForm }) {
   const steps = [
     { t: form.mode === "digital" ? "Datos académicos" : "Datos del artículo", ok: form.done.details },
-    { t: form.mode === "digital" ? "Archivo" : "Fotos y cobro", ok: form.done.file },
+    { t: form.mode === "digital" ? (form.batch ? "Archivos y cobro" : "Archivo y cobro") : "Fotos y cobro", ok: form.done.file },
     { t: "Precio", ok: form.done.price },
     { t: "Declaración D.L. 822", ok: form.done.legal },
   ];

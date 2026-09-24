@@ -64,12 +64,12 @@ export function Publicaciones() {
             <button key={v} type="button" role="tab" aria-selected={filter === v} onClick={() => setFilter(v)} className={`chip ${filter === v ? "chip-active" : ""}`}>{counts[v]}</button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
-          <label className="searchbar h-11 md:w-64">
+        <div className="flex w-full min-w-0 items-center gap-2 md:w-auto">
+          <label className="searchbar h-11 min-w-0 flex-1 md:w-64 md:flex-none">
             <span className="material-symbols-outlined text-zinc-500" aria-hidden="true">search</span>
             <input value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar mis publicaciones" placeholder="Título o curso…" />
           </label>
-          <select aria-label="Ordenar" value={sort} onChange={(e) => setSort(isSortKey(e.target.value) ? e.target.value : "recent")} className="input h-11 w-auto font-bold">
+          <select aria-label="Ordenar" value={sort} onChange={(e) => setSort(isSortKey(e.target.value) ? e.target.value : "recent")} className="input h-11 w-auto min-w-0 max-w-[10.5rem] shrink font-bold md:max-w-none">
             {SORTS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
         </div>

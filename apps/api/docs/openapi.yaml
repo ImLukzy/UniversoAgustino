@@ -108,6 +108,29 @@ paths:
       tags: [auth]
       summary: Revoca el refresh y limpia la cookie
       responses: { '200': { description: OK } }
+  /auth/onboarding:
+    post:
+      tags: [auth]
+      summary: Completa el perfil obligatorio de una cuenta nueva (spec 21, /bienvenida; una sola vez)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName, faculty, career, cycle, phone]
+              properties:
+                fullName: { type: string, minLength: 5, maxLength: 120, description: Nombres y apellidos (2+ palabras) }
+                faculty: { type: string, description: Facultad UNSA; debe corresponder a la carrera }
+                career: { type: string, description: Carrera oficial UNSA }
+                cycle: { type: string, description: Ciclo (I–XII) }
+                phone: { type: string, description: Celular peruano de 9 dígitos }
+      responses:
+        '201': { description: Perfil guardado con onboardedAt }
+        '400': { description: VALIDATION (p. ej. carrera fuera de la facultad) }
+        '401': { description: Sin sesión }
+        '409': { description: PERFIL_COMPLETO }
   /auth/email/start:
     post:
       tags: [auth]

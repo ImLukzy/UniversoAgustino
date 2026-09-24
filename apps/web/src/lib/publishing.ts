@@ -1,7 +1,7 @@
 import { careerContent } from "../data/career";
 
 // Constantes y reglas compartidas por los flujos de publicación
-// (/publicar y /subir-material). Valores 1:1 con los esquemas de @hub/shared.
+// (/publicar: apunte, lote de apuntes o artículo de bazar). Valores 1:1 con los esquemas de @hub/shared.
 export const MAX_UPLOAD_MB = 25;
 export const UPLOAD_ACCEPT = ".pdf,.jpg,.jpeg,.png,.epub";
 export { CYCLES } from "@hub/shared";

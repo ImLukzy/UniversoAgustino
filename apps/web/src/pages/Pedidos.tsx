@@ -62,7 +62,7 @@ export function Pedidos() {
           </div>
         ))}
       </dl>
-      <div className="grid items-start gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
         <div className="flex flex-col gap-4 lg:col-span-8">
           <div role="tablist" aria-label="Filtrar pedidos" className="flex gap-2 overflow-x-auto p-1">
             {tabs.map(([v, l]) => (

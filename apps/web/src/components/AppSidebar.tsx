@@ -38,14 +38,9 @@ export function AppSidebar({ onAction, animateActive = true }: { onAction?: () =
   const { pathname } = useLocation();
   return (
     <nav className="flex flex-col gap-1" aria-label="Secciones">
-      <div className="mb-3 grid grid-cols-2 gap-2">
-        <Link to={ROUTES.publish} onClick={onAction} className="btn btn-primary btn-sm">
-          <span className="material-symbols-outlined text-base">add</span> Publicar
-        </Link>
-        <Link to={ROUTES.subirMaterial} onClick={onAction} className="btn btn-secondary btn-sm">
-          <span className="material-symbols-outlined text-base">cloud_upload</span> Subir
-        </Link>
-      </div>
+      <Link to={ROUTES.publish} onClick={onAction} className="btn btn-primary btn-sm mb-3">
+        <span className="material-symbols-outlined text-base">add</span> Publicar material
+      </Link>
       {SECTIONS.map((s, i) => (
         <div key={s.title ?? i} className="flex flex-col gap-0.5 pb-2">
           {s.title && <p className="eyebrow px-3 pb-1 pt-3">{s.title}</p>}

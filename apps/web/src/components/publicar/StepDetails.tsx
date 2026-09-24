@@ -11,9 +11,24 @@ export function StepDetails({ form }: { form: PublishForm }) {
   return (
     <section className="card flex flex-col gap-4 p-6">
       <h2 className="text-lg font-extrabold text-zinc-950">1 · {digital ? "Información académica" : "Datos del artículo"}</h2>
+      {form.batch && (
+        <p className="flex items-start gap-2 rounded-xl border-2 border-zinc-900 bg-primary-soft p-3 text-sm text-zinc-800">
+          <span className="material-symbols-outlined text-lg text-primary" aria-hidden="true">info</span>
+          <span>
+            <b>Lote de {form.queue.items.length} archivos.</b> Carrera, curso, ciclo, tipo, descripción, precio y cobro se aplican a todos; cada archivo tiene su título en el paso 2.
+          </span>
+        </p>
+      )}
       <label className={fieldLabel}>
         Título *
-        <input className="input" value={f.title} onChange={(e) => set("title", e.target.value)} placeholder={digital ? cc.publishTitlePh : cc.bazarTitlePh} maxLength={160} />
+        <input
+          className="input"
+          value={form.batch ? "" : f.title}
+          disabled={form.batch}
+          onChange={(e) => set("title", e.target.value)}
+          placeholder={form.batch ? "Cada archivo usa su propio título (paso 2)" : digital ? cc.publishTitlePh : cc.bazarTitlePh}
+          maxLength={160}
+        />
       </label>
       {digital ? (
         <>

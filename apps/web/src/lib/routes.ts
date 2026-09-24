@@ -16,7 +16,6 @@ export const ROUTES = {
   mySales: "/ventas",
   myBazar: "/publicaciones",
   publish: "/publicar",
-  subirMaterial: "/subir-material",
   panel: "/panel",
   account: "/cuenta",
   perfil: "/perfil",
