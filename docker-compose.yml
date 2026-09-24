@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: enfermeria-hub-postgres
+    container_name: universo-agustino-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: hub
@@ -19,7 +19,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: enfermeria-hub-redis
+    container_name: universo-agustino-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -34,7 +34,7 @@ services:
   # Mailhog: bandeja de correo falsa para dev (verificacion, escrow, payouts)
   mailhog:
     image: mailhog/mailhog:v1.0.1
-    container_name: enfermeria-hub-mailhog
+    container_name: universo-agustino-mailhog
     restart: unless-stopped
     ports:
       - "1025:1025"

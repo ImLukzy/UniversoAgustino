@@ -27,7 +27,7 @@
 
 | Campo | Valor |
 |---|---|
-| Nombre | Universo Agustino (antes `enfermeria-hub`) |
+| Nombre | Universo Agustino (repo `Universo_Agustino`, antes `enfermeria-hub`) |
 | Repo | https://github.com/ImLukzy/UniversoAgustino.git, branch `main` |
 | Root local | `C:\Users\anton\OneDrive\Documentos\Unsa\enfermeria-hub` |
 | API | Express + Prisma, puerto 4000, prefijo `/api/v1` |

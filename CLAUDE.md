@@ -1,4 +1,4 @@
-# CLAUDE.md — Universo Agustino (enfermeria-hub)
+# CLAUDE.md — Universo_Agustino
 Marketplace académico UNSA: apuntes PDF (visor protegido), bazar con custodia, balotarios modo juego. Solo `@unsa.edu.pe` + excepción `lukas.melgar@tecsup.edu.pe` (`ALLOWED_EMAIL_EXCEPTIONS`).
 
 ## Trabajo

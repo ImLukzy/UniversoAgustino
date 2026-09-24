@@ -44,7 +44,7 @@ Ruta base: `stitch_enfermer_ahub_arequipa_marketplace/`
 
 **Monorepo npm workspaces:**
 ```
-enfermeria-hub/
+Universo_Agustino/
   apps/api/          # backend
   apps/web/          # frontend
   packages/shared/   # tipos + esquemas + constantes (contrato único FE/BE)

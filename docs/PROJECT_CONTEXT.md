@@ -1,4 +1,4 @@
-# PROJECT_CONTEXT — enfermeria-hub / Universo Agustino
+# PROJECT_CONTEXT — Universo_Agustino (Universo Agustino)
 
 > Mapa mental para un LLM que va a trabajar en este monorepo. Hechos
 > verificados contra el código el 2026-09-23. Donde el brief original
