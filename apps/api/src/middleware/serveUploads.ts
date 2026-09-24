@@ -3,6 +3,8 @@ import fs from "node:fs";
 import { Readable } from "node:stream";
 import { prisma } from "../lib/prisma.js";
 import { asyncHandler } from "./errors.js";
+import type { AuthedRequest } from "./auth.js";
+import { hasFullAccess, paidDocumentFor } from "../modules/documents/access.js";
 import { getServeUrl, hasObject, storageConfig } from "../lib/storage.js";
 
 // Sprint 4 (F4-01): servicio controlado de archivos (reemplaza express.static
@@ -14,7 +16,10 @@ import { getServeUrl, hasObject, storageConfig } from "../lib/storage.js";
 // UUID imposibles de adivinar, (3) cabeceras defensivas al servir y
 // (4) attachment forzado para lo no previsualizable. Las URLs de archivos
 // de ítems no publicados nunca se exponen vía API.
-export const uploadsDir = storageConfig.localDir;
+// Spec 15 (T7): excepción — el archivo de un Document de pago solo se sirve
+// al autor, a un comprador con pago verificado (ESCROW/RELEASED) o a un admin
+// (403 PAYWALL). Los demás usan GET /documents/:id/preview.
+const uploadsDir = storageConfig.localDir;
 // En modo s3 el disco local no se usa: no se crea el directorio.
 if (storageConfig.backend === "local") fs.mkdirSync(uploadsDir, { recursive: true });
 
@@ -32,11 +37,17 @@ function guessLegacyMime(name: string): string {
   return "application/octet-stream";
 }
 
-export const serveUpload = asyncHandler(async (req, res) => {
+export const serveUpload = asyncHandler(async (req: AuthedRequest, res) => {
   const raw = String(req.params.name ?? "");
   const name = path.basename(raw);
   if (!name || name !== raw || name.includes("..")) {
     return res.status(400).json({ error: { code: "VALIDATION", message: "Nombre de archivo inválido" } });
+  }
+
+  const paid = await paidDocumentFor(name);
+  if (paid && !(await hasFullAccess(paid, req.user))) {
+    res.setHeader("Cache-Control", "private, no-store");
+    return res.status(403).json({ error: { code: "PAYWALL", message: "Compra el documento para ver el archivo completo" } });
   }
 
   const rec = await prisma.upload.findUnique({ where: { storedName: name } });

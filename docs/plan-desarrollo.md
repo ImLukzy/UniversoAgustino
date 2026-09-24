@@ -703,3 +703,11 @@ actualizar §4 y los deltas de §3/§8-apéndice; al reactivar R2, actualizar §
 - **Rate limit uploads (2026-09-22):** brecha del checklist cerrada — `POST /uploads`
   con 30/hora por IP (cada subida cuesta disco/R2). Login 50/15min, global 300/min y
   doble limiter de forgot ya existían y aplicados. Cadena verificada en vivo (201+302).
+- **OAuth Google+Apple con puerta UNSA (código completo, pendiente credenciales):**
+  migración `oauth_accounts` 13/13 (`provider/providerId/avatarUrl`, `passwordHash`
+  nullable + índice único, login con clave deriva a `OAUTH_ONLY`), `oauth.ts`
+  (inicio/callback/consume, `state` firmado, `isAllowedEmail` idéntica a registro,
+  revoke en Google ante denegado, audit `auth.oauth.*`), `lib/apple.ts` con
+  verificación RS256/JWKS unit-testeada, modal con loading + `/auth/callback`,
+  openapi+docs-check 44/44, `docs/oauth.md`. Sin `GOOGLE_*`/`APPLE_*` los
+  botones conservan el toast. Tests 62 (api 21, shared 27).

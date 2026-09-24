@@ -17,7 +17,7 @@
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "docs:check": "node scripts/docs-check.mjs",
     "secrets": "bash scripts/check-secrets.sh",
     "budget:any": "node scripts/any-budget.mjs --check",

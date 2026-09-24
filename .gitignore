@@ -21,3 +21,5 @@ apps/web/dist/
 docs/.axe-raw.json
 docs/.lighthouse-raw.json
 docs/.lhr-*.json
+# Capturas de la regresión visual (scripts/visual-regression.mjs)
+artifacts/

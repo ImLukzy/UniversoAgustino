@@ -17,12 +17,12 @@ export class RouteErrorBoundary extends Component<{ children: ReactNode }, { fai
       <main className="mx-auto max-w-xl px-4 py-10">
         <div className="card space-y-2 p-6 text-center">
           <p className="font-bold">Hay una versión nueva disponible.</p>
-          <p className="text-sm text-slate-500">La página no pudo cargarse. Recarga para obtener la última versión.</p>
+          <p className="text-sm text-zinc-500">La página no pudo cargarse. Recarga para obtener la última versión.</p>
           <div className="flex justify-center gap-2 pt-2">
-            <button onClick={() => window.location.reload()} className="btn-primary px-4 py-2 text-sm">
+            <button onClick={() => window.location.reload()} className="btn btn-primary text-sm">
               Recargar
             </button>
-            <Link to="/" className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-bold">
+            <Link to="/" className="btn btn-secondary text-sm">
               Ir al inicio
             </Link>
           </div>

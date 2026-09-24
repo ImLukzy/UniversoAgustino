@@ -7,12 +7,14 @@ import { fileURLToPath } from "node:url";
 import { prisma } from "./lib/prisma.js";
 import { asyncHandler } from "./middleware/errors.js";
 import { authRouter } from "./modules/auth/routes.js";
+import { oauthRouter } from "./modules/auth/oauth.js";
 import { documentsRouter } from "./modules/documents/routes.js";
 import { bazarRouter } from "./modules/bazar/routes.js";
 import { ordersRouter } from "./modules/orders/routes.js";
 import { monetizationRouter, reportsRouter } from "./modules/extra/routes.js";
 import { notificationsRouter } from "./modules/notifications/routes.js";
 import { uploadsRouter } from "./modules/uploads/routes.js";
+import { paymentsRouter } from "./modules/payments/routes.js";
 
 export function buildRouter() {
   const r = Router();
@@ -33,6 +35,7 @@ export function buildRouter() {
   );
 
   r.use("/auth", authRouter);
+  r.use("/auth/oauth", oauthRouter);
   r.use("/documents", documentsRouter);
   r.use("/bazar", bazarRouter);
   r.use("/orders", ordersRouter);
@@ -40,6 +43,7 @@ export function buildRouter() {
   r.use("/reports", reportsRouter);
   r.use("/notifications", notificationsRouter);
   r.use("/uploads", uploadsRouter);
+  r.use("/payments", paymentsRouter);
 
   r.get("/legal/summary", (_req, res) => {
     res.json({

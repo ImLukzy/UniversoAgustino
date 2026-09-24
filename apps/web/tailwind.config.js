@@ -1,57 +1,12 @@
 /** @type {import('tailwindcss').Config} */
-// Tokens Stitch 1:1 — generados desde scripts/stitch-theme.json
-// (origen: stitch_enfermer_ahub_arequipa_marketplace + modern_clinical_warmth/DESIGN.md).
+// Colores: solo tokens de carrera (spec 05). Tipografía heredada del diseño original.
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: { extend: {
   "colors": {
-    "secondary-container": "#6063ee",
-    "tertiary": "#006948",
-    "on-tertiary-fixed": "#002114",
-    "surface-container-low": "#f2f3ff",
-    "on-secondary-container": "#fffbff",
-    "error": "#ba1a1a",
-    "on-surface": "#131b2e",
-    "on-tertiary-fixed-variant": "#005137",
-    "secondary-fixed-dim": "#c0c1ff",
-    "on-secondary-fixed-variant": "#2f2ebe",
-    "inverse-surface": "#283044",
-    "tertiary-fixed-dim": "#68dba9",
-    "primary-container": "rgb(var(--hub-p, 0 104 95) / <alpha-value>)",
-    "primary-fixed": "#89f5e7",
-    "surface-dim": "#d2d9f4",
-    "outline": "#6d7a77",
-    "surface-container-lowest": "#ffffff",
-    "inverse-primary": "#6bd8cb",
-    "surface-container-highest": "#dae2fd",
-    "tertiary-fixed": "#85f8c4",
     "primary": "rgb(var(--hub-p, 0 104 95) / <alpha-value>)",
-    "surface": "#faf8ff",
-    "primary-fixed-dim": "#6bd8cb",
-    "on-error-container": "#93000a",
-    "background": "#faf8ff",
-    "surface-tint": "#006a61",
-    "surface-bright": "#faf8ff",
-    "on-primary-container": "#f4fffc",
-    "secondary": "#4648d4",
-    "error-container": "#ffdad6",
-    "on-secondary": "#ffffff",
-    "secondary-fixed": "#e1e0ff",
-    "on-primary": "#ffffff",
-    "inverse-on-surface": "#eef0ff",
-    "on-surface-variant": "#3d4947",
-    "outline-variant": "#bcc9c6",
-    "on-error": "#ffffff",
-    "surface-container": "#eaedff",
-    "on-background": "#131b2e",
-    "on-tertiary": "#ffffff",
-    "on-primary-fixed": "#00201d",
-    "on-primary-fixed-variant": "#005049",
-    "tertiary-container": "#00855d",
-    "on-tertiary-container": "#f5fff7",
-    "surface-variant": "#dae2fd",
-    "on-secondary-fixed": "#07006c",
-    "surface-container-high": "#e2e7ff"
+    "primary-soft": "rgb(var(--hub-p-soft, 224 240 238) / <alpha-value>)",
+    "primary-ink": "rgb(var(--hub-p-ink, 255 255 255) / <alpha-value>)"
   },
   "borderRadius": {
     "DEFAULT": "0.25rem",
@@ -60,24 +15,8 @@ export default {
     "full": "9999px"
   },
   "spacing": {
-    "space-2xl": "3rem",
-    "space-base": "1rem",
-    "margin-mobile": "1rem",
-    "container-max": "75rem",
-    "space-sm": "0.5rem",
-    "space-xxs": "0.125rem",
-    "space-md": "0.75rem",
-    "gutter-mobile": "1rem",
-    "margin-desktop": "3rem",
-    "space-xl": "2rem",
     "space-xs": "0.25rem",
-    "space-lg": "1.5rem",
-    "space-3xl": "4rem",
-    "gutter-desktop": "1.5rem",
-    "margin-tablet": "2rem"
-  },
-  "maxWidth": {
-    "container-max": "75rem"
+    "space-md": "0.75rem"
   },
   "fontFamily": {
     "headline-lg-mobile": [

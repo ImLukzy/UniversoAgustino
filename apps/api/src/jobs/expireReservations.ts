@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { expiredPatch } from "../modules/orders/reservation.js";
 import { notify } from "../lib/notify.js";
 
-export interface ExpireResult {
+interface ExpireResult {
   expired: number;
   mode: "direct" | "pooled";
   claimed: string[];

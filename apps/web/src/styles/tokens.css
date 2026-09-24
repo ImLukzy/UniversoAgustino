@@ -1,3 +1,5 @@
+@import "./ui.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,6 +10,17 @@
   /* Triplete RGB del color de carrera (lo fija el tema global; por defecto, teal UNSA #00685f).
      Los tokens `primary` y `primary-container` de Tailwind lo consumen. */
   --hub-p: 0 104 95;
+  --hub-p-soft: 224 240 238;
+  --hub-p-ink: 255 255 255;
+}
+
+/* Cambio de carrera sin reflow: solo colores, 200 ms. */
+.theme-transition {
+  transition: background-color 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
 }
 
 body {
@@ -16,33 +29,14 @@ body {
   color: #131b2e;
   overscroll-behavior: none;
 }
-/* Base Stitch 1:1 (era el <style> inline de cada code.html) */
+/* Base heredada del diseño original (era el <style> inline de cada code.html) */
 main > :first-child { margin-top: 0 !important; }
 main > :last-child { margin-bottom: 0 !important; }
 ::-webkit-scrollbar { display: none; }
-/* Micro-interacción Stitch: pulso al presionar botones */
+/* Micro-interacción: pulso al presionar botones */
 button { transition: transform 120ms ease; }
 button:active { transform: scale(0.95); }
 .font-display { font-family: "Plus Jakarta Sans", sans-serif; }
-.price-tag { font-family: "Plus Jakarta Sans", sans-serif; font-variant-numeric: tabular-nums; }
-.card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
-}
-.btn-primary {
-  background: rgb(var(--hub-p, 0 104 95));
-  color: #fff;
-  border-radius: 0.5rem;
-  padding: 0.65rem 1.1rem;
-  font-weight: 600;
-}
-.btn-primary:hover { filter: brightness(0.9); }
-.badge-uni { background: #f1f5f9; color: #475569; border-radius: 9999px; padding: 0.15rem 0.6rem; font-size: 0.72rem; font-weight: 600; }
-.badge-cep { background: #ecfdf5; color: #047857; border-radius: 9999px; padding: 0.15rem 0.6rem; font-size: 0.72rem; font-weight: 600; }
-.input { background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.6rem 0.8rem; width: 100%; }
-.input:focus { outline: none; border-color: rgb(var(--hub-p, 0 104 95)); box-shadow: 0 0 0 3px rgb(var(--hub-p, 0 104 95) / 0.15); }
 /* Publicar: anillo de foco con el accent de la carrera SELECCIONADA
    (--career-accent) en lugar del azul/tema genérico. El fallback respeta
    el tema cuando el scope no define la variable. */

@@ -2,7 +2,6 @@
 // que Vite pueda analizar estáticamente los módulos: un import() con
 // variable pura NO funciona en build (lanza en runtime).
 const pageMods = import.meta.glob("../pages/*.tsx");
-const stitchMods = import.meta.glob("../stitch/*.tsx");
 
 const ROUTE_MODULE: Record<string, string> = {
   "/panel": "../pages/Panel.tsx",
@@ -12,17 +11,15 @@ const ROUTE_MODULE: Record<string, string> = {
   "/cuenta": "../pages/Cuenta.tsx",
   "/publicar": "../pages/Publicar.tsx",
   "/admin": "../pages/Admin.tsx",
-  "/bazar": "../stitch/BazarStitch.tsx",
-  "/monetiza": "../stitch/MonetizaStitch.tsx",
-  "/legal": "../stitch/LegalStitch.tsx",
+  "/bazar": "../pages/Bazar.tsx",
+  "/monetiza": "../pages/Monetiza.tsx",
+  "/legal": "../pages/Legal.tsx",
 };
 
 function loadersFor(mod: string): Array<() => Promise<unknown>> {
   const out: Array<() => Promise<unknown>> = [];
   const p = (pageMods as Record<string, () => Promise<unknown>>)[mod];
-  const s = (stitchMods as Record<string, () => Promise<unknown>>)[mod];
   if (p) out.push(p);
-  if (s) out.push(s);
   return out;
 }
 

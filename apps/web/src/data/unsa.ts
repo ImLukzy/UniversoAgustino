@@ -25,6 +25,11 @@ export const UNSA_CAREERS: UnsaCareer[] = [
   { key: "ING_INDUSTRIAL", label: "Ing. Industrial", faculty: "Fac. de Ing. de Producción y Servicios", color: "#475569", soft: "#e2e8f0" },
   { key: "ARQUITECTURA", label: "Arquitectura", faculty: "Facultad de Arquitectura", color: "#be123c", soft: "#ffe4e6" },
   { key: "AGRONOMIA", label: "Agronomía", faculty: "Fac. de Agronomía", color: "#4d7c0f", soft: "#ecfccb" },
+  { key: "ING_MECANICA", label: "Ing. Mecánica", faculty: "Fac. de Ing. de Producción y Servicios", color: "#7e22ce", soft: "#f3e8ff" },
+  { key: "ING_QUIMICA", label: "Ing. Química", faculty: "Fac. de Ingeniería de Procesos", color: "#15803d", soft: "#f0fdf4" },
+  { key: "ING_MINAS", label: "Ing. de Minas", faculty: "Fac. de Ing. Geológica, Geofísica y Minas", color: "#92400e", soft: "#fdf2e3" },
+  { key: "TURISMO", label: "Turismo y Hotelería", faculty: "Fac. de Ciencias Histórico Sociales", color: "#be185d", soft: "#fce7f3" },
+  { key: "COMUNICACION", label: "Ciencias de la Comunicación", faculty: "Fac. de Filosofía y Humanidades", color: "#a21caf", soft: "#fae8ff" },
   { key: "OTRA_UNSA", label: "Otra carrera UNSA", faculty: "UNSA", color: "#57534e", soft: "#f5f5f4" },
 ];
 

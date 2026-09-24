@@ -12,9 +12,9 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 // En modo S3 el GET redirige a una URL prefirmada de corta duración, así
 // que Document.fileUrl, BazarItem.photos y el frontend siguen intactos.
 
-export type StorageBackend = "local" | "s3";
+type StorageBackend = "local" | "s3";
 
-export interface StorageConfig {
+interface StorageConfig {
   backend: StorageBackend;
   /** Solo local: directorio absoluto donde viven los archivos. */
   localDir: string;
@@ -116,18 +116,6 @@ export async function hasObject(name: string): Promise<boolean> {
   }
 }
 
-/** Lee el objeto completo (usado por la migración local→R2). */
-export async function getObjectBuffer(name: string): Promise<Buffer> {
-  if (storageConfig.backend === "local") {
-    return fs.promises.readFile(path.join(storageConfig.localDir, path.basename(name)));
-  }
-  const out = await client().send(new GetObjectCommand({ Bucket: storageConfig.bucket, Key: key(name) }));
-  if (!out.Body) throw new Error(`Objeto vacío en R2: ${name}`);
-  const chunks: Buffer[] = [];
-  for await (const c of out.Body as AsyncIterable<Uint8Array>) chunks.push(Buffer.from(c));
-  return Buffer.concat(chunks);
-}
-
 /**
  * URL para servir el archivo al navegador. En local devuelve null (se sirve
  * desde disco como siempre). En s3 devuelve una URL prefirmada de 15 min con
@@ -146,6 +134,23 @@ export async function getServeUrl(name: string, contentType: string, downloadNam
     }),
     { expiresIn: 15 * 60 },
   );
+}
+
+/** Lee el objeto completo (vista previa del Visor). null si no existe. */
+export async function readObject(name: string): Promise<Buffer | null> {
+  if (storageConfig.backend === "local") {
+    try {
+      return await fs.promises.readFile(path.join(storageConfig.localDir, path.basename(name)));
+    } catch {
+      return null;
+    }
+  }
+  try {
+    const out = await client().send(new GetObjectCommand({ Bucket: storageConfig.bucket, Key: key(name) }));
+    return out.Body ? Buffer.from(await out.Body.transformToByteArray()) : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Directorio temporal para las subidas en tránsito (ambos backends). */

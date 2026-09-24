@@ -9,6 +9,7 @@ import { buildRouter, mountDocs } from "./app.js";
 import { limit } from "./middleware/rateLimit.js";
 import { errorHandler, notFound } from "./middleware/errors.js";
 import { serveUpload } from "./middleware/serveUploads.js";
+import { optionalAuth } from "./middleware/auth.js";
 import { startJobs } from "./jobs/index.js";
 
 const app = express();
@@ -45,8 +46,11 @@ app.use((_req, res, next) => {
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   next();
 });
-app.use(cors({ origin: env.WEB_ORIGIN, credentials: true }));
+// X-Preview-Pages / X-Total-Pages: el Visor cubre las páginas fuera de la muestra (spec 16).
+app.use(cors({ origin: env.WEB_ORIGIN, credentials: true, exposedHeaders: ["X-Preview-Pages", "X-Total-Pages"] }));
 app.use(express.json({ limit: "1mb" }));
+// Apple responde el callback OAuth como form_post (urlencoded, no JSON).
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(limit({ windowMs: 60_000, max: 300 }));
@@ -54,7 +58,7 @@ app.use(limit({ windowMs: 60_000, max: 300 }));
 app.use(env.PREFIX, buildRouter());
 // Sprint 4 (F4-01): servicio controlado (cabeceras defensivas + UUID).
 // Reemplaza express.static directo sobre el directorio de subidas.
-app.get("/uploads/:name", serveUpload);
+app.get("/uploads/:name", optionalAuth, serveUpload);
 mountDocs(app);
 app.use(notFound);
 app.use(errorHandler);

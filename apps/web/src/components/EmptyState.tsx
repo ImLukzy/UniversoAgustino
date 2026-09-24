@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
+import { SPRING } from "../lib/motion";
 
 // Estado vacío minimalista (Impeccable): icono, texto directo sin jerga y
 // acción principal destacada. Entrada suave; los textos los pone cada página
@@ -9,25 +10,30 @@ export function EmptyState({
   title,
   hint,
   action,
+  boxed = false,
+  className = "",
 }: {
   icon: string;
   title: string;
   hint?: string;
   action?: ReactNode;
+  /** Caja punteada rudo: el único marco de lista vacía de la app. */
+  boxed?: boolean;
+  className?: string;
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="flex flex-col items-center gap-2 py-4 text-center"
+      transition={SPRING}
+      className={`flex flex-col items-center gap-2 px-4 py-8 text-center ${boxed ? "card-dashed" : ""} ${className}`}
     >
-      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+      <span className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-zinc-900 bg-primary-soft text-primary">
         <span className="material-symbols-outlined text-3xl">{icon}</span>
       </span>
-      <p className="font-bold text-slate-800">{title}</p>
-      {hint && <p className="max-w-sm text-sm text-slate-500">{hint}</p>}
-      {action && <div className="mt-1">{action}</div>}
+      <p className="font-extrabold text-zinc-950">{title}</p>
+      {hint && <p className="max-w-sm text-sm text-zinc-600">{hint}</p>}
+      {action && <div className="mt-2">{action}</div>}
     </motion.div>
   );
 }

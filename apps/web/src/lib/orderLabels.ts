@@ -3,7 +3,7 @@ import { displayOrderStatus } from "./api";
 // Etiqueta única de estado de pedido (Sprint 2B). Reemplaza las copias de
 // ORDER_LABEL que vivían en Panel, Ventas, Publicaciones y Pedidos con
 // textos inconsistentes para el mismo estado.
-export type OrderRole = "buyer" | "seller";
+type OrderRole = "buyer" | "seller";
 
 const BUYER_LABEL: Record<string, string> = {
   PENDING: "Esperando pago",

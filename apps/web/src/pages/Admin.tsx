@@ -4,6 +4,10 @@ import { Link } from "react-router-dom";
 import { api, apiError } from "../lib/api";
 import { ITEM_TYPE_LABEL, REPORT_STATUS_LABEL } from "../lib/orderLabels";
 import { useAuth } from "../auth/AuthContext";
+import { ROUTES } from "../lib/routes";
+import { ListRowSkeleton } from "../components/Skeleton";
+import { EmptyState } from "../components/EmptyState";
+import { LoginRequired } from "../components/auth/LoginRequired";
 
 interface Report {
   id: string;
@@ -35,38 +39,39 @@ export function Admin() {
   });
 
   if (!user)
-    return (
-      <main className="mx-auto max-w-xl px-4 py-10"><div className="card p-6">Debes <Link className="underline" to="/login">entrar</Link>.</div></main>
-    );
+    return <LoginRequired what="moderar reportes" />;
   if (user.role !== "admin" && user.role !== "moderator")
     return (
-      <main className="mx-auto max-w-xl px-4 py-10">
-        <div className="card p-6">Solo <b>moderator/admin</b>. Tu rol: <span className="badge-uni">{user.role}</span>. Entra como <code>admin@unsa.edu.pe / Admin1234!</code></div>
+      <main className="mx-auto max-w-xl px-4 py-16">
+        <div className="card flex flex-col gap-2 p-8">
+          <h1 className="h-display text-2xl">Acceso restringido</h1>
+          <p className="text-sm text-zinc-600">La cola de moderación es solo para moderadores y administradores.</p>
+        </div>
       </main>
     );
 
   return (
-    <main className="mx-auto max-w-4xl space-y-3 px-4 py-8">
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="font-display text-2xl font-extrabold">Moderación · Reportes D.L. 822</h1>
-        <Link to="/ventas" className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-primary hover:bg-slate-200">
-          Ir a Gestión de Ventas →
-        </Link>
-      </div>
-      <p className="text-xs text-slate-500">Cola global (takedown &lt;48h). Tus alquileres y ventas propias se gestionan en Gestión de Ventas.</p>
-      {msg && <p className="rounded-lg bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">{msg}</p>}
-      {reports.isLoading && <p>Cargando reportes…</p>}
-      {reports.data?.length === 0 && <div className="card p-6 text-sm">Sin reportes. Usa el formulario legal para crear uno.</div>}
-      {reports.data?.map((r) => (
-        <div key={r.id} className="card p-4 text-sm">
-          <p className="font-bold">{ITEM_TYPE_LABEL[r.targetType] ?? r.targetType} · <span className="font-mono font-normal text-slate-500">Ref. {r.targetId.slice(0, 8)}…</span></p>
-          <p className="mt-1 text-slate-600">{r.reason}</p>
-          <div className="mt-2 flex items-center gap-2">
-            <span className="badge-uni">{REPORT_STATUS_LABEL[r.status] ?? r.status}</span>
-            <button onClick={() => act.mutate({ id: r.id, decision: "ACTIONED" })} className="btn-primary text-sm">Aplicar takedown</button>
-            <button onClick={() => act.mutate({ id: r.id, decision: "DISMISSED" })} className="rounded-lg border px-3 py-1.5 text-sm font-semibold">Desestimar</button>
-          </div>
+    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="eyebrow">Cola global · respuesta en menos de 48 h</p>
+          <h1 className="h-display mt-2 text-3xl">Moderación D.L. 822</h1>
         </div>
+        <Link to={ROUTES.mySales} className="btn btn-secondary btn-sm">Gestión de ventas</Link>
+      </header>
+      <p role="status" className="min-h-[1.25rem] text-sm font-bold text-zinc-800">{msg}</p>
+      {reports.isLoading && <ListRowSkeleton count={3} />}
+      {reports.data?.length === 0 && <EmptyState boxed icon="task_alt" title="Sin reportes pendientes" />}
+      {reports.data?.map((r) => (
+        <article key={r.id} className="card flex flex-col gap-2 p-5 text-sm">
+          <p className="font-extrabold text-zinc-950">{ITEM_TYPE_LABEL[r.targetType] ?? r.targetType} <span className="font-mono font-normal text-zinc-500">· Ref. {r.targetId.slice(0, 8)}…</span></p>
+          <p className="text-zinc-700">{r.reason}</p>
+          <div className="flex flex-wrap items-center gap-2 border-t border-dashed border-zinc-300 pt-3">
+            <span className="tag mr-auto">{REPORT_STATUS_LABEL[r.status] ?? r.status}</span>
+            <button type="button" onClick={() => act.mutate({ id: r.id, decision: "ACTIONED" })} className="btn btn-primary btn-sm">Aplicar takedown</button>
+            <button type="button" onClick={() => act.mutate({ id: r.id, decision: "DISMISSED" })} className="btn btn-secondary btn-sm">Desestimar</button>
+          </div>
+        </article>
       ))}
     </main>
   );

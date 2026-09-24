@@ -25,3 +25,17 @@ export const requireRole =
       return res.status(403).json({ error: { code: "FORBIDDEN", message: "Sin permisos" } });
     next();
   };
+
+// Auth opcional: identifica al usuario si trae un token válido, pero nunca
+// bloquea (rutas públicas que personalizan la respuesta, p. ej. el Visor).
+export function optionalAuth(req: AuthedRequest, _res: Response, next: NextFunction) {
+  const header = req.headers.authorization ?? "";
+  if (header.startsWith("Bearer ")) {
+    try {
+      req.user = verifyAccess(header.slice(7));
+    } catch {
+      /* token inválido: se trata como anónimo */
+    }
+  }
+  next();
+}

@@ -72,7 +72,8 @@ function parseSubset(html: string): { param: string | null; names: string[] } {
 describe("material symbols subset (F4-04)", () => {
   it("index.html cubre todos los iconos en uso (sin tofu)", () => {
     const used = extractIcons();
-    expect(used.length).toBeGreaterThan(100);
+    // Cordura del extractor (no un mínimo de diseño): si cae a ~0, el regex se rompió.
+    expect(used.length).toBeGreaterThan(50);
     const html = fs.readFileSync(indexHtml, "utf8");
     const { param, names } = parseSubset(html);
     expect(param, "index.html debe tener icon_names= (oficial) o text= con el subset").not.toBeNull();

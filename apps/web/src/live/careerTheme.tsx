@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 import { UNSA_CAREERS, careerOf, type UnsaCareer } from "../data/unsa";
 import { useAuth } from "../auth/AuthContext";
+import { THEME_STORE, themeTokens } from "../lib/themeTokens";
 
 const KEYS = UNSA_CAREERS.map((c) => c.key);
 const STORE = "hub_career";
@@ -11,13 +12,6 @@ interface CareerTheme {
   career: string;
   setCareer: (c: string) => void;
   accent: UnsaCareer | null;
-}
-
-function hexToRgbTriplet(hex: string): string {
-  const h = hex.replace("#", "");
-  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
-  const n = parseInt(full, 16);
-  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
 }
 
 const Ctx = createContext<CareerTheme>({ career: "all", setCareer: () => {}, accent: null });
@@ -67,14 +61,21 @@ export function CareerThemeProvider({ children }: { children: ReactNode }) {
 
   const accent = career === "all" ? null : careerOf(career);
 
-  // El color primario de TODA la app (todas las pestañas) sigue a la carrera:
-  // primary y primary-container de Tailwind leen --hub-p. Sin carrera → teal por defecto.
+  // El color primario de TODA la app sigue a la carrera: primary, primary-soft y
+  // primary-ink de Tailwind leen --hub-p*. Sin carrera → teal por defecto (tokens.css).
+  // Se persisten para que index.html los aplique antes del primer paint (sin FOUC).
   useEffect(() => {
     try {
-      if (accent) document.documentElement.style.setProperty("--hub-p", hexToRgbTriplet(accent.color));
-      else document.documentElement.style.removeProperty("--hub-p");
+      const root = document.documentElement.style;
+      const tokens = accent ? themeTokens(accent.color, accent.soft) : null;
+      for (const k of ["--hub-p", "--hub-p-soft", "--hub-p-ink"] as const) {
+        if (tokens) root.setProperty(k, tokens[k]);
+        else root.removeProperty(k);
+      }
+      if (tokens) localStorage.setItem(THEME_STORE, JSON.stringify(tokens));
+      else localStorage.removeItem(THEME_STORE);
     } catch {
-      /* sin DOM */
+      /* sin DOM o sin storage */
     }
   }, [accent]);
 

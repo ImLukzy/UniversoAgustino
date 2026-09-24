@@ -26,6 +26,12 @@ export async function notify(input: NotifyInput): Promise<void> {
   }
 }
 
+// Enlace para el VENDEDOR (gestión de ventas).
 export function orderLink(orderId: string): string {
   return `/ventas?order=${orderId}`;
+}
+
+// Enlace para el COMPRADOR (estado del pedido en su checkout).
+export function buyerOrderLink(orderId: string): string {
+  return `/checkout/${orderId}`;
 }

@@ -39,7 +39,7 @@ const login = (u) => req("POST", "/auth/login", { body: u }, 200);
 
 if (PHASE === "base") {
   const S = await login(SELLER), B = await login(BUYER), A = await login(BUYER2);
-  const TS = S.access, TB = B.access, TA = A.access;
+  const TS = S.access, TB = B.access;
   console.log("login ok", S.role, B.role, A.role);
 
   // 1. Snapshot en POST /orders (digital)

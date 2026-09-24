@@ -1,24 +1,25 @@
 import { motion, AnimatePresence } from "framer-motion";
 import type { ToastItem } from "../context/ToastContext";
+import { SPRING } from "../lib/motion";
 
 // Pila visual de toasts (Sprint 3). role=status/alert para lector de pantalla,
-// botón de cierre con aria-label, colores por tono con el sistema existente.
+// botón de cierre con aria-label, tarjeta .card del sistema de diseño con color por tono.
 // Craftsmanship: entrada slide+fade con spring, salida con fade; el viewport
 // siempre montado para conservar la animación de salida.
 const TONE: Record<ToastItem["tone"], { wrap: string; icon: string; iconName: string }> = {
   success: {
-    wrap: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    icon: "text-emerald-700",
+    wrap: "bg-[#dcfce7]",
+    icon: "text-[#15803d]",
     iconName: "check_circle",
   },
   error: {
-    wrap: "border-red-200 bg-red-50 text-red-900",
-    icon: "text-red-600",
+    wrap: "bg-[#fee2e2]",
+    icon: "text-[#b91c1c]",
     iconName: "error",
   },
   info: {
-    wrap: "border-indigo-200 bg-indigo-50 text-indigo-900",
-    icon: "text-indigo-700",
+    wrap: "bg-white",
+    icon: "text-primary",
     iconName: "info",
   },
 };
@@ -36,9 +37,9 @@ export function ToastStack({ items, onDismiss }: { items: ToastItem[]; onDismiss
               initial={{ opacity: 0, y: 16, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              transition={SPRING}
               role={t.tone === "error" ? "alert" : "status"}
-              className={`pointer-events-auto flex w-full max-w-sm items-start gap-2 rounded-xl border px-3 py-2.5 shadow-lg ${s.wrap}`}
+              className={`pointer-events-auto flex w-full max-w-sm items-start gap-2 card px-3 py-2.5 text-zinc-950 ${s.wrap}`}
             >
               <span className={`material-symbols-outlined text-xl ${s.icon}`}>{s.iconName}</span>
               <div className="min-w-0 flex-1">

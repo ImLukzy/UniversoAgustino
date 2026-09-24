@@ -8,6 +8,7 @@ servers:
 tags:
   - { name: auth }
   - { name: documents }
+  - { name: payments }
   - { name: bazar }
   - { name: orders }
   - { name: uploads }
@@ -55,6 +56,45 @@ paths:
       responses:
         '200': { description: OK }
         '401': { description: BAD_CREDENTIALS }
+  /auth/oauth/status:
+    get:
+      tags: [auth]
+      summary: Qué proveedores sociales están configurados (google/apple)
+      responses:
+        '200': { description: OK }
+  /auth/oauth/google:
+    get:
+      tags: [auth]
+      summary: Inicia OAuth Google (redirect 302 al proveedor)
+      responses:
+        '302': { description: Redirect a accounts.google.com }
+        '503': { description: OAUTH_NO_CONFIGURADO }
+  /auth/oauth/google/callback:
+    get:
+      tags: [auth]
+      summary: Callback Google (verifica, chequea dominio UNSA, emite sesión)
+      responses:
+        '302': { description: Redirect a /auth/callback con code o error }
+  /auth/oauth/apple:
+    get:
+      tags: [auth]
+      summary: Inicia Sign in with Apple (redirect 302 al proveedor)
+      responses:
+        '302': { description: Redirect a appleid.apple.com }
+        '503': { description: OAUTH_NO_CONFIGURADO }
+  /auth/oauth/apple/callback:
+    post:
+      tags: [auth]
+      summary: Callback Apple form_post (verifica id_token, chequea dominio)
+      responses:
+        '302': { description: Redirect a /auth/callback con code o error }
+  /auth/oauth/consume:
+    post:
+      tags: [auth]
+      summary: Canjea el código de un solo uso por access (mismo contrato que login)
+      responses:
+        '200': { description: OK }
+        '400': { description: CODE_INVALIDO }
   /auth/refresh:
     post:
       tags: [auth]
@@ -68,6 +108,46 @@ paths:
       tags: [auth]
       summary: Revoca el refresh y limpia la cookie
       responses: { '200': { description: OK } }
+  /auth/email/start:
+    post:
+      tags: [auth]
+      summary: Envía un código de 6 dígitos al correo @unsa.edu.pe (spec 22; 10/15min por IP, 5/hora por correo, 60 s entre envíos)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '202': { description: 'Código enviado ({ email, expiresIn, resendIn })' }
+        '403': { description: EMAIL_NO_AUTORIZADO (dominio distinto de @unsa.edu.pe) }
+        '429': { description: 'ESPERA_REENVIO (con retryIn) o RATE_LIMITED' }
+        '502': { description: CORREO_FALLIDO }
+        '503': { description: CORREO_NO_DISPONIBLE (sin proveedor de correo en producción) }
+  /auth/email/verify:
+    post:
+      tags: [auth]
+      summary: Canjea el código por sesión; crea la cuenta si es nueva (perfil pendiente → /bienvenida)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email: { type: string, format: email }
+                code: { type: string, pattern: '^\d{6}$' }
+      responses:
+        '200': { description: 'Cuenta existente ({ access, isNew: false }) + cookie de refresh' }
+        '201': { description: 'Cuenta creada ({ access, isNew: true }) + cookie de refresh' }
+        '400': { description: CODIGO_INCORRECTO }
+        '403': { description: EMAIL_NO_AUTORIZADO }
+        '410': { description: CODIGO_VENCIDO (vencido, usado o inexistente) }
+        '429': { description: DEMASIADOS_INTENTOS (5) o RATE_LIMITED }
   /auth/forgot:
     post:
       tags: [auth]
@@ -142,9 +222,16 @@ paths:
   /documents/{id}:
     get:
       tags: [documents]
-      summary: Detalle público (404 si no existe)
+      summary: Detalle público (404 si no existe); con token añade saved y fullAccess reales. fileType (pdf|image|null) siempre; fileUrl solo con fullAccess
+      security: [{}, { bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
+  /documents/{id}/preview:
+    get:
+      tags: [documents]
+      summary: Vista previa pública con las páginas de muestra que eligió el vendedor (previewPages, default 1–2) o la imagen. Cabeceras X-Preview-Pages (páginas reales incluidas) y X-Total-Pages. Cache-Control private
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: PDF con las páginas de muestra o imagen }, '404': { description: NOT_FOUND } }
     patch:
       tags: [documents]
       summary: Edita el dueño (auth)
@@ -157,6 +244,19 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
+  /documents/{id}/save:
+    post:
+      tags: [documents]
+      summary: Guardar documento (idempotente, auth)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { 200: { description: OK }, 401: { description: UNAUTHENTICATED }, 404: { description: NOT_FOUND } }
+    delete:
+      tags: [documents]
+      summary: Quitar de guardados (idempotente, auth)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { 200: { description: OK }, 401: { description: UNAUTHENTICATED } }
   /documents/{id}/takedown:
     post:
       tags: [documents]
@@ -226,9 +326,10 @@ paths:
                 rentalStart: { type: string, format: date-time }
                 rentalEnd: { type: string, format: date-time }
       responses:
+        '200': { description: Apunte con pedido vivo del mismo comprador (PENDING/PAID) — se reutiliza, no se duplica }
         '201': { description: Creado (sellerId, expiresAt, itemTitle, itemPriceCents, feeBps) }
-        '400': { description: SELF_PURCHASE, DATES_REQUIRED o BAD_DATES }
-        '409': { description: NOT_AVAILABLE (con details.availableAt) }
+        '400': { description: SELF_PURCHASE, FREE_ITEM, DATES_REQUIRED o BAD_DATES }
+        '409': { description: NOT_AVAILABLE (con details.availableAt) o ALREADY_OWNED }
   /orders/mine:
     get:
       tags: [orders]
@@ -258,10 +359,18 @@ paths:
   /orders/{id}/pay:
     post:
       tags: [orders]
-      summary: El comprador declara el pago → PAID (payProof = n° operación)
+      summary: El comprador declara el pago → PAID (payProof = n° operación y/o payProofUrl = voucher propio; al menos uno). No da acceso hasta que el vendedor confirme (ESCROW). 409 GATEWAY_REQUIRED con Mercado Pago activo
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '409': { description: BAD_STATE o RESERVATION_EXPIRED } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payProof: { type: string, minLength: 3, maxLength: 160, description: N° de operación Yape/Plin }
+                payProofUrl: { type: string, pattern: "^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$", description: Captura del voucher subida por POST /uploads }
+      responses: { '200': { description: OK }, '400': { description: VALIDATION o BAD_PROOF }, '403': { description: FORBIDDEN }, '409': { description: BAD_STATE, RESERVATION_EXPIRED o GATEWAY_REQUIRED } }
   /orders/{id}/confirm-payment:
     post:
       tags: [orders]
@@ -303,9 +412,12 @@ paths:
   /uploads/{name}:
     get:
       tags: [uploads]
-      summary: Sirve archivo con cabeceras defensivas (inline solo pdf/jpg/png, resto attachment)
-      parameters: [{ name: name, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: Archivo }, '400': { description: VALIDATION }, '404': { description: NOT_FOUND } }
+      summary: Sirve archivo con cabeceras defensivas (inline solo pdf/jpg/png, resto attachment). Archivo de un documento de pago solo para autor, comprador (PAID/ESCROW/RELEASED) o admin; ?stream=1 transmite por la API (Range → 206)
+      security: [{}, { bearerAuth: [] }]
+      parameters:
+        - { name: name, in: path, required: true, schema: { type: string } }
+        - { name: stream, in: query, schema: { type: string, enum: ['1'] } }
+      responses: { '200': { description: Archivo }, '206': { description: Rango parcial (stream) }, '302': { description: Redirección a URL prefirmada (R2) }, '400': { description: VALIDATION }, '403': { description: PAYWALL }, '404': { description: NOT_FOUND } }
   /monetization/simulate:
     post:
       tags: [monetization]
@@ -361,7 +473,7 @@ paths:
       tags: [reports]
       summary: Marca todo como leído (auth)
       security: [{ bearerAuth: [] }]
-      responses: { '200': { description: OK (read: N) } }
+      responses: { '200': { description: 'OK (read: N)' } }
   /notifications/{id}/read:
     post:
       tags: [reports]
@@ -369,6 +481,23 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
+  /payments/config:
+    get:
+      tags: [payments]
+      summary: Pasarela activa (manual = Yape/Plin verificado por el vendedor; mercadopago = Checkout Pro)
+      responses: { '200': { description: "{ data: { provider: manual | mercadopago } }" } }
+  /payments/checkout/{orderId}:
+    post:
+      tags: [payments]
+      summary: Crea la preferencia de Mercado Pago del pedido del comprador y devuelve la URL de pago
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: orderId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: "{ data: { url } }" }, '403': { description: FORBIDDEN }, '404': { description: PROVIDER_OFF }, '409': { description: BAD_STATE o RESERVATION_EXPIRED } }
+  /payments/webhook:
+    post:
+      tags: [payments]
+      summary: Notificación de Mercado Pago. Valida x-signature (HMAC-SHA256), relee el pago y exige approved + external_reference + monto exacto → ESCROW
+      responses: { '200': { description: "{ data: { outcome } }" }, '401': { description: BAD_SIGNATURE }, '404': { description: PROVIDER_OFF } }
   /legal/summary:
     get:
       tags: [legal]

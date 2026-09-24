@@ -1,18 +1,17 @@
 import type { Prisma } from "@prisma/client";
-import { LIVE_ORDER_STATUS } from "@hub/shared";
 
 // Ventana de reserva configurable (minutos). Mínimo 1 para permitir E2E;
 // por defecto 30. Solo se lee al arrancar el proceso.
 const rawTtlMin = Number(process.env.RESERVATION_TTL_MINUTES ?? 30);
 export const RESERVATION_TTL_MINUTES =
   Number.isFinite(rawTtlMin) && rawTtlMin >= 1 ? Math.floor(rawTtlMin) : 30;
-export const RESERVATION_TTL_MS = RESERVATION_TTL_MINUTES * 60_000;
+const RESERVATION_TTL_MS = RESERVATION_TTL_MINUTES * 60_000;
 
 export function nextExpiry(from: Date = new Date()): Date {
   return new Date(from.getTime() + RESERVATION_TTL_MS);
 }
 
-export interface Expirable {
+interface Expirable {
   status: string;
   expiresAt: Date | string | null;
 }
@@ -56,4 +55,3 @@ export function expiredPatch(now: Date = new Date()) {
   };
 }
 
-export { LIVE_ORDER_STATUS };

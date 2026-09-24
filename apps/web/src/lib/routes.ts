@@ -1,0 +1,31 @@
+// Mapa central de rutas reales de la app (React Router). El código nuevo
+// navega con ROUTES en lugar de literales sueltos; las páginas
+// antiguas usan el puente data-path de App.tsx (mismos destinos).
+export const ROUTES = {
+  home: "/",
+  appHome: "/home",
+  explore: "/explorar",
+  bazar: "/bazar",
+  monetiza: "/monetiza",
+  legal: "/legal",
+  document: (id: string) => `/v/${id}`,
+  bazarItem: (id: string) => `/p/bazar/${id}`,
+  checkout: (orderId: string) => `/checkout/${orderId}`,
+  myOrders: "/pedidos",
+  mySales: "/ventas",
+  myBazar: "/publicaciones",
+  publish: "/publicar",
+  subirMaterial: "/subir-material",
+  panel: "/panel",
+  account: "/cuenta",
+  perfil: "/perfil",
+  login: "/login",
+  authCallback: "/auth/callback",
+  onboarding: "/bienvenida",
+  register: "/register",
+  forgotPassword: "/forgot-password",
+  admin: "/admin",
+  notifications: "/notificaciones",
+  settings: "/ajustes",
+  subscription: "/suscripcion",
+} as const;

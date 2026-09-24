@@ -28,6 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.3.0",
+    "pdf-lib": "^1.17.1",
     "swagger-ui-express": "^5.0.1",
     "yaml": "^2.6.0",
     "zod": "^3.23.8"

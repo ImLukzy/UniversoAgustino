@@ -57,6 +57,6 @@ try {
 
 Write-Output ""
 Write-Output "TODO FUNCIONAL en:"
-Write-Output "  Web:  http://localhost:5173/  (Stitch: / /bazar /monetiza /legal + funcional /app /pedidos /admin /login)"
+Write-Output "  Web:  http://localhost:5173/  (/ /explorar /bazar /monetiza /legal /panel /pedidos /admin)"
 Write-Output "  API:  http://localhost:4000/api/v1  docs http://localhost:4000/docs"
 Write-Output "  Seeds: admin@hub.local / Admin1234!  ·  creadora@unsa.local / Creadora123!"

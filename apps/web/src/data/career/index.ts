@@ -43,4 +43,3 @@ export function careerContent(key?: string | null): CareerContent {
   return DEFAULT_CONTENT;
 }
 
-export type { CareerContent, CareerChip, CareerTesti, DocTypeFilter } from "./types";

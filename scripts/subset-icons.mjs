@@ -6,7 +6,7 @@
 // "Subset the font ... using the &icon_names query parameter, using an
 // alphabetically sorted comma-separated list of icon names").
 // Cubre FILL 0..1 porque hay `fontVariationSettings: "'FILL' 1"` en uso real
-// (CareerVisual, BazarStitch, LegalStitch, MarketplaceStitch).
+// (CareerVisual, Bazar, Legal, Explorar).
 //
 // Uso:
 //   node scripts/subset-icons.mjs            -> imprime URL + conteo (exit 0)
@@ -46,9 +46,9 @@ export function extractIcons() {
   for (const f of files) {
     if (!f.endsWith(".tsx")) continue;
     const c = fs.readFileSync(f, "utf8");
-    // 1) <span class="material-symbols-outlined...>literal</span>  (directo)
+    // 1) <span|motion.span class="material-symbols-outlined...>literal</span>  (directo)
     // 2) <span ...>{ternario con "literales"}</span> -> todos los quoted del inner
-    const spanRe = /<span[^>]*material-symbols-outlined[^>]*>([\s\S]*?)<\/span>/g;
+    const spanRe = /<(?:motion\.)?span[^>]*material-symbols-outlined[^>]*>([\s\S]*?)<\/(?:motion\.)?span>/g;
     let m;
     while ((m = spanRe.exec(c))) {
       const inner = m[1].trim();
@@ -57,10 +57,13 @@ export function extractIcons() {
       let q;
       while ((q = qre.exec(inner))) innerQuoted.add(q[1]);
     }
-    // 3) icon: "..." en tsx (PanelTabs, Panel, Pedidos, Cuenta, Register, LegalStitch...)
+    // 3) icon: "..." en tsx (Panel, Pedidos, Cuenta, Legal...)
     //    Excluye clases Tailwind con guiones porque el grupo solo admite [a-z0-9_].
     const ire = /\bicon\s*:\s*["']([a-z0-9_]+)["']/g;
     while ((m = ire.exec(c))) iconProp.add(m[1]);
+    // 3b) prop JSX icon="..." (EmptyState, Accordion, tarjetas).
+    const are = /\bicon=["']([a-z0-9_]+)["']/g;
+    while ((m = are.exec(c))) iconProp.add(m[1]);
     // 4) iconName: "..." (Toast: check_circle, error, info)
     const nre = /\biconName\s*:\s*["']([a-z0-9_]+)["']/g;
     while ((m = nre.exec(c))) iconName.add(m[1]);

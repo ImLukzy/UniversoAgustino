@@ -1,9 +1,11 @@
 import { useState, type ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { SPRING } from "../lib/motion";
 
-// Acordeón accesible (Sprint 3): <button> con aria-expanded + región con
-// aria-labelledby. Un solo item abierto a la vez (radio conductual);
-// `defaultOpen` abre el primero en desktop si se desea.
-export interface AccordionItem {
+// Acordeón único de la app (FAQ landing, Monetiza, Legal): <button> con
+// aria-expanded + región con aria-labelledby; un ítem abierto a la vez.
+// Variante "rows" = filas con borde inferior; "cards" = tarjetas sólidas.
+interface AccordionItem {
   id: string;
   icon?: string;
   eyebrow?: string;
@@ -11,56 +13,50 @@ export interface AccordionItem {
   body: ReactNode;
 }
 
-export function Accordion({
-  items,
-  defaultOpen = -1,
-  itemClassName = "bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden",
-  buttonClassName = "w-full p-space-lg text-left flex items-center justify-between gap-space-md",
-}: {
-  items: AccordionItem[];
-  defaultOpen?: number;
-  itemClassName?: string;
-  buttonClassName?: string;
-}) {
+export function Accordion({ items, defaultOpen = -1, variant = "cards" }: { items: AccordionItem[]; defaultOpen?: number; variant?: "cards" | "rows" }) {
   const [open, setOpen] = useState(defaultOpen);
+  const rows = variant === "rows";
   return (
-    <div className="flex flex-col gap-space-sm">
+    <div className={rows ? "border-t-2 border-zinc-900" : "flex flex-col gap-3"}>
       {items.map((it, i) => {
         const isOpen = open === i;
         return (
-          <div key={it.id} className={itemClassName}>
+          <div key={it.id} className={rows ? "border-b border-zinc-300" : "card overflow-hidden"}>
             <button
               type="button"
               onClick={() => setOpen(isOpen ? -1 : i)}
               aria-expanded={isOpen}
               aria-controls={`acc-panel-${it.id}`}
               id={`acc-button-${it.id}`}
-              className={`${buttonClassName} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
+              className={`flex w-full items-center justify-between gap-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${rows ? "py-6" : "p-5"}`}
             >
-              <span className="flex min-w-0 items-center gap-space-sm">
-                {it.icon && <span className="material-symbols-outlined text-primary text-title-lg shrink-0">{it.icon}</span>}
+              <span className="flex min-w-0 items-center gap-3">
+                {it.icon && <span className="material-symbols-outlined shrink-0 text-2xl text-primary">{it.icon}</span>}
                 <span className="min-w-0">
-                  {it.eyebrow && <span className="block font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">{it.eyebrow}</span>}
-                  <span className="block font-title-lg text-title-lg text-on-surface font-bold">{it.title}</span>
+                  {it.eyebrow && <span className="eyebrow block">{it.eyebrow}</span>}
+                  <span className="block font-bold text-zinc-950">{it.title}</span>
                 </span>
               </span>
-              <span
-                className="material-symbols-outlined text-primary text-headline-sm shrink-0 transition-transform duration-200"
-                style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-                aria-hidden="true"
-              >
+              <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={SPRING} className="material-symbols-outlined shrink-0 text-zinc-700" aria-hidden="true">
                 expand_more
-              </span>
+              </motion.span>
             </button>
-            <div
-              id={`acc-panel-${it.id}`}
-              role="region"
-              aria-labelledby={`acc-button-${it.id}`}
-              hidden={!isOpen}
-              className="px-space-lg pb-space-lg pt-0 text-on-surface-variant font-body-md text-body-md leading-relaxed"
-            >
-              {it.body}
-            </div>
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  id={`acc-panel-${it.id}`}
+                  role="region"
+                  aria-labelledby={`acc-button-${it.id}`}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={SPRING}
+                  className="overflow-hidden"
+                >
+                  <div className={`max-w-3xl leading-relaxed text-zinc-600 ${rows ? "pb-6" : "px-5 pb-5"}`}>{it.body}</div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         );
       })}

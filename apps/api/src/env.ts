@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { PLATFORM_FEE_PCT } from "@hub/shared";
 
 // Carga .env ANTES de leer process.env (los imports ESM se hoistean,
 // por eso debe vivir aquí y no en server.ts).
@@ -19,7 +20,7 @@ export const env = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
   PORT: Number(process.env.API_PORT ?? 4000),
   PREFIX: process.env.API_PREFIX ?? "/api/v1",
-  WEB_ORIGIN: (process.env.WEB_ORIGIN ?? "http://localhost:5173").split(","),
+  WEB_ORIGIN: (process.env.WEB_ORIGIN ?? "http://localhost:5173").split(",").map((o) => o.trim()),
   JWT_ACCESS_SECRET: str("JWT_ACCESS_SECRET"),
   JWT_REFRESH_SECRET: str("JWT_REFRESH_SECRET"),
   // Runbook de rotación (docs/runbook-rotacion.md): durante la ventana de gracia
@@ -29,11 +30,26 @@ export const env = {
   JWT_ACCESS_TTL: process.env.JWT_ACCESS_TTL ?? "15m",
   JWT_REFRESH_TTL: process.env.JWT_REFRESH_TTL ?? "7d",
   DATABASE_URL: process.env.DATABASE_URL ?? "",
-  FEE_PCT: Number(process.env.PLATFORM_FEE_PCT ?? 13),
+  FEE_PCT: Number(process.env.PLATFORM_FEE_PCT ?? PLATFORM_FEE_PCT),
   // Sprint 1A: TTL de reservas PENDING (minutos) y flags del job de expiración.
   RESERVATION_TTL_MINUTES: Number(process.env.RESERVATION_TTL_MINUTES ?? 30),
   DIRECT_DATABASE_URL: process.env.DIRECT_DATABASE_URL ?? "",
   ENABLE_JOBS: process.env.ENABLE_JOBS ?? "false",
+  // OAuth social (docs/oauth.md): opcionales, vacías = proveedor apagado.
+  // El frontend consulta GET /auth/oauth/status y mantiene el toast
+  // "aún no disponible" mientras no haya credenciales.
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? "",
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ?? "",
+  GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI ?? "",
+  APPLE_CLIENT_ID: process.env.APPLE_CLIENT_ID ?? "",
+  APPLE_REDIRECT_URI: process.env.APPLE_REDIRECT_URI ?? "",
+  // Pasarela Mercado Pago (spec 16, docs/payments.md): opcional. Sin token y
+  // secreto de webhook rige el cobro manual Yape/Plin verificado por el vendedor.
+  MP_ACCESS_TOKEN: process.env.MP_ACCESS_TOKEN ?? "",
+  MP_WEBHOOK_SECRET: process.env.MP_WEBHOOK_SECRET ?? "",
+  MP_API_BASE: process.env.MP_API_BASE ?? "https://api.mercadopago.com",
+  // URL pública HTTPS de esta API (MP no notifica a localhost; en dev usa un túnel).
+  API_PUBLIC_URL: process.env.API_PUBLIC_URL ?? `http://localhost:${process.env.API_PORT ?? 4000}`,
 };
 
 // Sprint 4 (F4-03): la API se niega a arrancar en producción con secretos

@@ -41,7 +41,13 @@ enum OrderStatus {
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
-  passwordHash String
+  // Nulo en cuentas 100% OAuth (sin contraseña local). El login con clave
+  // las rechaza con OAUTH_ONLY en lugar de romper.
+  passwordHash String?
+  // Proveedor OAuth vinculado (google|apple). provider+providerId únicos.
+  provider     String?
+  providerId   String?
+  avatarUrl    String?
   role         Role     @default(student)
   createdAt    DateTime @default(now())
   profile      Profile?
@@ -55,6 +61,8 @@ model User {
   notifications Notification[]
   reports      Report[]
   refreshTokens RefreshToken[]
+  savedDocuments SavedDocument[]
+  @@unique([provider, providerId])
 }
 
 model Profile {
@@ -65,6 +73,10 @@ model Profile {
   university  String  @default("UNSA")
   career      String  @default("ENFERMERIA")
   cycle       String?
+  // Onboarding (spec 21): nulo = perfil obligatorio pendiente.
+  faculty     String?
+  phone       String?
+  onboardedAt DateTime?
   hospital    String?
   cepCode     String?
   cepVerified Boolean @default(false)
@@ -82,6 +94,8 @@ model Document {
   type        String    // APUNTE | PAE | BALOTARIO | GUIA
   priceCents  Int       @default(0)
   fileUrl     String?
+  // Páginas de muestra públicas (spec 16): el resto solo con pago verificado.
+  previewPages Int[]    @default([1, 2])
   description String?
   payMethod   String    @default("YAPE")
   payQrUrl    String?
@@ -89,10 +103,23 @@ model Document {
   status      DocStatus @default(PUBLISHED)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  savedBy     SavedDocument[]
 
   @@index([university, career, status])
   @@index([title])
   @@index([authorId])
+}
+
+// Guardados (bookmark) del Visor: un registro por usuario+documento.
+model SavedDocument {
+  userId     String
+  documentId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, documentId])
+  @@index([userId, createdAt])
 }
 
 model BazarItem {
@@ -141,6 +168,8 @@ model Order {
   payDetail  String?
   // Constancia que declara el comprador (n° operación Yape/Plin).
   payProof   String?
+  // Captura opcional del voucher (spec 09): ruta /uploads/<uuid> validada.
+  payProofUrl String?
   // Alquiler de bazar: periodo solicitado por el comprador.
   rentalStart DateTime?
   rentalEnd   DateTime?
@@ -259,4 +288,21 @@ model Upload {
 
   @@index([ownerId])
   @@index([checksum])
+}
+
+// Spec 22: códigos de ingreso por correo institucional (6 dígitos, 10 min,
+// máx. 5 intentos). Solo se guarda el HMAC, nunca el código. Sin FK: el
+// usuario puede no existir aún (se crea al canjear el primer código).
+model EmailLoginCode {
+  id        String    @id @default(cuid())
+  email     String
+  codeHash  String
+  attempts  Int       @default(0)
+  expiresAt DateTime
+  usedAt    DateTime?
+  requestIp String?
+  createdAt DateTime  @default(now())
+
+  @@index([email, createdAt])
+  @@index([expiresAt])
 }

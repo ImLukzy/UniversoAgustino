@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { careerContent } from "../data/careerContent";
+import { careerContent } from "../data/career";
 import { useCareerTheme } from "../live/careerTheme";
 
 // Visual genérico con identidad de carrera (degradado + icono + etiqueta).
@@ -43,32 +42,6 @@ export function CareerVisual({
 
 // Foto temática por carrera con respaldo automático: si la imagen falla,
 // se muestra el visual de carrera (degradado + icono) en su lugar.
-export function CareerPhoto({
-  src,
-  alt,
-  className = "",
-}: {
-  src: string;
-  alt: string;
-  className?: string;
-}) {
-  const [failed, setFailed] = useState(false);
-  return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <CareerVisual className="absolute inset-0 h-full w-full" iconClassName="text-title-lg" />
-      {!failed && src && (
-        <img
-          src={src}
-          alt={alt}
-          loading="lazy"
-          onError={() => setFailed(true)}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
-    </div>
-  );
-}
-
 // Avatar con inicial y color de carrera (para testimonios y tarjetas).
 export function CareerAvatar({ name, className = "w-14 h-14" }: { name: string; className?: string }) {
   const { accent } = useCareerTheme();

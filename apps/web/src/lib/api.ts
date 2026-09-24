@@ -1,4 +1,7 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
+import { PEN, cancelLabel } from "@hub/shared";
+
+export type * from "./apiTypes";
 
 export const API_BASE: string =
   (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_API_URL ??
@@ -20,8 +23,9 @@ export function setAccessToken(token: string | null) {
   accessToken = token;
 }
 
-export function getAccessToken(): string | null {
-  return accessToken;
+// Para peticiones fuera de axios (pdf.js): el PDF de pago exige sesión (spec 15).
+export function authHeaders(): Record<string, string> {
+  return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
 }
 
 let refreshing: Promise<string> | null = null;
@@ -62,12 +66,8 @@ api.interceptors.response.use(
     const axiosErr = err as AxiosError<{ error?: { message?: string; code?: string } }>;
     const original = (axiosErr?.config ?? undefined) as RetriableConfig | undefined;
     const status = axiosErr?.response?.status;
-    if (!original || status !== 401 || original._retried || isAuthPath(original.url)) {
-      if (status === 401) {
-        // Sin token que rotar ni reintento posible.
-      }
-      return Promise.reject(err);
-    }
+    // Sin token que rotar ni reintento posible: se propaga el error.
+    if (!original || status !== 401 || original._retried || isAuthPath(original.url)) return Promise.reject(err);
     original._retried = true;
     try {
       const fresh = await refreshAccess();
@@ -81,7 +81,8 @@ api.interceptors.response.use(
   },
 );
 
-export const pen = (cents: number) => `S/ ${(cents / 100).toFixed(2)}`;
+
+export const pen = PEN;
 
 export function apiError(e: unknown): string {
   if (axios.isAxiosError(e)) {
@@ -93,117 +94,9 @@ export function apiError(e: unknown): string {
   return "Error inesperado";
 }
 
-// Tipos mínimos espejo del backend (evita importar @hub/shared en runtime web)
-// Comunidad UNSA-only: university siempre "UNSA". career = clave de UNSA_CAREERS.
-export interface HubUser {
-  id: string;
-  email: string;
-  role: string;
-  profile?: { fullName: string; university: string; career?: string | null; cycle?: string | null } | null;
-}
-
-export type PayMethod = "YAPE" | "PLIN" | "AMBAS";
-
-export interface HubDocument {
-  id: string;
-  createdAt?: string;
-  title: string;
-  course: string;
-  university: string;
-  career?: string | null;
-  cycle: string;
-  type: string;
-  priceCents: number;
-  description?: string | null;
-  fileUrl?: string | null;
-  status: string;
-  payMethod?: PayMethod | null;
-  payQrUrl?: string | null;
-  payDetail?: string | null;
-  author?: { profile?: { fullName: string } | null } | null;
-}
-
-export interface HubBazarItem {
-  id: string;
-  createdAt?: string;
-  title: string;
-  kind: string;
-  tx: string;
-  priceCents: number;
-  depositCents?: number | null;
-  description?: string | null;
-  photos?: string[] | null;
-  status: string;
-  payMethod?: PayMethod | null;
-  payQrUrl?: string | null;
-  payDetail?: string | null;
-}
-
-export interface HubOrder {
-  id: string;
-  buyerId: string;
-  sellerId?: string | null;
-  createdAt: string;
-  itemType: string;
-  itemId: string;
-  amountCents: number;
-  feeCents: number;
-  netCents: number;
-  status: string;
-  payMethod?: PayMethod | null;
-  payQrUrl?: string | null;
-  payDetail?: string | null;
-  payProof?: string | null;
-  rentalStart?: string | null;
-  rentalEnd?: string | null;
-  expiresAt?: string | null;
-  acceptedAt?: string | null;
-  cancelledAt?: string | null;
-  cancelledReason?: string | null;
-  itemTitle?: string;
-  itemDesc?: string | null;
-  itemTx?: string | null;
-  itemPriceCents?: number | null;
-  feeBps?: number | null;
-  fileUrl?: string | null;
-  buyerCompleted?: number;
-  buyer?: { id: string; email: string; profile?: { fullName: string; career?: string | null; cycle?: string | null } | null } | null;
-}
-
-export interface HubReport {
-  id: string;
-  targetType: string;
-  targetId: string;
-  reason: string;
-  status: string;
-  createdAt: string;
-}
-
-export interface HubNotification {
-  id: string;
-  type: string;
-  title: string;
-  body: string;
-  link?: string | null;
-  readAt?: string | null;
-  createdAt: string;
-}
-
-// Motivos de cancelación (espejo de CANCEL_REASON_LABEL en @hub/shared).
-const CANCEL_LABELS: Record<string, string> = {
-  TTL_EXPIRED: "Reserva expirada",
-  TTL_BACKFILL: "Reserva expirada",
-  BUYER_CANCELLED: "Cancelado por el comprador",
-  SELLER_REJECTED: "Rechazado por el vendedor",
-  ORPHAN_ITEM: "Publicación no disponible",
-};
-
 /** Etiqueta de estado con motivo de cancelación; null si no aplica (usar mapa local). */
 export function displayOrderStatus(order: { status: string; cancelledReason?: string | null }): string | null {
-  if (order.status === "CANCELLED" && order.cancelledReason) {
-    return CANCEL_LABELS[order.cancelledReason] ?? null;
-  }
-  return null;
+  return order.status === "CANCELLED" ? cancelLabel(order.cancelledReason) : null;
 }
 
 export function fmtDate(iso?: string | null) {
@@ -225,15 +118,16 @@ export async function uploadFileWithProgress(file: File, onProgress?: (pct: numb
   });
   const url = String(r.data?.data?.url ?? "");
   if (!url) throw new Error("Subida sin URL");
-  return url.startsWith("http") ? url : API_ORIGIN + url;
+  return resolveQr(url) ?? url;
 }
 
-export async function uploadFile(file: File): Promise<string> {
-  return uploadFileWithProgress(file);
-}
+export const uploadFile = (file: File) => uploadFileWithProgress(file);
 
-// Normaliza QR guardado (absoluto o /uploads/...) a URL visible.
+// Normaliza una URL guardada (absoluta o /uploads/...) a URL visible.
 export function resolveQr(url?: string | null): string | null {
   if (!url) return null;
   return url.startsWith("http") ? url : API_ORIGIN + url;
 }
+
+// Páginas 1–2 del documento de pago (spec 15, T7): pública, sin la ruta del archivo.
+export const previewUrl = (id: string) => `${API_BASE}/documents/${encodeURIComponent(id)}/preview`;

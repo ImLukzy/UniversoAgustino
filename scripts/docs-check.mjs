@@ -11,11 +11,13 @@ const api = path.join(root, "apps/api/src");
 const SOURCES = [
   ["app.ts", [""]],
   ["modules/auth/routes.ts", ["/auth"]],
+  ["modules/auth/oauth.ts", ["/auth/oauth"]],
   ["modules/documents/routes.ts", ["/documents"]],
   ["modules/bazar/routes.ts", ["/bazar"]],
   ["modules/orders/routes.ts", ["/orders"]],
   ["modules/extra/routes.ts", ["/monetization", "/reports"]],
   ["modules/uploads/routes.ts", ["/uploads"]],
+  ["modules/payments/routes.ts", ["/payments"]],
   ["modules/notifications/routes.ts", []],
   ["server.ts", [""]],
 ];
@@ -27,12 +29,14 @@ const ROUTER_PREFIX = {
   app: [""],
   router: null, // se resuelve por archivo (abajo)
   authRouter: ["/auth"],
+  oauthRouter: ["/auth/oauth"],
   documentsRouter: ["/documents"],
   bazarRouter: ["/bazar"],
   ordersRouter: ["/orders"],
   monetizationRouter: ["/monetization"],
   reportsRouter: ["/reports"],
   uploadsRouter: ["/uploads"],
+  paymentsRouter: ["/payments"],
   notificationsRouter: ["/notifications"],
 };
 const found = new Set();

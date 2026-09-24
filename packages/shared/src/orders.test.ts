@@ -6,6 +6,7 @@ import {
   canTransition,
   cancelLabel,
   isCancelReason,
+  MarkPaidSchema,
 } from "./index.js";
 
 describe("ORDER_STATUS", () => {
@@ -57,5 +58,21 @@ describe("cancelLabel", () => {
     expect(isCancelReason("TTL_EXPIRED")).toBe(true);
     expect(isCancelReason("OTRO")).toBe(false);
     expect(isCancelReason(null)).toBe(false);
+  });
+});
+
+describe("MarkPaidSchema (spec 09)", () => {
+  it("acepta n° de operación y voucher interno de /uploads", () => {
+    expect(MarkPaidSchema.safeParse({ payProof: "094821", payProofUrl: "/uploads/3f2a-uuid.png" }).success).toBe(true);
+    expect(MarkPaidSchema.safeParse({ payProof: "094821" }).success).toBe(true);
+  });
+
+  it("exige n° de operación o voucher (spec 16)", () => {
+    expect(MarkPaidSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("rechaza vouchers externos o con path traversal", () => {
+    expect(MarkPaidSchema.safeParse({ payProofUrl: "https://evil.example/x.png" }).success).toBe(false);
+    expect(MarkPaidSchema.safeParse({ payProofUrl: "/uploads/../secret" }).success).toBe(false);
   });
 });

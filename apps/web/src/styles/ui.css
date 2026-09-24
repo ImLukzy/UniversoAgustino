@@ -1,0 +1,90 @@
+/* Sistema de diseño "stetik / rudo" de Universo Agustino.
+   Minimalismo sobrio (tinta zinc-900 sobre blanco/papel), bordes definidos y
+   sombras duras de época; el acento vibrante sale del tema de carrera
+   (--hub-p*). Todos los botones, tarjetas, inputs, chips y buscadores de la
+   app parten de estas clases base; las utilidades de Tailwind las afinan. */
+
+@layer base {
+  :root {
+    --ua-ink: 24 24 27;
+    --ua-paper: 251 250 247;
+  }
+  h1, h2, h3, h4 { text-wrap: balance; }
+  p, li, dd { text-wrap: pretty; }
+}
+
+@layer components {
+  /* ---- Botones píldora ---- */
+  .btn {
+    @apply inline-flex h-11 shrink-0 select-none items-center justify-center gap-2 whitespace-nowrap rounded-full border-2 border-zinc-900 px-5 text-sm font-bold text-zinc-900 transition-[transform,box-shadow,background-color,color] duration-150;
+    box-shadow: 3px 3px 0 0 rgb(var(--ua-ink));
+  }
+  .btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 0 rgb(var(--ua-ink)); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 0 rgb(var(--ua-ink)); }
+  .btn:disabled, .btn[aria-disabled="true"] { @apply cursor-not-allowed opacity-50; transform: none; box-shadow: 3px 3px 0 0 rgb(var(--ua-ink)); }
+  .btn:focus-visible { @apply outline-none ring-2 ring-primary ring-offset-2; }
+  .btn-sm { @apply h-9 px-4 text-[13px]; }
+  .btn-lg { @apply h-12 px-7 text-[15px]; }
+
+  .btn-primary { @apply bg-primary text-primary-ink; }
+  .btn-secondary { @apply bg-white; }
+  .btn-dark { @apply bg-zinc-900 text-white; }
+  .btn-ghost {
+    @apply inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 text-sm font-bold text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900;
+  }
+  .btn-icon { @apply h-10 w-10 px-0; }
+
+  /* ---- Tarjetas ---- */
+  .card {
+    @apply rounded-2xl border-2 border-zinc-900 bg-white;
+    box-shadow: 4px 4px 0 0 rgb(var(--ua-ink));
+  }
+  .card-hover { @apply transition-[transform,box-shadow] duration-150; }
+  .card-hover:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 0 rgb(var(--ua-ink)); }
+  /* Caja informativa o estado vacío: mismo borde que .card, trazo punteado y sin sombra. */
+  .card-dashed { @apply rounded-2xl border-2 border-dashed border-zinc-900 bg-white; }
+  /* Panel grande de la landing (ilustraciones, multidispositivo). */
+  .panel {
+    @apply rounded-[2rem] border-2 border-zinc-900;
+    box-shadow: 6px 6px 0 0 rgb(var(--ua-ink));
+  }
+  /* Hoja del visor: papel con borde y sombra dura (misma caja en skeleton → CLS 0). */
+  .sheet {
+    @apply rounded-lg border-2 border-zinc-900 bg-white;
+    box-shadow: 4px 4px 0 0 rgb(var(--ua-ink));
+  }
+
+  /* ---- Campos ---- */
+  .input {
+    @apply h-11 w-full rounded-xl border-2 border-zinc-200 bg-white px-4 text-[15px] text-zinc-900 transition-colors placeholder:text-zinc-400;
+  }
+  .input:hover { @apply border-zinc-300; }
+  .input:focus, .input:focus-visible { @apply border-zinc-900 outline-none ring-0; }
+  textarea.input { @apply h-auto py-3; }
+
+  /* ---- Buscador píldora ---- */
+  .searchbar {
+    @apply flex h-12 w-full items-center gap-2 rounded-full border-2 border-zinc-900 bg-white pl-4 pr-1.5 transition-shadow;
+    box-shadow: 3px 3px 0 0 rgb(var(--ua-ink));
+  }
+  .searchbar:focus-within { box-shadow: 4px 4px 0 0 rgb(var(--hub-p)); }
+  .searchbar input { @apply h-full min-w-0 flex-1 bg-transparent text-[15px] text-zinc-900 outline-none placeholder:text-zinc-400; }
+
+  /* ---- Chips / filtros ---- */
+  .chip {
+    @apply inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full border-2 border-zinc-900 bg-white px-4 text-[13px] font-bold text-zinc-900 transition-colors hover:bg-zinc-100;
+  }
+  .chip-active { @apply border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-900; }
+  .tag { @apply inline-flex items-center rounded-full border border-zinc-900 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-zinc-900; }
+
+  /* ---- Tipografía ---- */
+  .eyebrow { @apply text-xs font-bold uppercase tracking-[0.18em] text-zinc-500; }
+  .h-display { @apply font-display font-extrabold leading-[1.08] tracking-tight text-zinc-950; }
+  .price { @apply font-display font-extrabold tabular-nums tracking-tight; }
+}
+
+/* Spec 16: las hojas de un documento de pago no se imprimen (ni a PDF). */
+@media print {
+  .protected-sheets { display: none !important; }
+  body::after { content: "Contenido protegido · Universo Agustino"; display: block; padding: 2rem; font: 600 16px system-ui, sans-serif; }
+}
