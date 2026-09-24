@@ -1,0 +1,71 @@
+# Blueprint de Render para la API (apps/api). Los secretos van con
+# sync: false: Render los pide en el panel y nunca se guardan en el repo.
+services:
+  - type: web
+    name: universo-agustino-api
+    runtime: node
+    rootDir: .
+    # --include=dev: tsc y el CLI de Prisma son devDependencies y NODE_ENV=production las omitiría.
+    buildCommand: npm ci --include=dev && npm run build -w packages/shared && npm run prisma:generate -w apps/api && npm run build -w apps/api
+    # Conexión directa (sin pooler) para migrar; requiere instancia de pago.
+    preDeployCommand: cd apps/api && DATABASE_URL=$DIRECT_DATABASE_URL npx prisma migrate deploy
+    startCommand: npm run start -w apps/api
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: API_PORT
+        value: "10000"
+      - key: API_PREFIX
+        value: /api/v1
+      - key: API_PUBLIC_URL
+        value: https://universo-agustino-api.onrender.com
+      - key: WEB_ORIGIN
+        value: https://universoagustino.site
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: JWT_ACCESS_TTL
+        value: 15m
+      - key: JWT_REFRESH_TTL
+        value: 7d
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: https://universo-agustino-api.onrender.com/api/v1/auth/oauth/google/callback
+      - key: MAIL_DRIVER
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        value: Universo Agustino <no-reply@universoagustino.site>
+      - key: STORAGE_DRIVER
+        value: s3
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_REGION
+        value: auto
+      - key: S3_BUCKET
+        value: ua-uploads
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: MAX_UPLOAD_MB
+        value: "25"
+      - key: PLATFORM_FEE_PCT
+        value: "13"
+      - key: RESERVATION_TTL_MINUTES
+        value: "30"
+      - key: ENABLE_JOBS
+        value: "true"
