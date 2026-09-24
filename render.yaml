@@ -24,7 +24,7 @@ services:
       - key: API_PUBLIC_URL
         value: https://universo-agustino-api.onrender.com
       - key: WEB_ORIGIN
-        value: https://universoagustino.site
+        value: https://universoagustino.site,https://www.universoagustino.site
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_DATABASE_URL
