@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { SPRING } from "../../../lib/motion";
+import { SPRING } from "../../lib/motion";
 
 export type OptionState = "idle" | "ok" | "bad" | "dim";
 

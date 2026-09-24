@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { answer, isDone, next, startQuiz, tally, type QuizQuestion } from "./quiz";
-import { EXAM_LIBRARY } from "../data/examLibrary";
+import { BALOTARIOS, EXAM_KINDS, libraryStats } from "../data/balotariosData";
+import { CareerSchema } from "@hub/shared";
 
 const QS: QuizQuestion[] = [
   { q: "a", opts: ["x", "y"], ok: 0, why: "" },
@@ -30,18 +31,27 @@ describe("quiz de práctica", () => {
     expect(startQuiz(3)).toEqual({ index: 0, picks: [null, null, null] });
   });
 
-  it("biblioteca válida: 5 facultades, ids únicos, 5 preguntas por examen", () => {
-    expect(EXAM_LIBRARY).toHaveLength(5);
-    const exams = EXAM_LIBRARY.flatMap((f) => f.exams);
+  it("biblioteca de balotarios: 5 facultades × 4 tipos de examen × 6 preguntas", () => {
+    expect(libraryStats(BALOTARIOS)).toEqual({ faculties: 5, exams: 20, questions: 120 });
+    const exams = BALOTARIOS.flatMap((f) => f.exams);
     expect(new Set(exams.map((e) => e.id)).size).toBe(exams.length);
+    for (const f of BALOTARIOS) expect(f.exams.map((e) => e.kind).sort()).toEqual([...EXAM_KINDS].sort());
     for (const a of exams) {
-      expect(a.questions).toHaveLength(5);
+      expect(CareerSchema.safeParse(a.career).success).toBe(true);
+      expect(a.questions).toHaveLength(6);
       for (const q of a.questions) {
+        expect(q.opts).toHaveLength(4);
         expect(q.ok).toBeGreaterThanOrEqual(0);
-        expect(q.ok).toBeLessThan(q.opts.length);
-        expect(new Set(q.opts).size).toBe(q.opts.length);
-        expect(q.why.length).toBeGreaterThan(10);
+        expect(q.ok).toBeLessThan(4);
+        expect(new Set(q.opts).size).toBe(4);
+        expect(q.why.length).toBeGreaterThan(100);
       }
     }
+  });
+
+  it("la respuesta correcta no se concentra en una sola letra", () => {
+    const counts = [0, 0, 0, 0];
+    for (const q of BALOTARIOS.flatMap((f) => f.exams.flatMap((e) => e.questions))) counts[q.ok]++;
+    for (const c of counts) expect(c).toBeGreaterThanOrEqual(20);
   });
 });

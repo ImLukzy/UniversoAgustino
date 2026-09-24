@@ -8,6 +8,7 @@ export const ROUTES = {
   bazar: "/bazar",
   monetiza: "/monetiza",
   legal: "/legal",
+  balotarios: "/balotarios",
   document: (id: string) => `/v/${id}`,
   bazarItem: (id: string) => `/p/bazar/${id}`,
   checkout: (orderId: string) => `/checkout/${orderId}`,

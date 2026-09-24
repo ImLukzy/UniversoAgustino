@@ -35,7 +35,8 @@ class ResendDriver implements MailDriver {
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY ?? ""}`, "Content-Type": "application/json" },
       body: JSON.stringify({ from: process.env.MAIL_FROM ?? "Universo Agustino <no-reply@universoagustino.pe>", to: [to], subject, html }),
     });
-    if (!r.ok) throw new Error(`resend_${r.status}`);
+    // El cuerpo de Resend dice la causa exacta (dominio sin verificar, from inválido, key restringida).
+    if (!r.ok) throw new Error(`resend_${r.status}: ${(await r.text().catch(() => "")).slice(0, 300)}`);
   }
 }
 

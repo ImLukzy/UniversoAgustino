@@ -9,6 +9,7 @@ const SECTIONS: { title?: string; links: { to: string; icon: string; label: stri
     links: [
       { to: ROUTES.appHome, icon: "home", label: "Inicio" },
       { to: ROUTES.explore, icon: "explore", label: "Explorar" },
+      { to: ROUTES.balotarios, icon: "quiz", label: "Balotarios" },
       { to: ROUTES.bazar, icon: "storefront", label: "Bazar" },
     ],
   },

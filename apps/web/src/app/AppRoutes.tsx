@@ -17,6 +17,7 @@ const PublicLanding = lazy(() => import("../pages/PublicLanding").then((m) => ({
 const Home = lazy(() => import("../pages/Home").then((m) => ({ default: m.Home })));
 const Monetiza = lazy(() => import("../pages/Monetiza").then((m) => ({ default: m.Monetiza })));
 const Legal = lazy(() => import("../pages/Legal").then((m) => ({ default: m.Legal })));
+const Balotarios = lazy(() => import("../pages/Balotarios").then((m) => ({ default: m.Balotarios })));
 const Cuenta = lazy(() => import("../pages/Cuenta").then((m) => ({ default: m.Cuenta })));
 const Pedidos = lazy(() => import("../pages/Pedidos").then((m) => ({ default: m.Pedidos })));
 const Publicaciones = lazy(() => import("../pages/Publicaciones").then((m) => ({ default: m.Publicaciones })));
@@ -68,6 +69,7 @@ export function AppRoutes() {
         <Route path="/bazar" element={<Bazar />} />
         <Route path="/monetiza" element={<Monetiza />} />
         <Route path="/legal" element={<Legal />} />
+        <Route path="/balotarios" element={<Balotarios />} />
         {/* Páginas de cuenta sobre el layout global */}
         <Route path="/login" element={<LoginOpener />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
