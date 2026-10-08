@@ -10,6 +10,7 @@ import { staffSedesRouter } from "./sedes.js";
 import { scheduleRouter } from "./schedule.js";
 import { casesRouter } from "../cases/routes.js";
 import { shiftsRouter } from "./shifts.js";
+import { usersRouter } from "../sanctions/users.js";
 
 export const staffRouter = Router();
 staffRouter.use(requireAuth, requireRole("moderator", "admin"));
@@ -18,6 +19,7 @@ staffRouter.use("/sedes", staffSedesRouter);
 staffRouter.use("/schedule", scheduleRouter);
 staffRouter.use("/shifts", shiftsRouter);
 staffRouter.use("/cases", casesRouter);
+staffRouter.use("/users", usersRouter);
 const memberSelect = { id: true, email: true, role: true, createdAt: true, profile: { select: { fullName: true } } } as const;
 function fail(status: number, code: string, message: string): never {
   throw Object.assign(new Error(message), { status, code });

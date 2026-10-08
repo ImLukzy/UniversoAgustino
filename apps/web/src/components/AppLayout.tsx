@@ -8,6 +8,7 @@ import { AppFooter } from "./AppFooter";
 import { useAuth } from "../auth/AuthContext";
 import { useAuthModal } from "./AuthModalHost";
 import { ROUTES } from "../lib/routes";
+import { SuspensionBanner } from "./SuspensionBanner";
 
 function Logo() {
   return (
@@ -57,7 +58,7 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
             )}
           </div>
         </header>
-        <main className={fluid ? "w-full flex-1" : "mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:px-10"}>{children}</main>
+        <main className={fluid ? "w-full flex-1" : "mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:px-10"}><SuspensionBanner />{children}</main>
         <AppFooter />
       </div>
 

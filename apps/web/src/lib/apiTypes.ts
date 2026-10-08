@@ -6,6 +6,7 @@ export interface HubUser {
   id: string;
   email: string;
   role: string;
+  suspension?: { kind: "SUSPENSION" | "BAN"; reason: string; endsAt: string | null; message: string } | null;
   profile?: { fullName: string; university: string; career?: string | null; cycle?: string | null; faculty?: string | null; phone?: string | null; onboardedAt?: string | null } | null;
 }
 

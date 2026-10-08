@@ -6,6 +6,7 @@ import { managedCase, caseTransition, type Actor } from "./caseGuard.js";
 import { validSlot } from "./calendar.js";
 import { notify } from "../../lib/notify.js";
 import { remindIfDue } from "./reminders.js";
+import { announceSanction, recordStrike, type AutoSanction } from "../sanctions/strikes.js";
 
 export type Booking = { kind: AppointmentKind; sedeId: string; startsAt: string };
 export async function bookInside(tx: Prisma.TransactionClient, id: string, actor: Actor, input: Booking, previousId?: string) {
@@ -58,6 +59,7 @@ export async function appointmentNotice(result: Awaited<ReturnType<typeof bookIn
 }
 
 export async function markNoShow(id: string, appointmentId: string, actor: Actor) {
+  let sanction: AutoSanction = null;
   const result = await scheduleChange(actor.sub, "appointment.no_show", "Appointment", appointmentId, async (tx) => {
     await managedCase(tx, id, actor);
     const row = await tx.appointment.findUnique({ where: { id: appointmentId } });
@@ -66,8 +68,11 @@ export async function markNoShow(id: string, appointmentId: string, actor: Actor
     if (row.kind === "PICKUP" && row.rescheduledFromId) {
       await tx.handoverCase.update({ where: { id }, data: { backToSellerRequestedAt: row.endsAt } });
     }
-    return tx.appointment.update({ where: { id: appointmentId }, data: { status: "NO_SHOW" } });
+    const updated = await tx.appointment.update({ where: { id: appointmentId }, data: { status: "NO_SHOW" } });
+    sanction = await recordStrike(tx, updated.partyId, appointmentId);
+    return updated;
   });
   await notify({ userId: result.partyId, type: "ORDER_APPOINTMENT_NO_SHOW", title: "Ausencia registrada", body: "Contacta al equipo para revisar la reprogramación disponible.", link: ["PICKUP", "RETURN"].includes(result.kind) ? "/pedidos" : "/ventas" });
+  await announceSanction(sanction);
   return result;
 }

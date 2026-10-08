@@ -10,7 +10,7 @@ import { hasFullAccess } from "../documents/access.js";
 
 const h = vi.hoisted(() => {
   const model = () => ({ count: vi.fn(), groupBy: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), updateMany: vi.fn(), update: vi.fn(), create: vi.fn() });
-  return { document: model(), bazarItem: model(), user: { findUnique: vi.fn() }, auditLog: { create: vi.fn() },
+  return { document: model(), bazarItem: model(), user: { findUnique: vi.fn() }, auditLog: { create: vi.fn() }, sanction: { findFirst: vi.fn() },
     savedDocument: { count: vi.fn() }, order: model(), notice: vi.fn(), env: { MODERATION_TRUST_AFTER: 0, FEE_PCT: 13 }, read: vi.fn() };
 });
 vi.mock("../../lib/prisma.js", () => ({ prisma: { ...h, $transaction: async (fn: (tx: typeof h) => Promise<unknown>) => fn(h) } }));
@@ -61,6 +61,14 @@ describe("historial y alta", () => {
     const body = { title: "Apunte propio", course: "Curso", cycle: "1", career: "ENFERMERIA", type: "APUNTE", kind: "LIBRO", tx: "VENTA", priceCents: 100, reviewStatus: "APPROVED" };
     expect((await request(router, "POST", "/", "student:author", body)).status).toBe(201);
     expect((type === "document" ? h.document : h.bazarItem).create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ reviewStatus: "PENDING" }) }));
+  });
+  it.each(["document", "bazar"])("suspendido no publica %s (403 ACCOUNT_SUSPENDED con motivo y fecha)", async (type) => {
+    h.sanction.findFirst.mockResolvedValue({ kind: "SUSPENSION", reason: "3 faltas en 90 días", endsAt: new Date("2026-10-24T12:00:00Z") });
+    const router = type === "document" ? documentsRouter : bazarRouter;
+    const body = { title: "Apunte propio", course: "Curso", cycle: "1", career: "ENFERMERIA", type: "APUNTE", kind: "LIBRO", tx: "VENTA", priceCents: 100 };
+    const r = await request(router, "POST", "/", "student:author", body);
+    expect(r.status).toBe(403); expect(JSON.stringify(r.body)).toContain("ACCOUNT_SUSPENDED"); expect(JSON.stringify(r.body)).toContain("24/10/2026");
+    expect((type === "document" ? h.document : h.bazarItem).create).not.toHaveBeenCalled();
   });
 });
 

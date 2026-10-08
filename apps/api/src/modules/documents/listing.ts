@@ -6,6 +6,7 @@ import { asyncHandler } from "../../middleware/errors.js";
 import { optionalAuth, requireAuth, type AuthedRequest } from "../../middleware/auth.js";
 import { canViewReview, initialReview } from "../../lib/moderation.js";
 import { fileKind, hasFullAccess } from "./access.js";
+import { assertNotSuspended } from "../sanctions/guard.js";
 
 // Catálogo público, alta, mis documentos y detalle (con acceso resuelto en servidor).
 export function registerListing(router: Router) {
@@ -45,6 +46,7 @@ export function registerListing(router: Router) {
     requireAuth,
     asyncHandler(async (req: AuthedRequest, res) => {
       const input = CreateDocumentSchema.parse(req.body);
+      await assertNotSuspended(req.user!.sub);
       // Sin carrera explícita se hereda la del perfil del autor.
       if (!req.body?.career) {
         const me = await prisma.profile.findUnique({ where: { userId: req.user!.sub } });

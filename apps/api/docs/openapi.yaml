@@ -872,6 +872,118 @@ paths:
         "404": { description: Caso inexistente o sin acceso }
         "409": { description: CASE_CLOSED }
         "429": { description: RATE_LIMITED (30 mensajes en 10 minutos) }
+  /staff/users:
+    get:
+      summary: Buscar usuarios por correo o nombre (equipo)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Hasta 20 usuarios; q mínimo 2 caracteres }
+        "400": { description: VALIDATION }
+        "401": { description: Sesión requerida }
+        "403": { description: FORBIDDEN (solo equipo o solo Técnico) }
+  /staff/users/{id}:
+    get:
+      summary: Ficha del usuario: faltas, calificaciones, sanciones y tratos (solo equipo)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Ficha; las calificaciones nunca salen por rutas de usuario }
+        "404": { description: Usuario inexistente }
+        "401": { description: Sesión requerida }
+        "403": { description: FORBIDDEN (solo equipo o solo Técnico) }
+        "409": { description: TARGET_IS_STAFF }
+  /staff/users/{id}/reviews:
+    post:
+      summary: Calificar y comentar a un usuario (equipo)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { score: { type: integer, minimum: 1, maximum: 5 }, comment: { type: string, maxLength: 500 }, caseId: { type: string } } }
+      responses:
+        "201": { description: Calificación creada }
+        "400": { description: VALIDATION }
+        "404": { description: Usuario inexistente }
+        "409": { description: TARGET_IS_STAFF o ALREADY_REVIEWED }
+        "401": { description: Sesión requerida }
+        "403": { description: FORBIDDEN (solo equipo o solo Técnico) }
+  /staff/users/{id}/sanctions:
+    post:
+      summary: Aplicar sanción; el Trabajador solo WARNING, el Técnico también SUSPENSION y BAN
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { kind: { type: string, enum: [WARNING, SUSPENSION, BAN] }, reason: { type: string, minLength: 5, maxLength: 300 }, days: { type: integer, minimum: 1, maximum: 30 } } }
+      responses:
+        "201": { description: Sanción creada; avisa a la persona }
+        "400": { description: VALIDATION }
+        "404": { description: Usuario inexistente }
+        "409": { description: TARGET_IS_STAFF o ALREADY_SANCTIONED }
+        "401": { description: Sesión requerida }
+        "403": { description: FORBIDDEN (solo equipo o solo Técnico) }
+  /staff/users/{id}/sanctions/{sid}/lift:
+    post:
+      summary: Levantar una sanción vigente (solo Técnico)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: sid
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { reason: { type: string, minLength: 5, maxLength: 300 } } }
+      responses:
+        "200": { description: Sanción levantada }
+        "404": { description: Sanción vigente inexistente }
+        "401": { description: Sesión requerida }
+        "403": { description: FORBIDDEN (solo equipo o solo Técnico) }
+  /staff/users/{id}/strikes/{strikeId}/forgive:
+    post:
+      summary: Perdonar una falta vigente (solo Técnico)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: strikeId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { reason: { type: string, minLength: 5, maxLength: 300 } } }
+      responses:
+        "200": { description: Falta perdonada; deja de contar }
+        "404": { description: Falta vigente inexistente }
+        "401": { description: Sesión requerida }
+        "403": { description: FORBIDDEN (solo equipo o solo Técnico) }
   /staff/cases:
     get:
       summary: Casos paginados visibles al equipo

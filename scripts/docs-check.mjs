@@ -28,6 +28,7 @@ const SOURCES = [
   ["modules/cases/sellerPayment.ts", ["/cases"]],
   ["modules/cases/queries.ts", ["/staff/cases", "/cases"]],
   ["modules/cases/chatRoutes.ts", ["/staff/cases/:id/messages", "/cases/:id/messages"]],
+  ["modules/sanctions/users.ts", ["/staff/users"]],
   ["modules/sedes/routes.ts", ["/sedes"]],
   ["modules/notifications/routes.ts", []],
   ["server.ts", [""]],
@@ -64,6 +65,7 @@ const ROUTER_PREFIX = {
   casesRouter: ["/staff/cases"],
   participantCasesRouter: ["/cases"],
   chatRouter: ["/staff/cases/:id/messages", "/cases/:id/messages"],
+  usersRouter: ["/staff/users"],
   sedesRouter: ["/sedes"],
   notificationsRouter: ["/notifications"],
 };

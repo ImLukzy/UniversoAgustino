@@ -4,6 +4,7 @@ import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth.js";
 import { registerAccount } from "./account.js";
+import { activeBlock, blockedMessage } from "../sanctions/guard.js";
 import { registerPassword } from "./password.js";
 import { registerEmailLogin } from "./emailLogin.js";
 
@@ -23,7 +24,8 @@ authRouter.get(
     const me = await prisma.user.findUnique({ where: { id: req.user!.sub }, include: { profile: true } });
     if (!me) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Usuario no existe" } });
     const { passwordHash, ...safe } = me;
-    res.json({ data: safe });
+    const block = await activeBlock(me.id);
+    res.json({ data: { ...safe, suspension: block ? { kind: block.kind, reason: block.reason, endsAt: block.endsAt, message: blockedMessage(block) } : null } });
   }),
 );
 

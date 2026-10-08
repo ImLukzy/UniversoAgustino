@@ -8,6 +8,7 @@ import { notify, orderLink } from "../../lib/notify.js";
 import { blockingOrderWhere, expiredPatch, nextExpiry, RESERVATION_TTL_MINUTES, BAZAR_REQUEST_TTL_HOURS } from "./reservation.js";
 import { audit, itemOwner } from "./itemOwner.js";
 import { documentGuard } from "./documentGuard.js";
+import { assertNotSuspended } from "../sanctions/guard.js";
 
 // Paso 1: el comprador crea el pedido en PENDING (nada es gratis: debe pagar
 // al Yape/Plin del vendedor y luego marcarlo como pagado).
@@ -17,6 +18,7 @@ export function registerCreate(router: Router) {
     requireAuth,
     asyncHandler(async (req: AuthedRequest, res) => {
       const input = CreateOrderSchema.parse(req.body);
+      await assertNotSuspended(req.user!.sub);
       const item = await itemOwner(input.itemType, input.itemId);
       if (item.ownerId === req.user!.sub) {
         return res.status(400).json({ error: { code: "SELF_PURCHASE", message: "No puedes comprar tu propia publicación" } });

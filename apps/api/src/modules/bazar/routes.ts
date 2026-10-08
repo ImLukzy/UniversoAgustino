@@ -6,6 +6,7 @@ import { asyncHandler } from "../../middleware/errors.js";
 import { optionalAuth, requireAuth, type AuthedRequest } from "../../middleware/auth.js";
 
 import { canViewReview, initialReview, resubmitReview } from "../../lib/moderation.js";
+import { assertNotSuspended } from "../sanctions/guard.js";
 
 export const bazarRouter = Router();
 
@@ -28,6 +29,7 @@ bazarRouter.post(
   requireAuth,
   asyncHandler(async (req: AuthedRequest, res) => {
     const input = CreateBazarItemSchema.parse(req.body);
+    await assertNotSuspended(req.user!.sub);
     const item = await prisma.bazarItem.create({ data: { ...input, sellerId: req.user!.sub, reviewStatus: await initialReview(req.user!.sub) } });
     res.status(201).json({ data: item });
   })

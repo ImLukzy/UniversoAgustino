@@ -8,7 +8,7 @@ import { registerReject } from "./rejectStep.js";
 import { errorHandler } from "../../middleware/errors.js";
 const h = vi.hoisted(() => {
   const model = () => ({ findUniqueOrThrow: vi.fn(), findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn(), create: vi.fn(), count: vi.fn() });
-  return { $queryRaw: vi.fn(), handoverCase: model(), appointment: model(), order: model(), bazarItem: model(), auditLog: model(), upload: model(), item: vi.fn(), notify: vi.fn(), guard: vi.fn() };
+  return { $queryRaw: vi.fn(), sanction: { findFirst: vi.fn() }, handoverCase: model(), appointment: model(), order: model(), bazarItem: model(), auditLog: model(), upload: model(), item: vi.fn(), notify: vi.fn(), guard: vi.fn() };
 });
 vi.mock("../../lib/prisma.js", () => ({ prisma: { ...h, $transaction: async (fn: (tx: typeof h) => Promise<unknown>) => fn(h) } }));
 vi.mock("../../env.js", () => ({ env: { FEE_PCT: 0 } }));
@@ -49,6 +49,12 @@ describe("solicitudes bazar", () => {
     const data = h.order.create.mock.calls[0][0].data;
     expect(data.status).toBe("PENDING"); expect(data.expiresAt.getTime() - start).toBeGreaterThanOrEqual(48 * 3_600_000);
     expect(h.notify).toHaveBeenCalledWith(expect.objectContaining({ type: "ORDER_CREATED", title: "Nueva solicitud" }));
+  });
+  it("suspendido no solicita (403 ACCOUNT_SUSPENDED) y no reserva", async () => {
+    h.sanction.findFirst.mockResolvedValue({ kind: "BAN", reason: "Fraude", endsAt: null });
+    const r = await request("/", "buyer", { itemType: "bazar", itemId: "item", rentalStart: "2026-11-01T00:00:00Z", rentalEnd: "2026-11-02T00:00:00Z" });
+    expect(r.status).toBe(403); expect(JSON.stringify(r.body)).toContain("ACCOUNT_SUSPENDED"); expect(h.order.create).not.toHaveBeenCalled();
+    h.sanction.findFirst.mockResolvedValue(null);
   });
   it("documento conserva plazo 30 min y pago directo", async () => {
     const start = Date.now(); await request("/", "buyer", { itemType: "document", itemId: "item" });
