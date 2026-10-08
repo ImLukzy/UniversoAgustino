@@ -6,6 +6,9 @@ import { readObject } from "../../lib/storage.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { fileKind, storedNameOf } from "./access.js";
 
+import { optionalAuth, type AuthedRequest } from "../../middleware/auth.js";
+import { canViewReview } from "../../lib/moderation.js";
+
 const CACHE_MAX = 50;
 
 export interface Preview {
@@ -49,11 +52,12 @@ async function cachedPreview(name: string, wanted: readonly number[]): Promise<P
 export function registerPreview(router: Router) {
   router.get(
     "/:id/preview",
-    asyncHandler(async (req, res) => {
-      const doc = await prisma.document.findUnique({ where: { id: req.params.id }, select: { fileUrl: true, previewPages: true } });
+    optionalAuth,
+    asyncHandler(async (req: AuthedRequest, res) => {
+      const doc = await prisma.document.findUnique({ where: { id: req.params.id }, select: { fileUrl: true, previewPages: true, reviewStatus: true, authorId: true } });
       const name = storedNameOf(doc?.fileUrl ?? null);
       const kind = fileKind(doc?.fileUrl ?? null);
-      if (!doc || !name || !kind) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Sin vista previa" } });
+      if (!doc || !canViewReview(doc, doc.authorId, req.user) || !name || !kind) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Sin vista previa" } });
       res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader("Cache-Control", "private, max-age=3600");
       res.setHeader("Content-Disposition", "inline");

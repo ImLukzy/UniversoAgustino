@@ -1,3 +1,5 @@
+import type { ReviewStatus } from "@hub/shared";
+
 // Tipos de respuesta de la API (espejo de los modelos Prisma que expone el backend).
 // Comunidad UNSA-only: university siempre "UNSA". career = clave de UNSA_CAREERS.
 export interface HubUser {
@@ -25,6 +27,8 @@ export interface HubDocument {
   fileType?: "pdf" | "image" | null;
   previewPages?: number[];
   status: string;
+  reviewStatus?: ReviewStatus;
+  reviewNote?: string | null;
   payMethod?: PayMethod | null;
   payQrUrl?: string | null;
   payDetail?: string | null;
@@ -42,6 +46,8 @@ export interface HubBazarItem {
   description?: string | null;
   photos?: string[] | null;
   status: string;
+  reviewStatus?: ReviewStatus;
+  reviewNote?: string | null;
   payMethod?: PayMethod | null;
   payQrUrl?: string | null;
   payDetail?: string | null;

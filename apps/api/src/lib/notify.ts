@@ -12,7 +12,11 @@ interface NotifyInput {
     | "ORDER_RELEASED"
     | "ORDER_EXPIRED"
     | "ORDER_CANCELLED"
-    | "REPORT_RESOLVED";
+    | "REPORT_RESOLVED"
+    | "REVIEW_APPROVED"
+    | "REVIEW_REJECTED"
+    | "STAFF_ADDED"
+    | "STAFF_REMOVED";
   title: string;
   body: string;
   link?: string;

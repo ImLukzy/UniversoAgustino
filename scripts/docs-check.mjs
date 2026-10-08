@@ -19,6 +19,7 @@ const SOURCES = [
   ["modules/uploads/routes.ts", ["/uploads"]],
   ["modules/payments/routes.ts", ["/payments"]],
   ["modules/staff/routes.ts", ["/staff"]],
+  ["modules/staff/reviews.ts", ["/staff/reviews"]],
   ["modules/notifications/routes.ts", []],
   ["server.ts", [""]],
 ];
@@ -39,6 +40,7 @@ const ROUTER_PREFIX = {
   uploadsRouter: ["/uploads"],
   paymentsRouter: ["/payments"],
   staffRouter: ["/staff"],
+  reviewsRouter: ["/staff/reviews"],
   notificationsRouter: ["/notifications"],
 };
 const found = new Set();

@@ -4,12 +4,11 @@ import type { AddressInfo } from "node:net";
 import express from "express";
 import { PDFDocument } from "pdf-lib";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-
 // Spec 15 (T7): paywall del archivo en el servidor, vista previa y detalle sin fileUrl.
 const h = vi.hoisted(() => {
   const dir = `${process.env.TEMP ?? process.env.TMPDIR ?? "/tmp"}/hub-access-${process.pid}`;
   const PDF = "11111111-2222-4333-8444-555555555555.pdf";
-  const doc = { id: "doc1", authorId: "author", priceCents: 500, fileUrl: `/uploads/${PDF}`, title: "PAE", author: null, previewPages: [2, 4] };
+  const doc = { reviewStatus: "APPROVED", id: "doc1", authorId: "author", priceCents: 500, fileUrl: `/uploads/${PDF}`, title: "PAE", author: null, previewPages: [2, 4] };
   // "declarer" solo autodeclaró el pago (PAID): no debe desbloquear (spec 16).
   const orders = [
     { buyerId: "buyer", status: "ESCROW" },
@@ -17,7 +16,6 @@ const h = vi.hoisted(() => {
   ];
   return { dir, PDF, doc, orders };
 });
-
 vi.mock("../../lib/storage.js", async () => {
   const fsp = await import("node:fs/promises");
   const p = await import("node:path");
@@ -28,11 +26,9 @@ vi.mock("../../lib/storage.js", async () => {
     readObject: async (name: string) => fsp.readFile(p.join(h.dir, name)).catch(() => null),
   };
 });
-
 vi.mock("../../lib/auth.js", () => ({
   verifyAccess: (t: string) => ({ sub: t, role: "student" }),
 }));
-
 vi.mock("../../lib/prisma.js", () => ({
   prisma: {
     document: {

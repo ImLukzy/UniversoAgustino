@@ -4,6 +4,8 @@ import { StaffMemberSchema } from "@hub/shared";
 import { staffRouter } from "./routes.js";
 import { errorHandler } from "../../middleware/errors.js";
 
+vi.mock("../../lib/notify.js", () => ({ notify: vi.fn() }));
+
 const db = vi.hoisted(() => ({
   user: { findMany: vi.fn(), findUnique: vi.fn(), updateMany: vi.fn() },
   auditLog: { findMany: vi.fn(), create: vi.fn() }, refreshToken: { updateMany: vi.fn() },

@@ -4,6 +4,8 @@ import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, requireRole, type AuthedRequest } from "../../middleware/auth.js";
 
+import { resubmitReview } from "../../lib/moderation.js";
+
 // Guardados, edición/borrado del dueño y takedown de moderación.
 export function registerManage(router: Router) {
   router.post(
@@ -40,7 +42,7 @@ export function registerManage(router: Router) {
         return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el dueño edita su publicación" } });
       }
       const input = UpdateDocumentSchema.parse(req.body);
-      const upd = await prisma.document.update({ where: { id: doc.id }, data: input });
+      const upd = await prisma.document.update({ where: { id: doc.id, reviewStatus: doc.reviewStatus }, data: { ...input, ...resubmitReview(doc.reviewStatus) } });
       await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "document.update", entity: "document", entityId: doc.id } });
       res.json({ data: upd });
     })

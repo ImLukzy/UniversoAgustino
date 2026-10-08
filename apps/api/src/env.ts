@@ -16,6 +16,11 @@ const str = (name: string, min = 32) => {
   return v;
 };
 
+const moderationTrust = Number(process.env.MODERATION_TRUST_AFTER ?? 0);
+if (!Number.isSafeInteger(moderationTrust) || moderationTrust < 0) {
+  throw new Error("MODERATION_TRUST_AFTER debe ser un entero mayor o igual a 0");
+}
+
 export const env = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
   PORT: Number(process.env.API_PORT ?? 4000),
@@ -30,6 +35,7 @@ export const env = {
   JWT_ACCESS_TTL: process.env.JWT_ACCESS_TTL ?? "15m",
   JWT_REFRESH_TTL: process.env.JWT_REFRESH_TTL ?? "7d",
   DATABASE_URL: process.env.DATABASE_URL ?? "",
+  MODERATION_TRUST_AFTER: moderationTrust,
   FEE_PCT: Number(process.env.PLATFORM_FEE_PCT ?? PLATFORM_FEE_PCT),
   // Sprint 1A: TTL de reservas PENDING (minutos) y flags del job de expiración.
   RESERVATION_TTL_MINUTES: Number(process.env.RESERVATION_TTL_MINUTES ?? 30),

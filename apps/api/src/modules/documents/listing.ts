@@ -4,6 +4,7 @@ import { CreateDocumentSchema, DocumentTypeSchema, ListQuerySchema } from "@hub/
 import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { optionalAuth, requireAuth, type AuthedRequest } from "../../middleware/auth.js";
+import { canViewReview, initialReview } from "../../lib/moderation.js";
 import { fileKind, hasFullAccess } from "./access.js";
 
 // Catálogo público, alta, mis documentos y detalle (con acceso resuelto en servidor).
@@ -15,7 +16,7 @@ export function registerListing(router: Router) {
         course: ListQuerySchema.shape.course.optional(),
         type: DocumentTypeSchema.optional(),
       }).parse(req.query);
-      const where: Prisma.DocumentWhereInput = { status: "PUBLISHED", university: "UNSA" };
+      const where: Prisma.DocumentWhereInput = { status: "PUBLISHED", reviewStatus: "APPROVED", university: "UNSA" };
       if (q.university) where.university = q.university;
       if (q.career) where.career = q.career;
       if (q.type) where.type = q.type;
@@ -49,7 +50,7 @@ export function registerListing(router: Router) {
         const me = await prisma.profile.findUnique({ where: { userId: req.user!.sub } });
         if (me?.career) (input as { career: string }).career = me.career;
       }
-      const doc = await prisma.document.create({ data: { ...input, university: "UNSA", authorId: req.user!.sub } });
+      const doc = await prisma.document.create({ data: { ...input, university: "UNSA", authorId: req.user!.sub, reviewStatus: await initialReview(req.user!.sub) } });
       await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "document.create", entity: "document", entityId: doc.id } });
       res.status(201).json({ data: doc });
     })
@@ -70,7 +71,7 @@ export function registerListing(router: Router) {
     asyncHandler(async (req: AuthedRequest, res) => {
       // Hardening: author con select explícito (nunca passwordHash).
       const doc = await prisma.document.findUnique({ where: { id: req.params.id }, include: { author: { select: { id: true, profile: true } } } });
-      if (!doc) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Documento no existe" } });
+      if (!doc || !canViewReview(doc, doc.authorId, req.user)) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Documento no existe" } });
       // Acceso y guardado se resuelven en el servidor: el cliente no decide.
       const me = req.user?.sub;
       const [fullAccess, saved] = await Promise.all([

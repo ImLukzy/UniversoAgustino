@@ -7,6 +7,8 @@ import { BAZAR_STATUS, itemStats, liveCount, type Listing } from "./listing";
 import { PAY_LABEL } from "../../lib/payments";
 import type { QrInfo } from "./QrModal";
 
+import { ReviewChip } from "../equipo/ReviewChip";
+
 const tool = "btn-ghost h-9 gap-1 px-3 text-xs";
 
 // Fila de una publicación propia: portada, estado, métricas reales de venta y acciones.
@@ -36,7 +38,8 @@ export function ListingRow({ listing, sales, open, onToggle, onQr }: {
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="tag">{listing.sub.split(" · ")[0]}</span>
-            <span className={`tag ${status.cls}`}>{status.label}</span>
+            {(!src.reviewStatus || src.reviewStatus === "APPROVED") && <span className={`tag ${status.cls}`}>{status.label}</span>}
+            <ReviewChip status={src.reviewStatus} note={src.reviewNote} />
           </div>
           <span className="price text-xl text-primary">{pen(listing.price)}</span>
         </div>

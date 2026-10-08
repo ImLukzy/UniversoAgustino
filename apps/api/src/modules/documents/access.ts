@@ -20,7 +20,7 @@ export interface Viewer {
 export async function hasFullAccess(doc: DocRef, user?: Viewer): Promise<boolean> {
   if (doc.priceCents === 0) return true;
   if (!user) return false;
-  if (doc.authorId === user.sub || user.role === "admin") return true;
+  if (doc.authorId === user.sub || user.role === "admin" || user.role === "moderator") return true;
   const paid = await prisma.order.count({
     where: { buyerId: user.sub, itemType: "document", itemId: doc.id, status: { in: [...ACCESS_STATUSES] } },
   });

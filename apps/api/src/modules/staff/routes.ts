@@ -1,11 +1,14 @@
 import { Router } from "express";
 import { StaffMemberSchema } from "@hub/shared";
+import { notify } from "../../lib/notify.js";
+import { reviewsRouter } from "./reviews.js";
 import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, requireRole, type AuthedRequest } from "../../middleware/auth.js";
 
 export const staffRouter = Router();
 staffRouter.use(requireAuth, requireRole("moderator", "admin"));
+staffRouter.use("/reviews", reviewsRouter);
 const memberSelect = { id: true, email: true, role: true, createdAt: true, profile: { select: { fullName: true } } } as const;
 function fail(status: number, code: string, message: string): never {
   throw Object.assign(new Error(message), { status, code });
@@ -35,6 +38,7 @@ staffRouter.post("/members", requireRole("admin"), asyncHandler(async (req: Auth
     const audit = await tx.auditLog.create({ data: { actorId: req.user!.sub, action: "staff.add", entity: "user", entityId: user.id } });
     return { id: user.id, email: user.email, fullName: user.profile?.fullName ?? "", role: "moderator", since: audit.createdAt };
   });
+  await notify({ userId: member.id, type: "STAFF_ADDED", title: "Ya eres parte del equipo", body: "Tienes acceso al panel del equipo de Universo Agustino.", link: "/equipo" });
   res.json({ data: member });
 }));
 
@@ -50,5 +54,6 @@ staffRouter.delete("/members/:userId", requireRole("admin"), asyncHandler(async 
     await tx.refreshToken.updateMany({ where: { userId, revoked: false }, data: { revoked: true } });
     await tx.auditLog.create({ data: { actorId: req.user!.sub, action: "staff.remove", entity: "user", entityId: userId } });
   });
+  await notify({ userId, type: "STAFF_REMOVED", title: "Tu acceso al equipo terminó", body: "Tu cuenta conserva el acceso al marketplace.", link: "/panel" });
   res.json({ data: { id: userId, role: "creator" } });
 }));

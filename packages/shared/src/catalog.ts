@@ -85,3 +85,8 @@ export const UpdateBazarItemSchema = z.object({
   payDetail: z.string().max(160).nullable().optional(),
 });
 export type UpdateBazarItemInput = z.infer<typeof UpdateBazarItemSchema>;
+
+// Revisión independiente del estado de publicación y del stock.
+export const ReviewStatusSchema = z.enum(["PENDING", "APPROVED", "REJECTED"]);
+export type ReviewStatus = z.infer<typeof ReviewStatusSchema>;
+export const RejectReviewSchema = z.object({ reason: z.string().trim().min(10).max(300) });

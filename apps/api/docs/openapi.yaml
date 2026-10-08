@@ -585,6 +585,68 @@ paths:
         '403': { description: FORBIDDEN }
         '404': { description: USER_NOT_FOUND }
         '409': { description: SELF_REMOVE, IS_ADMIN o NOT_STAFF }
+  /staff/reviews:
+    get:
+      tags: [staff]
+      summary: Cola FIFO de publicaciones PENDING (moderator o admin)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: type, in: query, schema: { type: string, enum: [document, bazar], default: document } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 50, default: 12 } }
+      responses:
+        '200': { description: "{data: [{id, type, title, priceCents, description, createdAt, previewUrl, author: {id, email, fullName, approvedCount}}], total, pendingTotal, page, pageSize}" }
+        '400': { description: VALIDATION }
+        '401': { description: UNAUTHENTICATED }
+        '403': { description: FORBIDDEN }
+  /staff/reviews/{type}/{id}/approve:
+    post:
+      tags: [staff]
+      summary: Aprueba publicación PENDING, audita y notifica al autor
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: type, in: path, required: true, schema: { type: string, enum: [document, bazar] } }
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: "{data: {id, reviewStatus: APPROVED, reviewNote: null, reviewedById, reviewedAt}}" }
+        '400': { description: VALIDATION }
+        '401': { description: UNAUTHENTICATED }
+        '403': { description: FORBIDDEN }
+        '404': { description: NOT_FOUND }
+        '409': { description: BAD_STATE (solo desde PENDING) }
+  /staff/reviews/{type}/{id}/reject:
+    post:
+      tags: [staff]
+      summary: Rechaza publicación PENDING con motivo, audita y notifica al autor
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: type, in: path, required: true, schema: { type: string, enum: [document, bazar] } }
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, minLength: 10, maxLength: 300, description: Se recortan espacios al inicio y al final }
+      responses:
+        '200': { description: "{data: {id, reviewStatus: REJECTED, reviewNote, reviewedById, reviewedAt}}" }
+        '400': { description: VALIDATION (motivo obligatorio) }
+        '401': { description: UNAUTHENTICATED }
+        '403': { description: FORBIDDEN }
+        '404': { description: NOT_FOUND }
+        '409': { description: BAD_STATE (solo desde PENDING) }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    ReviewFields:
+      type: object
+      description: Campos de Document y BazarItem; listados públicos solo APPROVED. Detalle y preview no aprobados devuelven 404 a terceros; dueño y equipo pueden consultarlos. Compra requiere APPROVED. Editar REJECTED reenvía a PENDING.
+      properties:
+        reviewStatus: { type: string, enum: [PENDING, APPROVED, REJECTED], default: APPROVED }
+        reviewNote: { type: string, nullable: true, maxLength: 300 }
+        reviewedAt: { type: string, format: date-time, nullable: true }
+        reviewedById: { type: string, nullable: true }

@@ -14,6 +14,12 @@ enum Role {
   admin
 }
 
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum DocStatus {
   DRAFT
   REVIEW
@@ -100,6 +106,10 @@ model Document {
   payMethod   String    @default("YAPE")
   payQrUrl    String?
   payDetail   String?
+  reviewStatus ReviewStatus @default(APPROVED)
+  reviewNote String?
+  reviewedAt DateTime?
+  reviewedById String?
   status      DocStatus @default(PUBLISHED)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -108,6 +118,7 @@ model Document {
   @@index([university, career, status])
   @@index([title])
   @@index([authorId])
+  @@index([reviewStatus, createdAt])
 }
 
 // Guardados (bookmark) del Visor: un registro por usuario+documento.
@@ -136,11 +147,16 @@ model BazarItem {
   payMethod    String      @default("YAPE")
   payQrUrl     String?
   payDetail    String?
+  reviewStatus ReviewStatus @default(APPROVED)
+  reviewNote String?
+  reviewedAt DateTime?
+  reviewedById String?
   status       BazarStatus @default(AVAILABLE)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
   @@index([sellerId])
+  @@index([reviewStatus, createdAt])
 }
 
 model Order {
@@ -257,6 +273,10 @@ enum NotificationType {
   ORDER_EXPIRED
   ORDER_CANCELLED
   REPORT_RESOLVED
+  REVIEW_APPROVED
+  REVIEW_REJECTED
+  STAFF_ADDED
+  STAFF_REMOVED
 }
 
 model Notification {

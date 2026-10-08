@@ -8,6 +8,8 @@ import { useAuth } from "../auth/AuthContext";
 import { careerLabel } from "../data/unsa";
 import { ROUTES } from "../lib/routes";
 
+import { ReviewChip } from "../components/equipo/ReviewChip";
+
 // Mi perfil: nombre, carrera y subidas reales (documento, tipo, precio,
 // estado, fecha). Sin seguidores, vistas ni ratings: no existen.
 export function Perfil() {
@@ -56,10 +58,10 @@ export function Perfil() {
                 <tbody className="divide-y divide-dashed divide-zinc-300">
                   {rows.slice(0, 5).map((d) => (
                     <tr key={d.id}>
-                      <td className="px-4 py-3"><Link to={ROUTES.document(d.id)} className="line-clamp-1 font-bold text-zinc-950 hover:underline">{d.title}</Link></td>
+                      <td className="px-4 py-3"><Link to={ROUTES.document(d.id)} className="line-clamp-1 font-bold text-zinc-950 hover:underline">{d.title}</Link><ReviewChip status={d.reviewStatus} note={d.reviewNote} /></td>
                       <td className="whitespace-nowrap px-3 py-3 text-zinc-600">{d.type}</td>
                       <td className="whitespace-nowrap px-3 py-3 text-right font-bold">{pen(d.priceCents)}</td>
-                      <td className="hidden px-3 py-3 sm:table-cell"><span className="tag">{d.status === "PUBLISHED" ? "Publicado" : d.status}</span></td>
+                      <td className="hidden px-3 py-3 sm:table-cell">{(!d.reviewStatus || d.reviewStatus === "APPROVED") && <span className="tag">{d.status === "PUBLISHED" ? "Publicado" : d.status}</span>}</td>
                       <td className="hidden whitespace-nowrap px-4 py-3 text-zinc-500 md:table-cell">{fmtDate(d.createdAt)}</td>
                     </tr>
                   ))}

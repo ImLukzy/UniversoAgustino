@@ -21,6 +21,7 @@ export function registerCreate(router: Router) {
       if (item.ownerId === req.user!.sub) {
         return res.status(400).json({ error: { code: "SELF_PURCHASE", message: "No puedes comprar tu propia publicación" } });
       }
+      if (item.reviewStatus !== "APPROVED") return res.status(409).json({ error: { code: "NOT_AVAILABLE", message: "Esta publicación aún no está aprobada" } });
       // (a) Expiración perezosa (Sprint 1A): libera PENDING vencidos de este
       // ítem para que el cron caído no bloquee el inventario.
       const expiredNow = await prisma.order.updateMany({

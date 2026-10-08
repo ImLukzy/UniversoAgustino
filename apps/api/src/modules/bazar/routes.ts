@@ -3,7 +3,9 @@ import type { Prisma } from "@prisma/client";
 import { CreateBazarItemSchema, ListQuerySchema, UpdateBazarItemSchema } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
-import { requireAuth, type AuthedRequest } from "../../middleware/auth.js";
+import { optionalAuth, requireAuth, type AuthedRequest } from "../../middleware/auth.js";
+
+import { canViewReview, initialReview, resubmitReview } from "../../lib/moderation.js";
 
 export const bazarRouter = Router();
 
@@ -11,7 +13,7 @@ bazarRouter.get(
   "/",
   asyncHandler(async (req, res) => {
     const q = ListQuerySchema.parse(req.query);
-    const where: Prisma.BazarItemWhereInput = { status: "AVAILABLE" };
+    const where: Prisma.BazarItemWhereInput = { status: "AVAILABLE", reviewStatus: "APPROVED" };
     if (q.q) where.OR = [{ title: { contains: q.q, mode: "insensitive" } }, { kind: { contains: q.q, mode: "insensitive" } }];
     const [total, rows] = await Promise.all([
       prisma.bazarItem.count({ where }),
@@ -26,7 +28,7 @@ bazarRouter.post(
   requireAuth,
   asyncHandler(async (req: AuthedRequest, res) => {
     const input = CreateBazarItemSchema.parse(req.body);
-    const item = await prisma.bazarItem.create({ data: { ...input, sellerId: req.user!.sub } });
+    const item = await prisma.bazarItem.create({ data: { ...input, sellerId: req.user!.sub, reviewStatus: await initialReview(req.user!.sub) } });
     res.status(201).json({ data: item });
   })
 );
@@ -42,10 +44,11 @@ bazarRouter.get(
 
 bazarRouter.get(
   "/:id",
-  asyncHandler(async (req, res) => {
+  optionalAuth,
+  asyncHandler(async (req: AuthedRequest, res) => {
     // Hardening: seller con select explícito (nunca passwordHash).
     const item = await prisma.bazarItem.findUnique({ where: { id: req.params.id }, include: { seller: { select: { id: true, profile: true } } } });
-    if (!item) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Ítem no existe" } });
+    if (!item || !canViewReview(item, item.sellerId, req.user)) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Ítem no existe" } });
     res.json({ data: item });
   })
 );
@@ -63,7 +66,7 @@ bazarRouter.patch(
       return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el dueño edita su publicación" } });
     }
     const input = UpdateBazarItemSchema.parse(req.body);
-    const upd = await prisma.bazarItem.update({ where: { id: item.id }, data: input });
+    const upd = await prisma.bazarItem.update({ where: { id: item.id, reviewStatus: item.reviewStatus }, data: { ...input, ...resubmitReview(item.reviewStatus) } });
     await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "bazar.update", entity: "bazar", entityId: item.id } });
     res.json({ data: upd });
   })
@@ -104,7 +107,9 @@ bazarRouter.post(
   "/:id/reserve",
   requireAuth,
   asyncHandler(async (req: AuthedRequest, res) => {
-    const item = await prisma.bazarItem.update({ where: { id: req.params.id }, data: { status: "RESERVED" } });
+    const current = await prisma.bazarItem.findUnique({ where: { id: req.params.id }, select: { reviewStatus: true } });
+    if (!current || current.reviewStatus !== "APPROVED") return res.status(409).json({ error: { code: "NOT_AVAILABLE", message: "Esta publicación aún no está aprobada" } });
+    const item = await prisma.bazarItem.update({ where: { id: req.params.id, reviewStatus: "APPROVED" }, data: { status: "RESERVED" } });
     await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "bazar.reserve", entity: "bazar", entityId: item.id } });
     res.json({ data: item });
   })
