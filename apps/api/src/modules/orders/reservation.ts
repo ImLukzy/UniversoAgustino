@@ -5,10 +5,13 @@ import type { Prisma } from "@prisma/client";
 const rawTtlMin = Number(process.env.RESERVATION_TTL_MINUTES ?? 30);
 export const RESERVATION_TTL_MINUTES =
   Number.isFinite(rawTtlMin) && rawTtlMin >= 1 ? Math.floor(rawTtlMin) : 30;
+const rawBazarHours = Number(process.env.BAZAR_REQUEST_TTL_HOURS ?? 48);
+export const BAZAR_REQUEST_TTL_HOURS = Number.isSafeInteger(rawBazarHours) && rawBazarHours > 0 ? rawBazarHours : 48;
 const RESERVATION_TTL_MS = RESERVATION_TTL_MINUTES * 60_000;
 
-export function nextExpiry(from: Date = new Date()): Date {
-  return new Date(from.getTime() + RESERVATION_TTL_MS);
+export function nextExpiry(from: Date = new Date(), itemType: string = "document"): Date {
+  const ttl = itemType === "bazar" ? BAZAR_REQUEST_TTL_HOURS * 3_600_000 : RESERVATION_TTL_MS;
+  return new Date(from.getTime() + ttl);
 }
 
 interface Expirable {

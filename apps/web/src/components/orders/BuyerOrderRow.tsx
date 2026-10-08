@@ -9,7 +9,7 @@ import { SPRING } from "../../lib/motion";
 import { DownloadButton } from "../DownloadButton";
 
 const HINT: Record<string, (o: HubOrder) => string> = {
-  PENDING: (o) => (o.rentalStart ? "Esperando que el vendedor acepte tu alquiler." : "Paga al vendedor para continuar."),
+  PENDING: (o) => (o.itemType === "bazar" ? `Esperando respuesta del vendedor${o.expiresAt ? ` (vence ${new Date(o.expiresAt).toLocaleString("es-PE")})` : ""}.` : "Paga al vendedor para continuar."),
   ACCEPTED: () => "Solicitud aceptada. Ya puedes pagar.",
   PAID: () => "El vendedor debe confirmar tu pago.",
   ESCROW: () => "Confirma la recepción solo cuando verifiques tu pedido.",
@@ -49,7 +49,7 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
               <span className="font-mono text-xs font-bold text-zinc-500">#ORD-{order.id.slice(0, 4).toUpperCase()}</span>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.span key={order.status} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={SPRING} className="tag">
-                  {getOrderLabel(order.status, "buyer", order.cancelledReason)}
+                  {!isDoc && order.status === "PENDING" ? "Esperando respuesta" : order.cancelledReason?.startsWith("SELLER_REJECTED: ") ? "Rechazada" : getOrderLabel(order.status, "buyer", order.cancelledReason)}
                 </motion.span>
               </AnimatePresence>
             </div>
@@ -65,11 +65,11 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
         <span className="price text-xl text-zinc-950">{pen(order.amountCents)}</span>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-dashed border-zinc-300 pt-3">
-        <p className="text-xs text-zinc-600">{msg ? <span className="font-bold text-[#b91c1c]">{msg}</span> : (HINT[order.status]?.(order) ?? getOrderLabel(order.status,"buyer", order.cancelledReason))}</p>
+        <p className="text-xs text-zinc-600">{msg ? <span className="font-bold text-[#b91c1c]">{msg}</span> : (order.cancelledReason?.startsWith("SELLER_REJECTED: ") ? `Rechazada: ${order.cancelledReason.slice(17)}` : HINT[order.status]?.(order) ?? getOrderLabel(order.status,"buyer", order.cancelledReason))}</p>
         <div className="flex flex-wrap gap-2">
           {(order.status === "PENDING" || order.status === "ACCEPTED") && (
             <>
-              <Link to={ROUTES.checkout(order.id)} className="btn btn-primary btn-sm">{order.status === "ACCEPTED" ? "Pagar ahora" :"Continuar pago"}</Link>
+              {(isDoc || order.status === "ACCEPTED") && <Link to={ROUTES.checkout(order.id)} className="btn btn-primary btn-sm">{order.status === "ACCEPTED" ? "Pagar ahora" :"Continuar pago"}</Link>}
               <button type="button" disabled={busy} onClick={() => post(`/orders/${order.id}/cancel`)} className="btn btn-secondary btn-sm">Cancelar</button>
             </>
           )}

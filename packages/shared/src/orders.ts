@@ -20,6 +20,8 @@ export const MarkPaidSchema = z.object({
   .refine((v) => !!v.payProof || !!v.payProofUrl, { message: "Indica el n.º de operación o adjunta el voucher", path: ["payProof"] });
 export type MarkPaidInput = z.infer<typeof MarkPaidSchema>;
 
+export const RejectOrderSchema = z.object({ reason: z.string().trim().min(5).max(300) });
+
 // --- Pedidos / reservas: estados, motivos de cancelación y transiciones ---
 // Fuente única de la máquina de estados (Sprint 1A). Los estados viven en
 // mayúsculas (enum OrderStatus de Prisma); itemType vive en minúsculas

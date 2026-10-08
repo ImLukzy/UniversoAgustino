@@ -25,6 +25,9 @@ const pay = (p: Partial<MpPayment> = {}): MpPayment => ({ id: 1, status: "approv
 const order = (o: Partial<Parameters<typeof settle>[0]> = {}) => ({ status: "PENDING", itemType: "document", amountCents: 1500, cancelledReason: null, ...o });
 
 describe("settle (pago aprobado → pedido)", () => {
+  it("pago bazar PENDING queda huérfano hasta aceptación", () => {
+    expect(settle(order({ itemType: "bazar" }), pay())).toBe("ORPHAN");
+  });
   it("pago aprobado con monto exacto → ESCROW", () => {
     expect(settle(order(), pay())).toBe("ESCROW");
     expect(settle(order({ status: "ACCEPTED", itemType: "bazar" }), pay())).toBe("ESCROW");

@@ -376,7 +376,7 @@ paths:
   /orders/{id}/accept:
     post:
       tags: [orders]
-      summary: El vendedor acepta alquiler bazar PENDING → ACCEPTED (409 si expiró o no es bazar)
+      summary: El vendedor acepta compra o alquiler bazar PENDING → ACCEPTED (409 si expiró o no es bazar)
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '409': { description: BAD_STATE, NOT_RENTAL o RESERVATION_EXPIRED } }
@@ -395,6 +395,22 @@ paths:
                 payProof: { type: string, minLength: 3, maxLength: 160, description: N° de operación Yape/Plin }
                 payProofUrl: { type: string, pattern: "^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$", description: Captura del voucher subida por POST /uploads }
       responses: { '200': { description: OK }, '400': { description: VALIDATION o BAD_PROOF }, '403': { description: FORBIDDEN }, '409': { description: BAD_STATE, RESERVATION_EXPIRED o GATEWAY_REQUIRED } }
+  /orders/{id}/reject:
+    post:
+      tags: [orders]
+      summary: Rechazar solicitud PENDING del bazar (solo vendedor), libera artículo y avisa motivo al comprador
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, minLength: 5, maxLength: 300 }
+      responses: { '200': { description: Pedido cancelado }, '400': { description: Motivo inválido }, '403': { description: Solo vendedor }, '409': { description: BAD_STATE } }
   /orders/{id}/confirm-payment:
     post:
       tags: [orders]

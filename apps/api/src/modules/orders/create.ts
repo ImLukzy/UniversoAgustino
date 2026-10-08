@@ -5,7 +5,7 @@ import { env } from "../../env.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth.js";
 import { notify, orderLink } from "../../lib/notify.js";
-import { blockingOrderWhere, expiredPatch, nextExpiry, RESERVATION_TTL_MINUTES } from "./reservation.js";
+import { blockingOrderWhere, expiredPatch, nextExpiry, RESERVATION_TTL_MINUTES, BAZAR_REQUEST_TTL_HOURS } from "./reservation.js";
 import { audit, itemOwner } from "./itemOwner.js";
 import { documentGuard } from "./documentGuard.js";
 
@@ -87,7 +87,7 @@ export function registerCreate(router: Router) {
           rentalStart,
           rentalEnd,
           status: "PENDING",
-          expiresAt: nextExpiry(),
+          expiresAt: nextExpiry(new Date(), input.itemType),
           // Snapshot congelado: título, precio y tasa vigentes al reservar.
           itemTitle: item.title,
           itemPriceCents: amountCents,
@@ -101,8 +101,8 @@ export function registerCreate(router: Router) {
         notify({
           userId: item.ownerId,
           type: "ORDER_CREATED",
-          title: "Nueva reserva en tu publicación",
-          body: `${item.title} — la reserva expira en ${RESERVATION_TTL_MINUTES} minutos.`,
+          title: input.itemType === "bazar" ? "Nueva solicitud" : "Nueva reserva en tu publicación",
+          body: input.itemType === "bazar" ? `${item.title} — tienes ${BAZAR_REQUEST_TTL_HOURS} h para aceptar o rechazar.` : `${item.title} — la reserva expira en ${RESERVATION_TTL_MINUTES} minutos.`,
           link: orderLink(order.id),
         }),
       ]);

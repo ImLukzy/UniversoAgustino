@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { expiredPatch } from "../modules/orders/reservation.js";
+import { expiredPatch, blockingOrderWhere } from "../modules/orders/reservation.js";
 import { notify } from "../lib/notify.js";
 
 interface ExpireResult {
@@ -28,8 +28,8 @@ export async function expireReservations(now: Date = new Date()): Promise<Expire
   try {
     for (;;) {
       const batch = await prisma.$transaction(async (tx) => {
-        const rows = await tx.$queryRaw<Array<{ id: string; buyerId: string; itemTitle: string }>>`
-          SELECT id, "buyerId", "itemTitle" FROM "Order"
+        const rows = await tx.$queryRaw<Array<{ id: string; buyerId: string; itemTitle: string; itemType: string; itemId: string }>>`
+          SELECT id, "buyerId", "itemTitle", "itemType", "itemId" FROM "Order"
           WHERE status = 'PENDING' AND "expiresAt" IS NOT NULL AND "expiresAt" <= ${now}
           ORDER BY "expiresAt" ASC
           LIMIT 500
@@ -40,6 +40,11 @@ export async function expireReservations(now: Date = new Date()): Promise<Expire
           where: { id: { in: ids }, status: "PENDING" },
           data: expiredPatch(now),
         });
+        for (const row of rows) {
+          if (row.itemType !== "bazar") continue;
+          const blocked = await tx.order.count({ where: blockingOrderWhere("bazar", row.itemId) });
+          if (!blocked) await tx.bazarItem.updateMany({ where: { id: row.itemId, status: "RESERVED" }, data: { status: "AVAILABLE" } });
+        }
         return rows;
       });
       if (batch.length === 0) break;

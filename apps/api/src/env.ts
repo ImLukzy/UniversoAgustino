@@ -21,6 +21,11 @@ if (!Number.isSafeInteger(moderationTrust) || moderationTrust < 0) {
   throw new Error("MODERATION_TRUST_AFTER debe ser un entero mayor o igual a 0");
 }
 
+const bazarRequestHours = Number(process.env.BAZAR_REQUEST_TTL_HOURS ?? 48);
+if (!Number.isSafeInteger(bazarRequestHours) || bazarRequestHours <= 0) {
+  throw new Error("BAZAR_REQUEST_TTL_HOURS debe ser un entero mayor que 0");
+}
+
 export const env = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
   PORT: Number(process.env.API_PORT ?? 4000),
@@ -38,6 +43,7 @@ export const env = {
   MODERATION_TRUST_AFTER: moderationTrust,
   FEE_PCT: Number(process.env.PLATFORM_FEE_PCT ?? PLATFORM_FEE_PCT),
   // Sprint 1A: TTL de reservas PENDING (minutos) y flags del job de expiración.
+  BAZAR_REQUEST_TTL_HOURS: bazarRequestHours,
   RESERVATION_TTL_MINUTES: Number(process.env.RESERVATION_TTL_MINUTES ?? 30),
   DIRECT_DATABASE_URL: process.env.DIRECT_DATABASE_URL ?? "",
   ENABLE_JOBS: process.env.ENABLE_JOBS ?? "false",

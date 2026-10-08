@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { registerReject } from "./rejectStep.js";
 import { registerCreate } from "./create.js";
 import { registerQueries } from "./queries.js";
 import { registerSellerSteps } from "./sellerSteps.js";
@@ -12,5 +13,6 @@ export const ordersRouter = Router();
 registerCreate(ordersRouter);
 registerQueries(ordersRouter);
 registerSellerSteps(ordersRouter);
+registerReject(ordersRouter);
 registerBuyerSteps(ordersRouter);
 registerCloseSteps(ordersRouter);

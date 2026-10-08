@@ -16,6 +16,7 @@ type Filter = "all" | "curso" | "digital" | "done";
 const isLive = (o: HubOrder) => (LIVE_ORDER_STATUS as readonly string[]).includes(o.status);
 const MATCH: Record<Filter, (o: HubOrder) => boolean> = { all: () => true, curso: isLive, digital: (o) => o.itemType === "document", done: (o) => o.status === "RELEASED" };
 const STEPS = [
+  ["Solicita tu artículo", "En el bazar, el vendedor acepta o rechaza en 48 h; los apuntes se pagan directo."],
   ["Paga al vendedor", "Yape o Plin directo a su QR."],
   ["Declara tu pago", "Envía tu n° de operación o voucher."],
   ["Custodia", "El vendedor confirma el abono y el pedido queda en custodia."],

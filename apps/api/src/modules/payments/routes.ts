@@ -28,7 +28,7 @@ paymentsRouter.post(
       await prisma.order.update({ where: { id: order.id }, data: expiredPatch() });
       return res.status(409).json({ error: { code: "RESERVATION_EXPIRED", message: "La reserva expiró. Genera un nuevo pedido." } });
     }
-    const payable = order.status === "ACCEPTED" || (order.status === "PENDING" && !(order.itemType === "bazar" && order.rentalStart));
+    const payable = order.status === "ACCEPTED" || (order.status === "PENDING" && order.itemType === "document");
     if (!payable) return res.status(409).json({ error: { code: "BAD_STATE", message: `El pedido está en ${order.status}` } });
     const url = await createPreference(order, env.WEB_ORIGIN[0]);
     await audit(req.user!.sub, "payment.checkout", order.id);

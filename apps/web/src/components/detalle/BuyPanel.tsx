@@ -7,7 +7,8 @@ import { todayLocal, type Detail } from "./useDetail";
 // Panel de compra: vendedor, precio con desglose real, cobro, fechas de alquiler y CTA.
 export function BuyPanel({ d }: { d: Detail }) {
   const p = d.person;
-  const cta = !d.available ? "No disponible" : d.busy ? "Creando pedido…" : !d.loggedIn ? "Entrar y comprar" : d.isRental ? "Solicitar alquiler" : "Comprar ahora";
+  const isBazar = !!d.item;
+  const cta = !d.available ? "No disponible" : d.busy ? "Creando pedido…" : !d.loggedIn ? "Entrar y comprar" : isBazar ? (d.isRental ? "Solicitar alquiler" : "Solicitar compra") : "Comprar ahora";
   return (
     <aside className="flex flex-col gap-4">
       <div className="card flex flex-col gap-4 p-6">
@@ -52,7 +53,7 @@ export function BuyPanel({ d }: { d: Detail }) {
         <p className="text-center text-xs text-zinc-500">Pagas al vendedor; el pedido queda en custodia hasta que confirmas la recepción.</p>
       </div>
       <ul className="card-dashed flex flex-col gap-2 p-5 text-sm text-zinc-700">
-        <li className="flex gap-2"><span className="material-symbols-outlined text-base text-primary">lock</span>Reserva de 30 minutos mientras pagas.</li>
+        <li className="flex gap-2"><span className="material-symbols-outlined text-base text-primary">lock</span>{isBazar ? "El vendedor tiene 48 h para responder." : "Reserva de 30 minutos mientras pagas."}</li>
         <li className="flex gap-2"><span className="material-symbols-outlined text-base text-primary">gavel</span>Reportes D.L. 822 atendidos en menos de 48 horas.</li>
         <li className="flex gap-2"><span className="material-symbols-outlined text-base text-primary">verified_user</span>Solo cuentas @unsa.edu.pe.</li>
       </ul>

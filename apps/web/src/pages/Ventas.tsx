@@ -32,7 +32,7 @@ export function Ventas() {
   const digitals = rows.filter((o) => o.itemType === "document");
   const myReports = reports.data ?? [];
   const kpis = [
-    { label: "Alquileres por revisar", value: String(rentals.filter((o) => o.status === "PENDING").length), href: "#seccion-alquileres" },
+    { label: "Solicitudes por revisar", value: String(rentals.filter((o) => o.status === "PENDING").length), href: "#seccion-alquileres" },
     { label: "Pagos por confirmar", value: String(rows.filter((o) => o.status === "PAID").length), href: "#seccion-digitales" },
     { label: "Ingresos liberados (apuntes)", value: pen(digitals.filter((o) => o.status === "RELEASED").reduce((a, o) => a + o.netCents, 0)) },
     { label: "Reportes abiertos", value: String(myReports.filter((r) => r.status === "OPEN").length), href: "#seccion-reportes" },
@@ -44,7 +44,7 @@ export function Ventas() {
         <div className="max-w-2xl">
           <p className="eyebrow">Módulo de ventas · sin comisión</p>
           <h1 className="h-display mt-2 text-3xl sm:text-4xl">Gestión de ventas</h1>
-          <p className="mt-2 text-sm text-zinc-600">Acepta alquileres, confirma pagos y gestiona tus reportes.</p>
+          <p className="mt-2 text-sm text-zinc-600">Acepta compras y alquileres, confirma pagos y gestiona tus reportes.</p>
         </div>
         <div className="flex gap-2">
           <Link to={ROUTES.myOrders} className="btn btn-secondary">Mis pedidos</Link>
@@ -62,13 +62,13 @@ export function Ventas() {
       </dl>
       <section id="seccion-alquileres" className="flex flex-col gap-4">
         <div>
-          <h2 className="h-display text-2xl">Solicitudes de alquiler</h2>
+          <h2 className="h-display text-2xl">Solicitudes de compra y alquiler</h2>
           <p className="mt-1 text-sm text-zinc-600">Al aceptar, el comprador paga a tu QR; al confirmar su pago, el pedido pasa a custodia.</p>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
           {sales.isLoading && Array.from({ length: 2 }, (_, i) => <RentalSkeleton key={i} />)}
           {!sales.isLoading && rentals.length === 0 && (
-            <EmptyState boxed className="lg:col-span-2" icon="storefront" title="Sin solicitudes de alquiler" hint="Cuando alguien reserve tu artículo, aparecerá aquí." action={<Link to={ROUTES.publish} className="btn btn-primary btn-sm">Publicar un artículo</Link>} />
+            <EmptyState boxed className="lg:col-span-2" icon="storefront" title="Sin solicitudes de compra o alquiler" hint="Cuando alguien reserve tu artículo, aparecerá aquí." action={<Link to={ROUTES.publish} className="btn btn-primary btn-sm">Publicar un artículo</Link>} />
           )}
           {rentals.map((o) => <RentalCard key={o.id} order={o} />)}
         </div>

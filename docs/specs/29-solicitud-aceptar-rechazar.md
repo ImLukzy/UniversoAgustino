@@ -28,6 +28,14 @@ Diseño: `docs/rfc/0002-entregas-mediadas-equipo.md` §3 (primer tramo del flujo
 | `apps/web/src/pages/Pedidos.tsx` (+ componentes) | modificar | estado "Esperando respuesta del vendedor (vence …)", "Rechazada: <motivo>" |
 | `apps/api/docs/openapi.yaml` | modificar | `POST /orders/{id}/reject` |
 
+Scope adicional aprobado por god (2026-10-08):
+- `apps/api/src/modules/payments/{routes.ts,settle.ts,payments.test.ts,checkout.test.ts}`: cerrar pago anticipado por pasarela y probarlo.
+- `apps/web/src/pages/Checkout.tsx`: sin QR/pago mientras bazar PENDING; mensaje de espera.
+- `apps/web/src/components/RentalCard.tsx`: título compra/alquiler y plazo restante.
+- `apps/api/src/jobs/expireReservations.test.ts`: liberar RESERVED dentro de la transacción del vencimiento, conservando otro pedido vivo.
+- `apps/api/src/modules/orders/closeSteps.ts`: impedir rechazo de bazar PENDING sin motivo mediante cancel del vendedor; cancel del comprador intacto.
+- `apps/api/src/modules/orders/routes.ts`: registrar rechazo; `requests.test.ts`: contratos nuevos.
+
 ## 4. Reglas
 - Todas las transiciones vía `canTransition` (`PENDING→ACCEPTED`, `PENDING→CANCELLED`).
 - No se puede solicitar algo propio, no aprobado (spec 27) o no `AVAILABLE` (ya existe).
@@ -43,8 +51,23 @@ Diseño: `docs/rfc/0002-entregas-mediadas-equipo.md` §3 (primer tramo del flujo
 | A11 | E2E (god, BD dev) | A solicita compra → B ve solicitud y la rechaza con motivo → A ve motivo; A solicita de nuevo → B acepta → A ve "Aceptada" | pasa |
 
 ## 6. Checklist
-- [ ] TTL por tipo · [ ] aceptar venta + rechazar · [ ] pagable solo tras aceptar · [ ] UI comprador/vendedor · [ ] Gates y §7
+- [x] TTL por tipo · [ ] aceptar venta + rechazar · [ ] pagable solo tras aceptar · [ ] UI comprador/vendedor · [ ] Gates y §7
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia |
 |---|---|---|---|
+| 2026-10-08 | A1–A4 locales | Verdes; suite completa a cargo de god | Typecheck y lint de producto excluyendo hive exit 0; API 131/131 excluyendo access.test.ts (puerto restringido); web 80/80; shared 46/46 |
+| 2026-10-08 | Tests nuevos | 28 tests API verdes | requests 20; job 3; checkout pasarela 3; TTL 1; settle 1. Venta/alquiler 48 h, digital 30 min/pago directo, aceptación, rechazo validado/autorizado, liberación, avisos, estados y concurrencia |
+| 2026-10-08 | Docs/build | Verdes | `npm run build` raíz exit 0 (API/web/shared); web 754 módulos; `npm run docs:check` 29 rutas, avisos existentes del escáner modular; reject documentado |
+| 2026-10-08 | A5 / iconos / diff | Verdes | Fuentes tocadas ≤149 líneas (Checkout); OpenAPI exento; subset-icons --check 113; git diff --check exit 0 |
+| 2026-10-08 | A7/A11 | Pendientes de god | Flujo compra/rechazo/motivo/nueva solicitud/aceptación y scroll a 375 px |
+
+Aceptación y rechazo usan canTransition y actualización condicional de PENDING para evitar doble resolución. Rechazo y liberación/auditoría comparten transacción; vencimiento libera inventario en transacción y conserva otros pedidos vivos. ORDER_CANCELLED comunica el motivo: sin enum nuevo ni migración. Excepción digital y máquina de estados intactas. El vendedor de bazar PENDING debe usar reject con motivo; el comprador sigue pudiendo cancelar. Suite completa confirmada por god; checklist pendiente de nueva medición A7; sin commit/push.
+| 2026-10-08 | Suite completa | Pasa | God fuera del sandbox: typecheck 0, lint 0/0, docs:check 29 rutas, secrets OK; tests API 141, web 80, shared 46 (267). |
+| 2026-10-08 | A11 | Pasa | God, BD dev, 375 px: qa-mod solicita → PENDING con plazo 48 h; pagar en PENDING 409; comprador no puede rechazar (403); vendedor no puede /cancel (409); qa-est rechaza en `/ventas` con motivo → CANCELLED, producto AVAILABLE, comprador ve "Rechazada: <motivo>" en `/pedidos`; nueva solicitud → Aceptar → ACCEPTED y `/pedidos` muestra "Aceptado · Ya puedes pagar". |
+| 2026-10-08 | A7 | Falla | `/ventas` 47 px de exceso: tag largo de estado en RentalCard sin `min-w-0`. `/pedidos` y detalle 0 px. Devuelto a Michael. |
+
+| 2026-10-08 | Suite completa / A11 | God confirma verde | API 141, web 80, shared 46 (267); lint/docs/secrets OK; flujo A11 entero pasa |
+| 2026-10-08 | Corrección A7 | Layout ajustado; nueva medición pendiente de god | RentalCard min-w-0; header en columna móvil; tag max-w-full con salto de línea y sin shrink-0; lint/build web/diff-check exit 0 |
+| 2026-10-08 | A7 (re-medición) | Pasa | God tras el arreglo de RentalCard: `/ventas` a 375 px con 0 px de exceso de página (la tabla digital desplaza dentro de su contenedor); `/pedidos` y detalle 0 px. |
+| 2026-10-08 | Auditoría | Pasa | Kelly APTO sin hallazgos (pago bloqueado en PENDING por todas las vías, solo vendedor acepta/rechaza, liberación atómica, TTL 48 h, digital intacto). |

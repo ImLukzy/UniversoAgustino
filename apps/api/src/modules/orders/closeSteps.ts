@@ -20,6 +20,9 @@ export function registerCloseSteps(router: Router) {
       const item = await itemOwner(order.itemType, order.itemId);
       const isBuyer = order.buyerId === req.user!.sub;
       if (!isBuyer && item.ownerId !== req.user!.sub) return res.status(403).json({ error: { code: "FORBIDDEN", message: "No participas en este pedido" } });
+      if (!isBuyer && order.itemType === "bazar" && order.status === "PENDING") {
+        return res.status(409).json({ error: { code: "BAD_STATE", message: "Usa /reject e indica el motivo para rechazar la solicitud" } });
+      }
       if (!canTransition(order.status as OrderStatus, "CANCELLED")) {
         return res.status(409).json({ error: { code: "BAD_STATE", message: `Ya no se puede cancelar (está ${order.status})` } });
       }

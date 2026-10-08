@@ -40,9 +40,7 @@ function Shell({ children }: { children: ReactNode }) {
   return <main className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col gap-4 bg-white px-4 py-8">{children}</main>;
 }
 
-// Checkout escrow (spec 09): una columna, 3 pasos — Resumen → Pagar (QR +
-// constancia) → Custodia. Solo el comprador lo ve; la máquina de estados vive
-// en el backend y aquí solo se refleja.
+// Checkout: solicitud de bazar → aceptación → pago → custodia.
 export function Checkout() {
   const { orderId } = useParams<{ orderId: string }>();
   const { user } = useAuth();
@@ -63,7 +61,7 @@ export function Checkout() {
     refetchInterval: (q) => {
       const st = q.state.data?.status;
       if (backFromGateway && (st === "PENDING" || st === "ACCEPTED")) return 3_000;
-      return st === "PAID" ? 30_000 : false;
+      return st === "PAID" || (st === "PENDING" && q.state.data?.itemType === "bazar") ? 30_000 : false;
     },
   });
   const o = order.data;
@@ -94,7 +92,7 @@ export function Checkout() {
   }
 
   const rental = o.itemType === "bazar" && !!o.rentalStart;
-  const payable = o.status === "ACCEPTED" || (o.status === "PENDING" && !rental);
+  const payable = o.status === "ACCEPTED" || (o.status === "PENDING" && o.itemType === "document");
   const isExpired = expired || (o.status === "CANCELLED" && TTL_REASONS.includes(o.cancelledReason ?? ""));
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["order", orderId] });
@@ -125,6 +123,8 @@ export function Checkout() {
           <Block key="expired" n={2} title="Reserva">
             <ExpiredState order={o} />
           </Block>
+        ) : o.itemType === "bazar" && o.status === "PENDING" ? (
+          <Block key="waiting" n={2} title="Solicitud enviada"><p className="text-sm">Esperando respuesta del vendedor{ o.expiresAt ? ` (vence ${new Date(o.expiresAt).toLocaleString("es-PE")})` : ""}.</p></Block>
         ) : payable ? (
           provider === "mercadopago" ? (
             <Block key="gateway" n={2} title="Paga con Mercado Pago">

@@ -12,19 +12,19 @@ export function RentalCard({ order }: { order: HubOrder }) {
   const meta = [order.buyer?.profile?.career ? careerLabel(order.buyer.profile.career) : null, order.buyer?.profile?.cycle ? `Ciclo ${order.buyer.profile.cycle}` : null].filter(Boolean).join(" · ");
   const days = order.rentalStart && order.rentalEnd ? Math.max(1, Math.round((new Date(order.rentalEnd).getTime() - new Date(order.rentalStart).getTime()) / 86400000)) : null;
   return (
-    <article className="card flex h-full flex-col gap-4 p-5">
-      <header className="flex items-start justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-3">
-          <CareerAvatar name={buyer} className="h-12 w-12" />
+    <article className="card flex h-full min-w-0 flex-col gap-4 p-5">
+      <header className="flex min-w-0 flex-col items-start justify-between gap-2 sm:flex-row">
+        <div className="flex w-full min-w-0 items-center gap-3 sm:w-auto sm:flex-1">
+          <CareerAvatar name={buyer} className="h-12 w-12 shrink-0" />
           <div className="min-w-0">
             <p className="truncate font-extrabold text-zinc-950">{buyer}</p>
             <p className="truncate text-xs text-zinc-500">{meta || "Comunidad UNSA"} · {order.buyerCompleted ?? 0} alquileres previos</p>
           </div>
         </div>
-        <span className="tag shrink-0">{getOrderLabel(order.status, "seller", order.cancelledReason)}</span>
+        <span className="tag max-w-full whitespace-normal break-words text-left sm:max-w-[50%]">{getOrderLabel(order.status, "seller", order.cancelledReason)}</span>
       </header>
       <div className="rounded-xl border border-dashed border-zinc-300 p-3">
-        <p className="eyebrow">Alquiler de bazar</p>
+        <p className="eyebrow">{order.rentalStart ? "Alquiler de bazar" : "Compra de bazar"}</p>
         <p className="truncate font-bold text-zinc-950">{order.itemTitle ?? order.itemId}</p>
         <p className="flex items-center gap-1 text-xs text-zinc-600">
           <span className="material-symbols-outlined text-sm">event</span>
@@ -50,6 +50,7 @@ export function RentalCard({ order }: { order: HubOrder }) {
           El comprador declara el pago{order.payProof ? <> con constancia <b>{order.payProof}</b></> : ""}. Confírmalo solo si recibiste el abono.
         </p>
       )}
+      {order.status === "PENDING" && order.expiresAt && <p className="text-xs text-zinc-600">Plazo restante: {Math.max(0, Math.ceil((new Date(order.expiresAt).getTime() - Date.now()) / 3_600_000))} h · Vence {new Date(order.expiresAt).toLocaleString("es-PE")}</p>}
       <div className="mt-auto">
         <SaleActions order={order} />
       </div>

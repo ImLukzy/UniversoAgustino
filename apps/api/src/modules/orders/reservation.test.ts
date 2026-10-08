@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   RESERVATION_TTL_MINUTES,
+  BAZAR_REQUEST_TTL_HOURS,
   blockingOrderWhere,
   expiredPatch,
   isExpired,
@@ -8,6 +9,12 @@ import {
 } from "./reservation.js";
 
 describe("RESERVATION_TTL", () => {
+  it("bazar vence en 48 h sin cambiar el TTL digital", () => {
+    const from = new Date("2026-01-01T12:00:00Z");
+    expect(BAZAR_REQUEST_TTL_HOURS).toBe(48);
+    expect(nextExpiry(from, "bazar").getTime() - from.getTime()).toBe(48 * 3_600_000);
+    expect(nextExpiry(from, "document").getTime() - from.getTime()).toBe(30 * 60_000);
+  });
   it("por defecto son 30 minutos", () => {
     expect(RESERVATION_TTL_MINUTES).toBe(30);
   });

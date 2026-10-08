@@ -1,5 +1,5 @@
 import type { Router } from "express";
-import { MarkPaidSchema } from "@hub/shared";
+import { MarkPaidSchema, canTransition, type OrderStatus } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth.js";
@@ -35,10 +35,10 @@ export function registerBuyerSteps(router: Router) {
         return res.status(409).json(expiredMsg);
       }
       // Alquiler: el vendedor debe aceptar antes (PENDING no es pagable).
-      const canPay = order.status === "ACCEPTED" || (order.status === "PENDING" && !(order.itemType === "bazar" && order.rentalStart));
+      const canPay = (order.status === "ACCEPTED" && canTransition(order.status as OrderStatus, "PAID")) || (order.status === "PENDING" && order.itemType === "document");
       if (!canPay) {
         if (order.status === "CANCELLED" && EXPIRED_REASONS.includes(order.cancelledReason ?? "")) return res.status(409).json(expiredMsg);
-        const hint = order.status === "PENDING" ? "El vendedor debe aceptar tu solicitud de alquiler primero" : `El pedido ya está en ${order.status}`;
+        const hint = order.status === "PENDING" ? "El vendedor debe aceptar tu solicitud primero" : `El pedido ya está en ${order.status}`;
         return res.status(409).json({ error: { code: "BAD_STATE", message: hint } });
       }
       const upd = await prisma.order.update({
