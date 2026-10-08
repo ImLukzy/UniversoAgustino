@@ -53,6 +53,8 @@ export const CANCEL_REASONS = [
   "BUYER_CANCELLED",
   "SELLER_REJECTED",
   "ORPHAN_ITEM",
+  "TEAM_CANCELLED",
+  "TEAM_RETURNED",
 ] as const;
 export type CancelReason = (typeof CANCEL_REASONS)[number];
 
@@ -62,6 +64,8 @@ export const CANCEL_REASON_LABEL: Record<CancelReason, string> = {
   BUYER_CANCELLED: "Cancelado por el comprador",
   SELLER_REJECTED: "Rechazado por el vendedor",
   ORPHAN_ITEM: "Publicación no disponible",
+  TEAM_CANCELLED: "Cancelado por el equipo",
+  TEAM_RETURNED: "Devuelto al vendedor",
 };
 
 export function isCancelReason(v: unknown): v is CancelReason {
@@ -119,5 +123,6 @@ export function computePrice(priceCents: number, feePct: number): PriceSnapshot 
 export const ITEM_TYPE_LABEL: Record<string, string> = {
   document: "Apunte digital",
   bazar: "Artículo de bazar",
+  order: "Pedido",
   user: "Usuario",
 };

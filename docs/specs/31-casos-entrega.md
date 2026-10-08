@@ -27,7 +27,7 @@ Aprobada por god en 2026-10-08T21-20-44-548Z-7aa8b2. Fuente: RFC 0002 §3–§6;
 5. Turnos con citas futuras SCHEDULED no pueden editarse/eliminarse si la cita queda fuera; no quitar del equipo un trabajador con casos activos o citas futuras hasta reasignar/cancelar. Evita invalidar asignaciones desde la administración de spec 30/26.
 
 ## 3. Archivos afectados
-Rutas actuales verificadas en repo; los nuevos archivos se crean en los directorios indicados. 31a autorizada; ejecución 31b requiere despacho posterior.
+Rutas actuales verificadas en repo; los nuevos archivos se crean en los directorios indicados. 31a autorizada; 31b autorizada por despacho c6938d.
 
 | Archivos | Acción | Entrega / propósito |
 |---|---|---|
@@ -111,8 +111,8 @@ Se ejecutan por entrega aprobada, con alcance completo verificable al cerrar 31b
 Tests mínimos31a: rollback de aceptación sin caso; caso único en carrera; lectura de participantes y ajenos; toma/asignación/autorización; solape entre sedes/turnos/feriados/plazo (sábado incluido); foto interna existente propia e imagen; recepción y aviso; NO_SHOW temprano/repetido; límite de reprogramación; protección de turnos/custodio; todos los pagos web bazar bloqueados. Tests31b: operación/CASH requeridos, cada transición canTransition, venta atómica, alquiler no libera inventario antes del retorno, devolución/revisión, citas restantes y cancelación asistida, idempotencia y permisos.
 
 ## 6. Estado de entregas
-- [ ] 31a — implementación lista; gates completos/dev en revisión de god (detalle en `31a-casos-custodia.md`).
-- [ ] 31b — plan aprobado; ejecución pendiente de despacho (detalle en `31b-recojo-devoluciones.md`).
+- [x] 31a — integrada por god383fde1; KellyAPTO/E2E/suite404 (detalle en `31a-casos-custodia.md`).
+- [ ] 31b — en implementación tras despacho c6938d (detalle en `31b-recojo-devoluciones.md`).
 
 ## 7. Evidencia
 31a: migración aplicada en dev y Prisma regenerado por god, mensaje 2026-10-08T21-24-05-568Z-73493a. No backfill. SQL aplicado no vuelve a editarse. No commit/push por Michael.
@@ -121,3 +121,7 @@ Tests mínimos31a: rollback de aceptación sin caso; caso único en carrera; lec
 | 2026-10-08 | Auditoría 31a | Pasa (previa a arreglos E2E) | Kelly APTO sin hallazgos sobre d2c21f5; la acción "Cancelar trato" (arreglo 1 del E2E) requerirá revisión puntual. |
 | 2026-10-08 | A3 + A11 arreglos 31a | Pasa | God: typecheck 0, lint 0/0, docs:check 79, any-budget 0, secrets OK; tests API 259, web 80, shared 65 (404). E2E: estudiante cancela 403; cancelar en custodia 409; custodio cancela tras 2 ausencias → caso/pedido CANCELLED, ítem AVAILABLE, citas intactas como NO_SHOW; 2ª cancelación 409; avisos ORDER_CANCELLED a comprador y vendedor; `/pedidos` explica pago al recoger sin QR; axe `/ventas` y `/pedidos` ok. (El aviso con ruta de foto que queda en dev es previo al arreglo.) |
 | 2026-10-08 | Auditoría delta | Pasa | Kelly APTO sin hallazgos en Cancelar trato y los 3 ajustes. |
+| 2026-10-08 | Migración dev 31b | Pasa (god) | `20261008214900_casos_devolucion` aplicada en Unsa; diff limpio salvo 2 índices previos. |
+| 2026-10-08 | A3 31b | Pasa | God fuera del sandbox: typecheck 0, lint 0/0, docs:check 84, any-budget 0; tests API 288, web 80, shared 71 (439). check-secrets solo marca `worktrees/` del temp (no rastreado, falso positivo). |
+| 2026-10-08 | A11 31b (god, BD dev, 375 px) | Pasa | Venta: pickup sin confirmar 400, operación sin n.º 400, estudiante 403, antes de hora 409, OK → pedido RELEASED/ítem SOLD/caso CLOSED, repetir 409; comprador no confirma cobro (404), vendedor confirma 200 y reporta 201 sin cambiar el pedido; aviso al vendedor con monto y n.º. Alquiler con fin en domingo: primera franja RETURN lunes 08:00 Lima; pickup en efectivo → ESCROW/RENTED/RETURN_SCHEDULED; return sin confirmar 400, OK → RELEASED con ítem aún RENTED; back-to-seller → ítem AVAILABLE, caso CLOSED. Recojo con 2 ausencias: 2ª reprogramación 409, retorno al vendedor → pedido CANCELLED, ítem AVAILABLE, caso CLOSED. `/equipo` Casos, `/pedidos`, `/ventas`: 0 px y axe ok. |
+| 2026-10-08 | Auditoría 31b | Pasa | Kelly APTO sin hallazgos (pago certificado, canTransition, ítem nunca liberado antes del retorno físico, roles, foto propia, AuditLog). |

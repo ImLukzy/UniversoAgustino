@@ -21,9 +21,9 @@ Tabla aprobada en spec 31. Helpers adicionales necesarios: `cases/orderChanges.t
 A1 tipos, A2 lint y presupuesto cero de `any`, A3 suite completa y ≥25 nuevos, A4 docs/negativa/enums, A5 fuentes≤150, A7 móvil375 sin scroll, A8 JS inicial<170KB gzip y Equipo<25KB, A10 axe formularios, A11a/c caso físico/concurrencia/permisos y A11d PDF. Ver spec padre para casos concretos.
 
 ## 6. Checklist
-- [ ] Modelo/migración/shared/API y flujo físico hasta PICKUP_SCHEDULED.
-- [ ] Equipo, Pedidos, Ventas y Checkout con instrucciones/cita y sin pago web bazar.
-- [ ] Tests/contratos/gates completos y revisión dev de god.
+- [x] Modelo/migración/shared/API y flujo físico hasta PICKUP_SCHEDULED.
+- [x] Equipo, Pedidos, Ventas y Checkout con instrucciones/cita y sin pago web bazar.
+- [x] Tests/contratos/gates completos y revisión dev de god.
 
 ## 7. Evidencia
 - SQL aditivo `20261008211600_casos_entrega` aplicado en dev por god; cliente regenerado (mensaje 2026-10-08T21-24-05-568Z-73493a). Sin backfill ni cambios a los dos índices crudos previos.
@@ -33,3 +33,5 @@ A1 tipos, A2 lint y presupuesto cero de `any`, A3 suite completa y ≥25 nuevos,
 - Pendiente de confirmación: A3 completa, A7, A10, A11a/c/d en dev. Pedido a god por outbox `31a-dev-gates.json`. Ningún gate pendiente se marca aprobado.
 
 - E2E god 2026-10-08T21-38-43-186Z-b83589: aceptación/caso, pago web bloqueado, permisos, carreras toma/cita, turno, recepción con evidencia/hora/custodio, PICKUP y aviso completo, foto en Pedidos, Checkout sin QR, NO_SHOW/reprogramación límite; Equipo/Pedidos/Checkout a375 sin scroll y axe OK. God pidió cuatro ajustes: cancelación del trato por equipo antes de custodia (implementada con transacción/auditoría/avisos a ambas partes y ocho tests), aviso sin ruta cruda de foto, instrucciones físicas en Pedidos/Ventas y región digital de Ventas enfocable. Revisión final de estos ajustes pendiente.
+
+Cierre de god: commit local383fde1 (sin push), Kelly APTO x2 y E2E/gates aprobados; suite404 registrada en memoria de god. La ejecución31b se autorizó por mensaje c6938d.

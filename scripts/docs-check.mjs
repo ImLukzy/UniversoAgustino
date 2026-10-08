@@ -24,6 +24,8 @@ const SOURCES = [
   ["modules/staff/schedule.ts", ["/staff/schedule"]],
   ["modules/staff/shifts.ts", ["/staff/shifts"]],
   ["modules/cases/routes.ts", ["/staff/cases"]],
+  ["modules/cases/fulfillmentRoutes.ts", ["/staff/cases"]],
+  ["modules/cases/sellerPayment.ts", ["/cases"]],
   ["modules/cases/queries.ts", ["/staff/cases", "/cases"]],
   ["modules/sedes/routes.ts", ["/sedes"]],
   ["modules/notifications/routes.ts", []],

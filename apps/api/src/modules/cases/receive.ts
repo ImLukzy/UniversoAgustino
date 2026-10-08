@@ -1,4 +1,4 @@
-import { hasObject } from "../../lib/storage.js";
+import { ownPhoto } from "./evidence.js";
 import { scheduleChange, scheduleFail } from "../staff/scheduleGuard.js";
 import { managedCase, caseTransition, type Actor } from "./caseGuard.js";
 import { notify } from "../../lib/notify.js";
@@ -10,10 +10,7 @@ export async function receiveCase(id: string, actor: Actor, photoUrl: string, co
     caseTransition(existing.status, "IN_CUSTODY");
     const appointment = existing.appointments.find((a) => a.kind === "DROP_OFF" && a.status === "SCHEDULED");
     if (!appointment || now < appointment.startsAt || now > appointment.endsAt) scheduleFail("BAD_STATE", "La recepción requiere una cita de entrega vigente");
-    const storedName = photoUrl.slice("/uploads/".length);
-    const upload = await tx.upload.findUnique({ where: { storedName } });
-    if (!upload || upload.ownerId !== actor.sub || !["image/jpeg", "image/png"].includes(upload.detectedMime)) scheduleFail("BAD_PHOTO", "Sube una foto JPG o PNG propia", 400);
-    if (!await hasObject(storedName)) scheduleFail("BAD_PHOTO", "La foto no está disponible", 400);
+    await ownPhoto(tx, photoUrl, actor.sub);
     await tx.appointment.update({ where: { id: appointment.id }, data: { status: "DONE" } });
     return tx.handoverCase.update({ where: { id }, data: { status: "IN_CUSTODY", receivedPhotoUrl: photoUrl, conditionNote, receivedAt: now }, include: { order: true } });
   });

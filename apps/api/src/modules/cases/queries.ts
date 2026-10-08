@@ -1,3 +1,4 @@
+import { registerSellerPayment } from "./sellerPayment.js";
 import { Router } from "express";
 import { z } from "zod";
 import { CaseStatusSchema } from "@hub/shared";
@@ -9,11 +10,14 @@ import { scheduleFail } from "../staff/scheduleGuard.js";
 
 export const participantCasesRouter = Router();
 participantCasesRouter.use(requireAuth);
+registerSellerPayment(participantCasesRouter);
 participantCasesRouter.get("/order/:orderId", asyncHandler(async (req: AuthedRequest, res) => {
   const order = await prisma.order.findUnique({ where: { id: req.params.orderId } });
   if (!order || ![order.buyerId, order.sellerId].includes(req.user!.sub)) scheduleFail("NOT_FOUND", "Caso no encontrado", 404);
   const row = await prisma.handoverCase.findUnique({ where: { orderId: order.id }, include: caseInclude });
   res.json({ data: row ? { id: row.id, status: row.status, receivedPhotoUrl: row.receivedPhotoUrl, conditionNote: row.conditionNote,
+    isSeller: order.sellerId === req.user!.sub, paymentRef: row.paymentRef, paymentMethod: row.paymentMethod, sellerConfirmedAt: row.sellerConfirmedAt,
+    returnCondition: row.returnCondition, returnConditionNote: row.returnConditionNote, returnPhotoUrl: row.returnPhotoUrl,
     staffName: row.assignee?.profile?.fullName ?? "Equipo", amountCents: order.amountCents, sede: row.sede,
     appointments: row.appointments.filter((a) => a.partyId === req.user!.sub).map((a) => ({ id: a.id, kind: a.kind,
       startsAt: a.startsAt, endsAt: a.endsAt, status: a.status, sede: a.sede })) } : null });

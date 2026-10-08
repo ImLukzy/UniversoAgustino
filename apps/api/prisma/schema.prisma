@@ -424,6 +424,14 @@ model HandoverCase {
   receivedAt DateTime?
   paymentRef String?
   paymentMethod String?
+  sellerConfirmedAt DateTime?
+  returnCondition String?
+  returnConditionNote String?
+  returnPhotoUrl String?
+  returnedAt DateTime?
+  returnWindowStart DateTime?
+  returnDeadlineAt DateTime?
+  backToSellerRequestedAt DateTime?
   closedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

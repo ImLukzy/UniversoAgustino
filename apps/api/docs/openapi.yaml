@@ -848,7 +848,7 @@ paths:
         - in: query
           name: kind
           required: true
-          schema: { type: string, enum: [DROP_OFF, PICKUP] }
+          schema: { type: string, enum: [DROP_OFF, PICKUP, RETURN, BACK_TO_SELLER] }
       responses:
         "200": { description: Operación completada; data contiene caso o cita }
         "400": { description: VALIDATION o BAD_PHOTO }
@@ -998,10 +998,134 @@ paths:
         "404": { description: Caso no encontrado }
         "409": { description: IN_CUSTODY o BAD_STATE }
 
+  /staff/cases/{id}/pickup:
+    post:
+      summary: Certificar pago físico y entregar al comprador
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CasePickup' }
+      responses:
+        "200": { description: Operación completada }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico en acciones físicas }
+        "404": { description: Caso no visible; confirmación y reporte solo del vendedor }
+        "409": { description: BAD_STATE, ALREADY_CONFIRMED o REPORT_EXISTS }
+  /staff/cases/{id}/return:
+    post:
+      summary: Recibir y revisar devolución de alquiler
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CaseReturnReview' }
+      responses:
+        "200": { description: Operación completada }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico en acciones físicas }
+        "404": { description: Caso no visible; confirmación y reporte solo del vendedor }
+        "409": { description: BAD_STATE, ALREADY_CONFIRMED o REPORT_EXISTS }
+  /staff/cases/{id}/back-to-seller:
+    post:
+      summary: Confirmar retorno físico al vendedor
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Operación completada }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico en acciones físicas }
+        "404": { description: Caso no visible; confirmación y reporte solo del vendedor }
+        "409": { description: BAD_STATE, ALREADY_CONFIRMED o REPORT_EXISTS }
+  /cases/order/{orderId}/confirm-payment:
+    post:
+      summary: Vendedor confirma cobro sin cambiar Order
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Operación completada }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico en acciones físicas }
+        "404": { description: Caso no visible; confirmación y reporte solo del vendedor }
+        "409": { description: BAD_STATE, ALREADY_CONFIRMED o REPORT_EXISTS }
+  /cases/order/{orderId}/payment-report:
+    post:
+      summary: Vendedor reporta pago no recibido; Report ligado al pedido
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CasePaymentReport' }
+      responses:
+        "201": { description: Operación completada }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico en acciones físicas }
+        "404": { description: Caso no visible; confirmación y reporte solo del vendedor }
+        "409": { description: BAD_STATE, ALREADY_CONFIRMED o REPORT_EXISTS }
+
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
   schemas:
+    CasePickup:
+      type: object
+      required: [paymentMethod, paymentConfirmed]
+      description: Custodio o Técnico durante PICKUP vigente. Solo entrega si certifica pago al vendedor; CASH guarda efectivo, OPERATION exige referencia. Venta pasa PAID→ESCROW→RELEASED y SOLD/CLOSED; alquiler PAID→ESCROW y RENTED, con RETURN adjunta opcional. El aviso del vendedor ofrece Confirmar cobro y No recibí el pago; ninguno altera el pedido.
+      properties:
+        paymentMethod: { type: string, enum: [OPERATION, CASH] }
+        paymentConfirmed: { type: boolean, enum: [true] }
+        paymentRef: { type: string, minLength: 3, maxLength: 160, description: Obligatorio para OPERATION }
+        returnAppointment:
+          allOf:
+            - { $ref: '#/components/schemas/CaseBooking' }
+            - type: object
+              properties:
+                kind: { type: string, enum: [RETURN] }
+    CaseReturnReview:
+      type: object
+      required: [condition, conditionNote, reviewConfirmed]
+      description: Durante RETURN vigente, revisión explícita; guarda evidencia separada de recepción original y pasa ESCROW→RELEASED. El objeto permanece RENTED hasta BACK_TO_SELLER físico. Observaciones no disparan sanciones ni cargos automáticos.
+      properties:
+        condition: { type: string, enum: [OK, DAMAGED] }
+        conditionNote: { type: string, minLength: 5, maxLength: 500 }
+        reviewConfirmed: { type: boolean, enum: [true] }
+        photoUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$', description: Opcional; JPG o PNG propio existente }
+    CasePaymentReport:
+      type: object
+      required: [reason]
+      properties:
+        reason: { type: string, minLength: 5, maxLength: 500 }
     CaseState:
       type: string
       enum: [UNASSIGNED, ASSIGNED, DROP_SCHEDULED, IN_CUSTODY, PICKUP_SCHEDULED, DELIVERED, RENTED_OUT, RETURN_SCHEDULED, RETURNED, BACK_TO_SELLER, CLOSED, CANCELLED]
@@ -1013,9 +1137,9 @@ components:
     CaseBooking:
       type: object
       required: [kind, sedeId, startsAt]
-      description: Franja futura de 15 minutos alineada, dentro del turno del custodio, sin domingos/feriados ni solapes. Plazo al cierre del tercer día hábil posterior a aceptación (DROP_OFF) o recepción (PICKUP); sábado abierto cuenta. Reprogramación conserva plazo original y solo una por tipo tras NO_SHOW.
+      description: Franja futura de 15 minutos alineada, dentro del turno del custodio, sin domingos/feriados ni solapes. Plazo al cierre del tercer día hábil posterior a aceptación (DROP_OFF) o recepción (PICKUP); sábado abierto cuenta. RETURN parte de la fecha final local y del primer día hábil con turno, con ventana fija de tres días hábiles; no cambia rentalEnd ni bloquea el recojo por día cerrado. BACK_TO_SELLER tiene ancla fija en segunda ausencia de recojo o revisión de devolución. Reprogramación conserva plazo original y solo una por tipo tras NO_SHOW.
       properties:
-        kind: { type: string, enum: [DROP_OFF, PICKUP] }
+        kind: { type: string, enum: [DROP_OFF, PICKUP, RETURN, BACK_TO_SELLER] }
         sedeId: { type: string, minLength: 1 }
         startsAt: { type: string, format: date-time }
     CaseReceive:
