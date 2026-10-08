@@ -26,12 +26,14 @@ Despacho god `2026-10-08T21-44-32-722Z-c6938d`, decisiones `2026-10-08T21-47-01-
 A1 tipos raíz; A2 lint/any-budget0; A3 suite completa con≥15 nuevos; A4 OpenAPI/negativa; A5 fuentes≤150; A7 móvil375 sin scroll; A8 JS inicial<170KB gzip/Equipo<25KB; A10 axe formularios; A11b venta/renta/retorno/noShows/confirmaciónReport; A11d PDF intacto. SQL dev/migraciones prod por god.
 
 ## 6. Checklist
-- [ ] Recojo, certificación y transiciones de venta/alquiler.
-- [ ] Citas RETURN/BACK, revisión separada y liberación física segura.
-- [ ] Confirmación del vendedor y reporte sin nuevo paso financiero.
-- [ ] Gates completos/dev/auditoría y evidencia final.
+- [x] Recojo, certificación y transiciones de venta/alquiler.
+- [x] Citas RETURN/BACK, revisión separada y liberación física segura.
+- [x] Confirmación del vendedor y reporte sin nuevo paso financiero.
+- [x] Gates completos/dev/auditoría y evidencia final.
 
 ## 7. Evidencia
-SQL aditivo aplicado en dev y Prisma regenerado por god (mensaje2026-10-08T21-49-13-247Z-d2ee87). No backfill ni edición de migraciones aplicadas. Local provisional API278 sin access.test.ts (puerto restringido), shared71; tipos raíz verdes. 29 testsAPI y6shared nuevos respecto31a. Esperado full API288/web80/shared71=439; validación completa y móvil/axe/E2E de god pendientes.
+SQL aditivo aplicado en dev y Prisma regenerado por god (mensaje2026-10-08T21-49-13-247Z-d2ee87). No backfill ni edición de migraciones aplicadas. Local provisional API278 sin access.test.ts (puerto restringido), shared71; tipos raíz verdes. 29 testsAPI y6shared nuevos respecto31a. Esperado full API288/web80/shared71=439; Cierre final de god: Kelly APTO y E2E completo, confirmado en 2026-10-08T22-08-11-859Z-c79b0c.
 
-Gates locales adicionales: web80/shared71, lint producto0/0 excluyendo hive y worktrees (checkout temporal specs32–34 apareció bajo raíz y no pertenece a esta entrega), any-budget0, docs84+negativa virtual pickup exit1, build raíz verde; JS entrada+preloads164.54KB gzip, Equipo9.88KB. No dependencias nuevas. Fuentes tocadas≤149. Gates completos y dev solicitados a god (`31b-dev-gates.json`).
+Gates locales adicionales: web80/shared71, lint producto0/0 excluyendo hive y worktrees (checkout temporal specs32–34 apareció bajo raíz y no pertenece a esta entrega), any-budget0, docs84+negativa virtual pickup exit1, build raíz verde; JS entrada+preloads164.53KB gzip, Equipo9.95KB. No dependencias nuevas. Fuentes tocadas≤149. Gates completos y dev solicitados a god (`31b-dev-gates.json`).
+
+Entrega cerrada por god en commit local9b1db0a, después de31a383fde1. Sin push; migraciones productivas pendientes de aprobación humana. No se inicia31b adicional ni specs32–34 desde esta sesión.

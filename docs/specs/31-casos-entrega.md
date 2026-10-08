@@ -112,7 +112,7 @@ Tests mínimos31a: rollback de aceptación sin caso; caso único en carrera; lec
 
 ## 6. Estado de entregas
 - [x] 31a — integrada por god383fde1; KellyAPTO/E2E/suite404 (detalle en `31a-casos-custodia.md`).
-- [ ] 31b — en implementación tras despacho c6938d (detalle en `31b-recojo-devoluciones.md`).
+- [x] 31b — integrada por god9b1db0a; KellyAPTO/E2E completo (detalle en `31b-recojo-devoluciones.md`).
 
 ## 7. Evidencia
 31a: migración aplicada en dev y Prisma regenerado por god, mensaje 2026-10-08T21-24-05-568Z-73493a. No backfill. SQL aplicado no vuelve a editarse. No commit/push por Michael.
@@ -125,3 +125,5 @@ Tests mínimos31a: rollback de aceptación sin caso; caso único en carrera; lec
 | 2026-10-08 | A3 31b | Pasa | God fuera del sandbox: typecheck 0, lint 0/0, docs:check 84, any-budget 0; tests API 288, web 80, shared 71 (439). check-secrets solo marca `worktrees/` del temp (no rastreado, falso positivo). |
 | 2026-10-08 | A11 31b (god, BD dev, 375 px) | Pasa | Venta: pickup sin confirmar 400, operación sin n.º 400, estudiante 403, antes de hora 409, OK → pedido RELEASED/ítem SOLD/caso CLOSED, repetir 409; comprador no confirma cobro (404), vendedor confirma 200 y reporta 201 sin cambiar el pedido; aviso al vendedor con monto y n.º. Alquiler con fin en domingo: primera franja RETURN lunes 08:00 Lima; pickup en efectivo → ESCROW/RENTED/RETURN_SCHEDULED; return sin confirmar 400, OK → RELEASED con ítem aún RENTED; back-to-seller → ítem AVAILABLE, caso CLOSED. Recojo con 2 ausencias: 2ª reprogramación 409, retorno al vendedor → pedido CANCELLED, ítem AVAILABLE, caso CLOSED. `/equipo` Casos, `/pedidos`, `/ventas`: 0 px y axe ok. |
 | 2026-10-08 | Auditoría 31b | Pasa | Kelly APTO sin hallazgos (pago certificado, canTransition, ítem nunca liberado antes del retorno físico, roles, foto propia, AuditLog). |
+
+Cierre spec31: god confirmó383fde1+9b1db0a, Kelly APTO y E2E completo (c79b0c). Sin push ni SQLproductivo por Michael; autorización de producción a cargo de god.
