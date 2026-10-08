@@ -984,6 +984,34 @@ paths:
         "404": { description: Falta vigente inexistente }
         "401": { description: Sesión requerida }
         "403": { description: FORBIDDEN (solo equipo o solo Técnico) }
+  /staff/agenda:
+    get:
+      summary: Agenda semanal lunes–sábado con citas, turnos y días cerrados (solo equipo, solo lectura)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: week
+          description: Cualquier fecha YYYY-MM-DD; se normaliza al lunes en America/Lima (por defecto la semana actual)
+          schema: { type: string, format: date }
+        - in: query
+          name: sedeId
+          schema: { type: string }
+        - in: query
+          name: staffId
+          schema: { type: string }
+      responses:
+        "200": { description: weekStart, days, staff, shifts y appointments (tope 500) }
+        "400": { description: VALIDATION }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo equipo }
+  /staff/metrics:
+    get:
+      summary: Métricas del panel del equipo (citas de hoy, casos por estado, custodia por trabajador, faltas del mes, pendientes)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: todayAppointments, casesByStatus, custodyByStaff, noShowsThisMonth, pendingReviews, openReports }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo equipo }
   /staff/cases:
     get:
       summary: Casos paginados visibles al equipo

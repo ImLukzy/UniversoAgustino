@@ -10,8 +10,9 @@ import { CasesTab } from "../components/equipo/CasesTab";
 import { SedesTab } from "../components/equipo/SedesTab";
 import { ResumenTab } from "../components/equipo/ResumenTab";
 import { UsuariosTab } from "../components/equipo/UsuariosTab";
+import { AgendaTab } from "../components/equipo/AgendaTab";
 
-type Tab = "Casos" | "Resumen" | "Denuncias" | "Miembros" | "Usuarios" | "Publicaciones" | "Sedes y horarios";
+type Tab = "Casos" | "Agenda" | "Resumen" | "Denuncias" | "Miembros" | "Usuarios" | "Publicaciones" | "Sedes y horarios";
 export function Equipo() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("Resumen");
@@ -24,7 +25,7 @@ export function Equipo() {
       <div className="card p-8"><h1 className="h-display text-2xl">No tienes acceso al panel del equipo</h1></div>
     </main>
   );
-  const tabs: Tab[] = user.role === "admin" ? ["Resumen", "Casos", "Usuarios", "Publicaciones", "Denuncias", "Miembros", "Sedes y horarios"] : ["Resumen", "Casos", "Usuarios", "Publicaciones", "Denuncias", "Sedes y horarios"];
+  const tabs: Tab[] = user.role === "admin" ? ["Resumen", "Casos", "Agenda", "Usuarios", "Publicaciones", "Denuncias", "Miembros", "Sedes y horarios"] : ["Resumen", "Casos", "Agenda", "Usuarios", "Publicaciones", "Denuncias", "Sedes y horarios"];
   return (
     <main className="mx-auto flex w-full min-w-0 max-w-5xl flex-col gap-6 px-4 py-8">
       <header><p className="eyebrow">Universo Agustino</p><h1 className="h-display text-3xl">Equipo</h1></header>
@@ -34,6 +35,7 @@ export function Equipo() {
       </nav>
       {tab === "Sedes y horarios" && <SedesTab />}
       {tab === "Casos" && <CasesTab />}
+      {tab === "Agenda" && <AgendaTab goCases={() => setTab("Casos")} />}
       {tab === "Usuarios" && <UsuariosTab />}
       {tab === "Resumen" && <ResumenTab />}
       {tab === "Publicaciones" && <PublicacionesTab />}

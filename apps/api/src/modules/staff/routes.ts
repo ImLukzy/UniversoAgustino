@@ -11,6 +11,7 @@ import { scheduleRouter } from "./schedule.js";
 import { casesRouter } from "../cases/routes.js";
 import { shiftsRouter } from "./shifts.js";
 import { usersRouter } from "../sanctions/users.js";
+import { agendaRouter, metricsRouter } from "../agenda/routes.js";
 
 export const staffRouter = Router();
 staffRouter.use(requireAuth, requireRole("moderator", "admin"));
@@ -20,6 +21,8 @@ staffRouter.use("/schedule", scheduleRouter);
 staffRouter.use("/shifts", shiftsRouter);
 staffRouter.use("/cases", casesRouter);
 staffRouter.use("/users", usersRouter);
+staffRouter.use("/agenda", agendaRouter);
+staffRouter.use("/metrics", metricsRouter);
 const memberSelect = { id: true, email: true, role: true, createdAt: true, profile: { select: { fullName: true } } } as const;
 function fail(status: number, code: string, message: string): never {
   throw Object.assign(new Error(message), { status, code });

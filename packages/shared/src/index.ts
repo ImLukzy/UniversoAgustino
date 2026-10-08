@@ -11,3 +11,4 @@ export * from "./sedes.js";
 export * from "./handover.js";
 export * from "./chat.js";
 export * from "./sanctions.js";
+export * from "./agenda.js";

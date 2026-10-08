@@ -1,6 +1,6 @@
 # Especificación 34 - Agenda semanal y métricas del panel
 
-Fuente: RFC 0002 §5 (Agenda, Hoy) y §7. Estado: **borrador §1–§5 para aprobación de god**. Sin migración.
+Fuente: RFC 0002 §5 (Agenda, Hoy) y §7. Estado: **aprobada por god (2026-10-08T22-02-14: 34-A, 34-B); implementada**. Sin migración.
 
 ## 1. Objetivo
 **Problema:** el equipo solo ve casos como lista (`CasesTab`) y `ResumenTab` solo cuenta denuncias; no hay vista semanal de quién recibe, quién tiene qué ni cuántos tratos hay por estado.
@@ -15,11 +15,12 @@ Fuente: RFC 0002 §5 (Agenda, Hoy) y §7. Estado: **borrador §1–§5 para apro
 | Archivo | Acción | Nota |
 |---|---|---|
 | `packages/shared/src/agenda.ts`, `agenda.test.ts`, `index.ts` | crear/modificar | `AgendaQuerySchema`, tipos de respuesta |
-| `apps/api/src/modules/agenda/week.ts`, `metrics.ts`, `routes.ts`, `agenda.test.ts` | crear | consultas de solo lectura |
+| `apps/api/src/modules/agenda/week.ts`, `metrics.ts`, `routes.ts`, `agenda.test.ts` | crear | consultas de solo lectura (`agendaRouter`, `metricsRouter`) |
+| `scripts/docs-check.mjs` | modificar | registrar `agenda/routes.ts` |
 | `apps/api/src/modules/staff/routes.ts` | modificar | montar `/agenda`, `/metrics` |
 | `apps/api/docs/openapi.yaml` | modificar | 2 rutas |
 | `apps/web/src/components/equipo/AgendaTab.tsx`, `AgendaGrid.tsx`, `AgendaFilters.tsx`, `agendaTypes.ts` | crear | semana, filtros, celdas |
-| `apps/web/src/components/equipo/ResumenTab.tsx`, `MetricCards.tsx` | modificar/crear | métricas |
+| `apps/web/src/components/equipo/ResumenTab.tsx`, `MetricCards.tsx` | modificar/crear | métricas (Resumen conserva la tarjeta de denuncias) |
 | `apps/web/src/pages/Equipo.tsx` | modificar | pestaña Agenda; Resumen con métricas |
 
 ## 4. Diseño y lógica
@@ -41,11 +42,17 @@ Fuente: RFC 0002 §5 (Agenda, Hoy) y §7. Estado: **borrador §1–§5 para apro
 | A11 | E2E dev | cita creada en 31 aparece en su celda con sede y trabajador; filtro por trabajador oculta las demás | pasa |
 
 ## 6. Checklist
-- [ ] Contratos shared
-- [ ] Endpoints agenda y métricas
-- [ ] UI Agenda + métricas
-- [ ] Gates A1–A5, registrar §7
+- [x] Contratos shared
+- [x] Endpoints agenda y métricas
+- [x] UI Agenda + métricas
+- [x] Gates A1–A5 locales, registrar §7 (A7/A8/A10/A11 pendientes: god)
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia |
 |---|---|---|---|
+| 2026-10-08 | A1 | ✅ | tsc api+web (alias al shared/Prisma del worktree) |
+| 2026-10-08 | A2 | ✅ | lint `--ignore-pattern 'worktrees/**' 'hive/**'` 0/0; `any-budget --check` 0 <= 0 |
+| 2026-10-08 | A3 | ✅ | API 366 verdes (+11 en `agenda.test.ts`: semana→lunes Lima, domingo excluido, feriado/día cerrado, filtros, estados incluidos, tope 500, métricas, 401/403/400), shared 83 verdes (+4 `agenda.test.ts`) |
+| 2026-10-08 | A4 | ✅ | `docs:check` 94 rutas (+`/staff/agenda`, `/staff/metrics`) |
+| 2026-10-08 | A5 | ✅ | AgendaGrid 37, AgendaTab 25, AgendaFilters 20, MetricCards 26, week.ts 37, metrics.ts 28, Equipo.tsx 46 líneas |
+| — | A7, A8, A10, A11 | pendiente | build/bundle y E2E en dev por god (el build local resolvería el shared del repo principal por el `node_modules` compartido) |
