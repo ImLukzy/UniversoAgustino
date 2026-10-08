@@ -52,9 +52,9 @@ function LoginOpener({ tab = "login" }: { tab?: "login" | "register" }) {
 
 // "/" depende de la sesión: visitantes ven la landing pública; con sesión,
 // el marketplace. El catálogo público sigue en /explorar para todos.
-function RootRoute() {
-  const { user, loading } = useAuth();
-  if (loading) return <RouteFallback />;
+export function RootRoute() {
+  const { user, loading, hadSession } = useAuth();
+  if (loading && hadSession) return <RouteFallback />;
   return user ? <Explorar /> : <PublicLanding />;
 }
 

@@ -2,9 +2,9 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    // Solo lógica pura (lib/): los tests de componentes llegarán con jsdom.
+    // Lógica y sesión con renderizado de servidor, sin servicios externos.
     environment: "node",
-    include: ["src/lib/**/*.test.ts"],
+    include: ["src/lib/**/*.test.ts", "src/auth/**/*.test.ts", "src/auth/**/*.test.tsx"],
     testTimeout: 15000,
   },
 });
