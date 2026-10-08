@@ -6,11 +6,12 @@ import { api, apiError, fmtDate, pen, resolveQr, type HubOrder } from "../../lib
 import { getOrderLabel } from "../../lib/orderLabels";
 import { ROUTES } from "../../lib/routes";
 import { SPRING } from "../../lib/motion";
+import { BuyerCaseView } from "./BuyerCaseView";
 import { DownloadButton } from "../DownloadButton";
 
 const HINT: Record<string, (o: HubOrder) => string> = {
   PENDING: (o) => (o.itemType === "bazar" ? `Esperando respuesta del vendedor${o.expiresAt ? ` (vence ${new Date(o.expiresAt).toLocaleString("es-PE")})` : ""}.` : "Paga al vendedor para continuar."),
-  ACCEPTED: () => "Solicitud aceptada. Ya puedes pagar.",
+  ACCEPTED: (o) => o.itemType === "bazar" ? "Solicitud aceptada. El equipo coordinará el recojo." : "Solicitud aceptada. Ya puedes pagar.",
   PAID: () => "El vendedor debe confirmar tu pago.",
   ESCROW: () => "Confirma la recepción solo cuando verifiques tu pedido.",
   RELEASED: () => "Pedido completado.",
@@ -69,12 +70,12 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
         <div className="flex flex-wrap gap-2">
           {(order.status === "PENDING" || order.status === "ACCEPTED") && (
             <>
-              {(isDoc || order.status === "ACCEPTED") && <Link to={ROUTES.checkout(order.id)} className="btn btn-primary btn-sm">{order.status === "ACCEPTED" ? "Pagar ahora" :"Continuar pago"}</Link>}
+              {isDoc && <Link to={ROUTES.checkout(order.id)} className="btn btn-primary btn-sm">{order.status === "ACCEPTED" ? "Pagar ahora" :"Continuar pago"}</Link>}
               <button type="button" disabled={busy} onClick={() => post(`/orders/${order.id}/cancel`)} className="btn btn-secondary btn-sm">Cancelar</button>
             </>
           )}
           {order.status === "PAID" && <Link to={ROUTES.checkout(order.id)} className="btn btn-secondary btn-sm">Ver estado</Link>}
-          {order.status === "ESCROW" && (
+          {isDoc && order.status === "ESCROW" && (
             <button type="button" disabled={busy} onClick={() => post(`/orders/${order.id}/confirm-receipt`)} className="btn btn-primary btn-sm">Confirmar recepción</button>
           )}
           {order.status === "RELEASED" && isDoc && (order.fileUrl ? (
@@ -84,6 +85,7 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
           ))}
         </div>
       </div>
+      {!isDoc && order.status !== "PENDING" && <BuyerCaseView orderId={order.id} />}
     </article>
   );
 }

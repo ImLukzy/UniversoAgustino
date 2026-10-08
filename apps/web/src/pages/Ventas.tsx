@@ -63,7 +63,7 @@ export function Ventas() {
       <section id="seccion-alquileres" className="flex flex-col gap-4">
         <div>
           <h2 className="h-display text-2xl">Solicitudes de compra y alquiler</h2>
-          <p className="mt-1 text-sm text-zinc-600">Al aceptar, el comprador paga a tu QR; al confirmar su pago, el pedido pasa a custodia.</p>
+          <p className="mt-1 text-sm text-zinc-600">Al aceptar, entregas el objeto al equipo en sede. El comprador te paga al recoger delante del trabajador.</p>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
           {sales.isLoading && Array.from({ length: 2 }, (_, i) => <RentalSkeleton key={i} />)}

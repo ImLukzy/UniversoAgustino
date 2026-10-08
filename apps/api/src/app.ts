@@ -16,6 +16,7 @@ import { notificationsRouter } from "./modules/notifications/routes.js";
 import { uploadsRouter } from "./modules/uploads/routes.js";
 import { paymentsRouter } from "./modules/payments/routes.js";
 
+import { participantCasesRouter } from "./modules/cases/queries.js";
 import { sedesRouter } from "./modules/sedes/routes.js";
 import { staffRouter } from "./modules/staff/routes.js";
 
@@ -49,6 +50,7 @@ export function buildRouter() {
   r.use("/payments", paymentsRouter);
   r.use("/staff", staffRouter);
   r.use("/sedes", sedesRouter);
+  r.use("/cases", participantCasesRouter);
 
   r.get("/legal/summary", (_req, res) => {
     res.json({

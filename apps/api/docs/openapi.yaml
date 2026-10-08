@@ -782,10 +782,249 @@ paths:
         '403': { description: FORBIDDEN }
         '404': { description: NOT_FOUND }
         '409': { description: BAD_STATE (solo desde PENDING) }
+  /cases/order/{orderId}:
+    get:
+      summary: Caso del comprador o vendedor
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Operación completada; data contiene caso o cita }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /staff/cases:
+    get:
+      summary: Casos paginados visibles al equipo
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: status
+          schema: { $ref: '#/components/schemas/CaseState' }
+        - in: query
+          name: assigneeId
+          description: Solo el Técnico filtra otro custodio; Trabajador ve propios y sin asignar.
+          schema: { type: string }
+      responses:
+        "200": { description: Operación completada; data contiene caso o cita }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /staff/cases/{id}:
+    get:
+      summary: Detalle del caso
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Operación completada; data contiene caso o cita }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /staff/cases/{id}/slots:
+    get:
+      summary: Franjas futuras disponibles en turno
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: kind
+          required: true
+          schema: { type: string, enum: [DROP_OFF, PICKUP] }
+      responses:
+        "200": { description: Operación completada; data contiene caso o cita }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /staff/cases/{id}/take:
+    post:
+      summary: Tomar caso sin asignar
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Operación completada; data contiene caso o cita }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /staff/cases/{id}/assign:
+    post:
+      summary: Asignar custodio antes de recepción
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CaseAssignment' }
+      responses:
+        "200": { description: Operación completada; data contiene caso o cita }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /staff/cases/{id}/appointments:
+    post:
+      summary: Programar entrega o recojo
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CaseBooking' }
+      responses:
+        "201": { description: Cita creada }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /staff/cases/{id}/appointments/{appointmentId}/no-show:
+    post:
+      summary: Registrar ausencia después del fin
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: appointmentId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Operación completada; data contiene caso o cita }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /staff/cases/{id}/appointments/{appointmentId}/reschedule:
+    post:
+      summary: Reprogramar una ausencia una sola vez por tipo
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: appointmentId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CaseBooking' }
+      responses:
+        "201": { description: Cita creada }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /staff/cases/{id}/receive:
+    post:
+      summary: Recibir objeto con foto interna propia y nota
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CaseReceive' }
+      responses:
+        "200": { description: Operación completada; data contiene caso o cita }
+        "400": { description: VALIDATION o BAD_PHOTO }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no visible o inexistente }
+        "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+
+  /staff/cases/{id}/cancel:
+    post:
+      summary: Cancelar trato antes de recibir el objeto
+      description: Custodio o Técnico; caso y pedido CANCELLED, citas pendientes CANCELLED, artículo RESERVED pasa a AVAILABLE, auditoría en la misma transacción y aviso a ambas partes tras commit. Una segunda ausencia puede cerrarse con esta acción. En custodia devuelve IN_CUSTODY y exige retorno asistido.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Trato cancelado }
+        "401": { description: Sesión requerida }
+        "403": { description: Solo custodio o Técnico }
+        "404": { description: Caso no encontrado }
+        "409": { description: IN_CUSTODY o BAD_STATE }
+
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
   schemas:
+    CaseState:
+      type: string
+      enum: [UNASSIGNED, ASSIGNED, DROP_SCHEDULED, IN_CUSTODY, PICKUP_SCHEDULED, DELIVERED, RENTED_OUT, RETURN_SCHEDULED, RETURNED, BACK_TO_SELLER, CLOSED, CANCELLED]
+    CaseAssignment:
+      type: object
+      required: [assigneeId]
+      properties:
+        assigneeId: { type: string, minLength: 1 }
+    CaseBooking:
+      type: object
+      required: [kind, sedeId, startsAt]
+      description: Franja futura de 15 minutos alineada, dentro del turno del custodio, sin domingos/feriados ni solapes. Plazo al cierre del tercer día hábil posterior a aceptación (DROP_OFF) o recepción (PICKUP); sábado abierto cuenta. Reprogramación conserva plazo original y solo una por tipo tras NO_SHOW.
+      properties:
+        kind: { type: string, enum: [DROP_OFF, PICKUP] }
+        sedeId: { type: string, minLength: 1 }
+        startsAt: { type: string, format: date-time }
+    CaseReceive:
+      type: object
+      required: [photoUrl, conditionNote]
+      description: Solo custodio asignado, durante cita DROP_OFF vigente; foto JPG/PNG existente y propia del trabajador.
+      properties:
+        photoUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$' }
+        conditionNote: { type: string, minLength: 5, maxLength: 500 }
     ReviewFields:
       type: object
       description: Campos de Document y BazarItem; listados públicos solo APPROVED. Detalle y preview no aprobados devuelven 404 a terceros; dueño y equipo pueden consultarlos. Compra requiere APPROVED. Editar REJECTED reenvía a PENDING.

@@ -2,6 +2,7 @@ import { fmtDate, pen, resolveQr, type HubOrder } from "../lib/api";
 import { careerLabel } from "../data/unsa";
 import { getOrderLabel } from "../lib/orderLabels";
 import { CareerAvatar } from "./CareerVisual";
+import { BuyerCaseView } from "./orders/BuyerCaseView";
 import { SaleActions } from "./SaleActions";
 
 const PAY = { YAPE: "Yape", PLIN: "Plin", AMBAS: "Yape / Plin" } as const;
@@ -40,17 +41,18 @@ export function RentalCard({ order }: { order: HubOrder }) {
         <div className="flex min-w-0 flex-col gap-0.5">
           <dt className="text-zinc-500">Cobro</dt>
           <dd className="font-bold text-zinc-900">{PAY[order.payMethod as keyof typeof PAY] ?? "Yape"}</dd>
-          <dd className="truncate text-zinc-500">{order.payDetail || "Ver en Mis publicaciones"}</dd>
+          <dd className="text-zinc-500">Al recoger, delante del equipo.</dd>
           {order.payProof && <dd>Constancia: <b>{order.payProof}</b></dd>}
           {order.payProofUrl && <dd><a href={resolveQr(order.payProofUrl) ?? undefined} target="_blank" rel="noreferrer" className="font-bold text-zinc-950 underline">Ver voucher</a></dd>}
         </div>
       </dl>
       {order.status === "PAID" && (
         <p className="rounded-lg border border-zinc-900 bg-[#fef3c7] p-2 text-xs text-zinc-900">
-          El comprador declara el pago{order.payProof ? <> con constancia <b>{order.payProof}</b></> : ""}. Confírmalo solo si recibiste el abono.
+          Contacta al equipo para revisar este pedido anterior al flujo de entrega física.
         </p>
       )}
       {order.status === "PENDING" && order.expiresAt && <p className="text-xs text-zinc-600">Plazo restante: {Math.max(0, Math.ceil((new Date(order.expiresAt).getTime() - Date.now()) / 3_600_000))} h · Vence {new Date(order.expiresAt).toLocaleString("es-PE")}</p>}
+      {order.status !== "PENDING" && <BuyerCaseView orderId={order.id} />}
       <div className="mt-auto">
         <SaleActions order={order} />
       </div>

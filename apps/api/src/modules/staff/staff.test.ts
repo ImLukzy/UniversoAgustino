@@ -7,6 +7,7 @@ import { errorHandler } from "../../middleware/errors.js";
 vi.mock("../../lib/notify.js", () => ({ notify: vi.fn() }));
 
 const db = vi.hoisted(() => ({
+  $queryRaw: vi.fn(), handoverCase: { count: vi.fn().mockResolvedValue(0) }, appointment: { count: vi.fn().mockResolvedValue(0) },
   user: { findMany: vi.fn(), findUnique: vi.fn(), updateMany: vi.fn() },
   auditLog: { findMany: vi.fn(), create: vi.fn() }, refreshToken: { updateMany: vi.fn() },
 }));
@@ -111,4 +112,15 @@ describe("altas y bajas del equipo", () => {
     const r = await request("DELETE", "/members/member", "admin");
     expect(r.status).toBe(409); expect(r.body.error?.code).toBe("NOT_STAFF"); expect(db.refreshToken.updateMany).not.toHaveBeenCalled();
   });
+  it("no da de baja custodio activo", async () => {
+    db.handoverCase.count.mockResolvedValueOnce(1);
+    const r = await request("DELETE", "/members/member", "admin");
+    expect(r.status).toBe(409); expect(r.body.error?.code).toBe("HAS_CASES"); expect(db.user.updateMany).not.toHaveBeenCalled();
+  });
+  it("no da de baja miembro con cita futura", async () => {
+    db.appointment.count.mockResolvedValueOnce(1);
+    const r = await request("DELETE", "/members/member", "admin");
+    expect(r.status).toBe(409); expect(r.body.error?.code).toBe("HAS_APPOINTMENTS"); expect(db.refreshToken.updateMany).not.toHaveBeenCalled();
+  });
+
 });

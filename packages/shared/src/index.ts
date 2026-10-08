@@ -8,3 +8,4 @@ export * from "./extra.js";
 export * from "./onboarding.js";
 export * from "./notifications.js";
 export * from "./sedes.js";
+export * from "./handover.js";

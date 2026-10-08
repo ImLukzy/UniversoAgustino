@@ -21,9 +21,10 @@ paymentsRouter.post(
   "/checkout/:orderId",
   requireAuth,
   asyncHandler(async (req: AuthedRequest, res) => {
-    if (!mpEnabled()) return res.status(404).json({ error: { code: "PROVIDER_OFF", message: "La pasarela no está activa: paga por Yape o Plin" } });
     const order = await prisma.order.findUniqueOrThrow({ where: { id: req.params.orderId } });
     if (order.buyerId !== req.user!.sub) return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el comprador paga su pedido" } });
+    if (order.itemType === "bazar") return res.status(409).json({ error: { code: "PHYSICAL_PAYMENT", message: "Paga al vendedor al recoger delante del equipo" } });
+    if (!mpEnabled()) return res.status(404).json({ error: { code: "PROVIDER_OFF", message: "La pasarela no está activa: paga por Yape o Plin" } });
     if (isExpired(order)) {
       await prisma.order.update({ where: { id: order.id }, data: expiredPatch() });
       return res.status(409).json({ error: { code: "RESERVATION_EXPIRED", message: "La reserva expiró. Genera un nuevo pedido." } });

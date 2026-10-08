@@ -13,10 +13,9 @@ import { ReservationTimer } from "../components/checkout/ReservationTimer";
 import { StatusTimeline } from "../components/checkout/StatusTimeline";
 import { EscrowStatus, ExpiredState } from "../components/checkout/EscrowStatus";
 import { GatewayPay, usePayProvider } from "../components/checkout/GatewayPay";
+import { BuyerCaseView } from "../components/orders/BuyerCaseView";
 import { SPRING } from "../lib/motion";
-
 const TTL_REASONS = ["TTL_EXPIRED", "TTL_BACKFILL"];
-
 function Block({ n, title, children }: { n: number; title: string; children: ReactNode }) {
   return (
     <motion.section
@@ -40,7 +39,7 @@ function Shell({ children }: { children: ReactNode }) {
   return <main className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col gap-4 bg-white px-4 py-8">{children}</main>;
 }
 
-// Checkout: solicitud de bazar → aceptación → pago → custodia.
+// Checkout digital y coordinación de entregas físicas.
 export function Checkout() {
   const { orderId } = useParams<{ orderId: string }>();
   const { user } = useAuth();
@@ -91,6 +90,7 @@ export function Checkout() {
     );
   }
 
+  if (o.itemType === "bazar") return <Shell><h1 className="font-display text-2xl font-bold">Coordinación del pedido</h1><OrderSummary order={o} /><BuyerCaseView orderId={o.id} /><Link to={ROUTES.myOrders} className="btn btn-secondary">Ver mis pedidos</Link></Shell>;
   const rental = o.itemType === "bazar" && !!o.rentalStart;
   const payable = o.status === "ACCEPTED" || (o.status === "PENDING" && o.itemType === "document");
   const isExpired = expired || (o.status === "CANCELLED" && TTL_REASONS.includes(o.cancelledReason ?? ""));
@@ -123,8 +123,7 @@ export function Checkout() {
           <Block key="expired" n={2} title="Reserva">
             <ExpiredState order={o} />
           </Block>
-        ) : o.itemType === "bazar" && o.status === "PENDING" ? (
-          <Block key="waiting" n={2} title="Solicitud enviada"><p className="text-sm">Esperando respuesta del vendedor{ o.expiresAt ? ` (vence ${new Date(o.expiresAt).toLocaleString("es-PE")})` : ""}.</p></Block>
+
         ) : payable ? (
           provider === "mercadopago" ? (
             <Block key="gateway" n={2} title="Paga con Mercado Pago">

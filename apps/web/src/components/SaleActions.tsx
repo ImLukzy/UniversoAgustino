@@ -28,11 +28,11 @@ export function SaleActions({ order }: { order: HubOrder }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       {can("PENDING") && order.itemType === "bazar" && (
-        <button type="button" disabled={busy} onClick={() => act(`/orders/${order.id}/accept`, "Solicitud aceptada. Avisamos al comprador para que pague.")} className="btn btn-primary btn-sm flex-1">
+        <button type="button" disabled={busy} onClick={() => act(`/orders/${order.id}/accept`, "Solicitud aceptada. El equipo coordinará la entrega y el recojo.")} className="btn btn-primary btn-sm flex-1">
           <span className="material-symbols-outlined text-base">check</span> Aceptar
         </button>
       )}
-      {can("PAID") && (
+      {order.itemType === "document" && can("PAID") && (
         <button type="button" disabled={busy} onClick={() => act(`/orders/${order.id}/confirm-payment`, "Pago confirmado: el pedido pasa a custodia.")} className="btn btn-primary btn-sm flex-1">
           <span className="material-symbols-outlined text-base">verified</span> Confirmar pago ({pen(order.amountCents)})
         </button>

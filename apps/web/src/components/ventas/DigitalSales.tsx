@@ -15,7 +15,7 @@ export function DigitalSales({ rows, more, loadingMore, onMore }: { rows: HubOrd
         </p>
       </div>
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Ventas de documentos digitales">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <thead>
               <tr className="border-b-2 border-zinc-900 text-[11px] uppercase tracking-wider text-zinc-500">

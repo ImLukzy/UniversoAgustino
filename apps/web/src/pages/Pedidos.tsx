@@ -15,11 +15,11 @@ type Filter = "all" | "curso" | "digital" | "done";
 const isLive = (o: HubOrder) => (LIVE_ORDER_STATUS as readonly string[]).includes(o.status);
 const MATCH: Record<Filter, (o: HubOrder) => boolean> = { all: () => true, curso: isLive, digital: (o) => o.itemType === "document", done: (o) => o.status === "RELEASED" };
 const STEPS = [
-  ["Solicita tu artículo", "En el bazar, el vendedor acepta o rechaza en 48 h; los apuntes se pagan directo."],
-  ["Paga al vendedor", "Yape o Plin directo a su QR."],
-  ["Declara tu pago", "Envía tu n° de operación o voucher."],
-  ["Custodia", "El vendedor confirma el abono y el pedido queda en custodia."],
-  ["Confirma la recepción", "Cuando verificas tu pedido, se cierra la venta."],
+  ["Solicita tu artículo", "Envía la solicitud desde el bazar."],
+  ["El vendedor acepta", "Responde en un plazo de 48 horas."],
+  ["Entrega al equipo", "El vendedor deja el objeto en sede con el trabajador asignado."],
+  ["Te avisamos sede y hora", "Consulta tu cita y la foto del objeto en este pedido."],
+  ["Paga al recoger", "Pagas al vendedor delante del trabajador al recoger tu objeto."],
 ];
 
 // /pedidos: compras del usuario con el flujo de custodia explicado.

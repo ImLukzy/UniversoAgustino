@@ -1,3 +1,4 @@
+import { acceptWithCase } from "../cases/orderChanges.js";
 import { canTransition, type OrderStatus } from "@hub/shared";
 import type { Router } from "express";
 import { prisma } from "../../lib/prisma.js";
@@ -38,13 +39,8 @@ export function registerSellerSteps(router: Router) {
         });
         return res.status(409).json(expiredMsg);
       }
-      const claimed = await prisma.order.updateMany({ where: { id: order.id, status: "PENDING", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }, data: { status: "ACCEPTED", acceptedAt: new Date(), expiresAt: null } });
-      if (!claimed.count) return res.status(409).json({ error: { code: "BAD_STATE", message: "La solicitud ya cambió o venció" } });
-      const upd = await prisma.order.findUniqueOrThrow({ where: { id: order.id }, include: { escrow: true } });
-      await Promise.all([
-        audit(req.user!.sub, "order.accept", order.id),
-        notify({ userId: order.buyerId, type: "ORDER_ACCEPTED", title: "Solicitud aceptada", body: `${item.title} — ya puedes pagar al vendedor.`, link: buyerOrderLink(order.id) }),
-      ]);
+      const upd = await acceptWithCase(order.id, req.user!.sub);
+      await notify({ userId: order.buyerId, type: "ORDER_ACCEPTED", title: "Solicitud aceptada", body: `${item.title} — el equipo coordinará entrega y recojo. Pagarás al vendedor al recoger.`, link: buyerOrderLink(order.id) });
       res.json({ data: upd });
     }),
   );
@@ -58,6 +54,7 @@ export function registerSellerSteps(router: Router) {
       if (item.ownerId !== req.user!.sub) {
         return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el vendedor confirma el pago" } });
       }
+      if (order.itemType === "bazar") return res.status(409).json({ error: { code: "PHYSICAL_PAYMENT", message: "El equipo registra el pago al recoger" } });
       if (order.status !== "PAID") {
         return res.status(409).json({ error: { code: "BAD_STATE", message: `El pedido está en ${order.status}, falta que el comprador pague` } });
       }

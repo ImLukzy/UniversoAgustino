@@ -8,7 +8,7 @@ import { registerReject } from "./rejectStep.js";
 import { errorHandler } from "../../middleware/errors.js";
 const h = vi.hoisted(() => {
   const model = () => ({ findUniqueOrThrow: vi.fn(), findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn(), create: vi.fn(), count: vi.fn() });
-  return { order: model(), bazarItem: model(), auditLog: model(), upload: model(), item: vi.fn(), notify: vi.fn(), guard: vi.fn() };
+  return { $queryRaw: vi.fn(), handoverCase: model(), appointment: model(), order: model(), bazarItem: model(), auditLog: model(), upload: model(), item: vi.fn(), notify: vi.fn(), guard: vi.fn() };
 });
 vi.mock("../../lib/prisma.js", () => ({ prisma: { ...h, $transaction: async (fn: (tx: typeof h) => Promise<unknown>) => fn(h) } }));
 vi.mock("../../env.js", () => ({ env: { FEE_PCT: 0 } }));
@@ -59,11 +59,17 @@ describe("solicitudes bazar", () => {
   it("venta PENDING no es pagable", async () => {
     expect((await request("/order/pay", "buyer", { payProof: "123456" })).status).toBe(409); expect(h.order.update).not.toHaveBeenCalled();
   });
-  it("venta aceptada es pagable", async () => {
+  it("venta aceptada crea caso y bloquea pago web", async () => {
     expect((await request("/order/accept", "seller")).status).toBe(200);
     expect(h.order.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: "ACCEPTED" }) }));
     h.order.findUniqueOrThrow.mockResolvedValue({ ...pending, status: "ACCEPTED", expiresAt: null });
-    expect((await request("/order/pay", "buyer", { payProof: "123456" })).status).toBe(200);
+    expect((await request("/order/pay", "buyer", { payProof: "123456" })).status).toBe(409);
+    expect(h.handoverCase.create).toHaveBeenCalledWith({ data: { orderId: "order" } });
+  });
+  it.each([["pay", "ACCEPTED", "buyer"], ["confirm-payment", "PAID", "seller"], ["confirm-receipt", "ESCROW", "buyer"]])("bazar %s se bloquea incluso con estado %s", async (action, status, sub) => {
+    h.order.findUniqueOrThrow.mockResolvedValue({ ...pending, status, expiresAt: null });
+    const result = await request(`/order/${action}`, sub);
+    expect(result.status).toBe(409); expect(result.body).toMatchObject({ error: { code: "PHYSICAL_PAYMENT" } }); expect(h.order.update).not.toHaveBeenCalled();
   });
   it.each(["buyer", "third"])("%s no puede rechazar", async (sub) => { expect((await request("/order/reject", sub, { reason: "No disponible" })).status).toBe(403); });
   it.each([{}, { reason: " " }, { reason: "no" }, { reason: "a".repeat(301) }])("rechazo exige motivo válido %j", async (body) => {

@@ -1,0 +1,20 @@
+import { describe, expect, it } from "vitest";
+import { deadline, localInstant, localParts, validSlot } from "./calendar.js";
+const hours = [1, 2, 3, 4, 5].map((weekday) => ({ weekday, opens: 480, closes: 1080 })).concat({ weekday: 6, opens: 480, closes: 780 });
+const now = new Date("2026-10-08T12:00:00Z"), limit = new Date("2026-10-12T23:00:00Z");
+describe("calendario Lima", () => {
+  it("usa fecha local aunque UTC ya cambió de día", () => expect(localParts(new Date("2026-10-09T02:00:00Z"))).toEqual({ day: "2026-10-08", weekday: 4, minute: 1260 }));
+  it("sábado cuenta y domingo no", () => expect(deadline(now, hours, []).toISOString()).toBe("2026-10-12T23:00:00.000Z"));
+  it("sábado tercer día vence a su cierre", () => expect(deadline(new Date("2026-10-07T12:00:00Z"), hours, []).toISOString()).toBe("2026-10-10T18:00:00.000Z"));
+  it("omite feriados", () => expect(deadline(now, hours, ["2026-10-09"]).toISOString()).toBe("2026-10-13T23:00:00.000Z"));
+  it("domingo se omite incluso con horario", () => expect(deadline(now, [...hours, { weekday: 0, opens: 480, closes: 1080 }], []).toISOString()).toBe("2026-10-12T23:00:00.000Z"));
+  it("sin días hábiles falla con horizonte acotado", () => expect(() => deadline(now, [], [])).toThrow("No hay tres días"));
+  it("cita hoy futura es válida", () => expect(validSlot(localInstant("2026-10-08", 480), now, limit, hours, []).endsAt.toISOString()).toBe("2026-10-08T13:15:00.000Z"));
+  it("última franja termina exactamente al cierre", () => expect(validSlot(localInstant("2026-10-10", 765), now, limit, hours, []).endsAt.toISOString()).toBe("2026-10-10T18:00:00.000Z"));
+  it.each(["2026-10-08T12:00:00Z", "2026-10-08T13:01:00Z", "2026-10-08T13:00:01Z", "2026-10-08T13:00:00.001Z"])("rechaza pasada o no alineada %s", (date) => expect(() => validSlot(new Date(date), now, limit, hours, [])).toThrow("15 minutos"));
+  it("rechaza domingo", () => expect(() => validSlot(localInstant("2026-10-11", 480), now, limit, hours, [])).toThrow("no es hábil"));
+  it("rechaza feriado", () => expect(() => validSlot(localInstant("2026-10-09", 480), now, limit, hours, ["2026-10-09"])).toThrow("no es hábil"));
+  it("rechaza plazo excedido", () => expect(() => validSlot(localInstant("2026-10-13", 480), now, limit, hours, [])).toThrow("tres días"));
+  it("rechaza antes de apertura", () => expect(() => validSlot(localInstant("2026-10-09", 465), now, limit, hours, [])).toThrow("horario hábil"));
+  it("rechaza franja que termina después de cierre", () => expect(() => validSlot(localInstant("2026-10-10", 780), now, limit, hours, [])).toThrow("horario hábil"));
+});

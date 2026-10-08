@@ -19,8 +19,8 @@ const TTL = ["TTL_EXPIRED", "TTL_BACKFILL"];
 export function settle(order: SettleOrder, pay: MpPayment): Settlement {
   if (pay.status !== "approved") return "IGNORE";
   if (pay.currency_id !== "PEN" || Math.round(pay.transaction_amount * 100) !== order.amountCents) return "MISMATCH";
+  if (order.itemType === "bazar") return "ORPHAN";
   if (["PAID", "ESCROW", "RELEASED"].includes(order.status)) return order.status === "PAID" ? "ESCROW" : "ALREADY";
-  if (order.status === "PENDING" && order.itemType === "bazar") return "ORPHAN";
   if (order.status === "PENDING" || order.status === "ACCEPTED") return "ESCROW";
   // Un apunte no tiene stock: si la reserva expiró mientras pagaba, se honra.
   if (order.status === "CANCELLED" && TTL.includes(order.cancelledReason ?? "") && order.itemType === "document") return "ESCROW";

@@ -1,3 +1,4 @@
+import { protectShift } from "../cases/scheduleProtection.js";
 import { Router } from "express";
 import { ShiftSchema } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
@@ -23,11 +24,12 @@ shiftsRouter.patch("/:id", requireRole("admin"), asyncHandler(async (req: Authed
   const input = ShiftSchema.parse(req.body);
   const data = await scheduleChange(req.user!.sub, "shift.update", "staffShift", req.params.id, async (tx) => {
     await tx.staffShift.findUniqueOrThrow({ where: { id: req.params.id } });
+    await protectShift(tx, req.params.id, input);
     await guardShift(tx, input, req.params.id); return tx.staffShift.update({ where: { id: req.params.id }, data: input, include });
   });
   res.json({ data });
 }));
 shiftsRouter.delete("/:id", requireRole("admin"), asyncHandler(async (req: AuthedRequest, res) => {
-  const data = await scheduleChange(req.user!.sub, "shift.delete", "staffShift", req.params.id, (tx) => tx.staffShift.delete({ where: { id: req.params.id } }));
+  const data = await scheduleChange(req.user!.sub, "shift.delete", "staffShift", req.params.id, async (tx) => { await protectShift(tx, req.params.id); return tx.staffShift.delete({ where: { id: req.params.id } }); });
   res.json({ data });
 }));

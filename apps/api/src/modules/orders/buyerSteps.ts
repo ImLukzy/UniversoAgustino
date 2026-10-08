@@ -17,13 +17,13 @@ export function registerBuyerSteps(router: Router) {
     "/:id/pay",
     requireAuth,
     asyncHandler(async (req: AuthedRequest, res) => {
-      // Con pasarela activa el pago lo verifica su webhook, no una declaración.
-      if (mpEnabled()) return res.status(409).json({ error: { code: "GATEWAY_REQUIRED", message: "Paga con Mercado Pago desde el checkout" } });
-      const input = MarkPaidSchema.parse(req.body ?? {});
       const order = await prisma.order.findUniqueOrThrow({ where: { id: req.params.id } });
       if (order.buyerId !== req.user!.sub) {
         return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el comprador declara el pago" } });
       }
+      if (order.itemType === "bazar") return res.status(409).json({ error: { code: "PHYSICAL_PAYMENT", message: "Paga al vendedor al recoger delante del equipo" } });
+      if (mpEnabled()) return res.status(409).json({ error: { code: "GATEWAY_REQUIRED", message: "Paga con Mercado Pago desde el checkout" } });
+      const input = MarkPaidSchema.parse(req.body ?? {});
       // El voucher debe ser un archivo subido por el propio comprador (spec 16).
       if (input.payProofUrl) {
         const own = await prisma.upload.count({ where: { storedName: input.payProofUrl.replace("/uploads/", ""), ownerId: req.user!.sub } });
@@ -63,6 +63,7 @@ export function registerBuyerSteps(router: Router) {
       if (order.buyerId !== req.user!.sub) {
         return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el comprador confirma recepción" } });
       }
+      if (order.itemType === "bazar") return res.status(409).json({ error: { code: "PHYSICAL_PAYMENT", message: "El equipo registra la entrega física" } });
       if (order.status !== "ESCROW") {
         return res.status(409).json({ error: { code: "BAD_STATE", message: `El pedido está en ${order.status}, aún no está en custodia` } });
       }

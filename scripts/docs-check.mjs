@@ -23,11 +23,21 @@ const SOURCES = [
   ["modules/staff/sedes.ts", ["/staff/sedes"]],
   ["modules/staff/schedule.ts", ["/staff/schedule"]],
   ["modules/staff/shifts.ts", ["/staff/shifts"]],
+  ["modules/cases/routes.ts", ["/staff/cases"]],
+  ["modules/cases/queries.ts", ["/staff/cases", "/cases"]],
   ["modules/sedes/routes.ts", ["/sedes"]],
   ["modules/notifications/routes.ts", []],
   ["server.ts", [""]],
 ];
 
+// Los módulos registran rutas mediante helpers que reciben el router padre.
+for (const [dir, prefix] of [["auth", "/auth"], ["auth/oauth", "/auth/oauth"], ["documents", "/documents"], ["orders", "/orders"]]) {
+  for (const file of fs.readdirSync(path.join(api, "modules", dir))) {
+    if (!file.endsWith(".ts") || file.endsWith(".test.ts")) continue;
+    const source = `modules/${dir}/${file}`;
+    if (!SOURCES.some(([existing]) => existing === source)) SOURCES.push([source, [prefix]]);
+  }
+}
 const ROUTE_RE = /(\w+)\.(get|post|patch|delete|put)\(\s*["'`]([^'"`]+)["'`]/g;
 // router variable -> prefijo (extra/routes.ts tiene dos routers en un archivo)
 const ROUTER_PREFIX = {
@@ -48,14 +58,16 @@ const ROUTER_PREFIX = {
   staffSedesRouter: ["/staff/sedes"],
   scheduleRouter: ["/staff/schedule"],
   shiftsRouter: ["/staff/shifts"],
+  casesRouter: ["/staff/cases"],
+  participantCasesRouter: ["/cases"],
   sedesRouter: ["/sedes"],
   notificationsRouter: ["/notifications"],
 };
 const found = new Set();
-for (const [file] of SOURCES) {
+for (const [file, fallback] of SOURCES) {
   const text = fs.readFileSync(path.join(api, file), "utf8");
   for (const m of text.matchAll(ROUTE_RE)) {
-    const prefixes = ROUTER_PREFIX[m[1]];
+    const prefixes = m[1] === "router" ? fallback : ROUTER_PREFIX[m[1]];
     if (!prefixes) continue;
     const sub = m[3].split("?")[0];
     for (const pre of prefixes) {

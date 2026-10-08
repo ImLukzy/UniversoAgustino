@@ -1,3 +1,4 @@
+import { cancelPhysical } from "../cases/orderChanges.js";
 import type { Router } from "express";
 import { canTransition, type OrderStatus } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
@@ -27,11 +28,10 @@ export function registerCloseSteps(router: Router) {
         return res.status(409).json({ error: { code: "BAD_STATE", message: `Ya no se puede cancelar (está ${order.status})` } });
       }
       const cancelledReason = isBuyer ? "BUYER_CANCELLED" : "SELLER_REJECTED";
-      const upd = await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED", cancelledAt: new Date(), cancelledReason, expiresAt: null }, include: { escrow: true } });
-      if (order.itemType === "bazar") await freeBazarItem(order.itemId);
+      const upd = order.itemType === "bazar" ? await cancelPhysical(order.id, req.user!.sub) : await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED", cancelledAt: new Date(), cancelledReason, expiresAt: null }, include: { escrow: true } });
       // Un solo registro de auditoría por cancelación (antes se escribía dos veces).
       await Promise.all([
-        audit(req.user!.sub, "order.cancel", order.id),
+        ...(order.itemType === "document" ? [audit(req.user!.sub, "order.cancel", order.id)] : []),
         notify({
           userId: isBuyer ? order.sellerId : order.buyerId,
           type: "ORDER_CANCELLED",
@@ -50,6 +50,7 @@ export function registerCloseSteps(router: Router) {
     requireRole("moderator", "admin"),
     asyncHandler(async (req: AuthedRequest, res) => {
       const order = await prisma.order.findUniqueOrThrow({ where: { id: req.params.id } });
+      if (order.itemType === "bazar") return res.status(409).json({ error: { code: "IN_CUSTODY", message: "El bazar requiere retorno asistido por el equipo" } });
       if (order.status !== "PAID" && order.status !== "ESCROW") {
         return res.status(409).json({ error: { code: "BAD_STATE", message: `Solo se reembolsan pedidos pagados o en custodia (está ${order.status})` } });
       }

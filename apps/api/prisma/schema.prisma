@@ -67,6 +67,9 @@ model User {
   notifications Notification[]
   reports      Report[]
   refreshTokens RefreshToken[]
+  assignedCases HandoverCase[]
+  partyAppointments Appointment[] @relation("AppointmentParty")
+  staffAppointments Appointment[] @relation("AppointmentStaff")
   staffShifts StaffShift[]
   savedDocuments SavedDocument[]
   @@unique([provider, providerId])
@@ -197,6 +200,7 @@ model Order {
   cancelledAt     DateTime?
   cancelledReason String?
   status     OrderStatus @default(PENDING)
+  handoverCase HandoverCase?
   escrow     Escrow?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
@@ -278,6 +282,12 @@ enum NotificationType {
   REVIEW_REJECTED
   STAFF_ADDED
   STAFF_REMOVED
+  ORDER_CASE_ASSIGNED
+  ORDER_APPOINTMENT_SCHEDULED
+  ORDER_APPOINTMENT_NO_SHOW
+  ORDER_IN_CUSTODY
+  ORDER_PICKUP_COMPLETED
+  ORDER_RETURN_COMPLETED
 }
 
 model Notification {
@@ -337,6 +347,8 @@ model Sede {
   active Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  cases HandoverCase[]
+  appointments Appointment[]
   shifts StaffShift[]
 }
 
@@ -364,6 +376,82 @@ model StaffShift {
   endsMin Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  appointments Appointment[]
   @@index([userId, weekday])
   @@index([sedeId, weekday])
+}
+
+enum CaseStatus {
+  UNASSIGNED
+  ASSIGNED
+  DROP_SCHEDULED
+  IN_CUSTODY
+  PICKUP_SCHEDULED
+  DELIVERED
+  RENTED_OUT
+  RETURN_SCHEDULED
+  RETURNED
+  BACK_TO_SELLER
+  CLOSED
+  CANCELLED
+}
+
+enum AppointmentKind {
+  DROP_OFF
+  PICKUP
+  RETURN
+  BACK_TO_SELLER
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  DONE
+  NO_SHOW
+  CANCELLED
+}
+
+model HandoverCase {
+  id String @id @default(cuid())
+  orderId String @unique
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  assigneeId String?
+  assignee User? @relation(fields: [assigneeId], references: [id], onDelete: Restrict)
+  status CaseStatus @default(UNASSIGNED)
+  sedeId String?
+  sede Sede? @relation(fields: [sedeId], references: [id], onDelete: Restrict)
+  receivedPhotoUrl String?
+  conditionNote String?
+  receivedAt DateTime?
+  paymentRef String?
+  paymentMethod String?
+  closedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  appointments Appointment[]
+  @@index([assigneeId, status, createdAt])
+}
+
+model Appointment {
+  id String @id @default(cuid())
+  caseId String
+  case HandoverCase @relation(fields: [caseId], references: [id], onDelete: Restrict)
+  kind AppointmentKind
+  partyId String
+  party User @relation("AppointmentParty", fields: [partyId], references: [id], onDelete: Restrict)
+  staffId String
+  staff User @relation("AppointmentStaff", fields: [staffId], references: [id], onDelete: Restrict)
+  sedeId String
+  sede Sede @relation(fields: [sedeId], references: [id], onDelete: Restrict)
+  shiftId String?
+  shift StaffShift? @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  startsAt DateTime
+  endsAt DateTime
+  status AppointmentStatus @default(SCHEDULED)
+  rescheduledFromId String? @unique
+  rescheduledFrom Appointment? @relation("RescheduledAppointment", fields: [rescheduledFromId], references: [id], onDelete: Restrict)
+  replacement Appointment? @relation("RescheduledAppointment")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([staffId, status, startsAt])
+  @@index([caseId, kind])
 }

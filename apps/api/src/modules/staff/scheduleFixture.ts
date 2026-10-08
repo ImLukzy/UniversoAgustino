@@ -4,12 +4,12 @@ import { requireAuth, requireRole } from "../../middleware/auth.js";
 import { errorHandler } from "../../middleware/errors.js";
 const h = vi.hoisted(() => {
   const model = () => ({ findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), count: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), upsert: vi.fn() });
-  return { sede: model(), openingHours: model(), holiday: model(), staffShift: model(), user: model(), auditLog: model(), lock: vi.fn() };
+  return { appointment: model(), sede: model(), openingHours: model(), holiday: model(), staffShift: model(), user: model(), auditLog: model(), lock: vi.fn() };
 });
 vi.mock("../../lib/prisma.js", () => ({ prisma: { ...h, $transaction: async (fn: (tx: typeof h & { $queryRaw: typeof h.lock }) => Promise<unknown>) => fn({ ...h, $queryRaw: h.lock }) } }));
 vi.mock("../../lib/auth.js", () => ({ verifyAccess: (token: string) => { const [role, sub = "actor"] = token.split(":"); return { role, sub }; } }));
 export function resetSchedule() {
-  vi.clearAllMocks(); h.sede.findMany.mockResolvedValue([]); h.openingHours.findMany.mockResolvedValue([]); h.holiday.findMany.mockResolvedValue([]);
+  vi.clearAllMocks(); h.appointment.count.mockResolvedValue(0); h.appointment.findMany.mockResolvedValue([]); h.sede.findMany.mockResolvedValue([]); h.openingHours.findMany.mockResolvedValue([]); h.holiday.findMany.mockResolvedValue([]);
   h.sede.findUnique.mockResolvedValue({ id: "sede", active: true }); h.sede.findUniqueOrThrow.mockResolvedValue({ id: "sede" });
   h.sede.create.mockResolvedValue({ id: "sede" }); h.sede.update.mockResolvedValue({ id: "sede" });
   h.openingHours.findUnique.mockResolvedValue({ weekday: 1, opens: 480, closes: 1080 }); h.openingHours.upsert.mockResolvedValue({ weekday: 1 });

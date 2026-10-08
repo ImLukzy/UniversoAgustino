@@ -8,6 +8,7 @@ import { requireAuth, requireRole, type AuthedRequest } from "../../middleware/a
 
 import { staffSedesRouter } from "./sedes.js";
 import { scheduleRouter } from "./schedule.js";
+import { casesRouter } from "../cases/routes.js";
 import { shiftsRouter } from "./shifts.js";
 
 export const staffRouter = Router();
@@ -16,6 +17,7 @@ staffRouter.use("/reviews", reviewsRouter);
 staffRouter.use("/sedes", staffSedesRouter);
 staffRouter.use("/schedule", scheduleRouter);
 staffRouter.use("/shifts", shiftsRouter);
+staffRouter.use("/cases", casesRouter);
 const memberSelect = { id: true, email: true, role: true, createdAt: true, profile: { select: { fullName: true } } } as const;
 function fail(status: number, code: string, message: string): never {
   throw Object.assign(new Error(message), { status, code });
@@ -53,6 +55,9 @@ staffRouter.delete("/members/:userId", requireRole("admin"), asyncHandler(async 
   const userId = req.params.userId;
   if (userId === req.user!.sub) fail(409, "SELF_REMOVE", "No puedes quitarte del equipo");
   await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(300030)::text`;
+    if (await tx.handoverCase.count({ where: { assigneeId: userId, status: { notIn: ["CLOSED", "CANCELLED"] } } })) fail(409, "HAS_CASES", "Reasigna o cierra sus casos primero");
+    if (await tx.appointment.count({ where: { staffId: userId, status: "SCHEDULED", endsAt: { gt: new Date() } } })) fail(409, "HAS_APPOINTMENTS", "Cancela o reasigna sus citas primero");
     const user = await tx.user.findUnique({ where: { id: userId }, select: { role: true } });
     if (!user) fail(404, "USER_NOT_FOUND", "Usuario no encontrado");
     if (user.role === "admin") fail(409, "IS_ADMIN", "No puedes quitar a otro administrador");

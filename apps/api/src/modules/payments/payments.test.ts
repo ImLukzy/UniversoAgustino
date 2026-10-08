@@ -30,9 +30,12 @@ describe("settle (pago aprobado → pedido)", () => {
   });
   it("pago aprobado con monto exacto → ESCROW", () => {
     expect(settle(order(), pay())).toBe("ESCROW");
-    expect(settle(order({ status: "ACCEPTED", itemType: "bazar" }), pay())).toBe("ESCROW");
+    expect(settle(order({ status: "ACCEPTED", itemType: "bazar" }), pay())).toBe("ORPHAN");
   });
 
+  it.each(["PENDING", "ACCEPTED", "PAID", "ESCROW", "RELEASED", "CANCELLED", "REFUNDED"])("webhook aprobado bazar %s nunca avanza", (status) => {
+    expect(settle(order({ status, itemType: "bazar" }), pay())).toBe("ORPHAN");
+  });
   it("monto o moneda distintos nunca liberan", () => {
     expect(settle(order(), pay({ transaction_amount: 1.5 }))).toBe("MISMATCH");
     expect(settle(order(), pay({ currency_id: "USD" }))).toBe("MISMATCH");

@@ -1,3 +1,4 @@
+import type { NotificationKind } from "@hub/shared";
 import { prisma } from "../lib/prisma.js";
 
 // Sprint F1-08: notificaciones in-app. Nunca lanzan: un fallo al notificar
@@ -5,18 +6,7 @@ import { prisma } from "../lib/prisma.js";
 // try/catch, pero la creación del pedido sí se hace antes).
 interface NotifyInput {
   userId: string;
-  type:
-    | "ORDER_CREATED"
-    | "ORDER_ACCEPTED"
-    | "ORDER_PAID"
-    | "ORDER_RELEASED"
-    | "ORDER_EXPIRED"
-    | "ORDER_CANCELLED"
-    | "REPORT_RESOLVED"
-    | "REVIEW_APPROVED"
-    | "REVIEW_REJECTED"
-    | "STAFF_ADDED"
-    | "STAFF_REMOVED";
+  type: NotificationKind;
   title: string;
   body: string;
   link?: string;

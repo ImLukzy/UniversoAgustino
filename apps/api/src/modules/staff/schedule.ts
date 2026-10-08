@@ -1,3 +1,4 @@
+import { protectHoliday } from "../cases/scheduleProtection.js";
 import { Router } from "express";
 import { HolidaySchema, HoursSchema, WeekdaySchema } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
@@ -31,7 +32,7 @@ scheduleRouter.delete("/hours/:weekday", requireRole("admin"), asyncHandler(asyn
 scheduleRouter.post("/holidays", requireRole("admin"), asyncHandler(async (req: AuthedRequest, res) => {
   const input = HolidaySchema.parse(req.body);
   const data = await scheduleChange(req.user!.sub, "holiday.create", "holiday", undefined,
-    (tx) => tx.holiday.create({ data: { date: new Date(`${input.date}T00:00:00Z`), reason: input.reason } }));
+    async (tx) => { await protectHoliday(tx, input.date); return tx.holiday.create({ data: { date: new Date(`${input.date}T00:00:00Z`), reason: input.reason } }); });
   res.status(201).json({ data });
 }));
 scheduleRouter.delete("/holidays/:id", requireRole("admin"), asyncHandler(async (req: AuthedRequest, res) => {
