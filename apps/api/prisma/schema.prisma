@@ -67,6 +67,7 @@ model User {
   notifications Notification[]
   reports      Report[]
   refreshTokens RefreshToken[]
+  staffShifts StaffShift[]
   savedDocuments SavedDocument[]
   @@unique([provider, providerId])
 }
@@ -325,4 +326,44 @@ model EmailLoginCode {
 
   @@index([email, createdAt])
   @@index([expiresAt])
+}
+
+model Sede {
+  id String @id @default(cuid())
+  name String @unique
+  address String @default("")
+  meetingPoint String @default("")
+  photoUrl String?
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shifts StaffShift[]
+}
+
+model OpeningHours {
+  weekday Int @id
+  opens Int
+  closes Int
+  special Boolean @default(false)
+}
+
+model Holiday {
+  id String @id @default(cuid())
+  date DateTime @unique @db.Date
+  reason String
+}
+
+model StaffShift {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  sedeId String
+  sede Sede @relation(fields: [sedeId], references: [id], onDelete: Restrict)
+  weekday Int
+  startsMin Int
+  endsMin Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId, weekday])
+  @@index([sedeId, weekday])
 }

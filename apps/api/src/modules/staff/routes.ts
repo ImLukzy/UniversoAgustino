@@ -6,9 +6,16 @@ import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, requireRole, type AuthedRequest } from "../../middleware/auth.js";
 
+import { staffSedesRouter } from "./sedes.js";
+import { scheduleRouter } from "./schedule.js";
+import { shiftsRouter } from "./shifts.js";
+
 export const staffRouter = Router();
 staffRouter.use(requireAuth, requireRole("moderator", "admin"));
 staffRouter.use("/reviews", reviewsRouter);
+staffRouter.use("/sedes", staffSedesRouter);
+staffRouter.use("/schedule", scheduleRouter);
+staffRouter.use("/shifts", shiftsRouter);
 const memberSelect = { id: true, email: true, role: true, createdAt: true, profile: { select: { fullName: true } } } as const;
 function fail(status: number, code: string, message: string): never {
   throw Object.assign(new Error(message), { status, code });

@@ -52,6 +52,7 @@ export default tseslint.config(
     // tsconfig: se lintan sin tipos (sin no-floating-promises).
     ignores: [
       "apps/api/prisma/seed.ts",
+      "apps/api/prisma/seed-sedes.ts",
       "apps/api/scripts/grant-role.ts",
       "apps/api/vitest.config.ts",
       "packages/shared/vitest.config.ts",

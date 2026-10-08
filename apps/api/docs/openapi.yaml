@@ -498,6 +498,133 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '403': { description: FORBIDDEN } }
+  /sedes:
+    get:
+      tags: [staff]
+      summary: Sedes activas públicas; no expone trabajadores
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+  /sedes/schedule:
+    get:
+      tags: [staff]
+      summary: Horario global America/Lima y hasta 60 feriados desde hoy; feriados y días sin horario están cerrados
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+  /staff/sedes:
+    get:
+      tags: [staff]
+      summary: Todas las sedes para el equipo
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+    post:
+      tags: [staff]
+      summary: Crear sede (Técnico)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [name], properties: { name: { type: string, maxLength: 100 }, address: { type: string, maxLength: 300 }, meetingPoint: { type: string, maxLength: 300 }, photoUrl: { type: string, nullable: true, pattern: "^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$" }, active: { type: boolean } } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+  /staff/sedes/{id}:
+    patch:
+      tags: [staff]
+      summary: Modificar sede parcialmente; no desactivar si tiene turnos
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { name: { type: string, maxLength: 100 }, address: { type: string, maxLength: 300 }, meetingPoint: { type: string, maxLength: 300 }, photoUrl: { type: string, nullable: true, pattern: "^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$" }, active: { type: boolean } } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+    delete:
+      tags: [staff]
+      summary: Desactivar sede sin turnos (Técnico)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+  /staff/schedule:
+    get:
+      tags: [staff]
+      summary: Consultar horario global y todos los feriados (equipo)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+  /staff/schedule/hours/{weekday}:
+    put:
+      tags: [staff]
+      summary: Guardar horario diario dentro de 0–1440 minutos; no invalida turnos existentes
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: weekday, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [opens, closes], properties: { opens: { type: integer, minimum: 0, maximum: 1440 }, closes: { type: integer, minimum: 0, maximum: 1440 }, special: { type: boolean } } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+    delete:
+      tags: [staff]
+      summary: Cerrar día sin turnos existentes (Técnico)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: weekday, in: path, required: true, schema: { type: integer } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+  /staff/schedule/holidays:
+    post:
+      tags: [staff]
+      summary: Crear feriado global de cierre todo el día (Técnico)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [date, reason], properties: { date: { type: string, format: date }, reason: { type: string, minLength: 3, maxLength: 200 } } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+  /staff/schedule/holidays/{id}:
+    delete:
+      tags: [staff]
+      summary: Quitar feriado (Técnico)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+  /staff/shifts:
+    get:
+      tags: [staff]
+      summary: Turnos del equipo para Técnico; solo propios para Trabajador
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+    post:
+      tags: [staff]
+      summary: Crear turno dentro del horario, sede activa y sin solape entre sedes
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [userId, sedeId, weekday, startsMin, endsMin], properties: { userId: { type: string }, sedeId: { type: string }, weekday: { type: integer, minimum: 0, maximum: 6 }, startsMin: { type: integer, minimum: 0, maximum: 1440 }, endsMin: { type: integer, minimum: 0, maximum: 1440 } } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+  /staff/shifts/{id}:
+    patch:
+      tags: [staff]
+      summary: Editar turno validando horario y solape (Técnico)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [userId, sedeId, weekday, startsMin, endsMin], properties: { userId: { type: string }, sedeId: { type: string }, weekday: { type: integer, minimum: 0, maximum: 6 }, startsMin: { type: integer, minimum: 0, maximum: 1440 }, endsMin: { type: integer, minimum: 0, maximum: 1440 } } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
+    delete:
+      tags: [staff]
+      summary: Quitar turno (Técnico)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses: { '200': { description: OK }, '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo Técnico para cambios }, '404': { description: No encontrado }, '409': { description: Conflicto de horario, turno, sede o duplicado } }
   /notifications:
     get:
       tags: [reports]

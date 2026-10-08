@@ -11,6 +11,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed-sedes": "tsx prisma/seed-sedes.ts",
     "prisma:seed": "tsx prisma/seed.ts",
     "staff:grant": "tsx scripts/grant-role.ts"
   },

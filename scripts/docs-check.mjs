@@ -20,6 +20,10 @@ const SOURCES = [
   ["modules/payments/routes.ts", ["/payments"]],
   ["modules/staff/routes.ts", ["/staff"]],
   ["modules/staff/reviews.ts", ["/staff/reviews"]],
+  ["modules/staff/sedes.ts", ["/staff/sedes"]],
+  ["modules/staff/schedule.ts", ["/staff/schedule"]],
+  ["modules/staff/shifts.ts", ["/staff/shifts"]],
+  ["modules/sedes/routes.ts", ["/sedes"]],
   ["modules/notifications/routes.ts", []],
   ["server.ts", [""]],
 ];
@@ -41,6 +45,10 @@ const ROUTER_PREFIX = {
   paymentsRouter: ["/payments"],
   staffRouter: ["/staff"],
   reviewsRouter: ["/staff/reviews"],
+  staffSedesRouter: ["/staff/sedes"],
+  scheduleRouter: ["/staff/schedule"],
+  shiftsRouter: ["/staff/shifts"],
+  sedesRouter: ["/sedes"],
   notificationsRouter: ["/notifications"],
 };
 const found = new Set();

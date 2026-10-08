@@ -4,12 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { LIVE_ORDER_STATUS } from "@hub/shared";
 import { api, pen, type HubOrder } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { useCareerTheme } from "../live/careerTheme";
-import { careerContent } from "../data/career";
 import { ROUTES } from "../lib/routes";
 import { LoginRequired } from "../components/auth/LoginRequired";
 import { BuyerOrderRow } from "../components/orders/BuyerOrderRow";
 import { ListRowSkeleton } from "../components/Skeleton";
+import { DeliverySites } from "../components/orders/DeliverySites";
 import { EmptyState } from "../components/EmptyState";
 
 type Filter = "all" | "curso" | "digital" | "done";
@@ -26,8 +25,6 @@ const STEPS = [
 // /pedidos: compras del usuario con el flujo de custodia explicado.
 export function Pedidos() {
   const { user } = useAuth();
-  const { career } = useCareerTheme();
-  const cc = careerContent(career);
   const [filter, setFilter] = useState<Filter>("all");
   const orders = useQuery({ queryKey: ["orders", "mine"], enabled: !!user, queryFn: async () => (await api.get("/orders/mine")).data.data as HubOrder[] });
   if (!user) return <LoginRequired what="ver tus pedidos" />;
@@ -89,14 +86,7 @@ export function Pedidos() {
             </ol>
             <Link to={ROUTES.mySales} className="btn btn-secondary btn-sm mt-5 w-full">¿Problemas? Abrir un reporte</Link>
           </div>
-          <div className="card p-5">
-            <h2 className="font-extrabold text-zinc-950">Puntos de entrega sugeridos</h2>
-            <ul className="mt-3 divide-y divide-dashed divide-zinc-300 text-sm">
-              {cc.meetSpots.map((s, i) => (
-                <li key={s} className="flex justify-between gap-3 py-2"><span className="font-bold">{s}</span><span className="text-zinc-500">{cc.meetTimes[i]}</span></li>
-              ))}
-            </ul>
-          </div>
+          <DeliverySites />
         </aside>
       </div>
     </main>
