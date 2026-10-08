@@ -1,11 +1,12 @@
-import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
 import { ROUTES } from "../lib/routes";
 import { useAuthModal } from "./AuthModalHost";
 import { UNSA_CAREERS } from "../data/unsa";
 
 // Pie global de la app: solo rutas reales. Las carreras abren /explorar con
 // ?career= (filtra el catálogo y aplica el color de la escuela).
-const COLS: { h: string; links: { l: string; to?: string; auth?: boolean }[] }[] = [
+const COLS: { h: string; links: { l: string; to?: string; auth?: boolean; logout?: boolean }[] }[] = [
   { h: "Catálogo", links: [{ l: "Explorar", to: ROUTES.explore }, { l: "Bazar", to: ROUTES.bazar }, { l: "Publicar", to: ROUTES.publish }, { l: "Monetiza", to: ROUTES.monetiza }] },
   { h: "Cuenta", links: [{ l: "Iniciar sesión", auth: true }, { l: "Crear cuenta", to: ROUTES.register }, { l: "Mis pedidos", to: ROUTES.myOrders }, { l: "Mis ventas", to: ROUTES.mySales }] },
   { h: "Carreras", links: UNSA_CAREERS.slice(0, 4).map((c) => ({ l: c.label, to: `${ROUTES.explore}?career=${c.key}` })) },
@@ -14,6 +15,11 @@ const COLS: { h: string; links: { l: string; to?: string; auth?: boolean }[] }[]
 
 export function AppFooter() {
   const { openAuth } = useAuthModal();
+  const { user, logout } = useAuth();
+  const nav = useNavigate();
+  const cols = COLS.map((c) => c.h === "Cuenta" && user ? { ...c, links: [
+    { l: "Mi cuenta", to: ROUTES.account }, { l: "Cerrar sesión", logout: true }, ...c.links.slice(2),
+  ] } : c);
   const link = "w-fit text-sm text-zinc-600 transition-colors hover:text-zinc-950 hover:underline";
   return (
     <footer className="w-full border-t-2 border-zinc-900 bg-[rgb(var(--ua-paper))] py-10">
@@ -25,11 +31,13 @@ export function AppFooter() {
           </span>
           <p className="text-sm leading-relaxed text-zinc-600">Apuntes y bazar de la comunidad estudiantil de la UNSA, Arequipa.</p>
         </div>
-        {COLS.map((c) => (
+        {cols.map((c) => (
           <nav key={c.h} aria-label={c.h} className="flex flex-col gap-2">
             <span className="eyebrow text-zinc-900">{c.h}</span>
             {c.links.map((l) =>
-              l.auth ? (
+              l.logout ? (
+                <button key={l.l} type="button" onClick={() => void logout().then(() => nav(ROUTES.home))} className={`${link} text-left`}>{l.l}</button>
+              ) : l.auth ? (
                 <button key={l.l} type="button" onClick={openAuth} className={`${link} text-left`}>{l.l}</button>
               ) : (
                 <Link key={l.l} to={l.to ?? ROUTES.home} className={link}>{l.l}</Link>

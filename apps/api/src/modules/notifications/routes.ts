@@ -1,3 +1,4 @@
+import { NotificationCategorySchema, notificationTypes } from "@hub/shared";
 import { Router } from "express";
 import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
@@ -13,7 +14,8 @@ notificationsRouter.get(
     const unreadOnly = String(req.query.unread ?? "") === "1";
     const page = Math.max(1, Number(req.query.page ?? 1) || 1);
     const pageSize = Math.min(50, Math.max(1, Number(req.query.pageSize ?? 20) || 20));
-    const where = { userId: req.user!.sub, ...(unreadOnly ? { readAt: null } : {}) };
+    const category = req.query.category === undefined ? undefined : NotificationCategorySchema.parse(req.query.category);
+    const where = { ...(category ? { type: { in: notificationTypes(category) } } : {}), userId: req.user!.sub, ...(unreadOnly ? { readAt: null } : {}) };
     const [total, rows] = await Promise.all([
       prisma.notification.count({ where }),
       prisma.notification.findMany({

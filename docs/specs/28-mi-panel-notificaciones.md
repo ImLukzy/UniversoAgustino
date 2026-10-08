@@ -38,8 +38,19 @@ Diseño: `docs/rfc/0002-entregas-mediadas-equipo.md` §5–§6 (D4, D5).
 | A11 | E2E (god) | trabajador ve "Mi panel" y entra; estudiante no lo ve; filtro "No leídas" y "Marcar todo leído" funcionan; footer con sesión no muestra "Iniciar sesión" | pasa |
 
 ## 6. Checklist
-- [ ] Menú + etiquetas · [ ] API categoría + shared · [ ] Página de notificaciones · [ ] Footer · [ ] Gates y §7
+- [x] Menú + etiquetas · [x] API categoría + shared · [x] Página de notificaciones · [x] Footer · [x] Gates y §7
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia |
 |---|---|---|---|
+| 2026-10-08 | A1–A4 | Verdes | Typecheck raíz y lint de producto excluyendo hive exit 0; god confirmó `npm test` fuera del sandbox: API 113, web 80, shared 46 (239) |
+| 2026-10-08 | Tests nuevos | 17 casos nuevos verdes | API: 8 (categorías antes de paginar, enum Prisma completo, auth, invalidación, aislamiento); web: 5 fechas + 2 footer; shared: 2 mapa |
+| 2026-10-08 | Docs/build | Verdes | `npm run docs:check`: 29 rutas; builds shared/API/web exit 0; web 754 módulos, avisos existentes de imports estáticos/dinámicos |
+| 2026-10-08 | A5 | ≤150 líneas de fuentes tocadas | Máximo ProfileMenu.tsx: 114; OpenAPI exento |
+| 2026-10-08 | Iconos / diff | Verdes | Dashboard ya existente: `node scripts/subset-icons.mjs --check` 113 iconos; `git diff --check` exit 0 |
+| 2026-10-08 | A7/A11 | Pendientes de god | Menú trabajador/estudiante; lectura/filtros; footer autenticado; scroll a 375 px |
+
+Contador reutiliza el polling existente del menú; leer o marcar todo invalida consultas de notificaciones. Filtro por categoría y total en API; páginas adicionales preservan el filtro. Enlaces solo internos; errores de lectura visibles y sin navegación prematura. Sin migraciones, commit ni push.
+| 2026-10-08 | Suite completa | Pasa | God fuera del sandbox: typecheck 0; tests API 113, web 80, shared 46 (239). |
+| 2026-10-08 | A7 | Pasa | God, Playwright 375 px contra BD dev: `/notificaciones` y menú de perfil abierto (trabajador y estudiante) con 0 px de exceso horizontal. |
+| 2026-10-08 | A11 | Pasa | God: qa-mod ve "Mi panel" en el menú y entra a `/equipo`; qa-est no lo ve; "No leídas" mostró 4 y tras "Marcar todo leído" 0; footer con sesión muestra "Cerrar sesión" y no "Iniciar sesión". |

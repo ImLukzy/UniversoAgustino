@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, apiError, fmtDate } from "../../lib/api";
 import { useAuth } from "../../auth/AuthContext";
 
+import { roleLabel } from "../../lib/roles";
+
 interface Member { id: string; email: string; fullName: string; role: "moderator" | "admin"; since: string }
 export function MiembrosTab() {
   const { user } = useAuth();
@@ -40,7 +42,7 @@ export function MiembrosTab() {
           <p className="break-all text-sm text-zinc-600">{member.email}</p>
           <p className="text-xs text-zinc-500">Desde {fmtDate(member.since)}</p></div>
         <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-3">
-        <span className="chip">{member.role === "admin" ? "Administrador" : "Moderador"}</span>
+        <span className="chip">{roleLabel(member.role)}</span>
         {member.role !== "admin" && member.id !== user.id && <button type="button" onClick={() => remove(member)}
           className="btn btn-secondary btn-sm" disabled={change.isPending}>Quitar</button>}
         </div>

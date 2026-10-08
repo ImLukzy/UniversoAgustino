@@ -17,7 +17,7 @@ export function ProfileMenu() {
   const ref = useRef<HTMLDivElement>(null);
 
   const unread = useQuery({
-    queryKey: ["notifications", "unread-count"],
+    queryKey: ["notifications", "unread-count", user?.id],
     queryFn: async () => (await api.get("/notifications", { params: { unread: 1, pageSize: 1 } })).data.total as number,
     enabled: !!user,
     refetchInterval: 30000,
@@ -79,6 +79,9 @@ export function ProfileMenu() {
             className="card absolute right-0 top-12 z-50 flex w-60 flex-col divide-y divide-dashed divide-zinc-300 p-1.5"
           >
             <div>
+              {(user.role === "admin" || user.role === "moderator") && <Link to={ROUTES.equipo} onClick={() => setOpen(false)} role="menuitem" className={itemCls}>
+                <span className="material-symbols-outlined text-xl text-zinc-500">dashboard</span> Mi panel
+              </Link>}
               <Link to={ROUTES.notifications} onClick={() => setOpen(false)} role="menuitem" className={itemCls}>
                 <span className="material-symbols-outlined text-xl text-zinc-500">notifications</span>
                 <span className="flex-1">Notificaciones</span>

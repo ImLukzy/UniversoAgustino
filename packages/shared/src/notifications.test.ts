@@ -1,0 +1,14 @@
+import { describe, expect, it } from "vitest";
+import { NOTIFICATION_CATEGORY, NotificationCategorySchema, notificationTypes } from "./notifications.js";
+describe("mapa de categorías", () => {
+  it("particiona todos los tipos sin duplicados", () => {
+    const types = ["orders", "publications", "team"].flatMap((c) => notificationTypes(NotificationCategorySchema.parse(c)));
+    expect(types.sort()).toEqual(Object.keys(NOTIFICATION_CATEGORY).sort());
+    expect(new Set(types).size).toBe(types.length);
+  });
+  it("separa publicaciones, equipo y pedidos", () => {
+    expect(notificationTypes("team")).toEqual(["STAFF_ADDED", "STAFF_REMOVED"]);
+    expect(notificationTypes("publications")).toContain("REVIEW_REJECTED");
+    expect(notificationTypes("orders").every((t) => t.startsWith("ORDER_"))).toBe(true);
+  });
+});

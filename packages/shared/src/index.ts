@@ -6,3 +6,4 @@ export * from "./orders.js";
 export * from "./pages.js";
 export * from "./extra.js";
 export * from "./onboarding.js";
+export * from "./notifications.js";

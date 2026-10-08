@@ -485,13 +485,14 @@ paths:
   /notifications:
     get:
       tags: [reports]
-      summary: Mis notificaciones (auth, ?unread=1, paginado máx 50)
+      summary: Mis notificaciones (auth, filtros por categoría y no leídas, paginado máx 50)
       security: [{ bearerAuth: [] }]
       parameters:
         - { name: unread, in: query, schema: { type: string } }
+        - { name: category, in: query, schema: { type: string, enum: [orders, publications, team] }, description: Filtra tipos antes de contar y paginar }
         - { name: page, in: query, schema: { type: integer } }
         - { name: pageSize, in: query, schema: { type: integer } }
-      responses: { '200': { description: OK } }
+      responses: { '200': { description: OK }, '400': { description: Categoría inválida }, '401': { description: Sin sesión } }
   /notifications/read-all:
     post:
       tags: [reports]
