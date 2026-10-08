@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { api, apiError } from "../lib/api";
-import { ITEM_TYPE_LABEL, REPORT_STATUS_LABEL } from "../lib/orderLabels";
-import { useAuth } from "../auth/AuthContext";
-import { ROUTES } from "../lib/routes";
-import { ListRowSkeleton } from "../components/Skeleton";
-import { EmptyState } from "../components/EmptyState";
-import { LoginRequired } from "../components/auth/LoginRequired";
+import { api, apiError } from "../../lib/api";
+import { ITEM_TYPE_LABEL, REPORT_STATUS_LABEL } from "../../lib/orderLabels";
+import { useAuth } from "../../auth/AuthContext";
+import { ROUTES } from "../../lib/routes";
+import { ListRowSkeleton } from "../Skeleton";
+import { EmptyState } from "../EmptyState";
+import { LoginRequired } from "../auth/LoginRequired";
 
 interface Report {
   id: string;
@@ -18,7 +18,7 @@ interface Report {
   createdAt: string;
 }
 
-export function Admin() {
+export function DenunciasTab() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [msg, setMsg] = useState("");
@@ -42,16 +42,16 @@ export function Admin() {
     return <LoginRequired what="moderar reportes" />;
   if (user.role !== "admin" && user.role !== "moderator")
     return (
-      <main className="mx-auto max-w-xl px-4 py-16">
+      <section className="mx-auto max-w-xl px-4 py-16">
         <div className="card flex flex-col gap-2 p-8">
           <h1 className="h-display text-2xl">Acceso restringido</h1>
           <p className="text-sm text-zinc-600">La cola de moderación es solo para moderadores y administradores.</p>
         </div>
-      </main>
+      </section>
     );
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
+    <section className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="eyebrow">Cola global · respuesta en menos de 48 h</p>
@@ -63,7 +63,7 @@ export function Admin() {
       {reports.isLoading && <ListRowSkeleton count={3} />}
       {reports.data?.length === 0 && <EmptyState boxed icon="task_alt" title="Sin reportes pendientes" />}
       {reports.data?.map((r) => (
-        <article key={r.id} className="card flex flex-col gap-2 p-5 text-sm">
+        <article key={r.id} className="card flex min-w-0 flex-col gap-2 break-words p-5 text-sm">
           <p className="font-extrabold text-zinc-950">{ITEM_TYPE_LABEL[r.targetType] ?? r.targetType} <span className="font-mono font-normal text-zinc-500">· Ref. {r.targetId.slice(0, 8)}…</span></p>
           <p className="text-zinc-700">{r.reason}</p>
           <div className="flex flex-wrap items-center gap-2 border-t border-dashed border-zinc-300 pt-3">
@@ -73,6 +73,6 @@ export function Admin() {
           </div>
         </article>
       ))}
-    </main>
+    </section>
   );
 }

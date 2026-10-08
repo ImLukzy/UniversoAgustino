@@ -10,7 +10,7 @@ const ROUTE_MODULE: Record<string, string> = {
   "/ventas": "../pages/Ventas.tsx",
   "/cuenta": "../pages/Cuenta.tsx",
   "/publicar": "../pages/Publicar.tsx",
-  "/admin": "../pages/Admin.tsx",
+  "/equipo": "../pages/Equipo.tsx",
   "/bazar": "../pages/Bazar.tsx",
   "/monetiza": "../pages/Monetiza.tsx",
   "/legal": "../pages/Legal.tsx",

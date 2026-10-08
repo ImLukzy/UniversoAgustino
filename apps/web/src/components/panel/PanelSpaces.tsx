@@ -11,7 +11,7 @@ export function PanelSpaces({ d, email }: { d: PanelData; email: string }) {
     { to: ROUTES.myBazar, icon: "store", title: "Mis publicaciones", desc: "Precios, QR de cobro y ventas.", foot: d.releasedNet > 0 ? `${pen(d.releasedNet)} generados` : `${d.pubsActive} activas` },
     { to: ROUTES.mySales, icon: "point_of_sale", title: "Gestión de ventas", desc: "Alquileres, ventas y reportes.", foot: `${d.salesPending} pendientes` },
     { to: ROUTES.account, icon: "person", title: "Mi cuenta", desc: email, foot: "Perfil y carrera" },
-    ...(d.isMod ? [{ to: ROUTES.admin, icon: "gavel", title: "Moderación", desc: "Reportes D.L. 822 (< 48 h).", foot: `${d.openReports} por resolver` }] : []),
+    ...(d.isMod ? [{ to: ROUTES.equipo, icon: "gavel", title: "Equipo", desc: "Reportes D.L. 822 (< 48 h).", foot: `${d.openReports} por resolver` }] : []),
   ];
   return (
     <section className="flex flex-col gap-4">

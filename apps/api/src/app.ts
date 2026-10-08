@@ -16,6 +16,8 @@ import { notificationsRouter } from "./modules/notifications/routes.js";
 import { uploadsRouter } from "./modules/uploads/routes.js";
 import { paymentsRouter } from "./modules/payments/routes.js";
 
+import { staffRouter } from "./modules/staff/routes.js";
+
 export function buildRouter() {
   const r = Router();
 
@@ -44,6 +46,7 @@ export function buildRouter() {
   r.use("/notifications", notificationsRouter);
   r.use("/uploads", uploadsRouter);
   r.use("/payments", paymentsRouter);
+  r.use("/staff", staffRouter);
 
   r.get("/legal/summary", (_req, res) => {
     res.json({

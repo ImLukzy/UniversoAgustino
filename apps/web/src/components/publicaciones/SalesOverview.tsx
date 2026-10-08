@@ -44,7 +44,7 @@ export function SalesOverview({ sales, isStaff }: { sales: HubOrder[]; isStaff: 
           <h3 className="flex items-center gap-2 font-extrabold text-zinc-950"><span className="material-symbols-outlined">gavel</span>Cumplimiento D.L. 822</h3>
           <p className="text-sm text-zinc-600">Publica solo material de autoría propia. Los reportes fundados se atienden en menos de 48 horas.</p>
           <Link to={ROUTES.mySales} className="font-bold text-zinc-950 underline">Ir a Gestión de ventas</Link>
-          {isStaff && <Link to={ROUTES.admin} className="text-sm font-bold text-zinc-600 underline">Cola de moderación</Link>}
+          {isStaff && <Link to={ROUTES.equipo} className="text-sm font-bold text-zinc-600 underline">Panel del equipo</Link>}
         </div>
       </aside>
     </section>

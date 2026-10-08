@@ -15,6 +15,7 @@ tags:
   - { name: monetization }
   - { name: reports }
   - { name: legal }
+  - { name: staff }
 paths:
   /health:
     get:
@@ -526,6 +527,64 @@ paths:
       tags: [legal]
       summary: Resumen D.L. 822 (SLA takedown 48h)
       responses: { '200': { description: OK } }
+  /staff/members:
+    get:
+      tags: [staff]
+      summary: Lista miembros del equipo (moderator o admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Miembros y fecha de alta auditada (fecha de cuenta si no hay alta registrada)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, email, fullName, role, since]
+                      properties:
+                        id: { type: string }
+                        email: { type: string, format: email }
+                        fullName: { type: string }
+                        role: { type: string, enum: [moderator, admin] }
+                        since: { type: string, format: date-time }
+        '401': { description: UNAUTHENTICATED }
+        '403': { description: FORBIDDEN }
+    post:
+      tags: [staff]
+      summary: Añade moderador por correo UNSA o excepción (solo admin); registra AuditLog
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email, maxLength: 160 }
+      responses:
+        '200': { description: "{data: {id, email, fullName, role: moderator, since}}; rol aplica al rotar access" }
+        '400': { description: VALIDATION (correo no autorizado o inválido) }
+        '401': { description: UNAUTHENTICATED }
+        '403': { description: FORBIDDEN }
+        '404': { description: USER_NOT_FOUND (la persona aún no ingresó) }
+        '409': { description: ALREADY_STAFF }
+  /staff/members/{userId}:
+    delete:
+      tags: [staff]
+      summary: Retira moderador (solo admin), revoca refresh tokens y registra AuditLog
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: userId, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: "{data: {id, role: creator}}; access existente vence en JWT_ACCESS_TTL" }
+        '401': { description: UNAUTHENTICATED }
+        '403': { description: FORBIDDEN }
+        '404': { description: USER_NOT_FOUND }
+        '409': { description: SELF_REMOVE, IS_ADMIN o NOT_STAFF }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }

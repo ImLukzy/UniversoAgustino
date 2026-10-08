@@ -58,3 +58,7 @@ export const EmailVerifySchema = z.object({
   code: z.preprocess((v) => (typeof v === "string" ? v.replace(/\s/g, "") : v), z.string().regex(/^\d{6}$/, "El código tiene 6 dígitos")),
 });
 export type EmailVerifyInput = z.infer<typeof EmailVerifySchema>;
+
+// Panel del equipo: correo institucional normalizado, misma política de acceso.
+export const StaffMemberSchema = z.object({ email: NormalizedUnsaEmail });
+export type StaffMemberInput = z.infer<typeof StaffMemberSchema>;
