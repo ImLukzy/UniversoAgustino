@@ -126,7 +126,8 @@ describe("decisiones del equipo", () => {
   });
   it("rechaza con motivo, revisor, fecha, auditoría y aviso", async () => {
     const r = await request(staffRouter, "POST", "/reviews/bazar/item/reject", "admin", { reason: "  Motivo suficiente  " }); expect(r.status).toBe(200);
-    expect(h.bazarItem.updateMany).toHaveBeenCalledWith({ where: { id: "item", reviewStatus: "PENDING" }, data: { reviewStatus: "REJECTED", reviewNote: "Motivo suficiente", reviewedById: "actor", reviewedAt: expect.any(Date) } });
+    expect(h.bazarItem.updateMany).toHaveBeenCalledWith({ where: { id: "item", reviewStatus: "PENDING" }, data: { reviewStatus: "REJECTED", reviewNote: "Motivo suficiente", reviewedById: "actor", reviewedAt: expect.anything() } });
+    expect(h.bazarItem.updateMany.mock.calls.at(-1)?.[0]?.data.reviewedAt).toBeInstanceOf(Date);
     expect(h.notice).toHaveBeenCalledWith(expect.objectContaining({ type: "REVIEW_REJECTED", body: "Motivo suficiente" }));
   });
 });

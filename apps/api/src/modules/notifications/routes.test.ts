@@ -41,6 +41,7 @@ describe("categorías de notificaciones", () => {
   it("exige sesión", async () => { expect((await request({}, "GET", "/", false)).status).toBe(401); });
   it("marcar todo conserva aislamiento del usuario", async () => {
     expect((await request({}, "POST", "/read-all")).status).toBe(200);
-    expect(h.updateMany).toHaveBeenCalledWith({ where: { userId: "actor", readAt: null }, data: { readAt: expect.any(Date) } });
+    expect(h.updateMany).toHaveBeenCalledWith({ where: { userId: "actor", readAt: null }, data: { readAt: expect.anything() } });
+    expect(h.updateMany.mock.calls[0][0].data.readAt).toBeInstanceOf(Date);
   });
 });
