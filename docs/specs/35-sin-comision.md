@@ -40,3 +40,14 @@ Decisión del humano (2026-10-08): **quitar la comisión del 13 %**. Con el mode
 ## 6. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia |
 |---|---|---|---|
+| 2026-10-08 | Cálculo | Default 0; snapshots históricos preservados | `PLATFORM_FEE_PCT = 0`; tests nuevos de precio y simulador; shared 44/44 |
+| 2026-10-08 | A1–A4 locales | Typecheck, lint de producto, builds shared/web y tests web/shared verdes | `npm run typecheck`; `npm run lint -- --ignore-pattern 'hive/**'`; `npm run build -w packages/shared`; `npm run build -w apps/web`; web 73/73; shared 44/44 |
+| 2026-10-08 | Suite completa | Pendiente de god fuera del sandbox | API abre un puerto no permitido aquí; god confirmó que ejecutará `npm test` tras la entrega |
+| 2026-10-08 | A5 | Fuentes tocadas ≤150 líneas | Máximo 121 en shared/orders.ts; docs/OpenAPI exentos |
+| 2026-10-08 | A12 | 0 referencias al 13 %; 15 coincidencias explícitas «sin comisión» | `rg -n '13 ?%|comisi[oó]n' apps/web/src packages/shared/src` |
+| 2026-10-08 | Documentación | OpenAPI actualizado; checker verde | `npm run docs:check`: 29 rutas cubiertas; avisos existentes del escáner modular |
+| 2026-10-08 | A11 / despliegue | Pendientes de god | Navegador y pedido nuevo en BD dev; variable Render `PLATFORM_FEE_PCT=0` al subir |
+
+Revisados sin cambios: `extra.ts`, `useDetail.ts`, `usePublishForm.ts` usan la constante; `orders/create.ts` usa la configuración cuyo default viene de ella; `apiTypes.ts` conserva los campos del snapshot histórico. Checklist pendiente de la suite completa y A11 de god. Sin migraciones, commit ni push.
+| 2026-10-08 | Suite completa | Pasa | God fuera del sandbox: typecheck 0, lint, docs:check, secrets OK; tests API 105, web 73, shared 44. |
+| 2026-10-08 | A11 | Pasa | God, Playwright 375 px contra BD dev: detalle de bazar, `/publicar`, `/monetiza`, `/legal` y `/` sin "13 %" ni comisión cobrada (publicar/monetiza/legal dicen "sin comisión"); 0 px de desborde; pedido nuevo: amount 2500, fee 0, net 2500, feeBps 0 (cancelado después). |

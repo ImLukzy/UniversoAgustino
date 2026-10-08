@@ -30,7 +30,7 @@ export const ING_CIVIL: CareerContent = {
   resFisicoTitle: "Material de Obra",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Obra",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Casco + chaleco reglamentarios", "Wincha láser básica"],
   equivMid: ["Derecho de matrícula semestral completo", "Estación total de alquiler semestral"],
   equivHigh: ["Aporte a la colegiatura CIP", "Curso S10 + MS Project"],

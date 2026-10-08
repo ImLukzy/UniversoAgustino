@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Universo Agustino API
   version: 1.0.0
-  description: API v1 - marketplace académico UNSA (comunidad @unsa.edu.pe). Compra en custodia con comisión del 13%.
+  description: API v1 - marketplace académico UNSA (comunidad @unsa.edu.pe). Compra en custodia sin comisión.
 servers:
   - url: http://localhost:4000/api/v1
 tags:
@@ -445,7 +445,7 @@ paths:
   /monetization/simulate:
     post:
       tags: [monetization]
-      summary: Calculadora de ingresos (comisión 13% por defecto)
+      summary: Calculadora de ingresos (sin comisión por defecto)
       requestBody:
         required: true
         content:

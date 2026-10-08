@@ -83,3 +83,7 @@ Códigos comunes: 400 VALIDATION(zod) · 401 sin/mal token · 403 FORBIDDEN · 4
 | Upload | ownerId, storedName uuid, detectedMime, checksum, bytes | firma verificada |
 | Report · AuditLog · Notification · SavedDocument · PasswordResetToken | — | soporte |
 | Exam / Question | **no en BD**: estáticos en `apps/web/src/data/balotarios/*.ts` (`{q,opts[4],ok,why}`) | spec 23 |
+
+## Precios sin comisión (spec 35)
+
+Los pedidos nuevos usan `PLATFORM_FEE_PCT=0`: `feeCents=0`, `feeBps=0` y `netCents=amountCents`. El comprador paga el precio publicado; el vendedor recibe el 100 %. Los pedidos históricos mantienen sus snapshots. El equipo coordina la entrega en sede sin costo.

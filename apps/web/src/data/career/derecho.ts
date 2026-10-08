@@ -30,7 +30,7 @@ export const DERECHO: CareerContent = {
   resFisicoTitle: "Material Jurídico Físico",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar Jurídico Físico",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Código comentado de bolsillo", "Terno de medio uso para audiencias"],
   equivMid: ["Derecho de matrícula semestral completo", "Traje de litigación completo"],
   equivHigh: ["Aporte a la colegiatura CAA", "Biblioteca jurídica esencial"],

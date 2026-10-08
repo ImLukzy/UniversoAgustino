@@ -1,4 +1,3 @@
-import { PLATFORM_FEE_PCT } from "@hub/shared";
 
 // FAQ de la landing (spec 17). Cada respuesta describe el comportamiento real
 // del backend (spec 09 custodia, spec 16 muestra y pago verificado).
@@ -43,8 +42,8 @@ export const FAQS: Faq[] = [
   {
     icon: "percent",
     topic: "Vender",
-    q: `¿Cuánto cobra la plataforma? (comisión del ${PLATFORM_FEE_PCT} %)`,
-    a: `La plataforma retiene una comisión del ${PLATFORM_FEE_PCT} % de cada venta y el ${100 - PLATFORM_FEE_PCT} % restante es del vendedor. La comisión se calcula al crear el pedido y aparece desglosada en el resumen del pedido; no hay suscripciones ni costos por publicar.`,
+    q: "¿Cuánto cobra la plataforma?",
+    a: "Sin comisión: recibes el 100 % del precio. El equipo coordina la entrega en sede sin costo. No hay suscripciones ni costos por publicar.",
   },
   {
     icon: "sell",

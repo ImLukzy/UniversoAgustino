@@ -30,7 +30,7 @@ export const EDUCACION: CareerContent = {
   resFisicoTitle: "Material Didáctico Físico",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar Didáctico",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Set de plumones y láminas", "Mandil docente"],
   equivMid: ["Derecho de matrícula semestral completo", "Proyector de segunda para el aula"],
   equivHigh: ["Aporte a tu nombramiento (trámites)", "Laptop para planificar clases"],

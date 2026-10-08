@@ -30,7 +30,7 @@ export const ING_INDUSTRIAL: CareerContent = {
   resFisicoTitle: "Material de Planta",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Planta",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Cronómetro profesional", "Chaleco + casco de planta"],
   equivMid: ["Derecho de matrícula semestral completo", "Tablet para toma de tiempos"],
   equivHigh: ["Aporte a la colegiatura CIP", "Certificación Lean Six Sigma"],

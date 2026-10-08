@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EmailStartSchema, EmailVerifySchema, ForgotSchema, ResetSchema, isAllowedEmail, simulateEarnings } from "./index.js";
+import { EmailStartSchema, EmailVerifySchema, ForgotSchema, ResetSchema, isAllowedEmail, SimulateSchema, simulateEarnings } from "./index.js";
 
 describe("isAllowedEmail (puerta OAuth y registro)", () => {
   it("permite @unsa.edu.pe sin importar mayúsculas ni espacios", () => {
@@ -52,7 +52,10 @@ describe("ResetSchema", () => {
 });
 
 describe("simulateEarnings", () => {
-  it("calcula bruto, fee 13% y neto", () => {
+  it("sin comisión por defecto: bruto y neto coinciden", () => {
+    expect(simulateEarnings(SimulateSchema.parse({ avgPrice: 10, salesPerMonth: 10 }))).toEqual({ gross: 100, fee: 0, net: 100, currency: "PEN" });
+  });
+  it("conserva una tasa explícita para snapshots históricos", () => {
     const r = simulateEarnings({ avgPrice: 10, salesPerMonth: 10, bazarExtra: 0, feePct: 13 });
     expect(r.gross).toBe(100);
     expect(r.fee).toBe(13);

@@ -55,7 +55,7 @@
 - `Order` congela snapshot al crear: `sellerId` materializado, `itemTitle`,
   `amountCents/feeCents/netCents`, TTL 30 min que bloquea el ítem
   (`RESERVATION_TTL_MINUTES`). Invariante financiera no negociable:
-  `net + fee = amount`, calculada SOLO con `computePrice()` (comisión 13%).
+  `net + fee = amount`, calculada SOLO con `computePrice()` (sin comisión: tasa 0 %, fee 0 y neto igual al precio para pedidos nuevos; snapshots históricos intactos).
 - Estados: `PENDING → ACCEPTED` (solo bazar, alquiler) `→ PAID → ESCROW
   → RELEASED`. Documentos saltan `ACCEPTED` (PENDING→PAID directo).
   `CANCELLED` exige `cancelledReason`; `REFUNDED` existe.
@@ -115,7 +115,7 @@
 
 - `packages/shared`: Zod (`Register/Login/Forgot/Reset/UpdateProfile`,
   `CreateDocument/Bazar`, `CareerSchema` 1:1 con `data/unsa.ts`),
-  `computePrice()` (única vía legal para la comisión),
+  `computePrice()` (única vía para los montos; sin comisión por defecto),
   `isAllowedEmail()`, etiquetas y `simulateEarnings`.
 - Verificación obligatoria por cambio: `npm run typecheck` (0 errores),
   `npm run lint` (0 errores), `npm test` (vitest), `npm run docs:check`

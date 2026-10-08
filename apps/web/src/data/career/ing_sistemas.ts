@@ -30,7 +30,7 @@ export const ING_SISTEMAS: CareerContent = {
   resFisicoTitle: "Hardware y Periféricos",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar Tech Físico",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Teclado mecánico de entrada", "Mouse + pad XL"],
   equivMid: ["Derecho de matrícula semestral completo", "Monitor secundario de 24 pulgadas"],
   equivHigh: ["Mitad de una laptop de desarrollo", "Silla ergonómica + hosting anual"],

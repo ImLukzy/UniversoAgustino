@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { PLATFORM_FEE_PCT } from "@hub/shared";
 import { ROUTES } from "../../lib/routes";
 import { Accordion } from "../Accordion";
 
@@ -17,10 +16,10 @@ const FAQ = [
     body: <p>El comprador paga a tu Yape o Plin y envía su constancia. El pedido queda en custodia hasta que confirma la entrega; entonces se libera.</p>,
   },
   {
-    id: "comision",
+    id: "sin-cargos",
     icon: "payments",
-    title: `¿Cuánto es la comisión?`,
-    body: <p>{`El ${PLATFORM_FEE_PCT}% del precio. El resto (${100 - PLATFORM_FEE_PCT}%) es tuyo; el monto se congela al reservar, así nunca cambia a mitad del pedido.`}</p>,
+    title: "¿Cuánto recibo por venta?",
+    body: <p>Sin comisión: recibes el 100 % del precio. El equipo coordina la entrega en sede sin costo; el monto se congela al reservar.</p>,
   },
   {
     id: "copias",

@@ -30,7 +30,7 @@ export const CONTABILIDAD: CareerContent = {
   resFisicoTitle: "Material Contable Físico",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar Contable",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Plan contable empresarial", "Calculadora de escritorio"],
   equivMid: ["Derecho de matrícula semestral completo", "Software contable anual"],
   equivHigh: ["Aporte a la colegiatura CCPA", "Diplomado en tributación"],

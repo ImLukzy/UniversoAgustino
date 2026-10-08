@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computePrice } from "./index.js";
+import { PLATFORM_FEE_PCT, computePrice } from "./index.js";
 
 describe("computePrice (invariante net + fee = amount)", () => {
   const cases: Array<[number, number]> = [
@@ -22,13 +22,18 @@ describe("computePrice (invariante net + fee = amount)", () => {
     });
   }
 
-  it("caso E2E conocido: 1300 @ 13% → fee 169, neto 1131", () => {
+  it("conserva el cálculo de snapshots históricos: fee 169, neto 1131", () => {
     expect(computePrice(1300, 13)).toEqual({
       amountCents: 1300,
       feeCents: 169,
       netCents: 1131,
       feeBps: 1300,
     });
+  });
+
+  it("sin comisión: el vendedor recibe todo el precio", () => {
+    expect(PLATFORM_FEE_PCT).toBe(0);
+    expect(computePrice(1000, PLATFORM_FEE_PCT)).toEqual({ amountCents: 1000, feeCents: 0, netCents: 1000, feeBps: 0 });
   });
 
   it("negativos se fijan a 0", () => {

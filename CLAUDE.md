@@ -23,13 +23,13 @@ render.yaml (API) · vercel.json (web: build shared→web, SPA rewrite)
 Prisma (exportar `DATABASE_URL`): `npm run prisma:generate` · migración nueva `cd apps/api && npx prisma migrate dev --name x` · prod `DATABASE_URL=$DIRECT_DATABASE_URL npx prisma migrate deploy` (en `apps/api`).
 
 ## Entorno (nombres; valores en `.env`/Render/Vercel)
-API: `NODE_ENV API_PORT API_PREFIX=/api/v1 API_PUBLIC_URL WEB_ORIGIN(csv, con y sin www) DATABASE_URL DIRECT_DATABASE_URL JWT_ACCESS_SECRET JWT_REFRESH_SECRET(≥32, distintos) JWT_ACCESS_TTL JWT_REFRESH_TTL GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REDIRECT_URI MAIL_DRIVER(console|resend) RESEND_API_KEY MAIL_FROM(email o "Nombre <email>") STORAGE_DRIVER(local|s3) S3_ENDPOINT S3_REGION S3_BUCKET S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY MAX_UPLOAD_MB PLATFORM_FEE_PCT RESERVATION_TTL_MINUTES ENABLE_JOBS` · opc `TRUST_PROXY MP_ACCESS_TOKEN MP_WEBHOOK_SECRET APPLE_* CSP_ENFORCE`
+API: `NODE_ENV API_PORT API_PREFIX=/api/v1 API_PUBLIC_URL WEB_ORIGIN(csv, con y sin www) DATABASE_URL DIRECT_DATABASE_URL JWT_ACCESS_SECRET JWT_REFRESH_SECRET(≥32, distintos) JWT_ACCESS_TTL JWT_REFRESH_TTL GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REDIRECT_URI MAIL_DRIVER(console|resend) RESEND_API_KEY MAIL_FROM(email o "Nombre <email>") STORAGE_DRIVER(local|s3) S3_ENDPOINT S3_REGION S3_BUCKET S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY MAX_UPLOAD_MB PLATFORM_FEE_PCT RESERVATION_TTL_MINUTES MODERATION_TRUST_AFTER(0) ENABLE_JOBS` · opc `TRUST_PROXY MP_ACCESS_TOKEN MP_WEBHOOK_SECRET APPLE_* CSP_ENFORCE`
 Web (build-time): `VITE_API_URL`. BD: Neon `Universo_Agustino`(prod, ep-hidden-dew) · `Unsa`(dev, ep-orange-mountain).
 
 ## Reglas críticas
 - Sesión: access en memoria (Bearer) + cookie `hub_refresh` httpOnly; prod `SameSite=None;Secure` (`lib/cookies.ts`). CSRF = `requireSameOrigin` con Origin **exacto** ∈ `WEB_ORIGIN`. `trust proxy` = `TRUST_PROXY` (1 en prod).
 - Acceso: Google (`hd=unsa.edu.pe`, token revocado si falla) · OTP 6 dígitos (HMAC, 10 min, 5 intentos) · cuenta nueva → `onboardedAt` null → `/bienvenida`.
-- Dinero: comisión solo `computePrice()`+`PLATFORM_FEE_PCT` (13 %); pedido solo vía `canTransition` (PENDING→ACCEPTED→PAID→ESCROW→RELEASED|CANCELLED|REFUNDED).
+- Dinero: sin comisión (0 %, spec 35); cálculo solo vía `computePrice()`+`PLATFORM_FEE_PCT`; el equipo custodia objetos, nunca dinero (RFC 0002); pedido solo vía `canTransition` (PENDING→ACCEPTED→PAID→ESCROW→RELEASED|CANCELLED|REFUNDED).
 - Modelos: User, Profile, EmailLoginCode, RefreshToken, Document, BazarItem, Order, Escrow, Upload, Report, Notification. Exámenes = datos estáticos web (no BD).
 - Migraciones: nueva y fechada; nunca editar una aplicada.
 - Contrato API: `{data}` / `{error:{code,message}}`; toda ruta nueva en `openapi.yaml`.

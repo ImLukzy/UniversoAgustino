@@ -1,16 +1,11 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { PLATFORM_FEE_PCT } from "@hub/shared";
 import { pen } from "../../lib/api";
 import { careerLabel } from "../../data/unsa";
 import { PAY_LABEL } from "../../lib/payments";
-import { SPRING } from "../../lib/motion";
 import { CareerAvatar } from "../CareerVisual";
 import { todayLocal, type Detail } from "./useDetail";
 
 // Panel de compra: vendedor, precio con desglose real, cobro, fechas de alquiler y CTA.
 export function BuyPanel({ d }: { d: Detail }) {
-  const [showFee, setShowFee] = useState(false);
   const p = d.person;
   const cta = !d.available ? "No disponible" : d.busy ? "Creando pedido…" : !d.loggedIn ? "Entrar y comprar" : d.isRental ? "Solicitar alquiler" : "Comprar ahora";
   return (
@@ -27,20 +22,10 @@ export function BuyPanel({ d }: { d: Detail }) {
         <div className="rounded-xl border-2 border-zinc-900 p-4">
           <div className="flex items-center justify-between">
             <span className="eyebrow">Precio total</span>
-            <button type="button" onClick={() => setShowFee((v) => !v)} aria-expanded={showFee} className="flex items-center gap-0.5 text-xs font-bold text-zinc-600 hover:text-zinc-950">
-              <span className="material-symbols-outlined text-sm">info</span>Comisión {PLATFORM_FEE_PCT}%
-            </button>
+
           </div>
           <p className="price mt-1 text-4xl text-primary">{pen(d.quote.amountCents)}</p>
-          <AnimatePresence initial={false}>
-            {showFee && (
-              <motion.dl initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={SPRING} className="overflow-hidden text-xs">
-                <div className="mt-3 flex justify-between border-t border-dashed border-zinc-300 pt-2"><dt className="text-zinc-500">Comisión plataforma</dt><dd className="font-bold">−{pen(d.quote.feeCents)}</dd></div>
-                <div className="flex justify-between"><dt className="text-zinc-500">Neto para el vendedor</dt><dd className="font-bold">{pen(d.quote.netCents)}</dd></div>
-                <p className="mt-1 text-zinc-500">La comisión la asume el vendedor: tú pagas el precio publicado.</p>
-              </motion.dl>
-            )}
-          </AnimatePresence>
+          <p className="mt-2 text-xs text-zinc-600">Sin comisión: el vendedor recibe el 100 % del precio.</p>
         </div>
         <div className="flex items-start gap-3 text-sm">
           {d.payQr ? <img src={d.payQr} alt="QR de cobro del vendedor" className="h-24 w-24 rounded-lg border-2 border-zinc-900 object-cover" /> : null}

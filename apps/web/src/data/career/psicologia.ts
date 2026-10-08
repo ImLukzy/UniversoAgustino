@@ -30,7 +30,7 @@ export const PSICOLOGIA: CareerContent = {
   resFisicoTitle: "Material de Prácticas",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Prácticas",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Set de pruebas proyectivas básicas", "Chaleco de prácticas"],
   equivMid: ["Derecho de matrícula semestral completo", "Manual DSM-5"],
   equivHigh: ["Aporte a la colegiatura C.Ps.P.", "Batería completa de tests"],

@@ -30,7 +30,7 @@ export const DEFAULT_CONTENT: CareerContent = {
   resFisicoTitle: "Material de Estudio Físico",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar Físico",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Trámites universitarios del ciclo", "Set de libros de especialidad"],
   equivMid: ["Derecho de matrícula semestral completo", "Laptop de estudio"],
   equivHigh: ["Aporte del 50% a tu colegiatura", "Curso de especialización"],

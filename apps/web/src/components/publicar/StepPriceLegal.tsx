@@ -1,4 +1,3 @@
-import { PLATFORM_FEE_PCT } from "@hub/shared";
 import { pen } from "../../lib/api";
 import { fieldLabel } from "./StepDetails";
 import type { PublishForm } from "./usePublishForm";
@@ -7,7 +6,7 @@ import { SamplePagesField } from "../SamplePagesField";
 const DECLARATIONS = [
   "Declaro que este material es de mi autoría y no contiene exámenes oficiales ni escaneos de libros protegidos (D.L. 822).",
   "Confirmo que los datos de terceros están anonimizados: sin nombres, DNI ni datos identificables (Ley N° 29733).",
-  `Acepto la comisión del ${PLATFORM_FEE_PCT}% y el retiro del material si se reporta una infracción fundada.`,
+  "Acepto el retiro del material si se reporta una infracción fundada.",
 ];
 
 // Paso 3 (precio con desglose real de computePrice) y paso 4 (declaración jurada).
@@ -25,8 +24,8 @@ export function StepPriceLegal({ form }: { form: PublishForm }) {
           </label>
           <dl className="rounded-xl border-2 border-dashed border-zinc-300 p-4 text-sm">
             <div className="flex justify-between py-1"><dt className="text-zinc-600">Precio pagado</dt><dd className="font-bold">{pen(quote.amountCents)}</dd></div>
-            <div className="flex justify-between py-1"><dt className="text-zinc-600">Comisión ({PLATFORM_FEE_PCT}%)</dt><dd className="font-bold text-[#b91c1c]">− {pen(quote.feeCents)}</dd></div>
-            <div className="mt-1 flex items-baseline justify-between border-t border-zinc-900 pt-2"><dt className="font-bold">Tu ganancia</dt><dd className="price text-2xl text-primary">{pen(quote.netCents)}</dd></div>
+            <div className="mt-1 flex items-baseline justify-between border-t border-zinc-900 pt-2"><dt className="font-bold">Recibes</dt><dd className="price text-2xl text-primary">{pen(quote.netCents)}</dd></div>
+            <p className="mt-2 text-xs text-zinc-600">Sin comisión: recibes el 100 % del precio.</p>
           </dl>
         </div>
         {form.mode === "digital" && <SamplePagesField id="publish-samples" className="md:max-w-xs" value={form.f.samples} onChange={(v) => form.set("samples", v)} />}

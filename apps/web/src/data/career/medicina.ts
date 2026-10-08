@@ -30,7 +30,7 @@ export const MEDICINA: CareerContent = {
   resFisicoTitle: "Material Clínico Físico",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar Clínico Físico",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus o sedes hospitalarias de Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Fonendo básico y tensiómetro", "Atlas de bolsillo de anatomía"],
   equivMid: ["Derecho de matrícula semestral completo", "Estetoscopio Littmann Classic III"],
   equivHigh: ["Aporte del 50% a la colegiatura CMP", "Maletín médico completo"],

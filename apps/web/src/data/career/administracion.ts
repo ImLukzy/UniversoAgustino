@@ -30,7 +30,7 @@ export const ADMINISTRACION: CareerContent = {
   resFisicoTitle: "Material Ejecutivo Físico",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar Ejecutivo",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Calculadora financiera básica", "Terno de presentaciones"],
   equivMid: ["Derecho de matrícula semestral completo", "Laptop para análisis financiero"],
   equivHigh: ["Aporte a la colegiatura CORLAD", "Curso de especialización"],

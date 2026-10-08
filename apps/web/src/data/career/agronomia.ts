@@ -30,7 +30,7 @@ export const AGRONOMIA: CareerContent = {
   resFisicoTitle: "Material de Campo",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Campo",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Mochila de fumigación 20L", "Kit de análisis de suelo"],
   equivMid: ["Derecho de matrícula semestral completo", "Motobomba de segunda"],
   equivHigh: ["Aporte a la colegiatura CIP", "Sistema de riego por goteo"],

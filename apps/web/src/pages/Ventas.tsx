@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { PLATFORM_FEE_PCT } from "@hub/shared";
 import { api, pen, type HubOrder, type HubReport } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROUTES } from "../lib/routes";
@@ -35,7 +34,7 @@ export function Ventas() {
   const kpis = [
     { label: "Alquileres por revisar", value: String(rentals.filter((o) => o.status === "PENDING").length), href: "#seccion-alquileres" },
     { label: "Pagos por confirmar", value: String(rows.filter((o) => o.status === "PAID").length), href: "#seccion-digitales" },
-    { label: "Neto liberado (apuntes)", value: pen(digitals.filter((o) => o.status === "RELEASED").reduce((a, o) => a + o.netCents, 0)) },
+    { label: "Ingresos liberados (apuntes)", value: pen(digitals.filter((o) => o.status === "RELEASED").reduce((a, o) => a + o.netCents, 0)) },
     { label: "Reportes abiertos", value: String(myReports.filter((r) => r.status === "OPEN").length), href: "#seccion-reportes" },
   ];
 
@@ -43,7 +42,7 @@ export function Ventas() {
     <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-8">
       <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div className="max-w-2xl">
-          <p className="eyebrow">Módulo de ventas · comisión {PLATFORM_FEE_PCT}%</p>
+          <p className="eyebrow">Módulo de ventas · sin comisión</p>
           <h1 className="h-display mt-2 text-3xl sm:text-4xl">Gestión de ventas</h1>
           <p className="mt-2 text-sm text-zinc-600">Acepta alquileres, confirma pagos y gestiona tus reportes.</p>
         </div>

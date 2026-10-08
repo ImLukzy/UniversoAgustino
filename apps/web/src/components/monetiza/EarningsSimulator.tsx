@@ -67,15 +67,14 @@ export function EarningsSimulator({ cc, careerLabel }: { cc: CareerContent; care
           <Slider id="sales" label="Ventas por ciclo" value={sales} display={`${sales} ventas`} min={10} max={200} step={5} onChange={setSales} hint={`Promedio sugerido: ${cc.suggestSales}`} />
           <p className="rounded-xl border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">
             <b className="text-zinc-900">{kind === "digital" ? cc.feeDigitalTitle : cc.feeFisicoTitle}.</b>{" "}
-            {kind === "digital" ? `La plataforma retiene el ${PLATFORM_FEE_PCT}% para almacenamiento, moderación y custodia del pago.` : cc.feeFisicoBody}
+            {kind === "digital" ? "Sin comisión: recibes el 100 % del precio." : cc.feeFisicoBody}
           </p>
         </div>
         <div className="card bg-zinc-900 p-6 text-white sm:p-8 lg:col-span-5" aria-live="polite">
-          <p className="eyebrow text-zinc-400">Tu ganancia neta estimada</p>
+          <p className="eyebrow text-zinc-400">Recibes el 100 % del precio</p>
           <p className="price mt-3 text-5xl">{soles(sim.net)}</p>
           <dl className="mt-6 space-y-2 border-y border-dashed border-white/25 py-4 text-sm">
-            <div className="flex justify-between"><dt className="text-zinc-400">Monto bruto</dt><dd className="font-bold">{soles(sim.gross)}</dd></div>
-            <div className="flex justify-between"><dt className="text-zinc-400">Comisión ({PLATFORM_FEE_PCT}%)</dt><dd className="font-bold text-[#fca5a5]">− {soles(sim.fee)}</dd></div>
+            <div className="flex justify-between"><dt className="text-zinc-400">Total de ventas</dt><dd className="font-bold">{soles(sim.gross)}</dd></div>
           </dl>
           <p className="mt-4 text-sm font-bold text-zinc-300">¿Qué cubre en Arequipa?</p>
           <ul className="mt-2 space-y-1.5 text-sm text-zinc-300">

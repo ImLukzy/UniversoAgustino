@@ -30,7 +30,7 @@ export const ARQUITECTURA: CareerContent = {
   resFisicoTitle: "Material de Taller",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Taller",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Escalímetro + escuadras", "Set de estilógrafos"],
   equivMid: ["Derecho de matrícula semestral completo", "Tablero de dibujo profesional"],
   equivHigh: ["Aporte a la colegiatura CAP", "Licencia anual de software CAD"],

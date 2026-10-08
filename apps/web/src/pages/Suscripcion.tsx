@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
-import { PLATFORM_FEE_PCT } from "@hub/shared";
 import { AppLayout } from "../components/AppLayout";
 import { ROUTES } from "../lib/routes";
 
 const FACTS = [
   "Explora y compra apuntes por pedido individual: solo pagas lo que te llevas.",
-  `La comisión del ${PLATFORM_FEE_PCT}% la asume el vendedor; el precio que ves es el que pagas.`,
-  `Si vendes tus apuntes, te quedas con el ${100 - PLATFORM_FEE_PCT}% de cada venta.`,
+  "El precio que ves es el que pagas; no hay cargos de plataforma.",
+  "Sin comisión: recibes el 100 % del precio.",
 ];
 
 // Mi suscripción: Universo Agustino NO tiene premium ni planes. Esta página

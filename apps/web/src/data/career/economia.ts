@@ -30,7 +30,7 @@ export const ECONOMIA: CareerContent = {
   resFisicoTitle: "Material de Investigación",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Investigación",
-  feeFisicoBody: "Comisión del 13% por artículo vendido para coordinar el punto de entrega segura en campus UNSA y puntos de encuentro en Arequipa.",
+  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
   equivLow: ["Calculadora científica", "Suscripción de papers"],
   equivMid: ["Derecho de matrícula semestral completo", "Laptop para econometría"],
   equivHigh: ["Aporte al Colegio de Economistas", "Curso de Stata avanzado"],

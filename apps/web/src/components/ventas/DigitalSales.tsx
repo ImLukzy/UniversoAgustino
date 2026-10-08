@@ -1,4 +1,3 @@
-import { PLATFORM_FEE_PCT } from "@hub/shared";
 import { fmtDate, pen, type HubOrder } from "../../lib/api";
 import { careerLabel } from "../../data/unsa";
 import { getOrderLabel } from "../../lib/orderLabels";
@@ -12,7 +11,7 @@ export function DigitalSales({ rows, more, loadingMore, onMore }: { rows: HubOrd
       <div>
         <h2 className="h-display text-2xl">Ventas digitales</h2>
         <p className="mt-1 max-w-3xl text-sm text-zinc-600">
-          Confirma cada pago recibido para pasarlo a custodia. [Precio] − [Comisión {PLATFORM_FEE_PCT}%] = [Neto para ti].
+          Confirma cada pago recibido para pasarlo a custodia. Sin comisión: recibes el 100 % del precio.
         </p>
       </div>
       <div className="card overflow-hidden">
@@ -23,7 +22,7 @@ export function DigitalSales({ rows, more, loadingMore, onMore }: { rows: HubOrd
                 <th className="px-4 py-3">Fecha y archivo</th>
                 <th className="px-3 py-3">Comprador</th>
                 <th className="px-3 py-3 text-right">Precio</th>
-                <th className="px-3 py-3 text-right">Neto</th>
+                <th className="px-3 py-3 text-right">Recibes</th>
                 <th className="px-4 py-3">Estado</th>
               </tr>
             </thead>

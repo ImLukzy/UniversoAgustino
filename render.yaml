@@ -64,7 +64,7 @@ services:
       - key: MAX_UPLOAD_MB
         value: "25"
       - key: PLATFORM_FEE_PCT
-        value: "13"
+        value: "0"
       - key: RESERVATION_TTL_MINUTES
         value: "30"
       - key: ENABLE_JOBS
