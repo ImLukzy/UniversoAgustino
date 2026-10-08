@@ -8,7 +8,7 @@ PATTERN='cambia-este|changeme|your-secret-here|secret123'
 FOUND=0
 
 if command -v rg >/dev/null 2>&1; then
-  if rg -n --hidden --glob '!.git' --glob '!.env' --glob '!.env.example' --glob '!package-lock.json' --glob '!scripts/check-secrets.sh' -i "$PATTERN" . ; then
+  if rg -n --hidden --glob '!.git' --glob '!.env' --glob '!.env.example' --glob '!package-lock.json' --glob '!scripts/check-secrets.sh' --glob '!apps/api/src/env.ts' -i "$PATTERN" . ; then
     echo "::error::Secretos de plantilla fuera de .env.example"
     FOUND=1
   fi

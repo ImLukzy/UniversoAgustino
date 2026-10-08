@@ -4,7 +4,7 @@ Bloqueante: el release no sale sin los 26 ítems verificados.
 
 ## Configuración y secretos
 - [ ] `JWT_ACCESS_SECRET` y `JWT_REFRESH_SECRET` rotados, distintos, ≥ 32 bytes (ver `docs/runbook-rotacion.md`).
-- [ ] Ningún placeholder `cambia-este-*` en el entorno (`bash scripts/check-secrets.sh` en verde).
+- [ ] Ningún placeholder de plantilla en el entorno (patrones en `scripts/check-secrets.sh`; `bash scripts/check-secrets.sh` en verde).
 - [ ] gitleaks sin hallazgos; `.env` fuera del control de versiones (`git ls-files | grep '^\.env$'` vacío).
 - [ ] `WEB_ORIGIN`, `VITE_API_URL` y `DATABASE_URL`/`DIRECT_DATABASE_URL` apuntando a producción.
 - [ ] `RESERVATION_TTL_MINUTES` acordado con negocio (actual: 30) y documentado.
