@@ -12,9 +12,11 @@ import { receiveCase } from "./receive.js";
 import { bookingWindow } from "./bookingWindow.js";
 import { managedCase } from "./caseGuard.js";
 import { localInstant, localParts, SLOT_MS, validSlot } from "./calendar.js";
+import { chatRouter } from "./chatRoutes.js";
 
 export const casesRouter = Router();
 registerQueries(casesRouter);
+casesRouter.use("/:id/messages", chatRouter);
 casesRouter.post("/:id/take", asyncHandler(async (req: AuthedRequest, res) => {
   res.json({ data: await assignCase(req.params.id, req.user!.sub, req.user!, true) });
 }));

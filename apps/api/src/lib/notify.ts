@@ -1,5 +1,6 @@
 import type { NotificationKind } from "@hub/shared";
 import { prisma } from "../lib/prisma.js";
+import { sendCriticalMail } from "./criticalMail.js";
 
 // Sprint F1-08: notificaciones in-app. Nunca lanzan: un fallo al notificar
 // no debe abortar la transacción de negocio (el llamador no necesita
@@ -15,6 +16,7 @@ interface NotifyInput {
 export async function notify(input: NotifyInput): Promise<void> {
   try {
     await prisma.notification.create({ data: input });
+    await sendCriticalMail(input);
   } catch (e) {
     console.error("[notify] notification_failed", e);
   }

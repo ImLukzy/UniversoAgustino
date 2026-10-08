@@ -71,6 +71,14 @@ model User {
   partyAppointments Appointment[] @relation("AppointmentParty")
   staffAppointments Appointment[] @relation("AppointmentStaff")
   staffShifts StaffShift[]
+  caseMessages CaseMessage[]
+  strikes Strike[] @relation("StrikeUser")
+  strikesForgiven Strike[] @relation("StrikeForgiver")
+  reviewsReceived UserReview[] @relation("ReviewSubject")
+  reviewsWritten UserReview[] @relation("ReviewAuthor")
+  sanctions Sanction[] @relation("SanctionUser")
+  sanctionsApplied Sanction[] @relation("SanctionBy")
+  sanctionsLifted Sanction[] @relation("SanctionLiftedBy")
   savedDocuments SavedDocument[]
   @@unique([provider, providerId])
 }
@@ -288,6 +296,10 @@ enum NotificationType {
   ORDER_IN_CUSTODY
   ORDER_PICKUP_COMPLETED
   ORDER_RETURN_COMPLETED
+  CASE_MESSAGE
+  ORDER_APPOINTMENT_REMINDER
+  SANCTION_APPLIED
+  SANCTION_LIFTED
 }
 
 model Notification {
@@ -436,6 +448,8 @@ model HandoverCase {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   appointments Appointment[]
+  messages CaseMessage[]
+  reviews UserReview[]
   @@index([assigneeId, status, createdAt])
 }
 
@@ -455,6 +469,8 @@ model Appointment {
   startsAt DateTime
   endsAt DateTime
   status AppointmentStatus @default(SCHEDULED)
+  reminderSentAt DateTime?
+  strike Strike?
   rescheduledFromId String? @unique
   rescheduledFrom Appointment? @relation("RescheduledAppointment", fields: [rescheduledFromId], references: [id], onDelete: Restrict)
   replacement Appointment? @relation("RescheduledAppointment")
@@ -462,4 +478,67 @@ model Appointment {
   updatedAt DateTime @updatedAt
   @@index([staffId, status, startsAt])
   @@index([caseId, kind])
+}
+
+model CaseMessage {
+  id String @id @default(cuid())
+  caseId String
+  case HandoverCase @relation(fields: [caseId], references: [id], onDelete: Restrict)
+  authorId String
+  author User @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  body String
+  createdAt DateTime @default(now())
+  @@index([caseId, createdAt])
+}
+
+enum SanctionKind {
+  WARNING
+  SUSPENSION
+  BAN
+}
+
+model Strike {
+  id String @id @default(cuid())
+  userId String
+  user User @relation("StrikeUser", fields: [userId], references: [id], onDelete: Restrict)
+  appointmentId String @unique
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  forgivenAt DateTime?
+  forgivenById String?
+  forgivenBy User? @relation("StrikeForgiver", fields: [forgivenById], references: [id], onDelete: Restrict)
+  @@index([userId, createdAt])
+}
+
+model UserReview {
+  id String @id @default(cuid())
+  subjectId String
+  subject User @relation("ReviewSubject", fields: [subjectId], references: [id], onDelete: Restrict)
+  authorId String
+  author User @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  caseId String?
+  case HandoverCase? @relation(fields: [caseId], references: [id], onDelete: Restrict)
+  score Int
+  comment String @default("")
+  createdAt DateTime @default(now())
+  @@unique([authorId, subjectId, caseId])
+  @@index([subjectId, createdAt])
+}
+
+model Sanction {
+  id String @id @default(cuid())
+  userId String
+  user User @relation("SanctionUser", fields: [userId], references: [id], onDelete: Restrict)
+  kind SanctionKind
+  reason String
+  startsAt DateTime @default(now())
+  endsAt DateTime?
+  auto Boolean @default(false)
+  byId String?
+  by User? @relation("SanctionBy", fields: [byId], references: [id], onDelete: Restrict)
+  liftedAt DateTime?
+  liftedById String?
+  liftedBy User? @relation("SanctionLiftedBy", fields: [liftedById], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  @@index([userId, liftedAt, endsAt])
 }

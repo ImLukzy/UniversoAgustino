@@ -15,6 +15,12 @@ function loginCodeTemplate(code: string): string {
   return `<p>Tu código de ingreso a Universo Agustino es:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>Caduca en 10 minutos. Si no lo pediste, ignora este correo.</p>`;
 }
 
+const escapeHtml = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+function noticeTemplate(text: string, url?: string): string {
+  const link = url ? `<p><a href="${escapeHtml(url)}">Abrir en Universo Agustino</a></p>` : "";
+  return `<p>${escapeHtml(text)}</p>${link}`;
+}
+
 class ConsoleDriver implements MailDriver {
   async send(to: string, subject: string, html: string): Promise<void> {
     console.log(`[mail:console] to=${to} subject=${subject} body=${html}`);
@@ -57,6 +63,10 @@ export const mailer = {
   },
   sendPasswordReset(to: string, url: string): Promise<void> {
     return driver().send(to, "Restablece tu contraseña — Universo Agustino", resetTemplate(url));
+  },
+  // Specs 32/33: avisos críticos del flujo de entrega (texto plano escapado).
+  sendNotice(to: string, subject: string, text: string, url?: string): Promise<void> {
+    return driver().send(to, `${subject} — Universo Agustino`, noticeTemplate(text, url));
   },
   sendLoginCode(to: string, code: string): Promise<void> {
     return driver().send(to, `${code} es tu código de Universo Agustino`, loginCodeTemplate(code));

@@ -5,6 +5,7 @@ import { scheduleChange, scheduleFail } from "../staff/scheduleGuard.js";
 import { managedCase, caseTransition, type Actor } from "./caseGuard.js";
 import { validSlot } from "./calendar.js";
 import { notify } from "../../lib/notify.js";
+import { remindIfDue } from "./reminders.js";
 
 export type Booking = { kind: AppointmentKind; sedeId: string; startsAt: string };
 export async function bookInside(tx: Prisma.TransactionClient, id: string, actor: Actor, input: Booking, previousId?: string) {
@@ -53,6 +54,7 @@ export async function appointmentNotice(result: Awaited<ReturnType<typeof bookIn
   await notify({ userId: appointment.partyId, type: "ORDER_APPOINTMENT_SCHEDULED", title,
     body: `${row.order.itemTitle} — ${row.assignee?.profile?.fullName ?? "Equipo"}; ${sede.name}, ${sede.address}; ${sede.meetingPoint}; ${when}; S/ ${(row.order.amountCents / 100).toFixed(2)}.`,
     link: ["PICKUP", "RETURN"].includes(appointment.kind) ? "/pedidos" : "/ventas" });
+  await remindIfDue(appointment.id);
 }
 
 export async function markNoShow(id: string, appointmentId: string, actor: Actor) {

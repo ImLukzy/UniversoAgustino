@@ -7,10 +7,12 @@ import { asyncHandler } from "../../middleware/errors.js";
 import { requireAuth, type AuthedRequest } from "../../middleware/auth.js";
 import { caseInclude, currentActor } from "./caseGuard.js";
 import { scheduleFail } from "../staff/scheduleGuard.js";
+import { chatRouter } from "./chatRoutes.js";
 
 export const participantCasesRouter = Router();
 participantCasesRouter.use(requireAuth);
 registerSellerPayment(participantCasesRouter);
+participantCasesRouter.use("/:id/messages", chatRouter);
 participantCasesRouter.get("/order/:orderId", asyncHandler(async (req: AuthedRequest, res) => {
   const order = await prisma.order.findUnique({ where: { id: req.params.orderId } });
   if (!order || ![order.buyerId, order.sellerId].includes(req.user!.sub)) scheduleFail("NOT_FOUND", "Caso no encontrado", 404);

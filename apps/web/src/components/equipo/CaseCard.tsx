@@ -1,5 +1,6 @@
 import { CaseFulfillment } from "./CaseFulfillment";
-import { beforeCustody, type AppointmentKind } from "@hub/shared";
+import { beforeCustody, isCaseOpen, type AppointmentKind } from "@hub/shared";
+import { CaseChat } from "../orders/CaseChat";
 import { pen, resolveQr } from "../../lib/api";
 import { CaseAssignment } from "./CaseAssignment";
 import { AppointmentForm } from "./AppointmentForm";
@@ -36,6 +37,7 @@ export function CaseCard({ row, userId, admin, busy, save }: { row: StaffCase; u
     {manage && <CaseFulfillment row={row} busy={busy} save={save} />}
     {manage && beforeCustody(row.status) && <button type="button" disabled={busy} className="btn btn-secondary self-start"
       onClick={() => { if (window.confirm("¿Cancelar el trato antes de recibir el objeto? Se avisará a comprador y vendedor.")) void save(`/staff/cases/${row.id}/cancel`); }}>Cancelar trato</button>}
+    {(manage || admin) && <CaseChat caseId={row.id} base="/staff/cases" closed={!isCaseOpen(row.status)} />}
     {row.status === "PICKUP_SCHEDULED" && <p className="text-sm">Pago al vendedor delante del equipo al recoger.</p>}
   </article>;
 }

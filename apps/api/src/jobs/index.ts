@@ -1,4 +1,5 @@
 import { expireReservations } from "./expireReservations.js";
+import { startReminderJob } from "./appointmentReminders.js";
 
 /**
  * Scheduler mínimo sin dependencias (setInterval). Solo corre cuando
@@ -24,4 +25,5 @@ export function startJobs(): void {
   const timer = setInterval(tick, everyMs);
   timer.unref();
   console.log("[jobs] expireReservations every 60s");
+  startReminderJob();
 }

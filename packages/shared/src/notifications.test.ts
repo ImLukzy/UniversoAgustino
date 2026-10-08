@@ -9,6 +9,6 @@ describe("mapa de categorías", () => {
   it("separa publicaciones, equipo y pedidos", () => {
     expect(notificationTypes("team")).toEqual(["STAFF_ADDED", "STAFF_REMOVED"]);
     expect(notificationTypes("publications")).toContain("REVIEW_REJECTED");
-    expect(notificationTypes("orders").every((t) => t.startsWith("ORDER_"))).toBe(true);
+    expect(notificationTypes("orders").every((t) => t.startsWith("ORDER_") || /^(CASE_|SANCTION_)/.test(t))).toBe(true);
   });
 });

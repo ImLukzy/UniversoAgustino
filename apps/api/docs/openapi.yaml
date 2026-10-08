@@ -798,6 +798,80 @@ paths:
         "403": { description: Solo custodio o Técnico }
         "404": { description: Caso no visible o inexistente }
         "409": { description: BAD_STATE, SLOT_TAKEN, DEADLINE_EXCEEDED, RESCHEDULE_LIMIT o HAS_APPOINTMENTS }
+  /cases/{id}/messages:
+    get:
+      summary: Mensajes del caso (comprador, vendedor, custodio o Técnico)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Lista cronológica de mensajes (autor, texto, marca de equipo) }
+        "401": { description: Sesión requerida }
+        "404": { description: Caso inexistente o sin acceso }
+    post:
+      summary: Enviar un mensaje al caso (comprador, vendedor, custodio o Técnico)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string, minLength: 1, maxLength: 1000 }
+      responses:
+        "201": { description: Mensaje creado; avisa a los demás participantes }
+        "400": { description: VALIDATION }
+        "401": { description: Sesión requerida }
+        "404": { description: Caso inexistente o sin acceso }
+        "409": { description: CASE_CLOSED }
+        "429": { description: RATE_LIMITED (30 mensajes en 10 minutos) }
+  /staff/cases/{id}/messages:
+    get:
+      summary: Mensajes del caso (equipo)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Lista cronológica de mensajes (autor, texto, marca de equipo) }
+        "401": { description: Sesión requerida }
+        "404": { description: Caso inexistente o sin acceso }
+    post:
+      summary: Enviar un mensaje al caso (equipo)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string, minLength: 1, maxLength: 1000 }
+      responses:
+        "201": { description: Mensaje creado; avisa a los demás participantes }
+        "400": { description: VALIDATION }
+        "401": { description: Sesión requerida }
+        "404": { description: Caso inexistente o sin acceso }
+        "409": { description: CASE_CLOSED }
+        "429": { description: RATE_LIMITED (30 mensajes en 10 minutos) }
   /staff/cases:
     get:
       summary: Casos paginados visibles al equipo

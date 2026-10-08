@@ -3,9 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../auth/AuthContext";
 import { api, apiError, pen, resolveQr } from "../../lib/api";
 import { CASE_LABELS, appointmentLabel, caseTime, type CaseSede, type CaseAppointment } from "../equipo/caseTypes";
-import type { CaseStatus } from "@hub/shared";
+import { isCaseOpen, type CaseStatus } from "@hub/shared";
+import { CaseChat } from "./CaseChat";
 
-type ParticipantCase = { status: CaseStatus; staffName: string; amountCents: number; sede: CaseSede | null;
+type ParticipantCase = { id: string; status: CaseStatus; staffName: string; amountCents: number; sede: CaseSede | null;
   isSeller: boolean; paymentRef: string | null; paymentMethod: string | null; sellerConfirmedAt: string | null;
   returnCondition: string | null; returnConditionNote: string | null; returnPhotoUrl: string | null;
   receivedPhotoUrl: string | null; conditionNote: string | null; appointments: CaseAppointment[] };
@@ -26,6 +27,7 @@ export function BuyerCaseView({ orderId }: { orderId: string }) {
       {row.isSeller && row.paymentRef && <SellerPaymentActions orderId={orderId} confirmedAt={row.sellerConfirmedAt} />}
       {row.returnConditionNote && <p className="break-words">Revisión de devolución: {row.returnConditionNote}</p>}
       {row.returnPhotoUrl && <img src={resolveQr(row.returnPhotoUrl) ?? undefined} alt="Objeto al devolver el alquiler" className="h-36 w-full rounded-lg object-contain" />}
-      {row.conditionNote && <p className="break-words">{row.conditionNote}</p>}</>}
+      {row.conditionNote && <p className="break-words">{row.conditionNote}</p>}
+      <CaseChat caseId={row.id} base="/cases" closed={!isCaseOpen(row.status)} /></>}
   </section>;
 }
