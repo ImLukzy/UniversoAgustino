@@ -46,7 +46,7 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
           <button type="button" onClick={() => setDrawer(true)} aria-label="Abrir menú" className="btn-ghost h-11 w-11 shrink-0 px-0 lg:hidden">
             <span className="material-symbols-outlined">menu</span>
           </button>
-          <form role="search" onSubmit={search} className="searchbar mx-auto h-11 min-w-0 max-w-2xl">
+          <form role="search" aria-label="Búsqueda global" onSubmit={search} className="searchbar mx-auto h-11 min-w-0 max-w-2xl">
             <span className="material-symbols-outlined text-zinc-500" aria-hidden="true">search</span>
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar apuntes, cursos o artículos" aria-label="Buscar en el catálogo" />
           </form>

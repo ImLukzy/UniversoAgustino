@@ -21,6 +21,7 @@ export function MarketplaceHeader({ query, onQueryChange, onSubmit, resultCount,
         </p>
         <form
           role="search"
+          aria-label="Buscar en Explorar"
           className="searchbar mt-5 max-w-2xl"
           onSubmit={(e) => {
             e.preventDefault();
