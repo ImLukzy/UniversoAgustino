@@ -14,7 +14,7 @@ export async function staffMetrics(now = new Date()) {
     prisma.document.count({ where: { reviewStatus: "PENDING" } }),
     prisma.bazarItem.count({ where: { reviewStatus: "PENDING" } }),
     prisma.report.count({ where: { status: "OPEN" } }),
-    prisma.payout.groupBy({ by: ["collectorId"], where: { order: { itemType: "bazar", payMethod: "CASH", verifiedAt: { gte: monthStart, lte: now } } },
+    prisma.payout.groupBy({ by: ["collectorId"], where: { status: { not: "REFUNDED" }, order: { status: { not: "REFUNDED" }, itemType: "bazar", payMethod: "CASH", verifiedAt: { gte: monthStart, lte: now } } },
       _sum: { amountCents: true, feeCents: true, netCents: true }, _count: { _all: true } }),
   ]);
   const ids = [...new Set([...custody.flatMap((c) => c.assigneeId ? [c.assigneeId] : []), ...cash.map((c) => c.collectorId)])];

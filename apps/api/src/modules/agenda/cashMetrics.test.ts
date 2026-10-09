@@ -14,7 +14,7 @@ it("efectivo por trabajador suma monto cobrado y muestra fee/net separados", asy
   db.user.findMany.mockResolvedValue([{ id: "worker", email: "worker@unsa.edu.pe", profile: { fullName: "Trabajador" } }]);
   const r = await staffMetrics(new Date("2026-10-09T12:00:00Z"));
   expect(r.cashThisMonthByStaff).toEqual([{ staffId: "worker", name: "Trabajador", collectedCents: 1500, commissionCents: 195, netCents: 1305, count: 1 }]);
-  expect(db.payout.groupBy.mock.calls[0][0].where).toEqual({ order: { itemType: "bazar", payMethod: "CASH", verifiedAt: { gte: new Date("2026-10-01T05:00:00Z"), lte: new Date("2026-10-09T12:00:00Z") } } });
+  expect(db.payout.groupBy.mock.calls[0][0].where).toEqual({ status: { not: "REFUNDED" }, order: { status: { not: "REFUNDED" }, itemType: "bazar", payMethod: "CASH", verifiedAt: { gte: new Date("2026-10-01T05:00:00Z"), lte: new Date("2026-10-09T12:00:00Z") } } });
 });
 it("sin cobros no inventa saldos", async () => { expect((await staffMetrics()).cashThisMonthByStaff).toEqual([]); });
 it("exmiembro no accede a métricas monetarias", async () => { db.user.findUnique.mockResolvedValue({ role: "student" }); expect((await accountRequest(staffRouter, "GET", "/metrics", "admin")).status).toBe(403); expect(db.payout.groupBy).not.toHaveBeenCalled(); });

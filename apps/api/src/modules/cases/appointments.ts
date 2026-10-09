@@ -1,3 +1,5 @@
+import { requireRefundReturn } from "./refundReturn.js";
+import { currentActor } from "./caseGuard.js";
 import type { AppointmentKind } from "@hub/shared";
 import { bookingWindow } from "./bookingWindow.js";
 import type { Prisma } from "@prisma/client";
@@ -12,13 +14,17 @@ export type Booking = { kind: AppointmentKind; sedeId: string; startsAt: string 
 export async function bookInside(tx: Prisma.TransactionClient, id: string, actor: Actor, input: Booking, previousId?: string) {
   const row = await managedCase(tx, id, actor), now = new Date();
   const target = ({ DROP_OFF: "DROP_SCHEDULED", PICKUP: "PICKUP_SCHEDULED", RETURN: "RETURN_SCHEDULED", BACK_TO_SELLER: "BACK_TO_SELLER" } as const)[input.kind];
+  if (input.kind === "RETURN" && !row.order.rentalEnd) {
+    if ((await currentActor(tx, actor)).role !== "admin") scheduleFail("FORBIDDEN", "Solo el Técnico agenda devoluciones de venta", 403);
+    await requireRefundReturn(tx, row.orderId);
+  }
   if (previousId) {
     const previous = await tx.appointment.findUnique({ where: { id: previousId } });
     if (!previous || previous.caseId !== id || previous.kind !== input.kind || previous.status !== "NO_SHOW") scheduleFail("BAD_STATE", "Solo se reprograma una ausencia");
     if (await tx.appointment.count({ where: { caseId: id, kind: input.kind, rescheduledFromId: { not: null } } })) scheduleFail("RESCHEDULE_LIMIT", "Ya se usó la reprogramación de este tipo");
     if (row.status !== target && !(input.kind === "DROP_OFF" && row.status === "ASSIGNED")) scheduleFail("BAD_STATE", "El caso ya cambió");
   } else {
-    caseTransition(row.status, target);
+    if (!(row.status === "BACK_TO_SELLER" && target === "BACK_TO_SELLER" && row.order.status === "REFUNDED")) caseTransition(row.status, target);
     if (await tx.appointment.findFirst({ where: { caseId: id, kind: input.kind, status: "NO_SHOW" } }))
       scheduleFail("RESCHEDULE_REQUIRED", "Selecciona la ausencia que vas a reprogramar");
   }
@@ -38,7 +44,7 @@ export async function bookInside(tx: Prisma.TransactionClient, id: string, actor
   if (await tx.appointment.count({ where: { caseId: id, kind: input.kind, status: "SCHEDULED" } })) scheduleFail("BAD_STATE", "Ya hay una cita programada");
   const appointment = await tx.appointment.create({ data: { caseId: id, kind: input.kind, partyId: ["DROP_OFF", "BACK_TO_SELLER"].includes(input.kind) ? row.order.sellerId : row.order.buyerId,
     staffId: row.assigneeId, sedeId: sede.id, shiftId: shift.id, startsAt, endsAt: part.endsAt, rescheduledFromId: previousId } });
-  await tx.handoverCase.update({ where: { id }, data: { status: target, sedeId: sede.id, ...(input.kind === "RETURN" ? { returnWindowStart: data.minimum, returnDeadlineAt: data.limit } : {}),
+  await tx.handoverCase.update({ where: { id }, data: { status: target, sedeId: sede.id, ...(input.kind === "RETURN" ? { closedAt: null, returnWindowStart: data.minimum, returnDeadlineAt: data.limit } : {}),
     ...(input.kind === "BACK_TO_SELLER" ? { backToSellerRequestedAt: row.backToSellerRequestedAt ?? row.returnedAt ?? now } : {}) } });
   return { appointment, row, sede };
 }

@@ -14,16 +14,16 @@ export function registerQueries(router: Router) {
     "/mine",
     requireAuth,
     asyncHandler(async (req: AuthedRequest, res) => {
-      const rows = await prisma.order.findMany({ where: { buyerId: req.user!.sub }, orderBy: { createdAt: "desc" }, include: { escrow: true } });
+      const rows = await prisma.order.findMany({ where: { buyerId: req.user!.sub }, orderBy: { createdAt: "desc" }, include: { escrow: true, payout: { select: { refundProofUrl: true, refundPaymentRef: true, refundedAt: true } } } });
       // Sprint 2B+: el comprador descarga sus digitales RELEASED sin fetch por
       // fila. Solo se expone el fileUrl de SUS pedidos liberados (una consulta).
       const docIds = [...new Set(rows.filter((o) => o.itemType === "document" && ACCESS_STATUSES.includes(o.status as "ESCROW" | "RELEASED")).map((o) => o.itemId))];
       const docs = docIds.length ? await prisma.document.findMany({ where: { id: { in: docIds } }, select: { id: true, fileUrl: true } }) : [];
-      const grants = await prisma.documentAccessGrant.findMany({ where: { buyerId: req.user!.sub }, select: { documentId: true, fileUrl: true } });
+      const grants = await prisma.documentAccessGrant.findMany({ where: { buyerId: req.user!.sub, revokedAt: null }, select: { documentId: true, fileUrl: true } });
       const permanent = new Map(grants.map((g) => [g.documentId, g.fileUrl]));
       const files = new Map(docs.map((d) => [d.id, d.fileUrl ?? null]));
-      const data = rows.map((o) => ({ ...privateOrder(o, "buyer"), fileUrl: o.itemType === "document" ? (permanent.get(o.itemId) ?? files.get(o.itemId) ?? null) : null }));
-      res.json({ data });
+      const data = rows.map((o) => ({ ...privateOrder(o, "buyer"), refund: o.payout, fileUrl: o.itemType === "document" && o.status !== "REFUNDED" ? (permanent.get(o.itemId) ?? files.get(o.itemId) ?? null) : null }));
+      res.setHeader("Cache-Control", "private, no-store"); res.json({ data });
     }),
   );
 

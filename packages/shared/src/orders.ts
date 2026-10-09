@@ -79,7 +79,7 @@ export const ORDER_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
   PENDING: ["ACCEPTED", "CANCELLED"],
   ACCEPTED: ["PAID", "CANCELLED"],
   PAID: ["ESCROW", "CANCELLED"],
-  ESCROW: ["RELEASED"],
+  ESCROW: ["RELEASED", "REFUNDED"],
   RELEASED: [],
   REFUNDED: [],
   CANCELLED: [],

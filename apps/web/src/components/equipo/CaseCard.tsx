@@ -36,7 +36,7 @@ export function CaseCard({ row, userId, admin, busy, save }: { row: StaffCase; u
     {row.order.payProofUrl && <PrivateImage path={row.order.payProofUrl} alt="Comprobante del cobro en sede" expandable />}
     {row.returnConditionNote && <p className="break-words text-sm">Devolución: {row.returnCondition === "OK" ? "Conforme" : "Con observaciones"} · {row.returnConditionNote}</p>}
     {row.returnPhotoUrl && <img src={resolveQr(row.returnPhotoUrl) ?? undefined} alt="Objeto revisado al devolver" className="h-40 w-full rounded-xl object-contain" />}
-    {manage && <CaseFulfillment row={row} busy={busy} save={save} />}
+    {manage && <CaseFulfillment admin={admin} row={row} busy={busy} save={save} />}
     {manage && beforeCustody(row.status) && <button type="button" disabled={busy} className="btn btn-secondary self-start"
       onClick={() => { if (window.confirm("¿Cancelar el trato antes de recibir el objeto? Se avisará a comprador y vendedor.")) void save(`/staff/cases/${row.id}/cancel`); }}>Cancelar trato</button>}
     {(manage || admin) && <CaseChat caseId={row.id} base="/staff/cases" closed={!isCaseOpen(row.status)} />}

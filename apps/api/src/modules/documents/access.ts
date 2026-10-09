@@ -21,7 +21,7 @@ export async function hasFullAccess(doc: DocRef, user?: Viewer): Promise<boolean
   if (doc.priceCents === 0) return true;
   if (!user) return false;
   if (doc.authorId === user.sub || user.role === "admin" || user.role === "moderator") return true;
-  if (await prisma.documentAccessGrant.count({ where: { buyerId: user.sub, documentId: doc.id } }) > 0) return true;
+  if (await prisma.documentAccessGrant.count({ where: { buyerId: user.sub, documentId: doc.id, revokedAt: null } }) > 0) return true;
   const paid = await prisma.order.count({
     where: { buyerId: user.sub, itemType: "document", itemId: doc.id, status: { in: [...ACCESS_STATUSES] } },
   });

@@ -5,13 +5,15 @@ import { PickupForm } from "./PickupForm";
 import { ReturnForm } from "./ReturnForm";
 import type { StaffCase, CaseSave } from "./caseTypes";
 
-export function CaseFulfillment({ row, busy, save }: { row: StaffCase; busy: boolean; save: CaseSave }) {
+export function CaseFulfillment({ row, busy, save, admin = false }: { admin?: boolean; row: StaffCase; busy: boolean; save: CaseSave }) {
   const [returning, setReturning] = useState(false);
   const now = Date.now(), active = (kind: AppointmentKind) => row.appointments.some((a) => a.kind === kind && a.status === "SCHEDULED" && new Date(a.startsAt).getTime() <= now && new Date(a.endsAt).getTime() >= now);
   return <div className="flex min-w-0 flex-col gap-3">
+    {admin && ["DELIVERED", "CLOSED"].includes(row.status) && row.order.payout?.refundRequired && row.order.payout.status === "FROZEN" && <><p className="text-sm">El comprador debe devolver el objeto en sede antes del reembolso.</p><AppointmentForm caseId={row.id} kind="RETURN" busy={busy} save={save} /></>}
+    {row.status === "BACK_TO_SELLER" && !row.appointments.some((a) => a.kind === "BACK_TO_SELLER" && a.status === "SCHEDULED") && <AppointmentForm caseId={row.id} kind="BACK_TO_SELLER" busy={busy} save={save} />}
     {row.status === "PICKUP_SCHEDULED" && active("PICKUP") && <PickupForm caseId={row.id} rental={!!row.order.rentalEnd} amountCents={row.order.amountCents} busy={busy} save={save} />}
     {row.status === "RENTED_OUT" && <AppointmentForm caseId={row.id} kind="RETURN" busy={busy} save={save} />}
-    {row.status === "RETURN_SCHEDULED" && active("RETURN") && <ReturnForm caseId={row.id} busy={busy} save={save} />}
+    {row.status === "RETURN_SCHEDULED" && active("RETURN") && <ReturnForm requiredPhoto={!row.order.rentalEnd} caseId={row.id} busy={busy} save={save} />}
     {row.status === "RETURNED" && <AppointmentForm caseId={row.id} kind="BACK_TO_SELLER" busy={busy} save={save} />}
     {(row.status === "IN_CUSTODY" || row.status === "PICKUP_SCHEDULED") && <>
       <button type="button" className="btn btn-secondary self-start" disabled={busy} onClick={() => { if (window.confirm("¿Coordinar la devolución del objeto al vendedor y cancelar el trato? El artículo seguirá reservado hasta el retorno físico.")) setReturning(true); }}>Devolver al vendedor</button>

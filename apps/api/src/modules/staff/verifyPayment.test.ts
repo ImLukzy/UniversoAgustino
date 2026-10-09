@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { reviewDigitalPayment } from "./verifyPayment.js";
 const db = vi.hoisted(() => ({ $queryRaw: vi.fn(), user: { findUnique: vi.fn() }, order: { findUniqueOrThrow: vi.fn(), update: vi.fn() },
-  document: { findUnique: vi.fn() }, upload: { findUnique: vi.fn() }, documentAccessGrant: { create: vi.fn() }, payout: { create: vi.fn() },
+  document: { findUnique: vi.fn() }, upload: { findUnique: vi.fn() }, documentAccessGrant: { create: vi.fn(), count: vi.fn().mockResolvedValue(0) }, payout: { create: vi.fn() },
   auditLog: { create: vi.fn() }, notify: vi.fn(), hasObject: vi.fn() }));
 vi.mock("../../lib/prisma.js", () => ({ prisma: { ...db, $transaction: async (work: (tx: typeof db) => Promise<unknown>) => work(db) } }));
 vi.mock("../../lib/storage.js", () => ({ hasObject: db.hasObject }));
@@ -56,3 +56,5 @@ it("error de Payout aborta antes de estado/auditoría/avisos", async () => {
   db.payout.create.mockRejectedValueOnce(new Error("database failure")); await expect(reviewDigitalPayment("order", "worker", true)).rejects.toThrow("database failure");
   expect(db.order.update).not.toHaveBeenCalled(); expect(db.auditLog.create).not.toHaveBeenCalled(); expect(db.notify).not.toHaveBeenCalled();
 });
+
+it("no crea dos accesos activos para comprador/documento bajo lock", async () => { db.documentAccessGrant.count.mockResolvedValueOnce(1); await expect(reviewDigitalPayment("order", "worker", true)).rejects.toMatchObject({ code: "ALREADY_OWNED" }); expect(db.documentAccessGrant.create).not.toHaveBeenCalled(); expect(db.payout.create).not.toHaveBeenCalled(); });

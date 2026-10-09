@@ -24,6 +24,7 @@ export async function reviewDigitalPayment(id: string, actorId: string, accepted
       const name = storedNameOf(doc?.fileUrl ?? null);
       if (!doc || doc.reviewStatus !== "APPROVED" || !name || !await hasObject(name)) scheduleFail("DOCUMENT_UNAVAILABLE", "El archivo no está disponible; revisa antes de atribuir");
       if (!canTransition(order.status, "ESCROW")) scheduleFail("BAD_STATE", "Transición no permitida");
+      if (await tx.documentAccessGrant.count({ where: { buyerId: order.buyerId, documentId: doc.id, revokedAt: null } })) scheduleFail("ALREADY_OWNED", "El comprador ya tiene acceso activo a este apunte");
       await tx.documentAccessGrant.create({ data: { buyerId: order.buyerId, documentId: doc.id, orderId: id,
         fileUrl: doc.fileUrl!, authorId: doc.authorId, grantedAt: now } });
       await tx.payout.create({ data: { orderId: id, sellerId: order.sellerId, collectorId: order.paymentAccount.userId,

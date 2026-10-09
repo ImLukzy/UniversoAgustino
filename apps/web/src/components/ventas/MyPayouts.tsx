@@ -16,9 +16,9 @@ export function MyPayouts() {
       <h3 className="break-words font-semibold">{p.order.itemTitle}</h3>
       <dl className="grid grid-cols-2 gap-3 text-sm"><div><dt>Precio</dt><dd>{pen(p.amountCents)}</dd></div>
         <div><dt>Comisión {(p.order.feeBps ?? 1300) / 100}%</dt><dd>{pen(p.feeCents)}</dd></div>
-        <div><dt>Neto {p.status === "COMPLETED" ? "recibido" : "por recibir"}</dt><dd className="font-bold">{pen(p.netCents)}</dd></div>
-        <div><dt>Estado</dt><dd>{p.status === "COMPLETED" ? "Pagado" : p.status === "FROZEN" ? "Congelado" : "Pendiente"}</dd></div></dl>
-      <p className="text-sm text-zinc-600">{p.completedAt ? `Pagado ${fmtDate(p.completedAt)}` : `Vence ${fmtDate(p.dueAt)}`}</p>
+        <div><dt>Neto {p.status === "COMPLETED" ? "recibido" : p.status === "REFUNDED" ? "sin liquidación" : "por recibir"}</dt><dd className="font-bold">{pen(p.status === "REFUNDED" ? 0 : p.netCents)}</dd></div>
+        <div><dt>Estado</dt><dd>{p.status === "COMPLETED" ? "Pagado" : p.status === "REFUNDED" ? "Reembolsado al comprador" : p.status === "FROZEN" ? "Congelado" : "Pendiente"}</dd></div></dl>
+      <p className="text-sm text-zinc-600">{p.status === "REFUNDED" ? "Venta reembolsada: sin comisión ni pago al vendedor." : p.completedAt ? `Pagado ${fmtDate(p.completedAt)}` : `Vence ${fmtDate(p.dueAt)}`}</p>
       {p.frozenReason && <p className="break-words text-sm">Reclamo: {p.frozenReason}</p>}
       {p.status === "COMPLETED" && p.proofUrl && <PrivateImage path={p.proofUrl} alt="Comprobante del pago recibido" expandable />}
       {p.paymentRef && <p className="break-all text-sm">Operación: {p.paymentRef}</p>}

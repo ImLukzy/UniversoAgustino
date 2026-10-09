@@ -55,6 +55,7 @@ export interface HubBazarItem {
 }
 
 export interface HubOrder {
+  refund?: { refundProofUrl: string | null; refundPaymentRef: string | null; refundedAt: string | null } | null;
   id: string;
   buyerId: string;
   sellerId?: string | null;

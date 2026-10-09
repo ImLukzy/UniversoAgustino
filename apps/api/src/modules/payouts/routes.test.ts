@@ -24,7 +24,18 @@ const period = "?from=2026-10-01T00:00:00Z&to=2026-11-01T00:00:00Z";
 it("ganancias suma solo comisión verificada, no precio/neto", async () => {
   db.payout.groupBy.mockResolvedValue([{ collectorId: "actor", _sum: { feeCents: 195 }, _count: { _all: 1 } }]);
   const r = await request(staffRouter, "/payouts/earnings" + period, "moderator"); expect(r.body.data).toMatchObject({ commissionCents: 195, verifiedCount: 1 });
-  const query = db.payout.groupBy.mock.calls[0][0]; expect(query._sum).toEqual({ feeCents: true }); expect(query.where).toEqual({ collectorId: "actor", order: { verifiedAt: { gte: new Date("2026-10-01T00:00:00Z"), lt: new Date("2026-11-01T00:00:00Z") } } });
+  const query = db.payout.groupBy.mock.calls[0][0]; expect(query._sum).toEqual({ feeCents: true }); expect(query.where).toEqual({ collectorId: "actor", status: { not: "REFUNDED" }, order: { status: { not: "REFUNDED" }, verifiedAt: { gte: new Date("2026-10-01T00:00:00Z"), lt: new Date("2026-11-01T00:00:00Z") } } });
 });
 it("ganancias globales solo Técnico", async () => { db.user.findUnique.mockResolvedValue({ role: "admin" }); await request(staffRouter, "/payouts/earnings" + period, "admin"); expect(db.payout.groupBy.mock.calls[0][0].where).not.toHaveProperty("collectorId"); });
 it("periodo ausente no agrega", async () => { expect((await request(staffRouter, "/payouts/earnings", "moderator")).status).toBe(400); expect(db.payout.groupBy).not.toHaveBeenCalled(); });
+
+it("ganancias excluyen tanto Order como Payout reembolsados", async () => {
+  await request(staffRouter, "/payouts/earnings" + period, "moderator");
+  const q = db.payout.groupBy.mock.calls[0][0].where;
+  expect(q.status).toEqual({ not: "REFUNDED" }); expect(q.order.status).toEqual({ not: "REFUNDED" });
+});
+it("Mis cobros no expone comprobante del reembolso ni operación comprador", async () => {
+  await request(sellerPayoutsRouter, "/", "creator");
+  expect(db.payout.findMany.mock.calls[0][0].select).not.toHaveProperty("refundProofUrl");
+  expect(db.payout.findMany.mock.calls[0][0].select).not.toHaveProperty("refundPaymentRef");
+});

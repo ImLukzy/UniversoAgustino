@@ -7,6 +7,7 @@ import { getOrderLabel } from "../../lib/orderLabels";
 import { ROUTES } from "../../lib/routes";
 import { SPRING } from "../../lib/motion";
 import { BuyerCaseView } from "./BuyerCaseView";
+import { PrivateImage } from "../PrivateImage";
 import { DownloadButton } from "../DownloadButton";
 
 const HINT: Record<string, (o: HubOrder) => string> = {
@@ -82,6 +83,7 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
           ))}
         </div>
       </div>
+      {order.status === "REFUNDED" && order.refund?.refundProofUrl && <div className="flex min-w-0 flex-col gap-2"><p className="text-sm">Reembolsado: {pen(order.amountCents)}</p><PrivateImage path={order.refund.refundProofUrl} alt="Comprobante de devolución al comprador" expandable />{order.refund.refundPaymentRef && <p className="break-all text-sm">Operación: {order.refund.refundPaymentRef}</p>}</div>}
       {!isDoc && order.status !== "PENDING" && <BuyerCaseView orderId={order.id} />}
     </article>
   );

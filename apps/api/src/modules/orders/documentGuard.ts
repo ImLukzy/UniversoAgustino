@@ -10,7 +10,7 @@ export async function documentGuard(buyerId: string, itemId: string, item: { sta
   if (item.status !== "PUBLISHED" || item.reviewStatus !== "APPROVED") return { status: 409, code: "NOT_AVAILABLE", message: "Este apunte ya no está disponible" };
   if (item.priceCents <= 0) return { status: 400, code: "FREE_ITEM", message: "Este apunte es gratis: ábrelo directamente en el visor" };
   const mine = { buyerId, itemType: "document", itemId };
-  if (await prisma.documentAccessGrant.count({ where: { buyerId, documentId: itemId } }) > 0) return { status: 409, code: "ALREADY_OWNED", message: "Ya compraste este apunte" };
+  if (await prisma.documentAccessGrant.count({ where: { buyerId, documentId: itemId, revokedAt: null } }) > 0) return { status: 409, code: "ALREADY_OWNED", message: "Ya compraste este apunte" };
   const owned = await prisma.order.count({ where: { ...mine, status: { in: [...ACCESS_STATUSES] } } });
   if (owned > 0) return { status: 409, code: "ALREADY_OWNED", message: "Ya compraste este apunte" };
   const existing = await prisma.order.findFirst({

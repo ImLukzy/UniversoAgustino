@@ -25,3 +25,17 @@ it("comprador sin relación no ve comprobante del vendedor", async () => { db.pa
 
 it("comprador del físico verificado puede leer su comprobante subido por trabajador", async () => { db.order.findFirst.mockResolvedValue({ id: "order" }); expect(await privateUploadAllowed("physical.png", { sub: "buyer", role: "student" })).toBe(true); expect(db.order.findFirst.mock.calls[0][0].where).toEqual({ buyerId: "buyer", itemType: "bazar", payProofUrl: "/uploads/physical.png", verifiedAt: { not: null } }); });
 it("comprobante físico no se concede al vendedor por participar", async () => { db.paymentAccount.findFirst.mockResolvedValue(null); expect(await privateUploadAllowed("physical.png", { sub: "seller", role: "creator" })).toBe(false); });
+
+it("comprador obtiene su reembolso sin conceder comprobante a vendedor", async () => {
+  db.payout.count.mockResolvedValueOnce(0).mockResolvedValueOnce(1);
+  expect(await privateUploadAllowed("refund.png", { sub: "buyer", role: "student" })).toBe(true);
+  expect(db.payout.count.mock.calls[1][0].where).toEqual({ status: "REFUNDED", refundProofUrl: "/uploads/refund.png", order: { buyerId: "buyer" } });
+});
+it("vendedor común no recibe foto de devolución al comprador", async () => {
+  db.paymentAccount.findFirst.mockResolvedValue(null);
+  expect(await privateUploadAllowed("refund.png", { sub: "seller", role: "creator" })).toBe(false);
+});
+it("tercero no recibe foto de devolución", async () => {
+  db.paymentAccount.findFirst.mockResolvedValue(null);
+  expect(await privateUploadAllowed("refund.png", { sub: "third", role: "student" })).toBe(false);
+});

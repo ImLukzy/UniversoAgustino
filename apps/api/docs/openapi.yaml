@@ -17,11 +17,35 @@ tags:
   - { name: legal }
   - { name: staff }
 paths:
+  /staff/payouts/{id}/refund:
+    post:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Técnico registra devolución íntegra congelada con foto propia; Order ESCROW y Payout FROZEN refundRequired pasan REFUNDED bajo lock300030
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [proofUrl]
+              properties:
+                proofUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$' }
+                paymentRef: { type: string, minLength: 3, maxLength: 160 }
+      responses:
+        '200': { description: 'Payout REFUNDED con refundProofUrl/refundPaymentRef/refundedAt/refundedById; grant revocado conservado, reportes ACTIONED, auditoría y avisos/correo a comprador/vendedor/cobrador. No liquidación ni comisión. Físico en custodia pasa BACK_TO_SELLER, stock solo vuelve AVAILABLE tras entrega al vendedor.' }
+        '400': { description: 'Foto propia JPG/PNG obligatoria o cuerpo inválido; montos del cliente rechazados' }
+        '401': { description: 'Sin sesión' }
+        '403': { description: 'Solo Técnico vigente' }
+        '404': { description: 'Liquidación inexistente' }
+        '409': { description: 'BAD_STATE si no FROZEN/refundRequired/ESCROW o repetido; RETURN_REQUIRED si físico aún entregado/alquilado, primero recepción en sede' }
   /staff/payouts/{id}/refund-required:
     post:
       tags: [staff]
       security: [{ bearerAuth: [] }]
-      summary: Técnico decide devolver con motivo auditado; conserva FROZEN y marca Requiere reembolso (pendiente de spec40). No transfiere dinero, cambia Order ni revoca grant
+      summary: Técnico decide devolver con motivo auditado; conserva FROZEN y marca Requiere reembolso. No transfiere dinero, cambia Order ni revoca grant
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       requestBody:
         required: true
@@ -41,7 +65,7 @@ paths:
       security: [{ bearerAuth: [] }]
       summary: Liquidaciones propias del cobrador o todas para Técnico; FIFO vencimiento, historial por fecha de pago, no-store
       parameters:
-        - { name: status, in: query, schema: { type: string, enum: [PENDING, COMPLETED, FROZEN], default: PENDING } }
+        - { name: status, in: query, schema: { type: string, enum: [PENDING, COMPLETED, FROZEN, REFUNDED], default: PENDING } }
         - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
       responses:
         '200': { description: "data Payout[] hasta50, nextPage nullable; artículo, comprador, vendedor y cuenta del vendedor" }
@@ -51,6 +75,7 @@ paths:
   /orders/payouts:
     get:
       tags: [orders]
+      description: "REFUNDED informa estado sin foto u operación de devolución al comprador; snapshots históricos conservados, neto no liquidable."
       security: [{ bearerAuth: [] }]
       summary: Mis cobros del vendedor; solo propias, precios/comisión/neto congelados, estado y comprobante privado del equipo. Sin cuentas del equipo ni comprador
       parameters:
@@ -63,7 +88,7 @@ paths:
     get:
       tags: [staff]
       security: [{ bearerAuth: [] }]
-      summary: Suma exclusivamente feeCents de pedidos verificados durante periodo; cobrador propio o Técnico global con desglose por trabajador
+      summary: Suma exclusivamente feeCents de pedidos verificados durante periodo excluyendo Order/Payout REFUNDED; cobrador propio o Técnico global con desglose por trabajador
       parameters:
         - { name: from, in: query, required: true, schema: { type: string, format: date-time } }
         - { name: to, in: query, required: true, schema: { type: string, format: date-time } }
@@ -117,6 +142,7 @@ paths:
   /documents/{id}/download:
     get:
       tags: [documents]
+      description: "Grant activo revokedAt null; reembolso bloquea descarga y URL cruda del snapshot histórico. Recompra permite nuevo grant sin reutilizar el revocado."
       security: [{ bearerAuth: [] }]
       summary: Descarga autorizada permanente. Usa archivo congelado del comprador; PDF con correo como marca de agua, no-store. Grant no expira ni depende de liquidación.
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
@@ -566,6 +592,7 @@ paths:
   /orders/mine:
     get:
       tags: [orders]
+      description: "Incluye refundProofUrl/refundPaymentRef/refundedAt del reembolso propio; comprobante privado comprador/equipo. REFUNDED nunca expone fileUrl digital."
       summary: Mis compras como comprador (auth, incluye snapshot itemTitle y fileUrl en digitales RELEASED)
       security: [{ bearerAuth: [] }]
       responses: { '200': { description: OK } }
@@ -1646,5 +1673,10 @@ components:
         amountCents: { type: integer }
         feeCents: { type: integer }
         netCents: { type: integer }
-        status: { type: string, enum: [PENDING, COMPLETED, FROZEN] }
+        status: { type: string, enum: [PENDING, COMPLETED, FROZEN, REFUNDED] }
         dueAt: { type: string, format: date-time }
+        refundRequired: { type: boolean }
+        refundProofUrl: { type: string, nullable: true }
+        refundPaymentRef: { type: string, nullable: true }
+        refundedAt: { type: string, format: date-time, nullable: true }
+        refundedById: { type: string, nullable: true }

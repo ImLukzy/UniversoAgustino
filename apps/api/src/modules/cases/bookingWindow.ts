@@ -1,3 +1,4 @@
+import { requireRefundReturn } from "./refundReturn.js";
 import type { Prisma } from "@prisma/client";
 import { calendarData, caseInclude } from "./caseGuard.js";
 import { deadline, localInstant, localParts } from "./calendar.js";
@@ -7,7 +8,11 @@ export type CaseRow = Prisma.HandoverCaseGetPayload<{ include: typeof caseInclud
 export async function bookingWindow(tx: Prisma.TransactionClient, row: CaseRow, kind: string, now: Date) {
   const data = await calendarData(tx);
   if (kind === "RETURN") {
-    if (!row.order.rentalEnd || !row.assigneeId) scheduleFail("BAD_STATE", "Este caso no tiene fecha de devolución");
+    if (!row.order.rentalEnd) {
+      await requireRefundReturn(tx, row.orderId);
+      return { ...data, minimum: now, limit: deadline(now, data.hours, data.holidays) };
+    }
+    if (!row.assigneeId) scheduleFail("BAD_STATE", "Este caso no tiene fecha de devolución");
     if (row.returnWindowStart && row.returnDeadlineAt) return { ...data, minimum: row.returnWindowStart, limit: row.returnDeadlineAt };
     const first = localInstant(localParts(row.order.rentalEnd).day, 0);
     const shifts = await tx.staffShift.findMany({ where: { userId: row.assigneeId, sedeId: row.sedeId ?? "" } });

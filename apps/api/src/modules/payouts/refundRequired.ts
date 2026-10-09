@@ -4,7 +4,7 @@ import { accountRole } from "../staff/accountPermissions.js";
 import { scheduleFail } from "../staff/scheduleGuard.js";
 import { notify, buyerOrderLink } from "../../lib/notify.js";
 import { payoutNotice } from "./notices.js";
-export const REFUND_REQUIRED = "Requiere reembolso (pendiente de spec 40)";
+export const REFUND_REQUIRED = "Requiere reembolso";
 export async function markRefundRequired(id: string, actorId: string, body: unknown) {
   const input = ResumePayoutSchema.parse(body);
   const result = await prisma.$transaction(async (tx) => {

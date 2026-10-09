@@ -16,9 +16,9 @@ export const ReceiveSchema = z.object({
 const transitions: Record<CaseStatus, readonly CaseStatus[]> = {
   UNASSIGNED: ["ASSIGNED", "CANCELLED"], ASSIGNED: ["DROP_SCHEDULED", "CANCELLED"],
   DROP_SCHEDULED: ["ASSIGNED", "IN_CUSTODY", "CANCELLED"], IN_CUSTODY: ["PICKUP_SCHEDULED", "BACK_TO_SELLER"],
-  PICKUP_SCHEDULED: ["DELIVERED", "RENTED_OUT", "BACK_TO_SELLER"], DELIVERED: ["CLOSED"],
+  PICKUP_SCHEDULED: ["DELIVERED", "RENTED_OUT", "BACK_TO_SELLER"], DELIVERED: ["CLOSED", "RETURN_SCHEDULED"],
   RENTED_OUT: ["RETURN_SCHEDULED"], RETURN_SCHEDULED: ["RETURNED"],
-  RETURNED: ["BACK_TO_SELLER"], BACK_TO_SELLER: ["CLOSED"], CLOSED: [], CANCELLED: [],
+  RETURNED: ["BACK_TO_SELLER"], BACK_TO_SELLER: ["CLOSED"], CLOSED: ["RETURN_SCHEDULED"], CANCELLED: [],
 };
 export const canTransitionCase = (from: CaseStatus, to: CaseStatus) => transitions[from].includes(to);
 export const beforeCustody = (status: CaseStatus) => ["UNASSIGNED", "ASSIGNED", "DROP_SCHEDULED"].includes(status);

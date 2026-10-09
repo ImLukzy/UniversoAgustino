@@ -32,7 +32,7 @@ export function registerQueries(casesRouter: Router) {
     const actor = await currentActor(prisma, req.user!), input = filter.parse(req.query);
     const where = { ...(input.status ? { status: input.status } : {}),
       ...(actor.role === "admin" ? (input.assigneeId ? { assigneeId: input.assigneeId } : {}) : { OR: [{ assigneeId: null }, { assigneeId: actor.sub }] }) };
-    const [data, total] = await Promise.all([prisma.handoverCase.findMany({ where, include: caseInclude, orderBy: { createdAt: "desc" }, skip: (input.page - 1) * 20, take: 20 }), prisma.handoverCase.count({ where })]);
+    const [data, total] = await Promise.all([prisma.handoverCase.findMany({ where, include: { ...caseInclude, order: { include: { payout: { select: { refundRequired: true, status: true } } } } }, orderBy: { createdAt: "desc" }, skip: (input.page - 1) * 20, take: 20 }), prisma.handoverCase.count({ where })]);
     res.json({ data, meta: { page: input.page, total, pageSize: 20 } });
   }));
   casesRouter.get("/:id", asyncHandler(async (req: AuthedRequest, res) => {

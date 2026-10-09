@@ -328,6 +328,7 @@ enum NotificationType {
   PAYOUT_DUE
   PAYOUT_FROZEN
   PAYOUT_RESUMED
+  ORDER_REFUNDED
 }
 
 model Notification {
@@ -591,6 +592,7 @@ model PaymentAccount {
 enum PayoutStatus {
   PENDING
   COMPLETED
+  REFUNDED
   FROZEN
 }
 
@@ -617,6 +619,10 @@ model Payout {
   frozenReason String?
   reminderSentAt DateTime?
   refundRequired Boolean @default(false)
+  refundProofUrl String?
+  refundPaymentRef String?
+  refundedAt DateTime?
+  refundedById String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([collectorId, status, dueAt])
@@ -634,5 +640,6 @@ model DocumentAccessGrant {
   fileUrl String
   authorId String
   grantedAt DateTime @default(now())
-  @@unique([buyerId, documentId])
+  revokedAt DateTime?
+  @@index([buyerId, documentId, revokedAt])
 }

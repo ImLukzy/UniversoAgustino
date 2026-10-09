@@ -21,7 +21,7 @@ export function registerDownload(router: Router) {
     const doc = await prisma.document.findUnique({ where: { id: req.params.id } });
     if (!doc) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Apunte no encontrado" } });
     if (!await hasFullAccess(doc, req.user)) return res.status(403).json({ error: { code: "PAYWALL", message: "El equipo debe verificar tu pago primero" } });
-    const grant = await prisma.documentAccessGrant.findUnique({ where: { buyerId_documentId: { buyerId: req.user!.sub, documentId: doc.id } } });
+    const grant = await prisma.documentAccessGrant.findFirst({ where: { buyerId: req.user!.sub, documentId: doc.id, revokedAt: null }, orderBy: { grantedAt: "desc" } });
     const name = storedNameOf(grant?.fileUrl ?? doc.fileUrl);
     const bytes = name ? await readObject(name) : null;
     if (!name || !bytes) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Archivo no encontrado" } });
