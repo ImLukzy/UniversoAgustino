@@ -6,9 +6,11 @@ import { HeroWidgetCard } from "./HeroWidgetCard";
 import { SPRING } from "../../lib/motion";
 import { ROUTES } from "../../lib/routes";
 
+// Con sesión no hay zona de subida; el relleno inferior conserva el alto del hero público
+// para que el fondo y los adornos no se recorten bajo el buscador.
 export function LandingHero({ withSession }: { withSession?: boolean } = {}) {
   return (
-    <header className="relative isolate overflow-hidden bg-[#28132c] pb-20">
+    <header className={`relative isolate overflow-hidden bg-[#28132c] ${withSession ? "pb-32 sm:pb-56" : "pb-20"}`}>
       <HeroBlobs />
       <LandingNav withSession={withSession} />
       <div className="mx-auto max-w-4xl px-4 pt-16 text-center sm:pt-24">

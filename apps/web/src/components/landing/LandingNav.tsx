@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../lib/routes";
 import { useAuthModal } from "../AuthModalHost";
+import { ProfileMenu } from "../ProfileMenu";
 
 const pill = "btn btn-secondary btn-sm hidden md:inline-flex";
 
@@ -21,7 +22,9 @@ export function LandingNav({ withSession }: { withSession?: boolean } = {}) {
       <div className="flex items-center gap-2">
         <Link to={ROUTES.explore} className={pill}>Explorar apuntes</Link>
         <Link to={ROUTES.monetiza} className={pill}>Vende tus apuntes</Link>
-        {!withSession && (
+        {withSession ? (
+          <ProfileMenu />
+        ) : (
           <button
             type="button"
             onClick={openAuth}

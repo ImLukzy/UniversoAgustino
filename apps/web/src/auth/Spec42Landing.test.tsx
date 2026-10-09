@@ -33,3 +33,19 @@ describe("Spec 42: acceso a Inicio y CTA autenticada", () => {
     expect(publicLanding).not.toContain("Ir a Explorar");
   });
 });
+
+describe("Spec 43: landing con sesión", () => {
+  it("muestra el menú de perfil en la barra y no el botón de login", () => {
+    const signedIn = render(<LandingHero withSession />);
+    expect(signedIn).toContain("Perfil");
+    expect(signedIn).not.toContain("Iniciar sesión");
+    const anon = render(<LandingHero />);
+    expect(anon).toContain("Iniciar sesión");
+    expect(anon).not.toContain("Perfil");
+  });
+
+  it("conserva el alto del hero con sesión con relleno inferior mayor", () => {
+    expect(render(<LandingHero withSession />)).toContain("sm:pb-56");
+    expect(render(<LandingHero />)).toContain("pb-20");
+  });
+});
