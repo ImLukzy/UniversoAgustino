@@ -21,7 +21,7 @@ export function PaymentAccountForm({ account, userId, members, saved }: {
     void api.request({ method: account ? "patch" : "post", url: `/staff/payment-accounts${account ? `/${account.id}` : ""}`,
       data: account ? data : { ...data, userId: owner } }).then(saved).catch((err) => setError(apiError(err))).finally(() => setBusy(false));
   }}>
-    <h3 className="font-bold">{account ? "Editar cuenta" : "Nueva cuenta"}</h3>
+    <h2 className="font-bold">{account ? "Editar cuenta" : "Nueva cuenta"}</h2>
     {members && !account && <label className="flex min-w-0 flex-col gap-1">Trabajador<select className="input min-w-0" value={form.userId} onChange={(e) => setForm({ ...form, userId: e.target.value })}>
       {members.map((m) => <option key={m.id} value={m.id}>{m.fullName || m.id}</option>)}</select></label>}
     <label className="flex flex-col gap-1">Método<select className="input" value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value as AccountFields["method"] })}>

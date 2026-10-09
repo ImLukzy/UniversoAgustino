@@ -4,6 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { SuspensionBanner } from "../components/SuspensionBanner";
 import { PanelSidebar } from "../components/teamPanel/PanelSidebar";
 import { PanelDrawer } from "../components/teamPanel/PanelDrawer";
+import { PanelTopBar } from "../components/teamPanel/PanelTopBar";
 import { PanelSection } from "../components/teamPanel/PanelSection";
 import { panelPath, visibleSections } from "../components/teamPanel/navigation";
 export function TeamPanel() {
@@ -31,14 +32,17 @@ export function TeamPanel() {
   return <div className="flex h-dvh w-full overflow-hidden bg-zinc-50">
     <a href="#panel-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:bg-white focus:p-3">Ir al contenido</a>
     <aside ref={sidebar} className="hidden h-full w-72 shrink-0 border-r border-zinc-200 bg-white p-4 lg:block" aria-label="Navegación del equipo"><PanelSidebar /></aside>
-    <button type="button" disabled={open} aria-label="Abrir menú del panel" aria-expanded={open} aria-controls="panel-drawer" onClick={() => setOpen(true)}
-      className="btn btn-primary fixed left-4 top-4 z-40 !h-11 !w-11 !px-0 shadow-lg lg:hidden"><span className="material-symbols-outlined" aria-hidden="true">menu</span></button>
-    <main id="panel-content" ref={content} tabIndex={0} aria-label="Contenido del panel" className="min-w-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
-      <div className="flex min-w-0 flex-col gap-6 px-4 pb-8 pt-20 sm:px-6 lg:px-8 lg:pt-8">
-        <header><p className="eyebrow">Panel del equipo</p><h1 className="h-display break-words text-3xl">{section.label}</h1></header>
-        <SuspensionBanner /><PanelSection key={section.slug} slug={section.slug} />
-      </div>
-    </main>
+    <div className="flex min-w-0 flex-1 flex-col">
+      <PanelTopBar title={section.label} open={open} onOpen={() => setOpen(true)} />
+      <main id="panel-content" ref={content} tabIndex={0} aria-label="Contenido del panel" className="min-h-0 min-w-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
+        <div className="mx-auto flex min-w-0 max-w-6xl flex-col gap-5 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:pt-8">
+          <header className="flex min-w-0 flex-col gap-1"><p className="eyebrow">{section.group}</p>
+            <h1 className="h-display sr-only break-words text-3xl lg:not-sr-only">{section.label}</h1>
+            <p className="max-w-prose text-sm text-zinc-600">{section.description}</p></header>
+          <SuspensionBanner /><PanelSection key={section.slug} slug={section.slug} />
+        </div>
+      </main>
+    </div>
     {open && <PanelDrawer close={close} />}
   </div>;
 }

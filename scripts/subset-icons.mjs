@@ -71,8 +71,10 @@ export function extractIcons() {
 
   // 5) data/*.ts y data/career/*.ts: icon: "..." + visualIcon: "..."
   //    (Select-String es case-insensitive; aqui cubrimos ambos explicitamente).
+  // Tambien navigation.ts del panel del equipo: sus iconos se pintan con {s.icon} (no literales).
+  const navFile = path.join(webSrc, "components/teamPanel/navigation.ts");
   for (const f of files) {
-    if (!f.startsWith(dataDir)) continue;
+    if (!f.startsWith(dataDir) && f !== navFile) continue;
     const c = fs.readFileSync(f, "utf8");
     let m;
     const ire = /\bicon\s*:\s*["']([a-z0-9_]+)["']/gi;

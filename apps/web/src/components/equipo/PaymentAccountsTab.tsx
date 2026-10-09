@@ -4,13 +4,13 @@ import { useAuth } from "../../auth/AuthContext";
 import { api, apiError } from "../../lib/api";
 import { PaymentAccountForm } from "./PaymentAccountForm";
 import type { PaymentAccount } from "./paymentAccountTypes";
+import { PanelLoading } from "../teamPanel/PanelLoading";
 export function PaymentAccountsTab() {
   const { user } = useAuth(); const qc = useQueryClient(); const [editing, setEditing] = useState<PaymentAccount>(); const [version, setVersion] = useState(0);
   const accounts = useQuery({ queryKey: ["staff", "payment-accounts", user?.id], queryFn: async () => (await api.get("/staff/payment-accounts")).data.data as PaymentAccount[] });
   const members = useQuery({ queryKey: ["staff", "members", user?.id], enabled: user?.role === "admin", queryFn: async () => (await api.get("/staff/members")).data.data as { id: string; fullName: string }[] });
-  if (accounts.isPending) return <p role="status">Cargando cuentas…</p>;
-  return <section className="flex min-w-0 flex-col gap-4"><h2 className="font-bold">Cuentas de cobro del equipo</h2>
-    <p className="text-sm">Solo las cuentas activas se muestran a compradores con un pedido activo.</p>
+  if (accounts.isPending) return <PanelLoading label="Cargando cuentas…" />;
+  return <section className="flex min-w-0 flex-col gap-4">
     {accounts.error && <p role="alert">{apiError(accounts.error)}</p>}{members.error && <p role="alert">{apiError(members.error)}</p>}
     {accounts.data?.map((a) => <div key={a.id} className="card flex min-w-0 flex-wrap items-center justify-between gap-3 p-4">
       <p className="min-w-0 break-words">{a.holder} · {a.method} · {a.number} · {a.active ? "Activa" : "Inactiva"}</p>

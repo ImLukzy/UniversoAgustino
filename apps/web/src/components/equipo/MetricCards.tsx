@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api, apiError, pen } from "../../lib/api";
+import { PanelLoading } from "../teamPanel/PanelLoading";
 import { CASE_LABELS } from "./caseTypes";
 
 type Metrics = { todayAppointments: number; noShowsThisMonth: number; pendingReviews: number; openReports: number;
@@ -8,7 +9,7 @@ type Metrics = { todayAppointments: number; noShowsThisMonth: number; pendingRev
 // Métricas del panel (spec 34); solo lectura.
 export function MetricCards() {
   const m = useQuery({ queryKey: ["staff", "metrics"], refetchInterval: 60_000, queryFn: async () => (await api.get("/staff/metrics")).data.data as Metrics });
-  if (m.isPending) return <p role="status" className="min-h-24">Cargando métricas…</p>;
+  if (m.isPending) return <PanelLoading label="Cargando métricas…" rows={4} />;
   if (m.isError) return <p role="alert" className="break-words text-[#b91c1c]">{apiError(m.error)}</p>;
   const d = m.data, cards = [["Citas de hoy", d.todayAppointments], ["Faltas del mes", d.noShowsThisMonth], ["Publicaciones por revisar", d.pendingReviews], ["Denuncias abiertas", d.openReports]] as const;
   return <div className="flex min-w-0 flex-col gap-4">

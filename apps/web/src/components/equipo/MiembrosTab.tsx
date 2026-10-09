@@ -4,6 +4,7 @@ import { api, apiError, fmtDate } from "../../lib/api";
 import { useAuth } from "../../auth/AuthContext";
 
 import { roleLabel } from "../../lib/roles";
+import { PanelLoading } from "../teamPanel/PanelLoading";
 
 interface Member { id: string; email: string; fullName: string; role: "moderator" | "admin"; since: string }
 export function MiembrosTab() {
@@ -33,9 +34,9 @@ export function MiembrosTab() {
         <input id="staff-email" type="email" required maxLength={160} value={email} onChange={(e) => setEmail(e.target.value)}
           className="input w-full min-w-0" placeholder="nombre@unsa.edu.pe" autoComplete="email" />
         <button type="submit" className="btn btn-primary w-fit" disabled={change.isPending}>Añadir al equipo</button>
-        <p role="status" className="min-h-5 break-words text-sm">{msg}</p>
+        <p role="status" className={msg ? "break-words text-sm" : "sr-only"}>{msg}</p>
       </form>
-      {members.isPending && <p role="status">Cargando miembros…</p>}
+      {members.isPending && <PanelLoading label="Cargando miembros…" />}
       {members.isError && <p role="alert">{apiError(members.error)}</p>}
       {members.data?.map((member) => <article key={member.id} className="card flex min-w-0 flex-wrap items-center gap-3 p-5">
         <div className="w-full min-w-0 flex-none break-words sm:w-auto sm:flex-1"><h3 className="font-bold">{member.fullName || member.email}</h3>

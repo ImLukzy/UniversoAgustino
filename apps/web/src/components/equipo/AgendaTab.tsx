@@ -4,6 +4,7 @@ import { addDays, mondayOf } from "@hub/shared";
 import { api, apiError } from "../../lib/api";
 import { AgendaFilters } from "./AgendaFilters";
 import { AgendaGrid } from "./AgendaGrid";
+import { PanelLoading } from "../teamPanel/PanelLoading";
 import type { Agenda } from "./agendaTypes";
 
 const todayLima = () => new Date(Date.now() - 5 * 3_600_000).toISOString().slice(0, 10);
@@ -17,7 +18,7 @@ export function AgendaTab({ goCases }: { goCases: () => void }) {
   return <section className="flex min-w-0 flex-col gap-4" aria-label="Agenda semanal">
     <AgendaFilters sedes={sedes.data ?? []} staff={agenda.data?.staff ?? []} sedeId={sedeId} staffId={staffId} week={week} onSede={setSede} onStaff={setStaff} onWeek={move} />
     <div className="min-h-[420px] min-w-0" aria-busy={agenda.isFetching}>
-      {agenda.isPending && <p role="status">Cargando agenda…</p>}
+      {agenda.isPending && <PanelLoading label="Cargando agenda…" rows={3} />}
       {agenda.isError && <p role="alert" className="break-words text-[#b91c1c]">{apiError(agenda.error)}</p>}
       {agenda.data && <AgendaGrid data={agenda.data} onOpen={goCases} />}
     </div>

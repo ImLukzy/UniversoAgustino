@@ -7,6 +7,7 @@ import { HoursForm } from "./HoursForm";
 import { HolidaysForm } from "./HolidaysForm";
 import { ShiftsForm } from "./ShiftsForm";
 import { DAYS, timeText, type SaveSchedule, type Sede, type Shift, type Schedule, type StaffChoice } from "./sedeTypes";
+import { PanelLoading } from "../teamPanel/PanelLoading";
 
 export function SedesTab() {
   const { user } = useAuth(); const qc = useQueryClient(); const admin = user?.role === "admin";
@@ -22,14 +23,14 @@ export function SedesTab() {
     } catch (error) { setMsg(apiError(error)); return false; } finally { setBusy(false); }
   };
   const error = sedes.error ?? schedule.error ?? shifts.error ?? members.error;
-  if (sedes.isPending || schedule.isPending || shifts.isPending) return <div className="min-h-64" role="status">Cargando sedes y horarios…</div>;
+  if (sedes.isPending || schedule.isPending || shifts.isPending) return <PanelLoading label="Cargando sedes y horarios…" />;
   return <div className="flex min-w-0 flex-col gap-5">
-    <p role="status" className="min-h-6 break-words text-sm">{msg}</p>{error && <p role="alert">{apiError(error)}</p>}
+    <p role="status" className={msg ? "break-words text-sm" : "sr-only"}>{msg}</p>{error && <p role="alert">{apiError(error)}</p>}
     {admin ? <>
       <SedeForm sedes={sedes.data ?? []} save={save} busy={busy} />
       <HoursForm hours={schedule.data?.hours ?? []} save={save} busy={busy} />
       <HolidaysForm holidays={schedule.data?.holidays ?? []} save={save} busy={busy} />
-    </> : <section className="card flex min-w-0 flex-col gap-3 p-5"><h2 className="font-bold">Sedes y horario · America/Lima</h2>
+    </> : <section className="card flex min-w-0 flex-col gap-3 p-5"><h2 className="font-bold">Sedes y horario</h2>
       {sedes.data?.map((s) => <div key={s.id} className="min-w-0 break-words text-sm">
         <p className="font-bold">{s.name} · {s.active ? "Activa" : "Inactiva"}</p>
         {s.address.trim() && <p>{s.address}</p>}

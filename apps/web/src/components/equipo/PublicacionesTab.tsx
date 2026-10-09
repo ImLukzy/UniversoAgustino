@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, apiError } from "../../lib/api";
 import { useAuth } from "../../auth/AuthContext";
 import { ReviewCard, type ReviewItem } from "./ReviewCard";
+import { PanelLoading } from "../teamPanel/PanelLoading";
 
 interface Queue { data: ReviewItem[]; total: number; pendingTotal: number }
 export function PublicacionesTab() {
@@ -25,14 +26,13 @@ export function PublicacionesTab() {
   if (user?.role !== "admin" && user?.role !== "moderator") return null;
   return (
     <section className="flex min-w-0 flex-col gap-4" aria-label="Publicaciones en revisión">
-      <h2 className="h-display text-xl">Publicaciones en revisión</h2>
       <div className="flex flex-wrap gap-2">
         {(["document", "bazar"] as const).map((value) => <button key={value} type="button" aria-pressed={type === value}
           onClick={() => { setType(value); setPage(1); setMsg(""); }} className={`btn btn-sm ${type === value ? "btn-primary" : "btn-secondary"}`}>
           {value === "document" ? "Documentos" : "Bazar"}</button>)}
       </div>
-      <p role="status" className="min-h-5 break-words text-sm">{msg}</p>
-      {queue.isPending && <p role="status">Cargando publicaciones…</p>}
+      <p role="status" className={msg ? "break-words text-sm" : "sr-only"}>{msg}</p>
+      {queue.isPending && <PanelLoading label="Cargando publicaciones…" />}
       {queue.isError && <p role="alert">{apiError(queue.error)}</p>}
       {queue.data?.data.length === 0 && <p className="card p-5">No hay publicaciones pendientes de este tipo.</p>}
       {queue.data?.data.map((item) => <ReviewCard key={`${item.type}-${item.id}`} item={item} busy={action.isPending} decide={decide} />)}

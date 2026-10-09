@@ -17,7 +17,7 @@ export function UsuariosTab() {
         <button type="submit" className="btn btn-primary">Buscar</button>
       </div>
     </form>
-    <div className="min-h-6" aria-live="polite">
+    <div aria-live="polite" className={found.isFetching || found.isError || found.data?.length === 0 ? "min-h-6" : "sr-only"}>
       {found.isFetching && <p role="status">Buscando…</p>}
       {found.isError && <p role="alert" className="text-[#b91c1c]">{apiError(found.error)}</p>}
       {found.data?.length === 0 && <p>Sin resultados.</p>}

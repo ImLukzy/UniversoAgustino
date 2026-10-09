@@ -5,7 +5,7 @@ import { api, apiError } from "../../lib/api";
 import { ITEM_TYPE_LABEL, REPORT_STATUS_LABEL } from "../../lib/orderLabels";
 import { useAuth } from "../../auth/AuthContext";
 import { ROUTES } from "../../lib/routes";
-import { ListRowSkeleton } from "../Skeleton";
+import { PanelLoading } from "../teamPanel/PanelLoading";
 import { EmptyState } from "../EmptyState";
 import { LoginRequired } from "../auth/LoginRequired";
 
@@ -42,25 +42,19 @@ export function DenunciasTab() {
     return <LoginRequired what="moderar reportes" />;
   if (user.role !== "admin" && user.role !== "moderator")
     return (
-      <section className="mx-auto max-w-xl px-4 py-16">
+      <section className="max-w-xl">
         <div className="card flex flex-col gap-2 p-8">
-          <h1 className="h-display text-2xl">Acceso restringido</h1>
+          <h2 className="h-display text-2xl">Acceso restringido</h2>
           <p className="text-sm text-zinc-600">La cola de moderación es solo para moderadores y administradores.</p>
         </div>
       </section>
     );
 
   return (
-    <section className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">Cola global · respuesta en menos de 48 h</p>
-          <h1 className="h-display mt-2 text-3xl">Moderación D.L. 822</h1>
-        </div>
-        <Link to={ROUTES.mySales} className="btn btn-secondary btn-sm">Gestión de ventas</Link>
-      </header>
-      <p role="status" className="min-h-[1.25rem] text-sm font-bold text-zinc-800">{msg}</p>
-      {reports.isLoading && <ListRowSkeleton count={3} />}
+    <section className="flex min-w-0 flex-col gap-4">
+      <div className="flex justify-end"><Link to={ROUTES.mySales} className="btn btn-secondary btn-sm">Gestión de ventas</Link></div>
+      <p role="status" className={msg ? "text-sm font-bold text-zinc-800" : "sr-only"}>{msg}</p>
+      {reports.isLoading && <PanelLoading label="Cargando denuncias…" />}
       {reports.data?.length === 0 && <EmptyState boxed icon="task_alt" title="Sin reportes pendientes" />}
       {reports.data?.map((r) => (
         <article key={r.id} className="card flex min-w-0 flex-col gap-2 break-words p-5 text-sm">
