@@ -4,6 +4,7 @@ import type { Request, Response } from "express";
 import { afterAll, beforeEach, expect, it, vi } from "vitest";
 import { serveUpload } from "./serveUploads.js";
 const h = vi.hoisted(() => ({ dir: `/tmp/hub-private-upload-${process.pid}`,
+  documentAccessGrant: { findFirst: vi.fn().mockResolvedValue(null) },
   upload: { findUnique: vi.fn() }, document: { findFirst: vi.fn() }, paymentAccount: { findFirst: vi.fn() }, order: { count: vi.fn() } }));
 vi.mock("../lib/prisma.js", () => ({ prisma: h }));
 vi.mock("../lib/storage.js", () => ({ storageConfig: { backend: "local", localDir: h.dir }, hasObject: vi.fn() }));

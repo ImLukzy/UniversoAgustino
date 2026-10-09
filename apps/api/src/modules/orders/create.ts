@@ -1,3 +1,4 @@
+import { privateOrder } from "./paymentPrivacy.js";
 import type { Router } from "express";
 import { CreateOrderSchema, computePrice } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
@@ -83,9 +84,12 @@ export function registerCreate(router: Router) {
           amountCents,
           feeCents,
           netCents,
-          payMethod: item.payMethod,
-          payQrUrl: item.payQrUrl,
-          payDetail: item.payDetail,
+          sellerPayMethod: item.payMethod,
+          sellerPayDetail: item.payDetail,
+          sellerPayQrUrl: item.payQrUrl,
+          payMethod: input.itemType === "document" ? null : item.payMethod,
+          payQrUrl: input.itemType === "document" ? null : item.payQrUrl,
+          payDetail: input.itemType === "document" ? null : item.payDetail,
           rentalStart,
           rentalEnd,
           status: "PENDING",
@@ -108,7 +112,7 @@ export function registerCreate(router: Router) {
           link: orderLink(order.id),
         }),
       ]);
-      res.status(201).json({ data: order });
+      res.status(201).json({ data: privateOrder(order, "buyer") });
     }),
   );
 }

@@ -44,7 +44,7 @@ export function ViewerHeader({ doc, fileUrl, fullAccess, saved, buying, onSave, 
           <span className="hidden sm:inline">{saved ? "Guardado" : "Guardar"}</span>
         </motion.button>
         {fullAccess && fileUrl && (
-          <DownloadButton url={fileUrl} className="btn btn-secondary btn-sm">
+          <DownloadButton documentId={doc.priceCents > 0 ? doc.id : undefined} url={fileUrl} className="btn btn-secondary btn-sm">
             <span className="material-symbols-outlined text-xl">download</span>
             <span className="hidden sm:inline">Descargar</span>
           </DownloadButton>

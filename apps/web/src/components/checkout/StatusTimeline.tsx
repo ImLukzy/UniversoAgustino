@@ -5,9 +5,9 @@ type Step = { key: string; label: string };
 
 const BASE: Step[] = [
   { key: "PENDING", label: "Pendiente" },
-  { key: "PAID", label: "Pagado" },
-  { key: "ESCROW", label: "En custodia" },
-  { key: "RELEASED", label: "Liberado" },
+  { key: "PAID", label: "En revisión" },
+  { key: "ESCROW", label: "Verificado" },
+  { key: "RELEASED", label: "Liquidado" },
 ];
 // "Aceptado" solo existe en el alquiler de bazar (los documentos lo saltan).
 const RENTAL: Step[] = [BASE[0], { key: "ACCEPTED", label: "Aceptado" }, ...BASE.slice(1)];
@@ -47,12 +47,12 @@ export function StatusTimeline({ status, rental }: { status: string; rental: boo
               animate={{ scale: now ? 1.1 : 1 }}
               transition={SPRING}
               className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${
-                done ? "bg-primary text-primary-ink" : now ? "bg-primary-soft text-primary ring-2 ring-primary" : "bg-zinc-100 text-zinc-400"
+                done ? "bg-primary text-primary-ink" : now ? "bg-primary-soft text-primary ring-2 ring-primary" : "bg-zinc-100 text-zinc-600"
               }`}
             >
               {done ? <span className="material-symbols-outlined text-sm">check</span> : i + 1}
             </motion.span>
-            <span className={`text-center text-[11px] font-semibold ${now ? "text-primary" : done ? "text-zinc-700" : "text-zinc-400"}`}>{s.label}</span>
+            <span className={`text-center text-[11px] font-semibold ${now ? "text-primary" : done ? "text-zinc-700" : "text-zinc-600"}`}>{s.label}</span>
           </li>
         );
       })}

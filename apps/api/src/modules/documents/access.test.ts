@@ -31,6 +31,7 @@ vi.mock("../../lib/auth.js", () => ({
 }));
 vi.mock("../../lib/prisma.js", () => ({
   prisma: {
+    documentAccessGrant: { count: async () => 0, findFirst: async () => null },
     document: {
       findFirst: async ({ where }: { where: { fileUrl: { endsWith: string } } }) => (h.doc.fileUrl.endsWith(where.fileUrl.endsWith) ? h.doc : null),
       findUnique: async () => h.doc,
@@ -43,11 +44,9 @@ vi.mock("../../lib/prisma.js", () => ({
     savedDocument: { count: async () => 0 },
   },
 }));
-
 const { serveUpload } = await import("../../middleware/serveUploads.js");
 const { optionalAuth } = await import("../../middleware/auth.js");
 const { documentsRouter } = await import("./routes.js");
-
 let base = "";
 let close = () => {};
 

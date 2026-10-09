@@ -70,6 +70,12 @@ export interface HubOrder {
   payDetail?: string | null;
   payProof?: string | null;
   payProofUrl?: string | null;
+  paymentAccountId?: string | null;
+  payHolder?: string | null;
+  payPhotoUrl?: string | null;
+  proofSubmittedAt?: string | null;
+  paymentRejectedReason?: string | null;
+  verifiedAt?: string | null;
   rentalStart?: string | null;
   rentalEnd?: string | null;
   expiresAt?: string | null;

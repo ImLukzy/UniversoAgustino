@@ -7,12 +7,10 @@ import { ROUTES } from "../lib/routes";
 import { useAuth } from "../auth/AuthContext";
 import { useAuthModal } from "../components/AuthModalHost";
 import { OrderSummary } from "../components/checkout/OrderSummary";
-import { PayMethodPanel } from "../components/checkout/PayMethodPanel";
-import { ProofForm } from "../components/checkout/ProofForm";
+import { TeamPayPanel } from "../components/checkout/TeamPayPanel";
 import { ReservationTimer } from "../components/checkout/ReservationTimer";
 import { StatusTimeline } from "../components/checkout/StatusTimeline";
 import { EscrowStatus, ExpiredState } from "../components/checkout/EscrowStatus";
-import { GatewayPay, usePayProvider } from "../components/checkout/GatewayPay";
 import { BuyerCaseView } from "../components/orders/BuyerCaseView";
 import { SPRING } from "../lib/motion";
 const TTL_REASONS = ["TTL_EXPIRED", "TTL_BACKFILL"];
@@ -36,7 +34,7 @@ function Block({ n, title, children }: { n: number; title: string; children: Rea
 }
 
 function Shell({ children }: { children: ReactNode }) {
-  return <main className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col gap-4 bg-white px-4 py-8">{children}</main>;
+  return <div className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col gap-4 bg-white px-4 py-8">{children}</div>;
 }
 
 // Checkout digital y coordinación de entregas físicas.
@@ -46,7 +44,6 @@ export function Checkout() {
   const { openAuth } = useAuthModal();
   const qc = useQueryClient();
   const [expired, setExpired] = useState(false);
-  const provider = usePayProvider();
   // Vuelta de Mercado Pago (?payment_id=…): el webhook puede tardar unos segundos.
   const [search] = useSearchParams();
   const backFromGateway = search.has("payment_id");
@@ -91,8 +88,8 @@ export function Checkout() {
   }
 
   if (o.itemType === "bazar") return <Shell><h1 className="font-display text-2xl font-bold">Coordinación del pedido</h1><OrderSummary order={o} /><BuyerCaseView orderId={o.id} /><Link to={ROUTES.myOrders} className="btn btn-secondary">Ver mis pedidos</Link></Shell>;
-  const rental = o.itemType === "bazar" && !!o.rentalStart;
-  const payable = o.status === "ACCEPTED" || (o.status === "PENDING" && o.itemType === "document");
+  const rental = false;
+  const payable = o.status === "ACCEPTED" || o.status === "PENDING" || (o.status === "PAID" && !!o.paymentRejectedReason);
   const isExpired = expired || (o.status === "CANCELLED" && TTL_REASONS.includes(o.cancelledReason ?? ""));
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["order", orderId] });
@@ -110,7 +107,7 @@ export function Checkout() {
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-zinc-900">Checkout</h1>
           {o.status === "PENDING" && o.expiresAt && !isExpired && <ReservationTimer expiresAt={o.expiresAt} onExpire={onExpire} />}
         </div>
-        <p className="text-sm text-zinc-500">Pagas directo al vendedor y el dinero queda en custodia hasta que confirmes la entrega.</p>
+        <p className="text-sm text-zinc-500">Pagas al equipo y subes la foto del comprobante. Al verificar el abono, se habilitan el apunte y su descarga permanente.</p>
         {!isExpired && <div className="pt-2"><StatusTimeline status={o.status} rental={rental} /></div>}
       </header>
 
@@ -125,18 +122,10 @@ export function Checkout() {
           </Block>
 
         ) : payable ? (
-          provider === "mercadopago" ? (
-            <Block key="gateway" n={2} title="Paga con Mercado Pago">
-              <GatewayPay order={o} />
-            </Block>
-          ) : (
-            <Block key="pay" n={2} title="Paga con Yape o Plin">
-              <PayMethodPanel order={o} />
-              <div className="mt-5 border-t border-zinc-100 pt-5">
-                <ProofForm orderId={o.id} onPaid={refresh} />
-              </div>
-            </Block>
-          )
+          <Block key="pay" n={2} title="Paga a una cuenta del equipo">
+            {o.paymentRejectedReason && <p role="alert" className="mb-4 break-words text-sm text-[#b91c1c]">Comprobante denegado: {o.paymentRejectedReason}. Puedes reenviarlo.</p>}
+            <TeamPayPanel orderId={o.id} amountCents={o.amountCents} onPaid={refresh} />
+          </Block>
         ) : (
           <Block key={`status-${o.status}`} n={rental && o.status === "PENDING" ? 2 : 3} title="Estado de custodia">
             <EscrowStatus order={o} />

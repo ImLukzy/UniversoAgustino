@@ -16,6 +16,7 @@ export const NOTIFICATION_CATEGORY = {
   ORDER_APPOINTMENT_REMINDER: "orders",
   SANCTION_APPLIED: "orders",
   SANCTION_LIFTED: "orders",
+  PAYMENT_VERIFIED: "orders", PAYMENT_REJECTED: "orders", PAYOUT_PENDING: "orders",
   STAFF_ADDED: "team", STAFF_REMOVED: "team",
 } as const satisfies Record<string, NotificationCategory>;
 export type NotificationKind = keyof typeof NOTIFICATION_CATEGORY;

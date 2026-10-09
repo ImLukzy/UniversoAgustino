@@ -57,11 +57,11 @@ describe("solicitudes bazar", () => {
     expect(r.status).toBe(403); expect(JSON.stringify(r.body)).toContain("ACCOUNT_SUSPENDED"); expect(h.order.create).not.toHaveBeenCalled();
     h.sanction.findFirst.mockResolvedValue(null);
   });
-  it("documento conserva plazo 30 min y pago directo", async () => {
+  it("documento conserva plazo 30 min pero operación sola no declara pago", async () => {
     const start = Date.now(); await request("/", "buyer", { itemType: "document", itemId: "item" });
     expect(h.order.create.mock.calls[0][0].data.expiresAt.getTime() - start).toBeLessThan(30 * 60_000 + 1000);
     h.order.findUniqueOrThrow.mockResolvedValue({ ...pending, itemType: "document" });
-    expect((await request("/order/pay", "buyer", { payProof: "123456" })).status).toBe(200);
+    expect((await request("/order/pay", "buyer", { payProof: "123456" })).status).toBe(400);
   });
   it("venta PENDING no es pagable", async () => {
     expect((await request("/order/pay", "buyer", { payProof: "123456" })).status).toBe(409); expect(h.order.update).not.toHaveBeenCalled();

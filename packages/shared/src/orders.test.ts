@@ -61,13 +61,14 @@ describe("cancelLabel", () => {
   });
 });
 
-describe("MarkPaidSchema (spec 09)", () => {
+describe("MarkPaidSchema (spec 37)", () => {
   it("acepta n° de operación y voucher interno de /uploads", () => {
-    expect(MarkPaidSchema.safeParse({ payProof: "094821", payProofUrl: "/uploads/3f2a-uuid.png" }).success).toBe(true);
-    expect(MarkPaidSchema.safeParse({ payProof: "094821" }).success).toBe(true);
+    expect(MarkPaidSchema.safeParse({ paymentAccountId: "account", payProof: "094821", payProofUrl: "/uploads/3f2a-uuid.png" }).success).toBe(true);
+    expect(MarkPaidSchema.safeParse({ paymentAccountId: "account", payProof: "094821" }).success).toBe(false);
+    expect(MarkPaidSchema.safeParse({ paymentAccountId: "account", payProofUrl: "/uploads/proof.png" }).success).toBe(true);
   });
 
-  it("exige n° de operación o voucher (spec 16)", () => {
+  it("exige cuenta y foto aunque exista número de operación", () => {
     expect(MarkPaidSchema.safeParse({}).success).toBe(false);
   });
 
@@ -75,4 +76,12 @@ describe("MarkPaidSchema (spec 09)", () => {
     expect(MarkPaidSchema.safeParse({ payProofUrl: "https://evil.example/x.png" }).success).toBe(false);
     expect(MarkPaidSchema.safeParse({ payProofUrl: "/uploads/../secret" }).success).toBe(false);
   });
+});
+
+it("comprobante sin cuenta destino es inválido", () => {
+  expect(MarkPaidSchema.safeParse({ payProofUrl: "/uploads/proof.png" }).success).toBe(false);
+});
+it("operación opcional se normaliza, pero una operación corta no se admite", () => {
+  expect(MarkPaidSchema.parse({ paymentAccountId: "account", payProofUrl: "/uploads/proof.png", payProof: " 123 " }).payProof).toBe("123");
+  expect(MarkPaidSchema.safeParse({ paymentAccountId: "account", payProofUrl: "/uploads/proof.png", payProof: "x" }).success).toBe(false);
 });

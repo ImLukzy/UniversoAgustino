@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { api, apiError, pen, type HubOrder } from "../lib/api";
+import { api, apiError, type HubOrder } from "../lib/api";
 import { useToast } from "../context/ToastContext";
 
 // Acciones del vendedor sobre una venta (aceptar alquiler, confirmar pago,
@@ -32,13 +32,8 @@ export function SaleActions({ order }: { order: HubOrder }) {
           <span className="material-symbols-outlined text-base">check</span> Aceptar
         </button>
       )}
-      {order.itemType === "document" && can("PAID") && (
-        <button type="button" disabled={busy} onClick={() => act(`/orders/${order.id}/confirm-payment`, "Pago confirmado: el pedido pasa a custodia.")} className="btn btn-primary btn-sm flex-1">
-          <span className="material-symbols-outlined text-base">verified</span> Confirmar pago ({pen(order.amountCents)})
-        </button>
-      )}
       {can("PENDING") && order.itemType === "bazar" && <button type="button" disabled={busy} onClick={() => setRejecting(true)} className="btn btn-secondary btn-sm">Rechazar</button>}
-      {((can("PENDING") && order.itemType !== "bazar") || can("ACCEPTED", "PAID")) && (
+      {((can("PENDING") && order.itemType !== "bazar") || (order.itemType === "bazar" && can("ACCEPTED", "PAID"))) && (
         <button type="button" disabled={busy} onClick={() => act(`/orders/${order.id}/cancel`, order.status === "PENDING" && order.itemType === "bazar" ? "Solicitud denegada." : "Venta cancelada.")} className="btn btn-secondary btn-sm">
           {order.status === "PENDING" && order.itemType === "bazar" ? "Denegar" : "Cancelar"}
         </button>

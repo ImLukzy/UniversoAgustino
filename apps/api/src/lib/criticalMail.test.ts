@@ -9,7 +9,7 @@ describe("correo de eventos críticos", () => {
     await sendCriticalMail({ userId: "u", type: "CASE_MESSAGE", title: "t", body: "b" });
     expect(h.send).not.toHaveBeenCalled();
     expect(isCritical("ORDER_APPOINTMENT_REMINDER")).toBe(true);
-    expect(isCritical("ORDER_PAID")).toBe(false);
+    expect(isCritical("ORDER_PAID")).toBe(true);
   });
   it("envía con enlace absoluto del primer origen", async () => {
     await sendCriticalMail({ userId: "u", type: "ORDER_ACCEPTED", title: "Aceptada", body: "Libro", link: "/pedidos" });
@@ -24,4 +24,9 @@ describe("correo de eventos críticos", () => {
     await sendCriticalMail({ userId: "u", type: "ORDER_CREATED", title: "t", body: "b" });
     expect(h.send).not.toHaveBeenCalled();
   });
+});
+
+it.each(["ORDER_PAID", "PAYMENT_VERIFIED", "PAYMENT_REJECTED", "PAYOUT_PENDING"] as const)("aviso %s también envía correo", async (type) => {
+  await sendCriticalMail({ userId: "buyer", type, title: "Pago", body: "Apunte", link: "/checkout/order" });
+  expect(h.send).toHaveBeenCalledWith("a@unsa.edu.pe", "Pago", "Apunte", "https://universoagustino.site/checkout/order");
 });

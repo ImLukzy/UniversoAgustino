@@ -18,8 +18,8 @@ function request() {
   });
 }
 beforeEach(() => { vi.clearAllMocks(); h.preference.mockResolvedValue("https://example.test/pay"); });
-describe("pasarela solo paga documentos", () => {
-  it.each([["bazar", "PENDING", 409], ["bazar", "ACCEPTED", 409], ["document", "PENDING", 200]])("%s %s → %s", async (itemType, status, expected) => {
+describe("pasarela bloqueada durante intermediación", () => {
+  it.each([["bazar", "PENDING", 409], ["bazar", "ACCEPTED", 409], ["document", "PENDING", 409]])("%s %s → %s", async (itemType, status, expected) => {
     h.find.mockResolvedValue({ id: "order", buyerId: "buyer", itemType, status, expiresAt: new Date(Date.now() + 60_000), rentalStart: null });
     expect(await request()).toBe(expected);
     expect(h.preference).toHaveBeenCalledTimes(expected === 200 ? 1 : 0);

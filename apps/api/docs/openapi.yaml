@@ -17,6 +17,60 @@ tags:
   - { name: legal }
   - { name: staff }
 paths:
+  /documents/{id}/download:
+    get:
+      tags: [documents]
+      security: [{ bearerAuth: [] }]
+      summary: Descarga autorizada permanente. Usa archivo congelado del comprador; PDF con correo como marca de agua, no-store. Grant no expira ni depende de liquidación.
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: Archivo adjunto; PDF mantiene todas las páginas }
+        '401': { description: Sin sesión }
+        '403': { description: PAYWALL, PAID no basta }
+        '404': { description: Documento o archivo no disponible }
+  /staff/payments:
+    get:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Primeros50 comprobantes digitales PAID pendientes de cuenta propia; Técnico global. Producto/detalles/comprador/monto/destino/foto. Rol actual de BD y no-store.
+      responses:
+        '200': { description: '{ data: Order[] } con buyer perfil/nombre/correo y document curso/descripción' }
+        '401': { description: Sin sesión }
+        '403': { description: Solo equipo actual }
+  /staff/payments/{id}/accept:
+    post:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Verifica PAID→ESCROW; acceso permanente + Payout PENDING neto del snapshot, dueAt48h, escrow y auditoría en una transacción. Avisos comprador/vendedor/equipo después del commit.
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '{ data: Order } con verifiedAt y paymentReviewedById' }
+        '400': { description: BAD_PHOTO }
+        '401': { description: Sin sesión }
+        '403': { description: Solo trabajador de cuenta destino o Técnico actuales }
+        '404': { description: Pedido inexistente }
+        '409': { description: BAD_STATE, DOCUMENT_UNAVAILABLE o conflicto de unicidad. Repetido no crea otro acceso/payout/aviso. }
+  /staff/payments/{id}/deny:
+    post:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Guarda motivo y revisor; conserva PAID sin acceso/payout, avisa a ambas partes y permite reenviar foto.
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties: { reason: { type: string, minLength: 5, maxLength: 300 } }
+      responses:
+        '200': { description: '{ data: Order } con paymentRejectedReason' }
+        '400': { description: VALIDATION }
+        '401': { description: Sin sesión }
+        '403': { description: Cuenta ajena o exmiembro }
+        '404': { description: Pedido inexistente }
+        '409': { description: BAD_STATE }
   /staff/payment-accounts:
     get:
       tags: [staff]
@@ -438,18 +492,27 @@ paths:
   /orders/{id}/pay:
     post:
       tags: [orders]
-      summary: El comprador declara el pago → PAID (payProof = n° operación y/o payProofUrl = voucher propio; al menos uno). No da acceso hasta que el vendedor confirme (ESCROW). 409 GATEWAY_REQUIRED con Mercado Pago activo
+      summary: Digital solamente. Cuenta activa y foto JPG/PNG propia obligatorias; operación opcional. PENDING→ACCEPTED→PAID, o reenvío PAID denegado. Sin desbloquear.
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              additionalProperties: false
+              required: [paymentAccountId, payProofUrl]
               properties:
-                payProof: { type: string, minLength: 3, maxLength: 160, description: N° de operación Yape/Plin }
-                payProofUrl: { type: string, pattern: "^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$", description: Captura del voucher subida por POST /uploads }
-      responses: { '200': { description: OK }, '400': { description: VALIDATION o BAD_PROOF }, '403': { description: FORBIDDEN }, '409': { description: BAD_STATE, RESERVATION_EXPIRED o GATEWAY_REQUIRED } }
+                paymentAccountId: { type: string, minLength: 1 }
+                payProof: { type: string, minLength: 3, maxLength: 160, description: Operación opcional }
+                payProofUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$', description: Foto propia JPG/PNG existente }
+      responses:
+        '200': { description: '{ data: Order } PAID, copia cuenta destino, limpia TTL y denegación; avisos a comprador, vendedor y trabajador.' }
+        '400': { description: VALIDATION, BAD_PHOTO o ACCOUNT_INACTIVE }
+        '401': { description: Sin sesión }
+        '403': { description: Solo comprador }
+        '409': { description: PHYSICAL_PAYMENT, BAD_STATE o RESERVATION_EXPIRED }
   /orders/{id}/reject:
     post:
       tags: [orders]
@@ -469,35 +532,35 @@ paths:
   /orders/{id}/confirm-payment:
     post:
       tags: [orders]
-      summary: El vendedor confirma el abono → ESCROW (custodia)
+      summary: Desactivado por RFC0003. Solo el equipo verifica; 409 TEAM_VERIFICATION (físico PHYSICAL_PAYMENT).
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '409': { description: BAD_STATE } }
+      responses: { '401': { description: Sin sesión }, '403': { description: FORBIDDEN }, '409': { description: TEAM_VERIFICATION, TEAM_SETTLEMENT, TEAM_PAYMENT_REQUIRED o PHYSICAL_PAYMENT según operación } }
   /orders/{id}/cancel:
     post:
       tags: [orders]
-      summary: Cancela comprador o vendedor (PENDING/ACCEPTED/PAID) con motivo
+      summary: Digital se cancela antes de declarar pago, bajo lock; PAID requiere equipo (PAYMENT_REVIEW). Bazar conserva cancelación mediada.
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK (cancelledReason BUYER_CANCELLED/SELLER_REJECTED) }, '409': { description: BAD_STATE } }
   /orders/{id}/confirm-receipt:
     post:
       tags: [orders]
-      summary: El comprador confirma recepción ESCROW → RELEASED
+      summary: Desactivado. La descarga no necesita confirmación y el equipo liquida; 409 TEAM_SETTLEMENT (físico PHYSICAL_PAYMENT).
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '409': { description: BAD_STATE } }
+      responses: { '401': { description: Sin sesión }, '403': { description: FORBIDDEN }, '409': { description: TEAM_VERIFICATION, TEAM_SETTLEMENT, TEAM_PAYMENT_REQUIRED o PHYSICAL_PAYMENT según operación } }
   /orders/{id}/refund:
     post:
       tags: [orders]
-      summary: Reembolso por moderación (moderator/admin)
+      summary: Solo Técnico; 409 TEAM_SETTLEMENT. El reclamo y la liquidación requieren revisión, no cambia el pedido automáticamente.
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK }, '403': { description: FORBIDDEN } }
+      responses: { '401': { description: Sin sesión }, '403': { description: FORBIDDEN }, '409': { description: TEAM_VERIFICATION, TEAM_SETTLEMENT, TEAM_PAYMENT_REQUIRED o PHYSICAL_PAYMENT según operación } }
   /uploads:
     post:
       tags: [uploads]
-      summary: Sube PDF/JPG/PNG/EPUB 25MB (auth, campo file). Verifica firma, UUID, dedup. 413 si excede, 415 si el contenido no coincide
+      summary: Sube PDF/JPG/PNG/EPUB 25MB (auth, campo file). purpose payment-proof crea archivo privado; team-account solo equipo. Verifica firma, UUID, dedup privado. 413 tamaño, 415 firma.
       security: [{ bearerAuth: [] }]
       responses:
         '201': { description: Creado (url, name, size, mime) }
@@ -707,20 +770,20 @@ paths:
   /payments/config:
     get:
       tags: [payments]
-      summary: Pasarela activa (manual = Yape/Plin verificado por el vendedor; mercadopago = Checkout Pro)
+      summary: Durante intermediación siempre manual; MercadoPago no se ofrece aunque existan credenciales.
       responses: { '200': { description: "{ data: { provider: manual | mercadopago } }" } }
   /payments/checkout/{orderId}:
     post:
       tags: [payments]
-      summary: Crea la preferencia de Mercado Pago del pedido del comprador y devuelve la URL de pago
+      summary: Desactivado durante intermediación; 409 TEAM_PAYMENT_REQUIRED. No crea preferencias ni atribuye.
       security: [{ bearerAuth: [] }]
       parameters: [{ name: orderId, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: "{ data: { url } }" }, '403': { description: FORBIDDEN }, '404': { description: PROVIDER_OFF }, '409': { description: BAD_STATE o RESERVATION_EXPIRED } }
+      responses: { '401': { description: Sin sesión }, '403': { description: FORBIDDEN }, '409': { description: TEAM_VERIFICATION, TEAM_SETTLEMENT, TEAM_PAYMENT_REQUIRED o PHYSICAL_PAYMENT según operación } }
   /payments/webhook:
     post:
       tags: [payments]
-      summary: Notificación de Mercado Pago. Valida x-signature (HMAC-SHA256), relee el pago y exige approved + external_reference + monto exacto → ESCROW
-      responses: { '200': { description: "{ data: { outcome } }" }, '401': { description: BAD_SIGNATURE }, '404': { description: PROVIDER_OFF } }
+      summary: Durante intermediación ignora webhooks sin leer ni atribuir pedidos; retorna ignored y reason TEAM_MEDIATION. Código del proveedor conservado apagado.
+      responses: { '200': { description: '{ data: { ignored: true, reason: TEAM_MEDIATION } }' } }
   /legal/summary:
     get:
       tags: [legal]
@@ -938,7 +1001,7 @@ paths:
         "403": { description: FORBIDDEN (solo equipo o solo Técnico) }
   /staff/users/{id}:
     get:
-      summary: Ficha del usuario: faltas, calificaciones, sanciones y tratos (solo equipo)
+      summary: "Ficha del usuario: faltas, calificaciones, sanciones y tratos (solo equipo)"
       security: [{ bearerAuth: [] }]
       parameters:
         - in: path
@@ -1443,3 +1506,28 @@ components:
           properties:
             id: { type: string }
             userId: { type: string }
+    DigitalPaymentFields:
+      type: object
+      description: Datos privados. Comprador activo ve destino del equipo; vendedor no lo ve ni obtiene voucher. Snapshot vendedor nunca se expone al comprador. Acceso permanente independiente de status con DocumentAccessGrant.
+      properties:
+        paymentAccountId: { type: string, nullable: true }
+        payHolder: { type: string, nullable: true }
+        payPhotoUrl: { type: string, nullable: true }
+        proofSubmittedAt: { type: string, format: date-time, nullable: true }
+        paymentRejectedReason: { type: string, maxLength: 300, nullable: true }
+        paymentReviewedAt: { type: string, format: date-time, nullable: true }
+        paymentReviewedById: { type: string, nullable: true }
+        verifiedAt: { type: string, format: date-time, nullable: true }
+    Payout:
+      type: object
+      description: Scaffold37; gestión/listados/comprobantes del equipo y Mis cobros se implementan en38. Montos congelados, cuenta del vendedor separada del destino del comprador.
+      properties:
+        id: { type: string }
+        orderId: { type: string }
+        sellerId: { type: string }
+        collectorId: { type: string }
+        amountCents: { type: integer }
+        feeCents: { type: integer }
+        netCents: { type: integer }
+        status: { type: string, enum: [PENDING, COMPLETED, FROZEN] }
+        dueAt: { type: string, format: date-time }

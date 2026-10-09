@@ -1,3 +1,4 @@
+import { registerDownload } from "./download.js";
 import { Router } from "express";
 import { registerListing } from "./listing.js";
 import { registerManage } from "./manage.js";
@@ -8,3 +9,5 @@ export const documentsRouter = Router();
 registerListing(documentsRouter);
 registerPreview(documentsRouter);
 registerManage(documentsRouter);
+
+registerDownload(documentsRouter);

@@ -9,6 +9,10 @@ describe("mapa de categorías", () => {
   it("separa publicaciones, equipo y pedidos", () => {
     expect(notificationTypes("team")).toEqual(["STAFF_ADDED", "STAFF_REMOVED"]);
     expect(notificationTypes("publications")).toContain("REVIEW_REJECTED");
-    expect(notificationTypes("orders").every((t) => t.startsWith("ORDER_") || /^(CASE_|SANCTION_)/.test(t))).toBe(true);
+    expect(notificationTypes("orders").every((t) => (t.startsWith("ORDER_") || t.startsWith("PAYMENT_") || t.startsWith("PAYOUT_")) || /^(CASE_|SANCTION_)/.test(t))).toBe(true);
   });
+});
+
+it.each(["PAYMENT_VERIFIED", "PAYMENT_REJECTED", "PAYOUT_PENDING"] as const)("%s se agrupa como pedido", (type) => {
+  expect(notificationTypes("orders")).toContain(type);
 });

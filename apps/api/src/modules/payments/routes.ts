@@ -1,3 +1,4 @@
+import { TEAM_MEDIATION, teamPaymentError } from "./mediation.js";
 import { Router } from "express";
 import { prisma } from "../../lib/prisma.js";
 import { env } from "../../env.js";
@@ -14,13 +15,14 @@ import { settle } from "./settle.js";
 export const paymentsRouter = Router();
 
 paymentsRouter.get("/config", (_req, res) => {
-  res.json({ data: { provider: mpEnabled() ? "mercadopago" : "manual" } });
+  res.json({ data: { provider: !TEAM_MEDIATION && mpEnabled() ? "mercadopago" : "manual" } });
 });
 
 paymentsRouter.post(
   "/checkout/:orderId",
   requireAuth,
   asyncHandler(async (req: AuthedRequest, res) => {
+    if (TEAM_MEDIATION) return res.status(409).json(teamPaymentError);
     const order = await prisma.order.findUniqueOrThrow({ where: { id: req.params.orderId } });
     if (order.buyerId !== req.user!.sub) return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el comprador paga su pedido" } });
     if (order.itemType === "bazar") return res.status(409).json({ error: { code: "PHYSICAL_PAYMENT", message: "Paga al vendedor al recoger delante del equipo" } });
@@ -42,6 +44,7 @@ paymentsRouter.post(
 paymentsRouter.post(
   "/webhook",
   asyncHandler(async (req, res) => {
+    if (TEAM_MEDIATION) return res.json({ data: { ignored: true, reason: "TEAM_MEDIATION" } });
     const body = (req.body ?? {}) as { type?: string; data?: { id?: string | number } };
     const dataId = String(req.query["data.id"] ?? body.data?.id ?? "");
     const type = String(req.query.type ?? body.type ?? "");

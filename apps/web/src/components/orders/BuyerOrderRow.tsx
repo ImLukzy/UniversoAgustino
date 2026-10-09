@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { api, apiError, fmtDate, pen, resolveQr, type HubOrder } from "../../lib/api";
+import { api, apiError, fmtDate, pen, type HubOrder } from "../../lib/api";
 import { getOrderLabel } from "../../lib/orderLabels";
 import { ROUTES } from "../../lib/routes";
 import { SPRING } from "../../lib/motion";
@@ -10,10 +10,10 @@ import { BuyerCaseView } from "./BuyerCaseView";
 import { DownloadButton } from "../DownloadButton";
 
 const HINT: Record<string, (o: HubOrder) => string> = {
-  PENDING: (o) => (o.itemType === "bazar" ? `Esperando respuesta del vendedor${o.expiresAt ? ` (vence ${new Date(o.expiresAt).toLocaleString("es-PE")})` : ""}.` : "Paga al vendedor para continuar."),
+  PENDING: (o) => (o.itemType === "bazar" ? `Esperando respuesta del vendedor${o.expiresAt ? ` (vence ${new Date(o.expiresAt).toLocaleString("es-PE")})` : ""}.` : "Paga al equipo y adjunta el comprobante."),
   ACCEPTED: (o) => o.itemType === "bazar" ? "Solicitud aceptada. El equipo coordinará el recojo." : "Solicitud aceptada. Ya puedes pagar.",
-  PAID: () => "El vendedor debe confirmar tu pago.",
-  ESCROW: () => "Confirma la recepción solo cuando verifiques tu pedido.",
+  PAID: (o) => o.paymentRejectedReason ? `Comprobante denegado: ${o.paymentRejectedReason}. Reenvíalo desde el checkout.` : "El equipo está verificando tu comprobante.",
+  ESCROW: () => "Pago verificado; el equipo liquida al vendedor en 24–48 h.",
   RELEASED: () => "Pedido completado.",
 };
 
@@ -50,7 +50,7 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
               <span className="font-mono text-xs font-bold text-zinc-500">#ORD-{order.id.slice(0, 4).toUpperCase()}</span>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.span key={order.status} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={SPRING} className="tag">
-                  {!isDoc && order.status === "PENDING" ? "Esperando respuesta" : order.cancelledReason?.startsWith("SELLER_REJECTED: ") ? "Rechazada" : getOrderLabel(order.status, "buyer", order.cancelledReason)}
+                  {isDoc && order.status === "PAID" ? (order.paymentRejectedReason ? "Comprobante denegado" : "Pago en revisión") : !isDoc && order.status === "PENDING" ? "Esperando respuesta" : order.cancelledReason?.startsWith("SELLER_REJECTED: ") ? "Rechazada" : getOrderLabel(order.status, "buyer", order.cancelledReason)}
                 </motion.span>
               </AnimatePresence>
             </div>
@@ -59,7 +59,7 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
               {fmtDate(order.createdAt)}
               {order.rentalStart && order.rentalEnd && <> · Alquiler {fmtDate(order.rentalStart)} → {fmtDate(order.rentalEnd)}</>}
               {order.payProof && <> · Constancia <b>{order.payProof}</b></>}
-              {order.payProofUrl && <> · <a href={resolveQr(order.payProofUrl) ?? undefined} target="_blank" rel="noreferrer" className="font-bold underline">voucher</a></>}
+              {order.payProofUrl && <> · <DownloadButton url={order.payProofUrl} className="font-bold underline">comprobante</DownloadButton></>}
             </p>
           </div>
         </div>
@@ -75,11 +75,8 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
             </>
           )}
           {order.status === "PAID" && <Link to={ROUTES.checkout(order.id)} className="btn btn-secondary btn-sm">Ver estado</Link>}
-          {isDoc && order.status === "ESCROW" && (
-            <button type="button" disabled={busy} onClick={() => post(`/orders/${order.id}/confirm-receipt`)} className="btn btn-primary btn-sm">Confirmar recepción</button>
-          )}
-          {order.status === "RELEASED" && isDoc && (order.fileUrl ? (
-            <DownloadButton url={order.fileUrl} className="btn btn-dark btn-sm"><span className="material-symbols-outlined text-base">download</span>Descargar</DownloadButton>
+          {isDoc && (order.fileUrl || order.status === "ESCROW" || order.status === "RELEASED") && (order.fileUrl ? (
+            <DownloadButton documentId={order.itemId} url={order.fileUrl} className="btn btn-dark btn-sm"><span className="material-symbols-outlined text-base">download</span>Descargar</DownloadButton>
           ) : (
             <Link to={itemHref} className="btn btn-dark btn-sm">Abrir apunte</Link>
           ))}

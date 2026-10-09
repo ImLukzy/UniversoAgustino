@@ -53,8 +53,8 @@ uploadsRouter.post(
     if (!f) return res.status(400).json({ error: { code: "VALIDATION", message: "Adjunte el archivo en el campo 'file'" } });
     const tmp = f.path;
     try {
-      const privateUpload = req.body.purpose === "team-account";
-      if (privateUpload && !["admin", "moderator"].includes(req.user!.role)) {
+      const privateUpload = ["team-account", "payment-proof"].includes(req.body.purpose);
+      if (req.body.purpose === "team-account" && !["admin", "moderator"].includes(req.user!.role)) {
         throw Object.assign(new Error("Solo el equipo puede subir fotos de cuentas"), { status: 403, code: "FORBIDDEN" });
       }
       const detectedMime = await verifyUpload(tmp, f.originalname);

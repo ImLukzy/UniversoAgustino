@@ -1,3 +1,4 @@
+import { DownloadButton } from "../DownloadButton";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { pen, type HubOrder } from "../../lib/api";
@@ -6,8 +7,8 @@ import { SPRING } from "../../lib/motion";
 
 const COPY: Record<string, { icon: string; title: string; body: string }> = {
   PENDING: { icon: "schedule", title: "Esperando al vendedor", body: "Debe aceptar tu solicitud de alquiler antes de que puedas pagar. Te avisaremos aquí mismo." },
-  PAID: { icon: "hourglass_top", title: "Pago declarado", body: "El vendedor está verificando el abono. Al confirmarlo, tu dinero pasa a custodia." },
-  ESCROW: { icon: "verified_user", title: "Dinero en custodia", body: "Retenemos el pago hasta que confirmes que recibiste el producto en Mis pedidos." },
+  PAID: { icon: "hourglass_top", title: "Pago declarado", body: "El equipo está verificando el abono. Al confirmarlo, tu dinero pasa a custodia." },
+  ESCROW: { icon: "verified_user", title: "Dinero en custodia", body: "El pago fue verificado. El equipo liquida al vendedor en 24–48 h." },
   RELEASED: { icon: "check_circle", title: "Pedido completado", body: "Liberamos el pago al vendedor. ¡Gracias por comprar en la comunidad!" },
   CANCELLED: { icon: "cancel", title: "Pedido cancelado", body: "Este pedido ya no está activo." },
   REFUNDED: { icon: "cancel", title: "Pago reembolsado", body: "El monto se devolvió al comprador." },
@@ -32,11 +33,11 @@ export function EscrowStatus({ order }: { order: HubOrder }) {
       <div>
         <p className="font-display text-lg font-bold text-zinc-900">{c.title}</p>
         <p className="mx-auto mt-1 max-w-xs text-sm text-zinc-500">
-          {doc && order.status === "PAID" ? "El vendedor está verificando el abono. Al confirmarlo se desbloquea el documento completo." : doc && order.status === "ESCROW" ? "Pago verificado: ya tienes acceso completo al documento." : c.body}
+          {doc && order.status === "PAID" ? "El equipo está verificando el abono. Al confirmarlo se desbloquea el documento completo." : doc && order.status === "ESCROW" ? "Pago verificado: ya puedes abrir y descargar el documento para siempre." : c.body}
         </p>
       </div>
       {order.status === "ESCROW" && (
-        <p className="text-xs text-zinc-500">{pen(order.netCents)} llegarán al vendedor cuando confirmes la recepción.</p>
+        <p className="text-xs text-zinc-500">{pen(order.netCents)} llegarán al vendedor en 24–48 h tras la verificación.</p>
       )}
       {doc && good && (
         <Link to={ROUTES.document(order.itemId)} className="btn btn-primary">
@@ -44,6 +45,7 @@ export function EscrowStatus({ order }: { order: HubOrder }) {
           Abrir el documento
         </Link>
       )}
+      {doc && good && <DownloadButton documentId={order.itemId} className="btn btn-secondary">Descargar apunte</DownloadButton>}
       <Link to={ROUTES.myOrders} className="text-sm font-semibold text-primary hover:underline">Ir a Mis pedidos</Link>
     </div>
   );

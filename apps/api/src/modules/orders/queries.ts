@@ -1,3 +1,6 @@
+import { accountRole } from "../staff/accountPermissions.js";
+import { privateOrder } from "./paymentPrivacy.js";
+import { ACCESS_STATUSES } from "../documents/access.js";
 import type { Router } from "express";
 import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
@@ -14,10 +17,12 @@ export function registerQueries(router: Router) {
       const rows = await prisma.order.findMany({ where: { buyerId: req.user!.sub }, orderBy: { createdAt: "desc" }, include: { escrow: true } });
       // Sprint 2B+: el comprador descarga sus digitales RELEASED sin fetch por
       // fila. Solo se expone el fileUrl de SUS pedidos liberados (una consulta).
-      const docIds = [...new Set(rows.filter((o) => o.itemType === "document" && o.status === "RELEASED").map((o) => o.itemId))];
+      const docIds = [...new Set(rows.filter((o) => o.itemType === "document" && ACCESS_STATUSES.includes(o.status as "ESCROW" | "RELEASED")).map((o) => o.itemId))];
       const docs = docIds.length ? await prisma.document.findMany({ where: { id: { in: docIds } }, select: { id: true, fileUrl: true } }) : [];
+      const grants = await prisma.documentAccessGrant.findMany({ where: { buyerId: req.user!.sub }, select: { documentId: true, fileUrl: true } });
+      const permanent = new Map(grants.map((g) => [g.documentId, g.fileUrl]));
       const files = new Map(docs.map((d) => [d.id, d.fileUrl ?? null]));
-      const data = rows.map((o) => ({ ...o, fileUrl: o.itemType === "document" && o.status === "RELEASED" ? (files.get(o.itemId) ?? null) : null }));
+      const data = rows.map((o) => ({ ...privateOrder(o, "buyer"), fileUrl: o.itemType === "document" ? (permanent.get(o.itemId) ?? files.get(o.itemId) ?? null) : null }));
       res.json({ data });
     }),
   );
@@ -59,7 +64,7 @@ export function registerQueries(router: Router) {
       const completions = new Map(completed.map((r) => [r.buyerId, r._count._all]));
       const page = rows.slice(0, limit);
       const data = page.map((o) => ({
-        ...o,
+        ...privateOrder(o, "seller"),
         itemTitle: meta.get(o.itemId)?.title ?? o.itemId,
         itemDesc: meta.get(o.itemId)?.desc ?? null,
         itemTx: meta.get(o.itemId)?.tx ?? null,
@@ -80,7 +85,10 @@ export function registerQueries(router: Router) {
       const me = req.user!.sub;
       const allowed = order.buyerId === me || item.ownerId === me || ["admin", "moderator"].includes(req.user!.role);
       if (!allowed) return res.status(403).json({ error: { code: "FORBIDDEN", message: "No participas en este pedido" } });
-      res.json({ data: order });
+      const staff = ["admin", "moderator"].includes(req.user!.role);
+      if (staff) await accountRole(prisma, me);
+      res.setHeader("Cache-Control", "private, no-store");
+      res.json({ data: staff ? order : privateOrder(order, me === order.buyerId ? "buyer" : "seller") });
     }),
   );
 }

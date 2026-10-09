@@ -21,6 +21,7 @@ export async function hasFullAccess(doc: DocRef, user?: Viewer): Promise<boolean
   if (doc.priceCents === 0) return true;
   if (!user) return false;
   if (doc.authorId === user.sub || user.role === "admin" || user.role === "moderator") return true;
+  if (await prisma.documentAccessGrant.count({ where: { buyerId: user.sub, documentId: doc.id } }) > 0) return true;
   const paid = await prisma.order.count({
     where: { buyerId: user.sub, itemType: "document", itemId: doc.id, status: { in: [...ACCESS_STATUSES] } },
   });
@@ -29,11 +30,15 @@ export async function hasFullAccess(doc: DocRef, user?: Viewer): Promise<boolean
 
 // Documento de pago cuyo archivo es `/uploads/<storedName>` (o null). endsWith:
 // hay filas guardadas con la URL absoluta (`http://host/uploads/<storedName>`).
-export function paidDocumentFor(storedName: string): Promise<DocRef | null> {
-  return prisma.document.findFirst({
-    where: { fileUrl: { endsWith: `/uploads/${storedName}` }, priceCents: { gt: 0 } },
+export async function paidDocumentFor(storedName: string): Promise<DocRef | null> {
+  const doc = await prisma.document.findFirst({
+    where: { fileUrl: { endsWith: `/uploads/${storedName}` } },
     select: { id: true, authorId: true, priceCents: true },
   });
+  if (doc) return doc.priceCents > 0 ? doc : null;
+  const grant = await prisma.documentAccessGrant.findFirst({ where: { fileUrl: { endsWith: `/uploads/${storedName}` } },
+    select: { documentId: true, authorId: true } });
+  return grant ? { id: grant.documentId, authorId: grant.authorId, priceCents: 1 } : null;
 }
 
 // Tipo de archivo sin exponer la ruta: el Visor decide cómo pintar la vista previa.

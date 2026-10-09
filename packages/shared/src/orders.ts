@@ -11,13 +11,10 @@ export const CreateOrderSchema = z.object({
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
 
 export const MarkPaidSchema = z.object({
-  // Constancia del comprador (n° operación Yape/Plin u otro comprobante).
-  payProof: z.string().min(3).max(160).optional(),
-  // Voucher opcional: solo rutas internas de POST /uploads (nunca URLs externas).
-  payProofUrl: z.string().regex(/^\/uploads\/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$/).optional(),
-})
-  // Spec 16: sin constancia no hay nada que el vendedor pueda verificar.
-  .refine((v) => !!v.payProof || !!v.payProofUrl, { message: "Indica el n.º de operación o adjunta el voucher", path: ["payProof"] });
+  paymentAccountId: z.string().min(1),
+  payProof: z.string().trim().min(3).max(160).optional(),
+  payProofUrl: z.string().regex(/^\/uploads\/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$/),
+}).strict();
 export type MarkPaidInput = z.infer<typeof MarkPaidSchema>;
 
 export const RejectOrderSchema = z.object({ reason: z.string().trim().min(5).max(300) });

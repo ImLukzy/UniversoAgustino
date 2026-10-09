@@ -106,9 +106,10 @@ export function fmtDate(iso?: string | null) {
 
 // Sube imagen/PDF (QR, archivos) y devuelve URL absoluta lista para guardar.
 // Con onProgress opcional (0-100) para barras de subida animadas.
-export async function uploadFileWithProgress(file: File, onProgress?: (pct: number) => void): Promise<string> {
+export async function uploadFileWithProgress(file: File, onProgress?: (pct: number) => void, purpose?: "payment-proof"): Promise<string> {
   const fd = new FormData();
   fd.append("file", file);
+  if (purpose) fd.append("purpose", purpose);
   const r = await api.post("/uploads", fd, {
     headers: { "Content-Type": "multipart/form-data" },
     onUploadProgress: (e) => {
