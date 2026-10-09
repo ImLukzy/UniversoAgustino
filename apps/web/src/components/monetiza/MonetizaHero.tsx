@@ -4,7 +4,7 @@ import { ROUTES } from "../../lib/routes";
 
 // Hechos reales del producto (nada de cifras de tráfico inventadas).
 const FACTS = [
-  { value: `${100 - PLATFORM_FEE_PCT}%`, label: "del precio es para ti, sin comisión" },
+  { value: `${100 - PLATFORM_FEE_PCT}%`, label: "del precio es para ti, comisión del 13 %" },
   { value: "Yape · Plin", label: "cobro directo, en custodia" },
   { value: "2 págs.", label: "de vista previa gratis" },
 ];

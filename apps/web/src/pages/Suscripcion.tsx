@@ -5,7 +5,7 @@ import { ROUTES } from "../lib/routes";
 const FACTS = [
   "Explora y compra apuntes por pedido individual: solo pagas lo que te llevas.",
   "El precio que ves es el que pagas; no hay cargos de plataforma.",
-  "Sin comisión: recibes el 100 % del precio.",
+  "Comisión del 13 % a cargo del vendedor: recibes el 87 % del precio.",
 ];
 
 // Mi suscripción: Universo Agustino NO tiene premium ni planes. Esta página

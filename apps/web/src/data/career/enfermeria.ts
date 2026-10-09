@@ -31,7 +31,7 @@ export const ENFERMERIA: CareerContent = {
   resFisicoTitle: "Material Clínico Físico",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar Clínico Físico",
-  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
+  feeFisicoBody: "El equipo cobra, coordina la entrega en sede y liquida al vendedor en 24–48 h.",
   equivLow: ["Trámites de laboratorio y vacunas de internado", "Juego de tijeras mayo, pinzas de disección y riñonera"],
   equivMid: ["Derecho de matrícula semestral completo", "2 juegos de chaquetas clínicas bordadas"],
   equivHigh: ["Aporte del 50% al derecho de colegiatura del CEP", "Estetoscopio profesional tipo Littmann Classic III"],

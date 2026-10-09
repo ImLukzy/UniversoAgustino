@@ -1,3 +1,4 @@
+import { registerPaymentAccounts } from "./paymentAccounts.js";
 import { Router } from "express";
 import { registerReject } from "./rejectStep.js";
 import { registerCreate } from "./create.js";
@@ -16,3 +17,5 @@ registerSellerSteps(ordersRouter);
 registerReject(ordersRouter);
 registerBuyerSteps(ordersRouter);
 registerCloseSteps(ordersRouter);
+
+registerPaymentAccounts(ordersRouter);

@@ -26,7 +26,7 @@ export function BuyPanel({ d }: { d: Detail }) {
 
           </div>
           <p className="price mt-1 text-4xl text-primary">{pen(d.quote.amountCents)}</p>
-          <p className="mt-2 text-xs text-zinc-600">Sin comisión: el vendedor recibe el 100 % del precio.</p>
+          <p className="mt-2 text-xs text-zinc-600">El comprador paga el precio publicado; el vendedor recibe el 87 % (comisión del 13 %).</p>
         </div>
         <div className="flex items-start gap-3 text-sm">
           {d.payQr ? <img src={d.payQr} alt="QR de cobro del vendedor" className="h-24 w-24 rounded-lg border-2 border-zinc-900 object-cover" /> : null}

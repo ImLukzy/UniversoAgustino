@@ -8,6 +8,7 @@ vi.mock("../../lib/notify.js", () => ({ notify: vi.fn() }));
 
 const db = vi.hoisted(() => ({
   $queryRaw: vi.fn(), handoverCase: { count: vi.fn().mockResolvedValue(0) }, appointment: { count: vi.fn().mockResolvedValue(0) },
+  paymentAccount: { updateMany: vi.fn() },
   user: { findMany: vi.fn(), findUnique: vi.fn(), updateMany: vi.fn() },
   auditLog: { findMany: vi.fn(), create: vi.fn() }, refreshToken: { updateMany: vi.fn() },
 }));

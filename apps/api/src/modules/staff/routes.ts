@@ -13,8 +13,11 @@ import { shiftsRouter } from "./shifts.js";
 import { usersRouter } from "../sanctions/users.js";
 import { agendaRouter, metricsRouter } from "../agenda/routes.js";
 
+import { paymentAccountsRouter } from "./paymentAccounts.js";
+
 export const staffRouter = Router();
 staffRouter.use(requireAuth, requireRole("moderator", "admin"));
+staffRouter.use("/payment-accounts", paymentAccountsRouter);
 staffRouter.use("/reviews", reviewsRouter);
 staffRouter.use("/sedes", staffSedesRouter);
 staffRouter.use("/schedule", scheduleRouter);
@@ -68,6 +71,7 @@ staffRouter.delete("/members/:userId", requireRole("admin"), asyncHandler(async 
     if (user.role === "admin") fail(409, "IS_ADMIN", "No puedes quitar a otro administrador");
     const changed = await tx.user.updateMany({ where: { id: userId, role: "moderator" }, data: { role: "creator" } });
     if (!changed.count) fail(409, "NOT_STAFF", "Esa persona no es moderadora");
+    await tx.paymentAccount.updateMany({ where: { userId }, data: { active: false } });
     await tx.refreshToken.updateMany({ where: { userId, revoked: false }, data: { revoked: true } });
     await tx.auditLog.create({ data: { actorId: req.user!.sub, action: "staff.remove", entity: "user", entityId: userId } });
   });

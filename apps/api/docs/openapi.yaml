@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Universo Agustino API
   version: 1.0.0
-  description: API v1 - marketplace académico UNSA (comunidad @unsa.edu.pe). Compra en custodia sin comisión.
+  description: API v1 - marketplace académico UNSA (comunidad @unsa.edu.pe). Intermediación por el equipo; comisión del 13 % a cargo del vendedor.
 servers:
   - url: http://localhost:4000/api/v1
 tags:
@@ -17,6 +17,61 @@ tags:
   - { name: legal }
   - { name: staff }
 paths:
+  /staff/payment-accounts:
+    get:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Cuentas propias del trabajador; todas para el técnico. Respuesta privada no cacheable.
+      responses:
+        '200': { description: '{ data: PaymentAccount[] }' }
+        '401': { description: Sin sesión }
+        '403': { description: Solo equipo }
+    post:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Crear cuenta propia o del equipo (técnico). Fotos JPG/PNG propias y existentes, auditado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '#/components/schemas/PaymentAccountInput' }
+                - type: object
+                  required: [userId]
+                  properties: { userId: { type: string, minLength: 1 } }
+      responses:
+        '201': { description: '{ data: PaymentAccount }' }
+        '400': { description: Contrato inválido / NOT_STAFF / BAD_PHOTO }
+        '401': { description: Sin sesión }
+        '403': { description: Solo equipo y propietario, salvo técnico }
+  /staff/payment-accounts/{id}:
+    patch:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Editar, activar o desactivar. Propietario inmutable; solo dueño o técnico.
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentAccountInput' }
+      responses:
+        '200': { description: '{ data: PaymentAccount }' }
+        '400': { description: Contrato inválido / BAD_PHOTO }
+        '401': { description: Sin sesión }
+        '403': { description: Sin permiso }
+        '404': { description: NOT_FOUND }
+  /orders/{id}/payment-accounts:
+    get:
+      tags: [orders]
+      security: [{ bearerAuth: [] }]
+      summary: Cuentas activas del equipo; solo comprador de pedido PENDING vigente, ACCEPTED o PAID. Nunca público.
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '{ data: PaymentAccount[] } sin fechas ni datos públicos' }
+        '401': { description: Sin sesión }
+        '404': { description: Pedido ajeno, vencido o inactivo }
   /health:
     get:
       tags: [auth]
@@ -461,7 +516,7 @@ paths:
   /monetization/simulate:
     post:
       tags: [monetization]
-      summary: Calculadora de ingresos (sin comisión por defecto)
+      summary: Calculadora de ingresos (comisión del 13 % por defecto)
       requestBody:
         required: true
         content:
@@ -1371,3 +1426,20 @@ components:
         reviewNote: { type: string, nullable: true, maxLength: 300 }
         reviewedAt: { type: string, format: date-time, nullable: true }
         reviewedById: { type: string, nullable: true }
+    PaymentAccountInput:
+      type: object
+      required: [method, holder, number, photoUrl, qrUrl]
+      properties:
+        method: { type: string, enum: [YAPE, PLIN, OTHER] }
+        holder: { type: string, minLength: 3, maxLength: 120 }
+        number: { type: string, minLength: 3, maxLength: 80 }
+        photoUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$' }
+        qrUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$' }
+        active: { type: boolean, default: true }
+    PaymentAccount:
+      allOf:
+        - { $ref: '#/components/schemas/PaymentAccountInput' }
+        - type: object
+          properties:
+            id: { type: string }
+            userId: { type: string }

@@ -2,7 +2,7 @@ import { Accordion } from "../Accordion";
 import { Reveal } from "./Reveal";
 import { FAQS } from "../../data/landingFaq";
 
-// FAQ enriquecida (spec 17): pagos sin comisión, custodia, bazar, correo UNSA,
+// FAQ enriquecida (spec 17): pagos con comisión del 13 %, custodia, bazar, correo UNSA,
 // desbloqueo y reembolsos. Tarjetas rudo del Accordion único de la app.
 export function LandingFAQ() {
   return (

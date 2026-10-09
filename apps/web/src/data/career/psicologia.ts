@@ -30,7 +30,7 @@ export const PSICOLOGIA: CareerContent = {
   resFisicoTitle: "Material de Prácticas",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Prácticas",
-  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
+  feeFisicoBody: "El equipo cobra, coordina la entrega en sede y liquida al vendedor en 24–48 h.",
   equivLow: ["Set de pruebas proyectivas básicas", "Chaleco de prácticas"],
   equivMid: ["Derecho de matrícula semestral completo", "Manual DSM-5"],
   equivHigh: ["Aporte a la colegiatura C.Ps.P.", "Batería completa de tests"],

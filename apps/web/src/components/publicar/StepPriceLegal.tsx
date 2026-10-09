@@ -25,7 +25,7 @@ export function StepPriceLegal({ form }: { form: PublishForm }) {
           <dl className="rounded-xl border-2 border-dashed border-zinc-300 p-4 text-sm">
             <div className="flex justify-between py-1"><dt className="text-zinc-600">Precio pagado</dt><dd className="font-bold">{pen(quote.amountCents)}</dd></div>
             <div className="mt-1 flex items-baseline justify-between border-t border-zinc-900 pt-2"><dt className="font-bold">Recibes</dt><dd className="price text-2xl text-primary">{pen(quote.netCents)}</dd></div>
-            <p className="mt-2 text-xs text-zinc-600">Sin comisión: recibes el 100 % del precio.</p>
+            <p className="mt-2 text-xs text-zinc-600">Comisión del 13 % a cargo del vendedor: recibes el 87 % del precio.</p>
           </dl>
         </div>
         {form.mode === "digital" && <SamplePagesField id="publish-samples" className="md:max-w-xs" value={form.f.samples} onChange={(v) => form.set("samples", v)} />}

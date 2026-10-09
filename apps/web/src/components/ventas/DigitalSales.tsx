@@ -11,7 +11,7 @@ export function DigitalSales({ rows, more, loadingMore, onMore }: { rows: HubOrd
       <div>
         <h2 className="h-display text-2xl">Ventas digitales</h2>
         <p className="mt-1 max-w-3xl text-sm text-zinc-600">
-          Confirma cada pago recibido para pasarlo a custodia. Sin comisión: recibes el 100 % del precio.
+          Confirma cada pago recibido para pasarlo a custodia. Comisión del 13 % a cargo del vendedor: recibes el 87 % del precio.
         </p>
       </div>
       <div className="card overflow-hidden">

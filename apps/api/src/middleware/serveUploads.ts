@@ -1,3 +1,4 @@
+import { privateUploadAllowed } from "./privateUploadAccess.js";
 import path from "node:path";
 import fs from "node:fs";
 import { Readable } from "node:stream";
@@ -12,6 +13,7 @@ import { getServeUrl, hasObject, storageConfig } from "../lib/storage.js";
 //
 // Modelo de amenaza documentado: los uploads de este marketplace son
 // públicos por diseño (previews, fotos y QRs se renderizan sin login).
+// Spec 36: QR/fotos de cuentas de equipo son privados y requieren sesión.
 // La protección real está en (1) validación por firma al subir, (2) nombres
 // UUID imposibles de adivinar, (3) cabeceras defensivas al servir y
 // (4) attachment forzado para lo no previsualizable. Las URLs de archivos
@@ -51,6 +53,10 @@ export const serveUpload = asyncHandler(async (req: AuthedRequest, res) => {
   }
 
   const rec = await prisma.upload.findUnique({ where: { storedName: name } });
+  if (rec?.private && req.user?.sub !== rec.ownerId && !await privateUploadAllowed(name, req.user)) {
+    res.setHeader("Cache-Control", "private, no-store");
+    return res.status(403).json({ error: { code: "PRIVATE_UPLOAD", message: "Este archivo es privado" } });
+  }
   const mime = rec?.detectedMime ?? guessLegacyMime(name);
   const original = rec?.originalName ?? name;
   const inline = PREVIEWABLE.has(mime);
@@ -83,7 +89,7 @@ export const serveUpload = asyncHandler(async (req: AuthedRequest, res) => {
       }
       res.setHeader("Content-Disposition", `${inline ? "inline" : "attachment"}; filename="${rfc5987(original)}"`);
       // Bytes inmutables por storedName (UUID): cacheables sin riesgo.
-      res.setHeader("Cache-Control", "private, max-age=86400");
+      res.setHeader("Cache-Control", rec?.private ? "private, no-store" : "private, max-age=86400");
       if (!upstream.body) return res.end();
       return Readable.fromWeb(upstream.body as unknown as Parameters<typeof Readable.fromWeb>[0]).pipe(res);
     }
@@ -112,6 +118,6 @@ export const serveUpload = asyncHandler(async (req: AuthedRequest, res) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Content-Type", mime);
   res.setHeader("Content-Disposition", `${disposition}; filename="${rfc5987(original)}"`);
-  res.setHeader("Cache-Control", "private, max-age=604800");
+  res.setHeader("Cache-Control", rec?.private ? "private, no-store" : "private, max-age=604800");
   return res.sendFile(abs);
 });

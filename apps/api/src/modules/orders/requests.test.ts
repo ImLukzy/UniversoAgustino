@@ -11,7 +11,7 @@ const h = vi.hoisted(() => {
   return { $queryRaw: vi.fn(), sanction: { findFirst: vi.fn() }, handoverCase: model(), appointment: model(), order: model(), bazarItem: model(), auditLog: model(), upload: model(), item: vi.fn(), notify: vi.fn(), guard: vi.fn() };
 });
 vi.mock("../../lib/prisma.js", () => ({ prisma: { ...h, $transaction: async (fn: (tx: typeof h) => Promise<unknown>) => fn(h) } }));
-vi.mock("../../env.js", () => ({ env: { FEE_PCT: 0 } }));
+vi.mock("../../env.js", () => ({ env: { FEE_PCT: 13 } }));
 vi.mock("./itemOwner.js", () => ({ itemOwner: h.item, audit: vi.fn(), EXPIRED_REASONS: ["TTL_EXPIRED"] }));
 vi.mock("./documentGuard.js", () => ({ documentGuard: h.guard }));
 vi.mock("../../lib/notify.js", () => ({ notify: h.notify, orderLink: () => "/ventas", buyerOrderLink: () => "/pedidos" }));
@@ -47,6 +47,7 @@ describe("solicitudes bazar", () => {
     const start = Date.now();
     expect((await request("/", "buyer", { itemType: "bazar", itemId: "item", rentalStart: "2026-11-01T00:00:00Z", rentalEnd: "2026-11-02T00:00:00Z" })).status).toBe(201);
     const data = h.order.create.mock.calls[0][0].data;
+    expect(data.amountCents).toBe(1000); expect(data.feeCents).toBe(130); expect(data.netCents).toBe(870); expect(data.feeBps).toBe(1300);
     expect(data.status).toBe("PENDING"); expect(data.expiresAt.getTime() - start).toBeGreaterThanOrEqual(48 * 3_600_000);
     expect(h.notify).toHaveBeenCalledWith(expect.objectContaining({ type: "ORDER_CREATED", title: "Nueva solicitud" }));
   });

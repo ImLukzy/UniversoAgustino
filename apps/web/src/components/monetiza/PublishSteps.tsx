@@ -19,7 +19,7 @@ const FAQ = [
     id: "sin-cargos",
     icon: "payments",
     title: "¿Cuánto recibo por venta?",
-    body: <p>Sin comisión: recibes el 100 % del precio. El equipo coordina la entrega en sede sin costo; el monto se congela al reservar.</p>,
+    body: <p>Comisión del 13 % a cargo del vendedor: recibes el 87 % del precio. El equipo cobra y coordina la entrega en sede; el monto se congela al reservar.</p>,
   },
   {
     id: "copias",

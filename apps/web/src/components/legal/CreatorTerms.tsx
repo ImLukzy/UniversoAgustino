@@ -8,7 +8,7 @@ const CLAUSES = [
 ];
 
 const MORE = [
-  { id: "precios", icon: "price_change", title: "Precios sin comisión", body: <p>Tú fijas el precio. Sin comisión: recibes el 100 % del precio. El equipo coordina la entrega en sede sin costo; el monto se congela al reservar el pedido.</p> },
+  { id: "precios", icon: "price_change", title: "Precios y comisión del 13 %", body: <p>Tú fijas el precio. Comisión del 13 % a cargo del vendedor: recibes el 87 % del precio. El equipo cobra y coordina la entrega en sede; el monto se congela al reservar el pedido.</p> },
   { id: "datos", icon: "fingerprint", title: "Casos clínicos anonimizados", body: <p>Nunca incluyas nombres, DNI ni números de cama de pacientes reales (Ley N° 29733 de Protección de Datos Personales).</p> },
   { id: "cita", icon: "menu_book", title: "¿Puedo citar NANDA, dosis o guías del MINSA?", body: <p>Sí, con fines docentes y citando la fuente. Lo que no puedes es copiar capítulos enteros de manuales comerciales sin aporte propio.</p> },
   { id: "clases", icon: "mic", title: "¿Puedo transcribir grabaciones de clase?", body: <p>No de forma literal: la clase magistral es obra del docente. Sí puedes redactar con tus palabras lo aprendido y ordenarlo en tu propio material.</p> },

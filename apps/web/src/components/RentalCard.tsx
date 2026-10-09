@@ -36,7 +36,7 @@ export function RentalCard({ order }: { order: HubOrder }) {
         <div className="flex flex-col gap-0.5">
           <dt className="text-zinc-500">Precio</dt>
           <dd className="price text-lg text-primary">{pen(order.amountCents)}</dd>
-          <dd className="text-zinc-500">Sin comisión: recibes el 100 % del precio.</dd>
+          <dd className="text-zinc-500">Comisión del 13 % a cargo del vendedor: recibes el 87 % del precio.</dd>
         </div>
         <div className="flex min-w-0 flex-col gap-0.5">
           <dt className="text-zinc-500">Cobro</dt>

@@ -16,7 +16,7 @@ export function OrderSummary({ order }: { order: HubOrder }) {
       </div>
       <dl className="flex flex-col gap-1.5 text-sm">
         <div className="flex justify-between text-zinc-500"><dt>Precio</dt><dd className="text-zinc-900">{pen(price)}</dd></div>
-        <p className="text-xs text-zinc-500">El equipo coordina la entrega en sede sin costo.</p>
+        <p className="text-xs text-zinc-500">El equipo cobra, coordina la entrega en sede y liquida al vendedor en 24–48 h.</p>
         <div className="mt-1 flex items-baseline justify-between border-t border-zinc-100 pt-2">
           <dt className="font-semibold text-zinc-900">Total</dt>
           <dd className="font-display text-2xl font-extrabold text-primary theme-transition">{pen(order.amountCents)}</dd>

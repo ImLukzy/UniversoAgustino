@@ -30,7 +30,7 @@ export const ING_INDUSTRIAL: CareerContent = {
   resFisicoTitle: "Material de Planta",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Planta",
-  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
+  feeFisicoBody: "El equipo cobra, coordina la entrega en sede y liquida al vendedor en 24–48 h.",
   equivLow: ["Cronómetro profesional", "Chaleco + casco de planta"],
   equivMid: ["Derecho de matrícula semestral completo", "Tablet para toma de tiempos"],
   equivHigh: ["Aporte a la colegiatura CIP", "Certificación Lean Six Sigma"],

@@ -52,8 +52,8 @@ describe("ResetSchema", () => {
 });
 
 describe("simulateEarnings", () => {
-  it("sin comisión por defecto: bruto y neto coinciden", () => {
-    expect(simulateEarnings(SimulateSchema.parse({ avgPrice: 10, salesPerMonth: 10 }))).toEqual({ gross: 100, fee: 0, net: 100, currency: "PEN" });
+  it("comisión por defecto del 13 %", () => {
+    expect(simulateEarnings(SimulateSchema.parse({ avgPrice: 10, salesPerMonth: 10 }))).toEqual({ gross: 100, fee: 13, net: 87, currency: "PEN" });
   });
   it("conserva una tasa explícita para snapshots históricos", () => {
     const r = simulateEarnings({ avgPrice: 10, salesPerMonth: 10, bazarExtra: 0, feePct: 13 });

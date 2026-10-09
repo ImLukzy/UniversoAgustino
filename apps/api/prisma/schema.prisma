@@ -67,6 +67,7 @@ model User {
   notifications Notification[]
   reports      Report[]
   refreshTokens RefreshToken[]
+  paymentAccounts PaymentAccount[]
   assignedCases HandoverCase[]
   partyAppointments Appointment[] @relation("AppointmentParty")
   staffAppointments Appointment[] @relation("AppointmentStaff")
@@ -322,6 +323,7 @@ model Upload {
   id           String   @id @default(cuid())
   ownerId      String
   owner        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  private      Boolean  @default(false)
   storedName   String   @unique
   originalName String
   bytes        Int
@@ -541,4 +543,19 @@ model Sanction {
   liftedBy User? @relation("SanctionLiftedBy", fields: [liftedById], references: [id], onDelete: Restrict)
   createdAt DateTime @default(now())
   @@index([userId, liftedAt, endsAt])
+}
+
+model PaymentAccount {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  method String
+  holder String
+  number String
+  photoUrl String
+  qrUrl String
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId, active])
 }

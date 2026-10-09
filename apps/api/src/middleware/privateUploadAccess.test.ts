@@ -1,0 +1,18 @@
+import { beforeEach, expect, it, vi } from "vitest";
+import { privateUploadAllowed } from "./privateUploadAccess.js";
+const db = vi.hoisted(() => ({ user: { findUnique: vi.fn() }, paymentAccount: { findFirst: vi.fn() }, order: { count: vi.fn() } }));
+vi.mock("../lib/prisma.js", () => ({ prisma: db }));
+beforeEach(() => { vi.clearAllMocks(); db.user.findUnique.mockResolvedValue({ role: "moderator" }); db.paymentAccount.findFirst.mockResolvedValue({ id: "account" }); db.order.count.mockResolvedValue(1); });
+it("anónimo no obtiene imágenes privadas", async () => { expect(await privateUploadAllowed("qr.png")).toBe(false); });
+it.each(["admin", "moderator"])("%s puede revisar imágenes", async (role) => { expect(await privateUploadAllowed("qr.png", { sub: "staff", role })).toBe(true); });
+it("comprador con pedido activo obtiene imagen de cuenta activa", async () => {
+  expect(await privateUploadAllowed("qr.png", { sub: "buyer", role: "student" })).toBe(true);
+  expect(db.paymentAccount.findFirst.mock.calls[0][0].where.OR).toEqual([{ photoUrl: "/uploads/qr.png" }, { qrUrl: "/uploads/qr.png" }]);
+  expect(db.order.count.mock.calls[0][0].where.buyerId).toBe("buyer");
+});
+it("tercero sin pedido no obtiene QR", async () => { db.order.count.mockResolvedValue(0); expect(await privateUploadAllowed("qr.png", { sub: "third", role: "student" })).toBe(false); });
+it("cuenta desactivada no expone imagen al comprador", async () => { db.paymentAccount.findFirst.mockResolvedValue(null); expect(await privateUploadAllowed("qr.png", { sub: "buyer", role: "student" })).toBe(false); });
+it("token de exmiembro no permite leer QR sin pedido", async () => {
+  db.user.findUnique.mockResolvedValue({ role: "creator" }); db.order.count.mockResolvedValue(0);
+  expect(await privateUploadAllowed("qr.png", { sub: "former-staff", role: "admin" })).toBe(false);
+});

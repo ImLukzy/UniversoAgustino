@@ -30,7 +30,7 @@ export const BIOLOGIA: CareerContent = {
   resFisicoTitle: "Material de Laboratorio",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Laboratorio",
-  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
+  feeFisicoBody: "El equipo cobra, coordina la entrega en sede y liquida al vendedor en 24–48 h.",
   equivLow: ["Lupa estereoscópica básica", "Kit de disección"],
   equivMid: ["Derecho de matrícula semestral completo", "Microscopio binocular"],
   equivHigh: ["Aporte a la colegiatura CBP", "Estereoscopio profesional"],

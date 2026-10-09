@@ -53,6 +53,10 @@ uploadsRouter.post(
     if (!f) return res.status(400).json({ error: { code: "VALIDATION", message: "Adjunte el archivo en el campo 'file'" } });
     const tmp = f.path;
     try {
+      const privateUpload = req.body.purpose === "team-account";
+      if (privateUpload && !["admin", "moderator"].includes(req.user!.role)) {
+        throw Object.assign(new Error("Solo el equipo puede subir fotos de cuentas"), { status: 403, code: "FORBIDDEN" });
+      }
       const detectedMime = await verifyUpload(tmp, f.originalname);
       const checksum = await sha256File(tmp);
 
@@ -62,6 +66,7 @@ uploadsRouter.post(
         select: { storedName: true, originalName: true, bytes: true, detectedMime: true },
       });
       if (existing) {
+        if (privateUpload) await prisma.upload.update({ where: { storedName: existing.storedName }, data: { private: true } });
         await fs.promises.unlink(tmp).catch(() => {});
         return res.status(201).json({
           data: {
@@ -84,6 +89,7 @@ uploadsRouter.post(
       const record = await prisma.upload.create({
         data: {
           ownerId: req.user!.sub,
+          private: privateUpload,
           storedName: stored,
           originalName: sanitizeFilename(f.originalname),
           bytes: f.size,

@@ -30,7 +30,7 @@ export const MEDICINA: CareerContent = {
   resFisicoTitle: "Material Clínico Físico",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar Clínico Físico",
-  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
+  feeFisicoBody: "El equipo cobra, coordina la entrega en sede y liquida al vendedor en 24–48 h.",
   equivLow: ["Fonendo básico y tensiómetro", "Atlas de bolsillo de anatomía"],
   equivMid: ["Derecho de matrícula semestral completo", "Estetoscopio Littmann Classic III"],
   equivHigh: ["Aporte del 50% a la colegiatura CMP", "Maletín médico completo"],

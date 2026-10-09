@@ -42,7 +42,7 @@ export function Ventas() {
     <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-8">
       <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div className="max-w-2xl">
-          <p className="eyebrow">Módulo de ventas · sin comisión</p>
+          <p className="eyebrow">Módulo de ventas · comisión 13 %</p>
           <h1 className="h-display mt-2 text-3xl sm:text-4xl">Gestión de ventas</h1>
           <p className="mt-2 text-sm text-zinc-600">Acepta compras y alquileres, confirma pagos y gestiona tus reportes.</p>
         </div>

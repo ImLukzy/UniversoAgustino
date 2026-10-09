@@ -67,11 +67,11 @@ export function EarningsSimulator({ cc, careerLabel }: { cc: CareerContent; care
           <Slider id="sales" label="Ventas por ciclo" value={sales} display={`${sales} ventas`} min={10} max={200} step={5} onChange={setSales} hint={`Promedio sugerido: ${cc.suggestSales}`} />
           <p className="rounded-xl border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">
             <b className="text-zinc-900">{kind === "digital" ? cc.feeDigitalTitle : cc.feeFisicoTitle}.</b>{" "}
-            {kind === "digital" ? "Sin comisión: recibes el 100 % del precio." : cc.feeFisicoBody}
+            {kind === "digital" ? "Comisión del 13 % a cargo del vendedor: recibes el 87 % del precio." : cc.feeFisicoBody}
           </p>
         </div>
         <div className="card bg-zinc-900 p-6 text-white sm:p-8 lg:col-span-5" aria-live="polite">
-          <p className="eyebrow text-zinc-400">Recibes el 100 % del precio</p>
+          <p className="eyebrow text-zinc-400">Recibes el 87 % del precio</p>
           <p className="price mt-3 text-5xl">{soles(sim.net)}</p>
           <dl className="mt-6 space-y-2 border-y border-dashed border-white/25 py-4 text-sm">
             <div className="flex justify-between"><dt className="text-zinc-400">Total de ventas</dt><dd className="font-bold">{soles(sim.gross)}</dd></div>

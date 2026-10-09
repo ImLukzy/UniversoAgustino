@@ -92,9 +92,9 @@ export function canTransition(from: OrderStatus, to: OrderStatus): boolean {
   return ORDER_TRANSITIONS[from].includes(to);
 }
 
-// Sin comisión por defecto. El backend puede sobrescribir la tasa con
+// Comisión del 13 % a cargo del vendedor por defecto. El backend puede sobrescribir la tasa con
 // PLATFORM_FEE_PCT; la UI y los simuladores usan este valor por defecto.
-export const PLATFORM_FEE_PCT = 0;
+export const PLATFORM_FEE_PCT = 13;
 
 // --- Precio de pedido (Sprint F2-09): la ÚNICA forma de calcular montos.
 // Invariante: netCents + feeCents === amountCents (testeada abajo en

@@ -30,7 +30,7 @@ export const AGRONOMIA: CareerContent = {
   resFisicoTitle: "Material de Campo",
   feeDigitalTitle: "Modelo de retención para Apuntes Digitales",
   feeFisicoTitle: "Modelo para Bazar de Campo",
-  feeFisicoBody: "El equipo coordina la entrega en sede sin costo.",
+  feeFisicoBody: "El equipo cobra, coordina la entrega en sede y liquida al vendedor en 24–48 h.",
   equivLow: ["Mochila de fumigación 20L", "Kit de análisis de suelo"],
   equivMid: ["Derecho de matrícula semestral completo", "Motobomba de segunda"],
   equivHigh: ["Aporte a la colegiatura CIP", "Sistema de riego por goteo"],

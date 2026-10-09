@@ -43,7 +43,7 @@ export const FAQS: Faq[] = [
     icon: "percent",
     topic: "Vender",
     q: "¿Cuánto cobra la plataforma?",
-    a: "Sin comisión: recibes el 100 % del precio. El equipo coordina la entrega en sede sin costo. No hay suscripciones ni costos por publicar.",
+    a: "Comisión del 13 % a cargo del vendedor: recibes el 87 % del precio. El equipo cobra, coordina la entrega en sede y liquida al vendedor en 24–48 h. No hay suscripciones ni costos por publicar.",
   },
   {
     icon: "sell",

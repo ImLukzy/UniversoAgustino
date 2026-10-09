@@ -31,9 +31,9 @@ describe("computePrice (invariante net + fee = amount)", () => {
     });
   });
 
-  it("sin comisión: el vendedor recibe todo el precio", () => {
-    expect(PLATFORM_FEE_PCT).toBe(0);
-    expect(computePrice(1000, PLATFORM_FEE_PCT)).toEqual({ amountCents: 1000, feeCents: 0, netCents: 1000, feeBps: 0 });
+  it("comisión 13 % a cargo del vendedor", () => {
+    expect(PLATFORM_FEE_PCT).toBe(13);
+    expect(computePrice(1000, PLATFORM_FEE_PCT)).toEqual({ amountCents: 1000, feeCents: 130, netCents: 870, feeBps: 1300 });
   });
 
   it("negativos se fijan a 0", () => {
