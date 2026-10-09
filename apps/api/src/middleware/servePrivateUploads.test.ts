@@ -5,13 +5,13 @@ import { afterAll, beforeEach, expect, it, vi } from "vitest";
 import { serveUpload } from "./serveUploads.js";
 const h = vi.hoisted(() => ({ dir: `/tmp/hub-private-upload-${process.pid}`,
   documentAccessGrant: { findFirst: vi.fn().mockResolvedValue(null) },
-  payout: { count: vi.fn().mockResolvedValue(0) }, upload: { findUnique: vi.fn() }, document: { findFirst: vi.fn() }, paymentAccount: { findFirst: vi.fn() }, order: { count: vi.fn() } }));
+  payout: { count: vi.fn().mockResolvedValue(0) }, upload: { findUnique: vi.fn() }, document: { findFirst: vi.fn() }, paymentAccount: { findFirst: vi.fn() }, order: { findFirst: vi.fn().mockResolvedValue(null), count: vi.fn() } }));
 vi.mock("../lib/prisma.js", () => ({ prisma: h }));
 vi.mock("../lib/storage.js", () => ({ storageConfig: { backend: "local", localDir: h.dir }, hasObject: vi.fn() }));
 fs.mkdirSync(h.dir, { recursive: true }); fs.writeFileSync(path.join(h.dir, "qr.png"), "private-fixture");
 afterAll(() => { fs.rmSync(h.dir, { recursive: true, force: true }); });
 beforeEach(() => {
-  vi.clearAllMocks(); h.document.findFirst.mockResolvedValue(null);
+  vi.clearAllMocks(); h.order.findFirst.mockResolvedValue(null); h.document.findFirst.mockResolvedValue(null);
   h.upload.findUnique.mockResolvedValue({ ownerId: "owner", private: true, detectedMime: "image/png", originalName: "qr.png" });
   h.paymentAccount.findFirst.mockResolvedValue(null); h.order.count.mockResolvedValue(0);
 });
@@ -40,3 +40,5 @@ it("imagen de publicación pública sigue disponible", async () => {
   h.upload.findUnique.mockResolvedValue({ private: false, detectedMime: "image/png", originalName: "qr.png" });
   expect((await request()).served).toBe(true);
 });
+
+it("comprador propio recibe bytes de comprobante físico privado con no-store", async () => { h.order.findFirst.mockResolvedValue({ id: "order" }); const r = await request({ sub: "buyer", role: "student" }); expect(r.served).toBe(true); expect(r.headers["Cache-Control"]).toBe("private, no-store"); });

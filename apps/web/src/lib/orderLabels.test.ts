@@ -5,13 +5,13 @@ describe("getOrderLabel", () => {
   it("comprador: textos de espera", () => {
     expect(getOrderLabel("PENDING", "buyer")).toBe("Esperando pago");
     expect(getOrderLabel("ESCROW", "buyer")).toBe("En custodia");
-    expect(getOrderLabel("RELEASED", "buyer")).toBe("Completado");
+    expect(getOrderLabel("RELEASED", "buyer")).toBe("Pago liquidado");
   });
 
   it("vendedor: textos de acción", () => {
     expect(getOrderLabel("PENDING", "seller")).toBe("Pendiente de aprobación");
     expect(getOrderLabel("ACCEPTED", "seller")).toBe("Aceptado · pago en espera");
-    expect(getOrderLabel("PAID", "seller")).toBe("Pagado · por confirmar");
+    expect(getOrderLabel("PAID", "seller")).toBe("En revisión por el equipo");
   });
 
   it("CANCELLED con motivo muestra la causa en ambos roles", () => {

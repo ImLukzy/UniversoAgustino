@@ -155,7 +155,7 @@ model BazarItem {
   sellerId     String
   seller       User        @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   title        String
-  kind         String      // LIBRO | SCRUB | INSTRUMENTO
+  kind         String      // LIBRO | SCRUB | INSTRUMENTO | APUNTE
   tx           String      // VENTA | ALQUILER
   priceCents   Int
   depositCents Int?
@@ -224,6 +224,7 @@ model Order {
   paymentRejectedReason String?
   paymentReviewedAt DateTime?
   paymentReviewedById String?
+  physicalClosedAt DateTime?
   verifiedAt DateTime?
   payout Payout?
   documentGrant DocumentAccessGrant?
@@ -238,6 +239,7 @@ model Order {
   // createdAt; el groupBy de completadas filtra por buyerId+status.
   @@index([itemId, createdAt(sort: Desc)])
   @@index([buyerId, status])
+  @@index([itemType, payMethod, verifiedAt])
 }
 
 model Escrow {

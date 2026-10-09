@@ -9,7 +9,7 @@ export function CaseFulfillment({ row, busy, save }: { row: StaffCase; busy: boo
   const [returning, setReturning] = useState(false);
   const now = Date.now(), active = (kind: AppointmentKind) => row.appointments.some((a) => a.kind === kind && a.status === "SCHEDULED" && new Date(a.startsAt).getTime() <= now && new Date(a.endsAt).getTime() >= now);
   return <div className="flex min-w-0 flex-col gap-3">
-    {row.status === "PICKUP_SCHEDULED" && active("PICKUP") && <PickupForm caseId={row.id} rental={!!row.order.rentalEnd} busy={busy} save={save} />}
+    {row.status === "PICKUP_SCHEDULED" && active("PICKUP") && <PickupForm caseId={row.id} rental={!!row.order.rentalEnd} amountCents={row.order.amountCents} busy={busy} save={save} />}
     {row.status === "RENTED_OUT" && <AppointmentForm caseId={row.id} kind="RETURN" busy={busy} save={save} />}
     {row.status === "RETURN_SCHEDULED" && active("RETURN") && <ReturnForm caseId={row.id} busy={busy} save={save} />}
     {row.status === "RETURNED" && <AppointmentForm caseId={row.id} kind="BACK_TO_SELLER" busy={busy} save={save} />}

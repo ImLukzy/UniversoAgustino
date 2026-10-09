@@ -14,7 +14,7 @@ const HINT: Record<string, (o: HubOrder) => string> = {
   ACCEPTED: (o) => o.itemType === "bazar" ? "Solicitud aceptada. El equipo coordinará el recojo." : "Solicitud aceptada. Ya puedes pagar.",
   PAID: (o) => o.paymentRejectedReason ? `Comprobante denegado: ${o.paymentRejectedReason}. Reenvíalo desde el checkout.` : "El equipo está verificando tu comprobante.",
   ESCROW: () => "Pago verificado; el equipo liquida al vendedor en 24–48 h.",
-  RELEASED: () => "Pedido completado.",
+  RELEASED: (o) => o.itemType === "bazar" && o.rentalEnd ? "Pago liquidado. Consulta la coordinación física de tu alquiler." : "El equipo liquidó el pago al vendedor.",
 };
 
 // Fila única de un pedido del comprador (Panel y Mis pedidos): estado,

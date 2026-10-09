@@ -12,7 +12,7 @@ import { documentGuard } from "./documentGuard.js";
 import { assertNotSuspended } from "../sanctions/guard.js";
 
 // Paso 1: el comprador crea el pedido en PENDING (nada es gratis: debe pagar
-// al Yape/Plin del vendedor y luego marcarlo como pagado).
+// al equipo: digital en checkout; físico al recoger en sede).
 export function registerCreate(router: Router) {
   router.post(
     "/",
@@ -87,9 +87,9 @@ export function registerCreate(router: Router) {
           sellerPayMethod: item.payMethod,
           sellerPayDetail: item.payDetail,
           sellerPayQrUrl: item.payQrUrl,
-          payMethod: input.itemType === "document" ? null : item.payMethod,
-          payQrUrl: input.itemType === "document" ? null : item.payQrUrl,
-          payDetail: input.itemType === "document" ? null : item.payDetail,
+          payMethod: null,
+          payQrUrl: null,
+          payDetail: null,
           rentalStart,
           rentalEnd,
           status: "PENDING",

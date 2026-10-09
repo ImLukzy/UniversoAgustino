@@ -11,6 +11,6 @@ describe("contratos de custodia", () => {
 
 describe("certificación física", () => {
   it.each([{}, { paymentMethod: "CASH", paymentConfirmed: false }, { paymentMethod: "OPERATION", paymentConfirmed: true }, { paymentMethod: "OPERATION", paymentRef: "1", paymentConfirmed: true }])("pago insuficiente %j no entrega", (body) => expect(PickupSchema.safeParse(body).success).toBe(false));
-  it("efectivo requiere confirmación y operación se normaliza", () => { expect(PickupSchema.parse({ paymentMethod: "CASH", paymentConfirmed: true }).paymentMethod).toBe("CASH"); expect(PickupSchema.parse({ paymentMethod: "OPERATION", paymentRef: "  12345  ", paymentConfirmed: true }).paymentRef).toBe("12345"); });
+  it("efectivo requiere confirmación y operación se normaliza", () => { expect(PickupSchema.parse({ paymentMethod: "CASH", paymentConfirmed: true }).paymentMethod).toBe("CASH"); expect(PickupSchema.parse({ paymentMethod: "OPERATION", paymentRef: "  12345  ", paymentAccountId: "account", paymentProofUrl: "/uploads/proof.png", paymentConfirmed: true }).paymentRef).toBe("12345"); });
   it("no registra devolución sin revisión explícita", () => { expect(ReturnReviewSchema.safeParse({ condition: "OK", conditionNote: "Buen estado" }).success).toBe(false); expect(ReturnReviewSchema.safeParse({ condition: "OK", conditionNote: "Buen estado", reviewConfirmed: true }).success).toBe(true); });
 });

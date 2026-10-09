@@ -1,6 +1,6 @@
 import { Router } from "express";
 import type { Prisma } from "@prisma/client";
-import { CreateBazarItemSchema, ListQuerySchema, UpdateBazarItemSchema } from "@hub/shared";
+import { CreateBazarItemSchema, ListBazarQuerySchema, UpdateBazarItemSchema } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
 import { asyncHandler } from "../../middleware/errors.js";
 import { optionalAuth, requireAuth, type AuthedRequest } from "../../middleware/auth.js";
@@ -13,8 +13,10 @@ export const bazarRouter = Router();
 bazarRouter.get(
   "/",
   asyncHandler(async (req, res) => {
-    const q = ListQuerySchema.parse(req.query);
+    const q = ListBazarQuerySchema.parse(req.query);
     const where: Prisma.BazarItemWhereInput = { status: "AVAILABLE", reviewStatus: "APPROVED" };
+    if (q.kind) where.kind = q.kind;
+    if (q.tx) where.tx = q.tx;
     if (q.q) where.OR = [{ title: { contains: q.q, mode: "insensitive" } }, { kind: { contains: q.q, mode: "insensitive" } }];
     const [total, rows] = await Promise.all([
       prisma.bazarItem.count({ where }),

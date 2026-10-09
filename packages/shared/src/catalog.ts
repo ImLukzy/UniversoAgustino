@@ -54,8 +54,9 @@ export const ListQuerySchema = z.object({
 });
 
 // --- Bazar ---
-export const BazarKindSchema = z.enum(["LIBRO", "SCRUB", "INSTRUMENTO"]);
+export const BazarKindSchema = z.enum(["LIBRO", "SCRUB", "INSTRUMENTO", "APUNTE"]);
 export const BazarTxSchema = z.enum(["VENTA", "ALQUILER"]);
+export const ListBazarQuerySchema = ListQuerySchema.extend({ kind: BazarKindSchema.optional(), tx: BazarTxSchema.optional() });
 const photoList = z
   .array(z.string().url().or(z.string().startsWith("/uploads/")))
   .max(4)

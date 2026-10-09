@@ -1,0 +1,36 @@
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { actor, h, resetCases } from "./caseFixture.js";
+import { physicalFlow } from "./fulfillmentFixture.js";
+import { pickupCase } from "./pickup.js";
+const paid = { paymentMethod: "OPERATION" as const, paymentAccountId: "account", paymentProofUrl: "/uploads/proof.png", paymentConfirmed: true as const };
+const cash = { paymentMethod: "CASH" as const, paymentConfirmed: true as const };
+beforeEach(resetCases); afterEach(() => vi.useRealTimers());
+it("transferencia crea Payout de snapshots y cuenta equipo, nunca libera", async () => {
+  const row = physicalFlow(); await pickupCase("case", actor, paid);
+  const p = h.payout.create.mock.calls[0][0].data;
+  expect(p).toMatchObject({ orderId: "order", sellerId: "seller", collectorId: "worker", amountCents: 1500, feeCents: 195, netCents: 1305, status: "PENDING", payDetail: "SELLER-TEST" });
+  expect(p.dueAt.getTime() - row.order.verifiedAt!.getTime()).toBe(48 * 3600000); expect(row.order.status).toBe("ESCROW");
+  expect(h.order.update.mock.calls[0][0].data).toMatchObject({ paymentAccountId: "account", payMethod: "PLIN", payDetail: "TEAM-TEST", payProofUrl: "/uploads/proof.png" });
+  expect(h.upload.update).toHaveBeenCalledWith({ where: { storedName: "proof.png" }, data: { private: true } });
+});
+it("operación opcional no impide entregar con foto", async () => { const r = physicalFlow(); await pickupCase("case", actor, paid); expect(r.paymentRef).toBe("Comprobante verificado"); expect(h.payout.create).toHaveBeenCalledTimes(1); });
+it("efectivo atribuye al trabajador que recibe sin cuenta", async () => { physicalFlow(); await pickupCase("case", actor, cash); expect(h.payout.create.mock.calls[0][0].data.collectorId).toBe("worker"); expect(h.paymentAccount.findUnique).not.toHaveBeenCalled(); expect(h.order.update.mock.calls[0][0].data).toMatchObject({ paymentAccountId: null, payMethod: "CASH", payProofUrl: null }); });
+it("Técnico registra transferencia a otro trabajador con foto propia", async () => { physicalFlow(); h.user.findUnique.mockResolvedValue({ role: "admin" }); h.upload.findUnique.mockResolvedValue({ ownerId: "admin", detectedMime: "image/png" }); await pickupCase("case", { sub: "admin", role: "admin" }, paid); expect(h.payout.create.mock.calls[0][0].data.collectorId).toBe("worker"); expect(h.order.update.mock.calls[1][0].data.paymentReviewedById).toBe("admin"); });
+it("efectivo recibido por Técnico se atribuye al Técnico", async () => { physicalFlow(); h.user.findUnique.mockResolvedValue({ role: "admin" }); await pickupCase("case", { sub: "admin", role: "admin" }, cash); expect(h.payout.create.mock.calls[0][0].data.collectorId).toBe("admin"); });
+it("custodio no usa cuenta ajena", async () => { physicalFlow(); h.paymentAccount.findUnique.mockResolvedValue({ userId: "other", active: true, user: { role: "moderator" } }); await expect(pickupCase("case", actor, paid)).rejects.toMatchObject({ status: 403 }); expect(h.order.update).not.toHaveBeenCalled(); });
+it("cuenta desactivada no registra ni entrega", async () => { physicalFlow(); h.paymentAccount.findUnique.mockResolvedValue({ userId: "worker", active: false, user: { role: "moderator" } }); await expect(pickupCase("case", actor, paid)).rejects.toMatchObject({ code: "ACCOUNT_UNAVAILABLE" }); expect(h.payout.create).not.toHaveBeenCalled(); expect(h.appointment.update).not.toHaveBeenCalled(); });
+it("cuenta de exmiembro no registra", async () => { physicalFlow(); h.paymentAccount.findUnique.mockResolvedValue({ userId: "worker", active: true, user: { role: "creator" } }); await expect(pickupCase("case", actor, paid)).rejects.toMatchObject({ code: "ACCOUNT_UNAVAILABLE" }); });
+it("cuenta inexistente no registra", async () => { physicalFlow(); h.paymentAccount.findUnique.mockResolvedValue(null); await expect(pickupCase("case", actor, paid)).rejects.toMatchObject({ code: "ACCOUNT_UNAVAILABLE" }); });
+it("foto ajena no atribuye", async () => { physicalFlow(); h.upload.findUnique.mockResolvedValue({ ownerId: "buyer", detectedMime: "image/png" }); await expect(pickupCase("case", actor, paid)).rejects.toMatchObject({ code: "BAD_PHOTO" }); expect(h.order.update).not.toHaveBeenCalled(); });
+it("foto inexistente en storage no entrega", async () => { physicalFlow(); h.hasObject.mockResolvedValue(false); await expect(pickupCase("case", actor, paid)).rejects.toMatchObject({ code: "BAD_PHOTO" }); expect(h.payout.create).not.toHaveBeenCalled(); });
+it.each(["application/pdf", "text/plain"])("comprobante %s no entrega", async (detectedMime) => { physicalFlow(); h.upload.findUnique.mockResolvedValue({ ownerId: "worker", detectedMime }); await expect(pickupCase("case", actor, paid)).rejects.toMatchObject({ code: "BAD_PHOTO" }); });
+it("rol revocado no cobra efectivo con token viejo", async () => { physicalFlow(); h.user.findUnique.mockResolvedValue({ role: "student" }); await expect(pickupCase("case", actor, cash)).rejects.toMatchObject({ status: 403 }); expect(h.payout.create).not.toHaveBeenCalled(); });
+it("falla Payout antes de entrega/inventario/avisos", async () => { physicalFlow(); h.payout.create.mockRejectedValue(new Error("db")); await expect(pickupCase("case", actor, cash)).rejects.toThrow("db"); expect(h.bazarItem.update).not.toHaveBeenCalled(); expect(h.appointment.update).not.toHaveBeenCalled(); expect(h.notify).not.toHaveBeenCalled(); });
+it("repetir entrega no duplica liquidación", async () => { physicalFlow(); await pickupCase("case", actor, cash); await expect(pickupCase("case", actor, cash)).rejects.toMatchObject({ code: "BAD_STATE" }); expect(h.payout.create).toHaveBeenCalledTimes(1); });
+it("digital no pasa por cobro físico", async () => { const r = physicalFlow(); r.order.itemType = "document"; await expect(pickupCase("case", actor, cash)).rejects.toMatchObject({ code: "BAD_STATE" }); expect(h.payout.create).not.toHaveBeenCalled(); });
+it("pago previo verificado no se atribuye dos veces", async () => { const r = physicalFlow(); r.order.verifiedAt = new Date(); await expect(pickupCase("case", actor, cash)).rejects.toMatchObject({ code: "BAD_STATE" }); });
+it("avisos comprador/vendedor/cobrador anuncian verificación y neto pendiente", async () => {
+  physicalFlow(); await pickupCase("case", actor, paid);
+  expect(h.notify.mock.calls.map(([n]) => [n.userId, n.type])).toEqual([["seller", "ORDER_PICKUP_COMPLETED"], ["buyer", "ORDER_PICKUP_COMPLETED"], ["buyer", "PAYMENT_VERIFIED"], ["seller", "PAYMENT_VERIFIED"], ["seller", "PAYOUT_PENDING"], ["worker", "PAYOUT_PENDING"]]);
+  const buyer = h.notify.mock.calls.find(([n]) => n.type === "PAYMENT_VERIFIED" && n.userId === "buyer")![0]; expect(buyer.body).toContain("entrega en sede"); expect(buyer.body).not.toContain("descargar");
+});

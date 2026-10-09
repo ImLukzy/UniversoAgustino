@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { pen, resolveQr, type HubBazarItem } from "../../lib/api";
 import { ROUTES } from "../../lib/routes";
 
-const KIND_ICON: Record<string, string> = { LIBRO: "menu_book", SCRUB: "checkroom", INSTRUMENTO: "medical_services" };
+const KIND_ICON: Record<string, string> = { APUNTE: "description", LIBRO: "menu_book", SCRUB: "checkroom", INSTRUMENTO: "medical_services" };
 
 // Card de producto físico con la MISMA geometría que DocumentCard (w-48,
 // cover h-32, título en 2 líneas, alto fijo 15.5rem = skeleton) para que convivan en una sola grilla.

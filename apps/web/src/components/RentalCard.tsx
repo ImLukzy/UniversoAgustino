@@ -1,11 +1,11 @@
-import { fmtDate, pen, resolveQr, type HubOrder } from "../lib/api";
+import { fmtDate, pen, type HubOrder } from "../lib/api";
 import { careerLabel } from "../data/unsa";
 import { getOrderLabel } from "../lib/orderLabels";
 import { CareerAvatar } from "./CareerVisual";
 import { BuyerCaseView } from "./orders/BuyerCaseView";
 import { SaleActions } from "./SaleActions";
 
-const PAY = { YAPE: "Yape", PLIN: "Plin", AMBAS: "Yape / Plin" } as const;
+
 
 // Solicitud de alquiler del bazar: comprador, fechas, desglose congelado y acciones.
 export function RentalCard({ order }: { order: HubOrder }) {
@@ -40,10 +40,8 @@ export function RentalCard({ order }: { order: HubOrder }) {
         </div>
         <div className="flex min-w-0 flex-col gap-0.5">
           <dt className="text-zinc-500">Cobro</dt>
-          <dd className="font-bold text-zinc-900">{PAY[order.payMethod as keyof typeof PAY] ?? "Yape"}</dd>
-          <dd className="text-zinc-500">Al recoger, delante del equipo.</dd>
-          {order.payProof && <dd>Constancia: <b>{order.payProof}</b></dd>}
-          {order.payProofUrl && <dd><a href={resolveQr(order.payProofUrl) ?? undefined} target="_blank" rel="noreferrer" className="font-bold text-zinc-950 underline">Ver voucher</a></dd>}
+          <dd className="font-bold text-zinc-900">Al equipo en sede</dd>
+          <dd className="text-zinc-500">Neto de {pen(order.netCents)} por liquidar en 24–48 h.</dd>
         </div>
       </dl>
       {order.status === "PAID" && (

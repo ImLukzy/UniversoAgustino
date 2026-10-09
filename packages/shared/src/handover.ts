@@ -26,9 +26,13 @@ export const beforeCustody = (status: CaseStatus) => ["UNASSIGNED", "ASSIGNED", 
 export const PickupSchema = z.object({
   paymentMethod: z.enum(["OPERATION", "CASH"]), paymentRef: z.string().trim().min(3).max(160).optional(),
   paymentConfirmed: z.literal(true),
+  paymentAccountId: z.string().min(1).optional(),
+  paymentProofUrl: ReceiveSchema.shape.photoUrl.optional(),
   returnAppointment: AppointmentSchema.refine((v) => v.kind === "RETURN", "Selecciona una cita de devolución").optional(),
-}).superRefine((v, ctx) => {
-  if (v.paymentMethod === "OPERATION" && !v.paymentRef) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["paymentRef"], message: "Indica el n.º de operación" });
+}).strict().superRefine((v, ctx) => {
+  if (v.paymentMethod === "OPERATION" && !v.paymentAccountId) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["paymentAccountId"], message: "Selecciona la cuenta del equipo" });
+  if (v.paymentMethod === "OPERATION" && !v.paymentProofUrl) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["paymentProofUrl"], message: "Adjunta foto del comprobante" });
+  if (v.paymentMethod === "CASH" && (v.paymentAccountId || v.paymentProofUrl || v.paymentRef)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Efectivo no requiere cuenta ni comprobante de transferencia" });
 });
 export type PickupInput = z.infer<typeof PickupSchema>;
 export const ReturnReviewSchema = z.object({

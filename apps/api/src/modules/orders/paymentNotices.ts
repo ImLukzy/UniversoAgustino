@@ -10,8 +10,8 @@ export async function paymentSubmittedNotices(order: Order, collectorId: string)
 export async function paymentReviewedNotices(order: Order, collectorId: string, accepted: boolean) {
   const type = accepted ? "PAYMENT_VERIFIED" : "PAYMENT_REJECTED";
   await Promise.all([
-    notify({ userId: order.buyerId, type, title: accepted ? "Apunte disponible" : "Comprobante denegado",
-      body: accepted ? `${order.itemTitle} — puedes abrir y descargar el apunte para siempre.` : `${order.itemTitle} — ${order.paymentRejectedReason}. Reenvía una foto del comprobante.`, link: buyerOrderLink(order.id) }),
+    notify({ userId: order.buyerId, type, title: accepted ? order.itemType === "document" ? "Apunte disponible" : "Pago físico verificado" : "Comprobante denegado",
+      body: accepted ? order.itemType === "document" ? `${order.itemTitle} — puedes abrir y descargar el apunte para siempre.` : `${order.itemTitle} — el equipo recibió tu pago y registró la entrega en sede.` : `${order.itemTitle} — ${order.paymentRejectedReason}. Reenvía una foto del comprobante.`, link: buyerOrderLink(order.id) }),
     notify({ userId: order.sellerId, type, title: accepted ? "Producto atribuido" : "Pago denegado",
       body: accepted ? `${order.itemTitle} — pago verificado por el equipo.` : `${order.itemTitle} — el comprador debe reenviar su comprobante.`, link: orderLink(order.id) }),
     ...(accepted ? [notify({ userId: order.sellerId, type: "PAYOUT_PENDING", title: "Liquidación pendiente",

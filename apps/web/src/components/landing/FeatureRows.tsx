@@ -32,8 +32,8 @@ export function FeatureRows() {
     },
     {
       title: "Compra segura con Yape, Plin o Mercado Pago",
-      body: "Registras tu número de operación o voucher y el vendedor valida el pago; con Mercado Pago la confirmación es automática.",
-      points: ["Tu dinero queda en custodia hasta que confirmas", "Reembolso si el material no corresponde"],
+      body: "El equipo cobra y verifica el comprobante. En físico pagas al recoger en sede; en digital adjuntas la foto desde checkout.",
+      points: ["El vendedor recibe su neto en 24–48 h", "Reclamos congelan la liquidación pendiente"],
       mock: <PaymentMock />,
       bg: "bg-zinc-100",
       flip: false,

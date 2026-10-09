@@ -7,7 +7,7 @@ vi.mock("../../lib/auth.js", () => ({ verifyAccess: (sub: string) => ({ sub, rol
 function request(router: Router, path: string, sub: string, query = {}) {
   return new Promise<{ status: number; body: { data?: { appointments: { kind: string }[] } | null } }>((resolve) => {
     const req = { method: "GET", url: path, query, user: { ...actor, sub }, headers: { authorization: `Bearer ${sub}` } } as unknown as Request;
-    const res = { statusCode: 200, status(this: Response, code: number) { this.statusCode = code; return this; }, json(this: Response, body: { data?: { appointments: { kind: string }[] } | null }) { resolve({ status: this.statusCode, body }); return this; } } as Response;
+    const res = { statusCode: 200, setHeader() {}, status(this: Response, code: number) { this.statusCode = code; return this; }, json(this: Response, body: { data?: { appointments: { kind: string }[] } | null }) { resolve({ status: this.statusCode, body }); return this; } } as unknown as Response;
     const next: NextFunction = (error) => error ? errorHandler(error, req, res, next) : resolve({ status: 404, body: {} });
     (router as unknown as { handle: (req: Request, res: Response, next: NextFunction) => void }).handle(req, res, next);
   });
@@ -29,3 +29,6 @@ describe("privacidad del caso", () => {
   it("trabajador no consulta detalle asignado a otro", async () => { const router = Router(); registerQueries(router); expect((await request(router, "/case", "other")).status).toBe(404); });
   it("lista de trabajador filtra sin asignar o propios y pagina", async () => { const router = Router(); registerQueries(router); h.handoverCase.findMany.mockResolvedValue([]); h.handoverCase.count.mockResolvedValue(0); await request(router, "/", "worker", { page: "2" }); expect(h.handoverCase.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { OR: [{ assigneeId: null }, { assigneeId: "worker" }] }, skip: 20, take: 20 })); });
 });
+
+it("vendedor no recibe número de operación comprador ni snapshot de cuenta", async () => { h.order.findUnique.mockResolvedValue({ ...order, verifiedAt: new Date() }); h.handoverCase.findUnique.mockResolvedValue({ ...row, paymentRef: "PRIVATE-OP", paymentMethod: "OPERATION", appointments: [] }); const r = await request(participantCasesRouter, "/order/order", "seller"); expect(r.body.data).toMatchObject({ paymentRecorded: true, paymentRef: null }); expect(r.body.data).not.toHaveProperty("payDetail"); expect(r.body.data).not.toHaveProperty("payProofUrl"); });
+it("comprador ve operación de su cobro físico", async () => { h.handoverCase.findUnique.mockResolvedValue({ ...row, paymentRef: "BUYER-OP", appointments: [] }); expect((await request(participantCasesRouter, "/order/order", "buyer")).body.data).toHaveProperty("paymentRef", "BUYER-OP"); });

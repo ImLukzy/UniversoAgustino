@@ -9,8 +9,9 @@ export async function backToSeller(id: string, actor: Actor) {
     caseTransition(existing.status, "CLOSED");
     if (!existing.returnedAt) {
       orderTransition(existing.order.status, "CANCELLED");
-      await tx.order.update({ where: { id: existing.orderId }, data: { status: "CANCELLED", cancelledAt: now, cancelledReason: "TEAM_RETURNED", expiresAt: null } });
-    } else if (existing.order.status !== "RELEASED") scheduleFail("BAD_STATE", "El alquiler no terminó su revisión");
+      await tx.order.update({ where: { id: existing.orderId }, data: { status: "CANCELLED", physicalClosedAt: now, cancelledAt: now, cancelledReason: "TEAM_RETURNED", expiresAt: null } });
+    } else if (!["ESCROW", "RELEASED"].includes(existing.order.status)) scheduleFail("BAD_STATE", "El alquiler no terminó su revisión");
+    if (existing.returnedAt) await tx.order.update({ where: { id: existing.orderId }, data: { physicalClosedAt: now } });
     await tx.appointment.update({ where: { id: appointment.id }, data: { status: "DONE" } });
     await tx.bazarItem.update({ where: { id: existing.order.itemId }, data: { status: "AVAILABLE" } });
     await tx.auditLog.create({ data: { actorId: actor.sub, action: "order.physical_return", entity: "order", entityId: existing.orderId } });

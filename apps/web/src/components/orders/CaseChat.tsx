@@ -17,7 +17,7 @@ export function CaseChat({ caseId, base, closed = false }: { caseId: string; bas
   const send = useMutation({ mutationFn: async () => { await api.post(`${base}/${caseId}/messages`, { body: text }); },
     onSuccess: () => { setText(""); void client.invalidateQueries({ queryKey: key }); } });
   const regionId = `chat-${caseId}`;
-  return <section className="flex min-w-0 flex-col gap-2" aria-label="Mensajes del trato">
+  return <section className="flex min-w-0 flex-col gap-2" aria-label={`Mensajes del trato · ${caseId}`}>
     <button type="button" className="btn btn-secondary btn-sm self-start" aria-expanded={open} aria-controls={regionId} onClick={() => setOpen(!open)}>
       {open ? "Ocultar mensajes" : "Mensajes del trato"}</button>
     {open && <div id={regionId} className="flex min-w-0 flex-col gap-2">

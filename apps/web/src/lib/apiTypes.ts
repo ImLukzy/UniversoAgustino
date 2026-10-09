@@ -65,7 +65,7 @@ export interface HubOrder {
   feeCents: number;
   netCents: number;
   status: string;
-  payMethod?: PayMethod | null;
+  payMethod?: PayMethod | "OTHER" | "CASH" | null;
   payQrUrl?: string | null;
   payDetail?: string | null;
   payProof?: string | null;
@@ -76,6 +76,7 @@ export interface HubOrder {
   proofSubmittedAt?: string | null;
   paymentRejectedReason?: string | null;
   verifiedAt?: string | null;
+  physicalClosedAt?: string | null;
   rentalStart?: string | null;
   rentalEnd?: string | null;
   expiresAt?: string | null;

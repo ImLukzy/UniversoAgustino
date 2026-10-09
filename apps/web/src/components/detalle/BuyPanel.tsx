@@ -1,6 +1,5 @@
 import { pen } from "../../lib/api";
 import { careerLabel } from "../../data/unsa";
-import { PAY_LABEL } from "../../lib/payments";
 import { CareerAvatar } from "../CareerVisual";
 import { todayLocal, type Detail } from "./useDetail";
 
@@ -28,13 +27,7 @@ export function BuyPanel({ d }: { d: Detail }) {
           <p className="price mt-1 text-4xl text-primary">{pen(d.quote.amountCents)}</p>
           <p className="mt-2 text-xs text-zinc-600">El comprador paga el precio publicado; el vendedor recibe el 87 % (comisión del 13 %).</p>
         </div>
-        <div className="flex items-start gap-3 text-sm">
-          {d.payQr ? <img src={d.payQr} alt="QR de cobro del vendedor" className="h-24 w-24 rounded-lg border-2 border-zinc-900 object-cover" /> : null}
-          <div>
-            <p className="font-bold text-zinc-950">Cobro por {PAY_LABEL[d.src?.payMethod ??"YAPE"]}</p>
-            <p className="text-zinc-600">{d.src?.payDetail || (d.payQr ? "" :"El vendedor aún no sube su QR.")}</p>
-          </div>
-        </div>
+        <p className="text-sm text-zinc-600">{isBazar ? "Paga al equipo al recoger en sede, después de revisar el artículo." : "Elige una cuenta del equipo en checkout y adjunta la foto del comprobante."}</p>
         {d.isRental && d.available && (
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1 text-xs font-bold text-zinc-700">
@@ -50,7 +43,7 @@ export function BuyPanel({ d }: { d: Detail }) {
         )}
         <p role="alert" className="min-h-[1rem] text-sm font-bold text-[#b91c1c]">{d.err}</p>
         <button type="button" disabled={!d.available || d.busy} onClick={d.buy} className="btn btn-primary btn-lg w-full">{cta}</button>
-        <p className="text-center text-xs text-zinc-500">Pagas al vendedor; el pedido queda en custodia hasta que confirmas la recepción.</p>
+        <p className="text-center text-xs text-zinc-500">El equipo verifica el pago y liquida al vendedor en 24–48 h.</p>
       </div>
       <ul className="card-dashed flex flex-col gap-2 p-5 text-sm text-zinc-700">
         <li className="flex gap-2"><span className="material-symbols-outlined text-base text-primary">lock</span>{isBazar ? "El vendedor tiene 48 h para responder." : "Reserva de 30 minutos mientras pagas."}</li>

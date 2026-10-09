@@ -1,0 +1,12 @@
+import { expect, it, vi } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
+import { PickupForm } from "../components/equipo/PickupForm";
+import { PhysicalPaymentFields, paymentReady, type PhysicalPayment } from "../components/equipo/PhysicalPaymentFields";
+import { BAZAR_KINDS } from "../lib/publishing";
+vi.mock("@tanstack/react-query", () => ({ useQuery: () => ({ data: [], isLoading: false }) }));
+vi.mock("../auth/AuthContext", () => ({ useAuth: () => ({ user: { id: "worker" } }) }));
+const v: PhysicalPayment = { method: "OPERATION", accountId: "account", proofUrl: "", reference: "", confirmed: true, uploading: false };
+it("recojo inicial exige cuenta y foto para registrar", () => { const html = renderToStaticMarkup(<PickupForm caseId="case" rental={false} amountCents={1500} busy={false} save={async () => true} />); expect(html).toContain("Foto del comprobante (obligatoria)"); expect(html).toContain("Pago al equipo"); expect(html).not.toContain("Pago al vendedor"); expect(html).toContain('disabled=""'); });
+it("transferencia confirmada sin foto o subiendo sigue bloqueada", () => { expect(paymentReady(v)).toBe(false); expect(paymentReady({ ...v, proofUrl: "/uploads/photo.png", uploading: true })).toBe(false); expect(paymentReady({ ...v, proofUrl: "/uploads/photo.png" })).toBe(true); });
+it("efectivo exige recepción confirmada y no requiere foto", () => { const cash = { ...v, method: "CASH" as const }; const html = renderToStaticMarkup(<PhysicalPaymentFields value={cash} setValue={vi.fn()} amountCents={1500} busy={false} />); expect(html).toContain("recibí el efectivo"); expect(html).not.toContain("Foto del comprobante"); expect(paymentReady(cash)).toBe(true); expect(paymentReady({ ...cash, confirmed: false })).toBe(false); });
+it("publicador permite Apuntes físicos sin inventar categoría de documento", () => { expect(BAZAR_KINDS).toContainEqual({ label: "Apuntes físicos", value: "APUNTE" }); });

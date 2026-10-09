@@ -12,14 +12,14 @@ import { DeliverySites } from "../components/orders/DeliverySites";
 import { EmptyState } from "../components/EmptyState";
 
 type Filter = "all" | "curso" | "digital" | "done";
-const isLive = (o: HubOrder) => (LIVE_ORDER_STATUS as readonly string[]).includes(o.status);
+const isLive = (o: HubOrder) => (LIVE_ORDER_STATUS as readonly string[]).includes(o.status) || !!(o.itemType === "bazar" && o.rentalEnd && o.verifiedAt && !o.physicalClosedAt && o.status === "RELEASED");
 const MATCH: Record<Filter, (o: HubOrder) => boolean> = { all: () => true, curso: isLive, digital: (o) => o.itemType === "document", done: (o) => o.status === "RELEASED" };
 const STEPS = [
   ["Solicita tu artículo", "Envía la solicitud desde el bazar."],
   ["El vendedor acepta", "Responde en un plazo de 48 horas."],
   ["Entrega al equipo", "El vendedor deja el objeto en sede con el trabajador asignado."],
   ["Te avisamos sede y hora", "Consulta tu cita y la foto del objeto en este pedido."],
-  ["Paga al recoger", "Pagas al vendedor delante del trabajador al recoger tu objeto."],
+  ["Paga al recoger", "Pagas al equipo en sede; el trabajador registra comprobante o efectivo antes de entregar."],
 ];
 
 // /pedidos: compras del usuario con el flujo de custodia explicado.
@@ -35,13 +35,13 @@ export function Pedidos() {
   const stats = [
     { label: "En curso", value: String(count("curso")) },
     { label: "En custodia", value: pen(list.filter((o) => o.status === "ESCROW").reduce((a, o) => a + o.amountCents, 0)) },
-    { label: "Completados", value: String(count("done")) },
+    { label: "Pagos liquidados", value: String(count("done")) },
     { label: "Total", value: String(list.length) },
   ];
-  const tabs: [Filter, string][] = [["all", "Todos"], ["curso", "En curso"], ["digital", "Digitales"], ["done", "Completados"]];
+  const tabs: [Filter, string][] = [["all", "Todos"], ["curso", "En curso"], ["digital", "Digitales"], ["done", "Pagos liquidados"]];
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8">
+    <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8">
       <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <p className="eyebrow">Compras protegidas</p>
@@ -89,6 +89,6 @@ export function Pedidos() {
           <DeliverySites />
         </aside>
       </div>
-    </main>
+    </div>
   );
 }

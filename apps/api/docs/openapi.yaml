@@ -500,11 +500,14 @@ paths:
       summary: Listar bazar AVAILABLE (público, paginado)
       parameters:
         - { name: q, in: query, schema: { type: string } }
+        - { name: kind, in: query, schema: { type: string, enum: [LIBRO, SCRUB, INSTRUMENTO, APUNTE] } }
+        - { name: tx, in: query, schema: { type: string, enum: [VENTA, ALQUILER] } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 50, default: 12 } }
         - { name: page, in: query, schema: { type: integer } }
       responses: { '200': { description: OK } }
     post:
       tags: [bazar]
-      summary: Publicar ítem (auth, photos máx 4)
+      summary: Publicar ítem (incluye APUNTE físico; auth y moderación; photos máx4)
       security: [{ bearerAuth: [] }]
       responses: { '201': { description: Creado }, '400': { description: VALIDATION } }
   /bazar/mine:
@@ -667,7 +670,7 @@ paths:
   /uploads/{name}:
     get:
       tags: [uploads]
-      summary: Sirve archivo con cabeceras defensivas (inline solo pdf/jpg/png, resto attachment). Archivo de un documento de pago solo para autor, comprador (PAID/ESCROW/RELEASED) o admin; ?stream=1 transmite por la API (Range → 206)
+      summary: "Sirve archivo con cabeceras defensivas (inline solo pdf/jpg/png, resto attachment). Archivo de un documento de pago solo para autor, comprador con grant o ESCROW/RELEASED, o equipo; PAID no basta. Comprobantes privados solo para partes autorizadas: físico al comprador propio/equipo, liquidación al vendedor propio/equipo; ?stream=1 transmite por la API (Range → 206)"
       security: [{}, { bearerAuth: [] }]
       parameters:
         - { name: name, in: path, required: true, schema: { type: string } }
@@ -1229,7 +1232,7 @@ paths:
       summary: Métricas del panel del equipo (citas de hoy, casos por estado, custodia por trabajador, faltas del mes, pendientes)
       security: [{ bearerAuth: [] }]
       responses:
-        "200": { description: todayAppointments, casesByStatus, custodyByStaff, noShowsThisMonth, pendingReviews, openReports }
+        "200": { description: "todayAppointments, casesByStatus, custodyByStaff, noShowsThisMonth, pendingReviews, openReports; cashThisMonthByStaff con staffId/name/count/collectedCents/commissionCents/netCents, solo CASH físico verificado del mes Lima, no-store" }
         "401": { description: Sesión requerida }
         "403": { description: Solo equipo }
   /staff/cases:
@@ -1492,7 +1495,7 @@ paths:
         "409": { description: BAD_STATE, ALREADY_CONFIRMED o REPORT_EXISTS }
   /cases/order/{orderId}/confirm-payment:
     post:
-      summary: Vendedor confirma cobro sin cambiar Order
+      summary: Ruta heredada bloqueada TEAM_SETTLEMENT; vendedor consulta liquidación en Mis cobros
       security: [{ bearerAuth: [] }]
       parameters:
         - in: path
@@ -1500,15 +1503,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        "200": { description: Operación completada }
-        "400": { description: VALIDATION o BAD_PHOTO }
         "401": { description: Sesión requerida }
-        "403": { description: Solo custodio o Técnico en acciones físicas }
         "404": { description: Caso no visible; confirmación y reporte solo del vendedor }
-        "409": { description: BAD_STATE, ALREADY_CONFIRMED o REPORT_EXISTS }
+        "409": { description: TEAM_SETTLEMENT; no modifica Order ni HandoverCase }
   /cases/order/{orderId}/payment-report:
     post:
-      summary: Vendedor reporta pago no recibido; Report ligado al pedido
+      summary: Vendedor reporta pago no recibido; Report ligado al pedido y congela Payout pendiente bajo lock compartido con complete
       security: [{ bearerAuth: [] }]
       parameters:
         - in: path
@@ -1534,12 +1534,26 @@ components:
   schemas:
     CasePickup:
       type: object
+      additionalProperties: false
       required: [paymentMethod, paymentConfirmed]
-      description: Custodio o Técnico durante PICKUP vigente. Solo entrega si certifica pago al vendedor; CASH guarda efectivo, OPERATION exige referencia. Venta pasa PAID→ESCROW→RELEASED y SOLD/CLOSED; alquiler PAID→ESCROW y RENTED, con RETURN adjunta opcional. El aviso del vendedor ofrece Confirmar cobro y No recibí el pago; ninguno altera el pedido.
+      description: Custodio o Técnico durante PICKUP vigente; cobra al equipo y verifica antes de entregar. OPERATION exige cuenta activa y foto propia; operación opcional. CASH no necesita cuenta/foto y se atribuye al actor. Ambos crean Payout neto PENDING48h y Order PAID→ESCROW. Venta SOLD/CLOSED; alquiler RENTED con RETURN opcional. Solo complete de liquidación38 pasa RELEASED.
+      oneOf:
+        - required: [paymentAccountId, paymentProofUrl]
+          properties:
+            paymentMethod: { type: string, enum: [OPERATION] }
+        - properties:
+            paymentMethod: { type: string, enum: [CASH] }
+          not:
+            anyOf:
+              - required: [paymentAccountId]
+              - required: [paymentProofUrl]
+              - required: [paymentRef]
       properties:
         paymentMethod: { type: string, enum: [OPERATION, CASH] }
         paymentConfirmed: { type: boolean, enum: [true] }
-        paymentRef: { type: string, minLength: 3, maxLength: 160, description: Obligatorio para OPERATION }
+        paymentAccountId: { type: string, minLength: 1 }
+        paymentProofUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$' }
+        paymentRef: { type: string, minLength: 3, maxLength: 160, description: Opcional para OPERATION }
         returnAppointment:
           allOf:
             - { $ref: '#/components/schemas/CaseBooking' }
@@ -1549,7 +1563,7 @@ components:
     CaseReturnReview:
       type: object
       required: [condition, conditionNote, reviewConfirmed]
-      description: Durante RETURN vigente, revisión explícita; guarda evidencia separada de recepción original y pasa ESCROW→RELEASED. El objeto permanece RENTED hasta BACK_TO_SELLER físico. Observaciones no disparan sanciones ni cargos automáticos.
+      description: Durante RETURN vigente, revisión explícita; guarda evidencia separada de recepción original; conserva estado financiero ESCROW o RELEASED sin liberar dinero. El objeto permanece RENTED hasta BACK_TO_SELLER; allí Order.physicalClosedAt y el índice de reservas permiten una nueva solicitud aunque Payout siga pendiente físico. Observaciones no disparan sanciones ni cargos automáticos.
       properties:
         condition: { type: string, enum: [OK, DAMAGED] }
         conditionNote: { type: string, minLength: 5, maxLength: 500 }
@@ -1619,6 +1633,7 @@ components:
         paymentRejectedReason: { type: string, maxLength: 300, nullable: true }
         paymentReviewedAt: { type: string, format: date-time, nullable: true }
         paymentReviewedById: { type: string, nullable: true }
+        physicalClosedAt: { type: string, format: date-time, nullable: true, description: Cierre físico independiente de liquidación; excluye reserva viva del bazar }
         verifiedAt: { type: string, format: date-time, nullable: true }
     Payout:
       type: object

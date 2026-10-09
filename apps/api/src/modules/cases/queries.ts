@@ -17,8 +17,10 @@ participantCasesRouter.get("/order/:orderId", asyncHandler(async (req: AuthedReq
   const order = await prisma.order.findUnique({ where: { id: req.params.orderId } });
   if (!order || ![order.buyerId, order.sellerId].includes(req.user!.sub)) scheduleFail("NOT_FOUND", "Caso no encontrado", 404);
   const row = await prisma.handoverCase.findUnique({ where: { orderId: order.id }, include: caseInclude });
+  res.setHeader("Cache-Control", "private, no-store");
   res.json({ data: row ? { id: row.id, status: row.status, receivedPhotoUrl: row.receivedPhotoUrl, conditionNote: row.conditionNote,
-    isSeller: order.sellerId === req.user!.sub, paymentRef: row.paymentRef, paymentMethod: row.paymentMethod, sellerConfirmedAt: row.sellerConfirmedAt,
+    isSeller: order.sellerId === req.user!.sub, paymentRecorded: !!order.verifiedAt,
+    paymentRef: order.buyerId === req.user!.sub ? row.paymentRef : null, paymentMethod: row.paymentMethod,
     returnCondition: row.returnCondition, returnConditionNote: row.returnConditionNote, returnPhotoUrl: row.returnPhotoUrl,
     staffName: row.assignee?.profile?.fullName ?? "Equipo", amountCents: order.amountCents, sede: row.sede,
     appointments: row.appointments.filter((a) => a.partyId === req.user!.sub).map((a) => ({ id: a.id, kind: a.kind,

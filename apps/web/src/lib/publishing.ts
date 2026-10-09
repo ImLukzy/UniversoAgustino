@@ -15,6 +15,7 @@ const DOC_TYPE_LABEL: Record<string, string> = {
 
 export const BAZAR_KINDS = [
   { label: "Libros y manuales", value: "LIBRO" },
+  { label: "Apuntes físicos", value: "APUNTE" },
   { label: "Instrumental y herramientas", value: "INSTRUMENTO" },
   { label: "Uniformes y vestimenta", value: "SCRUB" },
 ] as const;

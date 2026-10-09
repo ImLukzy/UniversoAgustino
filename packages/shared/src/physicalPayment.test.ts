@@ -1,0 +1,12 @@
+import { expect, it } from "vitest";
+import { PickupSchema } from "./handover.js";
+import { BazarKindSchema, CreateBazarItemSchema, ListBazarQuerySchema } from "./catalog.js";
+const paid = { paymentMethod: "OPERATION", paymentAccountId: "account", paymentProofUrl: "/uploads/proof.png", paymentConfirmed: true };
+it("transferencia con foto y cuenta no requiere operación", () => { expect(PickupSchema.safeParse(paid).success).toBe(true); });
+it.each(["paymentAccountId", "paymentProofUrl"])("transferencia exige %s", (field) => { expect(PickupSchema.safeParse({ ...paid, [field]: undefined }).success).toBe(false); });
+it.each(["https://example.test/proof.png", "/uploads/../proof.png"])("foto rechaza ruta %s", (paymentProofUrl) => { expect(PickupSchema.safeParse({ ...paid, paymentProofUrl }).success).toBe(false); });
+it("CASH no exige foto pero sí confirmación literal", () => { expect(PickupSchema.safeParse({ paymentMethod: "CASH", paymentConfirmed: true }).success).toBe(true); expect(PickupSchema.safeParse({ paymentMethod: "CASH", paymentConfirmed: false }).success).toBe(false); });
+it("CASH no acepta foto/cuenta/operación de transferencia", () => { expect(PickupSchema.safeParse({ ...paid, paymentMethod: "CASH" }).success).toBe(false); });
+it("cliente no puede fijar importes o cobrador", () => { expect(PickupSchema.safeParse({ ...paid, collectorId: "other", netCents: 1 }).success).toBe(false); });
+it("APUNTE físico es tipo válido de bazar y publicable", () => { expect(BazarKindSchema.parse("APUNTE")).toBe("APUNTE"); expect(CreateBazarItemSchema.safeParse({ title: "Apuntes impresos", kind: "APUNTE", tx: "VENTA", priceCents: 1500, payMethod: "PLIN" }).success).toBe(true); });
+it("filtro APUNTE conserva paginación y admite alquiler", () => { expect(ListBazarQuerySchema.parse({ kind: "APUNTE", tx: "ALQUILER", page: "2" })).toMatchObject({ kind: "APUNTE", tx: "ALQUILER", page: 2 }); expect(ListBazarQuerySchema.safeParse({ kind: "UNKNOWN" }).success).toBe(false); });

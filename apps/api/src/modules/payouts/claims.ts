@@ -16,7 +16,7 @@ export async function createPaymentReport(input: CreateReportInput, reporterId: 
   });
   if (result.payout) {
     await payoutNotice(result.payout, "PAYOUT_FROZEN");
-    await notify({ userId: result.buyerId!, type: "PAYOUT_FROZEN", title: "Reclamo en revisión", body: "La liquidación quedó congelada. El Técnico revisará el caso; tu acceso permanece disponible.", link: buyerOrderLink(result.payout.orderId) });
+    await notify({ userId: result.buyerId!, type: "PAYOUT_FROZEN", title: "Reclamo en revisión", body: "La liquidación quedó congelada. El Técnico revisará el caso; la entrega y el estado de tu pedido se conservan.", link: buyerOrderLink(result.payout.orderId) });
   }
   return result.report;
 }

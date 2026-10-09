@@ -14,6 +14,6 @@ export async function receiveCase(id: string, actor: Actor, photoUrl: string, co
     await tx.appointment.update({ where: { id: appointment.id }, data: { status: "DONE" } });
     return tx.handoverCase.update({ where: { id }, data: { status: "IN_CUSTODY", receivedPhotoUrl: photoUrl, conditionNote, receivedAt: now }, include: { order: true } });
   });
-  await notify({ userId: row.order.buyerId, type: "ORDER_IN_CUSTODY", title: "Objeto recibido por el equipo", body: `${row.order.itemTitle}. El equipo programará tu recojo; pagarás al vendedor al recoger.`, link: "/pedidos" });
+  await Promise.all([row.order.buyerId, row.order.sellerId].map((userId) => notify({ userId, type: "ORDER_IN_CUSTODY", title: "Objeto recibido por el equipo", body: `${row.order.itemTitle}. El equipo programará tu recojo; el comprador pagará al equipo al recoger en sede.`, link: userId === row.order.buyerId ? "/pedidos" : "/ventas" })));
   return row;
 }

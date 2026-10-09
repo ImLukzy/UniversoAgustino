@@ -34,7 +34,7 @@ export function Ventas() {
   const myReports = reports.data ?? [];
   const kpis = [
     { label: "Solicitudes por revisar", value: String(rentals.filter((o) => o.status === "PENDING").length), href: "#seccion-alquileres" },
-    { label: "Pagos por confirmar", value: String(rows.filter((o) => o.status === "PAID").length), href: "#seccion-digitales" },
+    { label: "Pagos en revisión", value: String(rows.filter((o) => o.status === "PAID").length), href: "#seccion-digitales" },
     { label: "Ingresos liberados (apuntes)", value: pen(digitals.filter((o) => o.status === "RELEASED").reduce((a, o) => a + o.netCents, 0)) },
     { label: "Reportes abiertos", value: String(myReports.filter((r) => r.status === "OPEN").length), href: "#seccion-reportes" },
   ];
@@ -64,7 +64,7 @@ export function Ventas() {
       <section id="seccion-alquileres" className="flex flex-col gap-4">
         <div>
           <h2 className="h-display text-2xl">Solicitudes de compra y alquiler</h2>
-          <p className="mt-1 text-sm text-zinc-600">Al aceptar, entregas el objeto al equipo en sede. El comprador te paga al recoger delante del trabajador.</p>
+          <p className="mt-1 text-sm text-zinc-600">Al aceptar, entregas el objeto al equipo en sede. El comprador paga al equipo al recoger; recibirás el neto en 24–48 h desde la atribución.</p>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
           {sales.isLoading && Array.from({ length: 2 }, (_, i) => <RentalSkeleton key={i} />)}

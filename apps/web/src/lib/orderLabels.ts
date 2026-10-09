@@ -8,9 +8,9 @@ type OrderRole = "buyer" | "seller";
 const BUYER_LABEL: Record<string, string> = {
   PENDING: "Esperando pago",
   ACCEPTED: "Aceptado",
-  PAID: "Pagado",
+  PAID: "En revisión",
   ESCROW: "En custodia",
-  RELEASED: "Completado",
+  RELEASED: "Pago liquidado",
   REFUNDED: "Reembolsado",
   CANCELLED: "Cancelado",
 };
@@ -18,9 +18,9 @@ const BUYER_LABEL: Record<string, string> = {
 const SELLER_LABEL: Record<string, string> = {
   PENDING: "Pendiente de aprobación",
   ACCEPTED: "Aceptado · pago en espera",
-  PAID: "Pagado · por confirmar",
+  PAID: "En revisión por el equipo",
   ESCROW: "En custodia",
-  RELEASED: "Completado",
+  RELEASED: "Pago liquidado",
   REFUNDED: "Reembolsado",
   CANCELLED: "Cancelado",
 };

@@ -4,7 +4,7 @@ export type CaseAppointment = { id: string; kind: string; startsAt: string; ends
 export type StaffCase = { id: string; status: CaseStatus; assigneeId: string | null; receivedPhotoUrl: string | null;
   conditionNote: string | null; returnCondition: string | null; returnConditionNote: string | null; returnPhotoUrl: string | null;
   paymentRef: string | null; paymentMethod: string | null; sellerConfirmedAt: string | null; assignee: { id: string; profile: { fullName: string } | null } | null;
-  order: { itemTitle: string; amountCents: number; rentalStart: string | null; rentalEnd: string | null }; sede: CaseSede | null; appointments: CaseAppointment[] };
+  order: { payProofUrl?: string | null; verifiedAt?: string | null; itemTitle: string; amountCents: number; rentalStart: string | null; rentalEnd: string | null }; sede: CaseSede | null; appointments: CaseAppointment[] };
 export type CaseSave = (path: string, body?: unknown) => Promise<boolean>;
 export const CASE_LABELS: Record<CaseStatus, string> = {
   UNASSIGNED: "Sin asignar", ASSIGNED: "Custodio asignado", DROP_SCHEDULED: "Entrega programada", IN_CUSTODY: "En custodia",

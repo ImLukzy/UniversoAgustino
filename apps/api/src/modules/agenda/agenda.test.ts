@@ -2,8 +2,8 @@ import express from "express";
 import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 const h = vi.hoisted(() => {
-  const m = () => ({ findMany: vi.fn(), count: vi.fn(), groupBy: vi.fn() });
-  return { openingHours: m(), holiday: m(), appointment: m(), staffShift: m(), user: m(), handoverCase: m(), document: m(), bazarItem: m(), report: m() };
+  const m = () => ({ findMany: vi.fn(), findUnique: vi.fn(), count: vi.fn(), groupBy: vi.fn() });
+  return { payout: m(), openingHours: m(), holiday: m(), appointment: m(), staffShift: m(), user: m(), handoverCase: m(), document: m(), bazarItem: m(), report: m() };
 });
 vi.mock("../../lib/prisma.js", () => ({ prisma: h }));
 vi.mock("../../lib/auth.js", () => ({ verifyAccess: (token: string) => ({ sub: "actor", role: token }) }));
@@ -17,7 +17,7 @@ const person = (id: string, name: string) => ({ id, email: `${id}@unsa.edu.pe`, 
 const appt = { id: "a1", caseId: "c1", kind: "PICKUP", status: "SCHEDULED", startsAt: new Date("2026-10-08T14:00:00Z"), endsAt: new Date("2026-10-08T14:15:00Z"),
   sede: { id: "s1", name: "Ingenierías" }, staff: person("w1", "Ana"), party: person("b1", "Beto"), case: { order: { itemTitle: "Libro" } } };
 beforeEach(() => {
-  vi.resetAllMocks(); h.openingHours.findMany.mockResolvedValue(hours); h.holiday.findMany.mockResolvedValue([]);
+  vi.resetAllMocks(); h.payout.groupBy.mockResolvedValue([]); h.user.findUnique.mockResolvedValue({ role: "moderator" }); h.openingHours.findMany.mockResolvedValue(hours); h.holiday.findMany.mockResolvedValue([]);
   h.appointment.findMany.mockResolvedValue([appt]); h.staffShift.findMany.mockResolvedValue([]); h.user.findMany.mockResolvedValue([person("w1", "Ana")]);
 });
 describe("agenda semanal", () => {
@@ -55,7 +55,7 @@ describe("métricas", () => {
       .mockResolvedValueOnce([{ assigneeId: "w1", _count: { _all: 2 } }]);
     h.document.count.mockResolvedValue(5); h.bazarItem.count.mockResolvedValue(1); h.report.count.mockResolvedValue(7);
     expect(await staffMetrics(new Date("2026-10-08T15:00:00Z"))).toEqual({ todayAppointments: 4, noShowsThisMonth: 2, pendingReviews: 6, openReports: 7,
-      casesByStatus: { UNASSIGNED: 3, IN_CUSTODY: 2 }, custodyByStaff: [{ staffId: "w1", name: "Ana", count: 2 }] });
+      casesByStatus: { UNASSIGNED: 3, IN_CUSTODY: 2 }, custodyByStaff: [{ staffId: "w1", name: "Ana", count: 2 }], cashThisMonthByStaff: [] });
     const month = h.appointment.count.mock.calls[1]?.[0].where.startsAt.gte;
     expect(month.toISOString()).toBe("2026-10-01T05:00:00.000Z");
   });

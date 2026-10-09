@@ -24,7 +24,7 @@ export async function completePayout(id: string, actorId: string, body: unknown)
     return { payout: updated, buyerId: p.order.buyerId };
   });
   await payoutNotice(payout.payout, "PAYOUT_COMPLETED");
-  await notify({ userId: payout.buyerId, type: "ORDER_RELEASED", title: "Liquidación completada", body: "El equipo pagó al vendedor. Tu acceso al apunte continúa disponible.", link: buyerOrderLink(payout.payout.orderId) });
+  await notify({ userId: payout.buyerId, type: "ORDER_RELEASED", title: "Liquidación completada", body: "El equipo pagó al vendedor. Consulta el estado de tu pedido en Mis pedidos.", link: buyerOrderLink(payout.payout.orderId) });
   return payout.payout;
 }
 export async function resumePayout(id: string, actorId: string, body: unknown) {
@@ -41,6 +41,6 @@ export async function resumePayout(id: string, actorId: string, body: unknown) {
     return { payout: updated, buyerId: p.order.buyerId };
   });
   await payoutNotice(payout.payout, "PAYOUT_RESUMED");
-  await notify({ userId: payout.buyerId, type: "PAYOUT_RESUMED", title: "Reclamo resuelto", body: "El Técnico revisó el reclamo y autorizó liquidar al vendedor. Tu acceso continúa disponible.", link: buyerOrderLink(payout.payout.orderId) });
+  await notify({ userId: payout.buyerId, type: "PAYOUT_RESUMED", title: "Reclamo resuelto", body: "El Técnico revisó el reclamo y autorizó liquidar al vendedor.", link: buyerOrderLink(payout.payout.orderId) });
   return payout.payout;
 }

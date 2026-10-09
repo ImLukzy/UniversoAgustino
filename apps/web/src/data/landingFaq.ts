@@ -31,7 +31,7 @@ export const FAQS: Faq[] = [
     icon: "payments",
     topic: "Pagos",
     q: "¿Cómo se paga?",
-    a: "Con Yape o Plin al QR del vendedor: registras el número de operación o subes tu voucher y el vendedor confirma que recibió el dinero. Cuando la pasarela Mercado Pago está activa, también puedes pagar con tarjeta y la confirmación es automática.",
+    a: "El equipo recibe y verifica el pago. Para apuntes digitales eliges una cuenta activa del equipo y adjuntas la foto del comprobante. En bazar y apuntes físicos pagas al equipo al recoger en sede; el trabajador registra el comprobante o el efectivo.",
   },
   {
     icon: "timer",
@@ -55,19 +55,19 @@ export const FAQS: Faq[] = [
     icon: "shield_lock",
     topic: "Custodia",
     q: "¿Qué pasa con mi dinero después de pagar?",
-    a: "Cuando el pago se verifica, el pedido pasa a custodia (escrow) y la venta no se cierra hasta que confirmas que tienes el documento o el artículo; al confirmar, el pago se libera al vendedor. Si algo sale mal antes de confirmar, puedes reportarlo y pedir el reembolso.",
+    a: "El equipo verifica el pago y crea una liquidación del neto al vendedor en 24–48 h. El apunte digital queda disponible para siempre; en físico recibes el artículo en sede. Un reclamo antes de liquidar congela el pago para revisión del Técnico.",
   },
   {
     icon: "handshake",
     topic: "Bazar",
     q: "¿Cómo funcionan las entregas del Bazar?",
-    a: "En el Bazar se venden o alquilan libros, instrumentos y uniformes. Coordinas con el vendedor un punto de encuentro en el campus, revisas el artículo en persona y recién entonces confirmas la recepción. En alquileres, el anuncio indica la garantía y el plazo acordado.",
+    a: "En el Bazar se venden o alquilan apuntes físicos, libros, instrumentos y uniformes. El equipo recibe el artículo, programa el recojo en sede y registra tu pago antes de entregar. En alquileres también coordina la devolución; el anuncio conserva el plazo acordado.",
   },
   {
     icon: "currency_exchange",
     topic: "Reembolsos",
     q: "¿Cuál es la política de reembolsos?",
-    a: "Si el documento no corresponde a lo publicado, el archivo falla o el artículo no se entregó, no confirmes la recepción y abre un reporte desde Mis ventas › Mis reportes. Moderación lo revisa en menos de 48 horas y gestiona el reembolso de pedidos pagados o en custodia. Una vez que confirmas la recepción, el pago se libera y ya no es reembolsable.",
+    a: "Si el producto no corresponde a lo publicado, abre un reclamo desde tu pedido. Si la liquidación está pendiente queda congelada; el Técnico revisa el caso. Una devolución de dinero requiere su decisión y queda pendiente de gestión.",
   },
   {
     icon: "water_drop",

@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { api, apiError } from "../../lib/api";
+import { api, apiError, pen } from "../../lib/api";
 import { CASE_LABELS } from "./caseTypes";
 
 type Metrics = { todayAppointments: number; noShowsThisMonth: number; pendingReviews: number; openReports: number;
+  cashThisMonthByStaff: { staffId: string; name: string; collectedCents: number; commissionCents: number; netCents: number; count: number }[];
   casesByStatus: Record<string, number>; custodyByStaff: { staffId: string; name: string; count: number }[] };
 // Métricas del panel (spec 34); solo lectura.
 export function MetricCards() {
@@ -22,5 +23,9 @@ export function MetricCards() {
         {d.custodyByStaff.length === 0 ? <p className="text-sm">Nadie tiene objetos en custodia.</p> :
           <ul className="text-sm">{d.custodyByStaff.map((c) => <li key={c.staffId} className="flex justify-between gap-2"><span className="min-w-0 break-words">{c.name}</span><b>{c.count}</b></li>)}</ul>}</section>
     </div>
+    <section className="card min-w-0 p-4" aria-label="Efectivo cobrado por trabajador"><h2 className="font-bold">Efectivo cobrado este mes</h2>
+      {(d.cashThisMonthByStaff ?? []).length === 0 ? <p className="text-sm">Sin cobros en efectivo verificados.</p> : <ul className="flex flex-col gap-3 text-sm">
+        {d.cashThisMonthByStaff.map((c) => <li key={c.staffId} className="min-w-0 break-words"><b>{c.name}</b> · {c.count} cobros · Recibido {pen(c.collectedCents)}<p>Comisión {pen(c.commissionCents)} · Neto vendedor {pen(c.netCents)}</p></li>)}
+      </ul>}</section>
   </div>;
 }

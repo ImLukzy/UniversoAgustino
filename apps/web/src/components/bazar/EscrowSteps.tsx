@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 import { ROUTES } from "../../lib/routes";
 
 // Flujo real de pedidos del bazar (máquina de estados de @hub/shared):
-// reserva → pago al vendedor → custodia → liberación.
+// solicitud → custodia en sede → cobro del equipo → liquidación.
 const STEPS = [
-  { icon: "lock_clock", title: "Reserva", body: "Reservas el artículo por 30 minutos; nadie más puede tomarlo mientras pagas." },
-  { icon: "qr_code_scanner", title: "Pago con constancia", body: "Pagas al Yape o Plin del vendedor y subes tu número de operación o captura." },
-  { icon: "shield_person", title: "Custodia", body: "El vendedor confirma el abono y el pedido pasa a custodia hasta la entrega." },
-  { icon: "task_alt", title: "Entrega y liberación", body: "Revisas el artículo en persona y confirmas la recepción; recién ahí se cierra la venta." },
+  { icon: "lock_clock", title: "Solicita", body: "El vendedor tiene 48 h para aceptar. No pagas por adelantado." },
+  { icon: "shield_person", title: "Custodia en sede", body: "El vendedor entrega el artículo al equipo y se programa tu recojo." },
+  { icon: "qr_code_scanner", title: "Pago y entrega", body: "Revisas el artículo en sede y pagas al equipo. El trabajador registra comprobante o efectivo antes de entregarlo." },
+  { icon: "task_alt", title: "Liquidación", body: "El vendedor recibe su neto del 87 % en 24–48 h. La comisión es del 13 %." },
 ];
 
 export function EscrowSteps({ spots, times }: { spots: readonly string[]; times: readonly string[] }) {
@@ -21,7 +21,7 @@ export function EscrowSteps({ spots, times }: { spots: readonly string[]; times:
             <li key={s.title} className="card p-6">
               <span className="flex items-center justify-between">
                 <span className="material-symbols-outlined text-3xl text-primary theme-transition">{s.icon}</span>
-                <span className="price text-2xl text-zinc-300">{i + 1}</span>
+                <span className="price text-2xl text-zinc-600">{i + 1}</span>
               </span>
               <h3 className="mt-4 font-extrabold text-zinc-950">{s.title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-zinc-600">{s.body}</p>
@@ -32,7 +32,7 @@ export function EscrowSteps({ spots, times }: { spots: readonly string[]; times:
           <div className="card-dashed flex items-start gap-3 p-5">
             <span className="material-symbols-outlined text-2xl text-zinc-900">help_center</span>
             <p className="text-sm leading-relaxed text-zinc-700">
-              ¿El artículo no coincide con las fotos? No confirmes la recepción y repórtalo desde tu pedido.{" "}
+              ¿El artículo no coincide con las fotos? Repórtalo al trabajador antes de pagar y entregar; un reclamo posterior congela la liquidación pendiente.{" "}
               <Link to={ROUTES.legal} className="font-bold text-zinc-950 underline">Ver términos</Link>
             </p>
           </div>

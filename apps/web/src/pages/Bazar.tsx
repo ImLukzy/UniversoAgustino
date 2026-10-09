@@ -9,6 +9,7 @@ import { ROUTES } from "../lib/routes";
 
 const FILTERS: { id: BazarFilter; label: string; icon: string }[] = [
   { id: "all", label: "Todo", icon: "widgets" },
+  { id: "apuntes", label: "Apuntes físicos", icon: "description" },
   { id: "libros", label: "Libros", icon: "menu_book" },
   { id: "instrumental", label: "Instrumental", icon: "medical_services" },
   { id: "uniformes", label: "Uniformes", icon: "checkroom" },
@@ -28,7 +29,7 @@ export function Bazar() {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-12 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="eyebrow">Bazar UNSA · Arequipa</p>
-            <h1 className="h-display mt-3 text-4xl sm:text-5xl">Libros, instrumental y uniformes de segunda vida</h1>
+            <h1 className="h-display mt-3 text-4xl sm:text-5xl">Apuntes físicos, libros, instrumental y uniformes</h1>
             <p className="mt-4 text-lg leading-relaxed text-zinc-600">Compra o alquila por ciclo a otros estudiantes, con reserva y custodia del pedido.</p>
           </div>
           <Link to={ROUTES.publish} className="btn btn-primary btn-lg self-start lg:self-auto">

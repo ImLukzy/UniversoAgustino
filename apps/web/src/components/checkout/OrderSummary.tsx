@@ -21,7 +21,7 @@ export function OrderSummary({ order }: { order: HubOrder }) {
           <dd className="font-display text-2xl font-extrabold text-primary theme-transition">{pen(order.amountCents)}</dd>
         </div>
       </dl>
-      <p className="text-xs text-zinc-500">El equipo cobra, coordina la entrega en sede y liquida al vendedor en 24–48 h.</p>
+      <p className="text-xs text-zinc-500">{order.itemType === "bazar" ? "El equipo cobra al recoger y coordina la entrega en sede." : "El equipo verifica el pago y desbloquea tu apunte digital."} Liquida al vendedor en 24–48 h.</p>
     </div>
   );
 }

@@ -38,6 +38,7 @@ export function blockingOrderWhere(itemType: string, itemId: string): Prisma.Ord
   return {
     itemType,
     itemId,
+    physicalClosedAt: null,
     OR: [
       { status: { in: ["ACCEPTED", "PAID", "ESCROW"] } },
       { status: "PENDING", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },

@@ -69,3 +69,5 @@ describe("blockingOrderWhere", () => {
     expect(blockingOrderWhere("document", "doc-1")).toEqual({ id: "__never__" });
   });
 });
+
+it("reserva física excluye alquiler ya retornado aunque el pago siga ESCROW", () => { expect(blockingOrderWhere("bazar", "item-1")).toHaveProperty("physicalClosedAt", null); });

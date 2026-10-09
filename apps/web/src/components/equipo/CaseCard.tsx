@@ -1,3 +1,4 @@
+import { PrivateImage } from "../PrivateImage";
 import { CaseFulfillment } from "./CaseFulfillment";
 import { beforeCustody, isCaseOpen, type AppointmentKind } from "@hub/shared";
 import { CaseChat } from "../orders/CaseChat";
@@ -31,13 +32,14 @@ export function CaseCard({ row, userId, admin, busy, save }: { row: StaffCase; u
     {manage && row.status === "IN_CUSTODY" && <AppointmentForm caseId={row.id} kind="PICKUP" busy={busy} save={save} />}
     {manage && reprogram && phaseKind && <AppointmentForm caseId={row.id} kind={noShow.kind as AppointmentKind} previousId={noShow.id} busy={busy} save={save} />}
     {manage && noShow && !reprogram && <p className="text-sm">La reprogramación de este tipo ya fue usada. Solicita revisión al Técnico.</p>}
-    {row.paymentRef && <p className="break-words text-sm">Pago registrado: {row.paymentMethod === "CASH" ? "Efectivo" : row.paymentRef} · {row.sellerConfirmedAt ? "El vendedor confirmó el cobro" : "Confirmación del vendedor pendiente"}</p>}
+    {row.paymentRef && <p className="break-words text-sm">Pago registrado: {row.paymentMethod === "CASH" ? "Efectivo" : row.paymentRef} · Recibido por el equipo</p>}
+    {row.order.payProofUrl && <PrivateImage path={row.order.payProofUrl} alt="Comprobante del cobro en sede" expandable />}
     {row.returnConditionNote && <p className="break-words text-sm">Devolución: {row.returnCondition === "OK" ? "Conforme" : "Con observaciones"} · {row.returnConditionNote}</p>}
     {row.returnPhotoUrl && <img src={resolveQr(row.returnPhotoUrl) ?? undefined} alt="Objeto revisado al devolver" className="h-40 w-full rounded-xl object-contain" />}
     {manage && <CaseFulfillment row={row} busy={busy} save={save} />}
     {manage && beforeCustody(row.status) && <button type="button" disabled={busy} className="btn btn-secondary self-start"
       onClick={() => { if (window.confirm("¿Cancelar el trato antes de recibir el objeto? Se avisará a comprador y vendedor.")) void save(`/staff/cases/${row.id}/cancel`); }}>Cancelar trato</button>}
     {(manage || admin) && <CaseChat caseId={row.id} base="/staff/cases" closed={!isCaseOpen(row.status)} />}
-    {row.status === "PICKUP_SCHEDULED" && <p className="text-sm">Pago al vendedor delante del equipo al recoger.</p>}
+    {row.status === "PICKUP_SCHEDULED" && <p className="text-sm">Cobro al equipo en sede antes de entregar; liquidación al vendedor en 24–48 h.</p>}
   </article>;
 }

@@ -8,7 +8,7 @@ export function PaymentClaim({ orderId }: { orderId: string }) {
     catch (e) { setError(apiError(e)); } finally { setBusy(false); }
   };
   if (sent) return <p role="status">Reclamo enviado. Si la liquidación estaba pendiente, quedó congelada para revisión del Técnico.</p>;
-  return <form className="flex flex-col gap-2" onSubmit={submit}><label className="text-sm">¿El apunte no coincide con lo anunciado?
+  return <form className="flex flex-col gap-2" onSubmit={submit}><label className="text-sm">¿El producto no coincide con lo anunciado?
     <textarea className="input mt-1 w-full" value={reason} maxLength={2000} onChange={(e) => setReason(e.target.value)} placeholder="Describe el problema (mínimo10 caracteres)" /></label>
     <p className="text-xs text-zinc-600">Si el equipo aún no liquidó, tu reclamo congela el pago al vendedor.</p>{error && <p role="alert">{error}</p>}
     <button className="btn btn-secondary self-start" disabled={busy || reason.trim().length < 10}>{busy ? "Enviando…" : "Enviar reclamo"}</button></form>;
