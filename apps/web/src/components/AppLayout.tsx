@@ -51,7 +51,7 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar apuntes, cursos o artículos" aria-label="Buscar en el catálogo" />
           </form>
           <div className="flex shrink-0 items-center gap-2">
-            <Link to={ROUTES.landing} className="btn btn-ghost btn-sm hidden md:inline-flex">Inicio</Link>
+            <Link to={ROUTES.landing} className="btn btn-ghost btn-sm shrink-0 whitespace-nowrap">Inicio</Link>
             {user ? (
               <ProfileMenu />
             ) : (

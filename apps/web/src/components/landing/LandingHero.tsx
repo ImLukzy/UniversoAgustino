@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { LandingNav } from "./LandingNav";
 import { HeroBlobs } from "./HeroBlobs";
 import { HeroWidgetCard } from "./HeroWidgetCard";
 import { SPRING } from "../../lib/motion";
+import { ROUTES } from "../../lib/routes";
 
 export function LandingHero({ withSession }: { withSession?: boolean } = {}) {
   return (
@@ -21,6 +23,7 @@ export function LandingHero({ withSession }: { withSession?: boolean } = {}) {
         <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-zinc-200 sm:text-[1.375rem] sm:leading-8">
           Resúmenes, parciales, finales y balotarios hechos por estudiantes agustinos. Paga seguro con Yape, Plin o Mercado Pago, o sube tus apuntes y gana dinero.
         </p>
+        {withSession && <Link to={ROUTES.explore} className="btn btn-primary mt-6">Ir a Explorar</Link>}
       </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
