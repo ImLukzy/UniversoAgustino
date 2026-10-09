@@ -59,7 +59,9 @@ Fuente: RFC 0002 §4 (`CaseMessage`), §6 (correo solo para eventos críticos). 
 - [x] Rutas de chat + permisos
 - [x] Correo crítico + job de recordatorios
 - [x] UI equipo y participantes
-- [x] Gates A1–A5 locales, registrar §7 (A7/A10/A11 pendientes en dev por god)
+- [x] Gates A1–A5 y verificación integrada de god; evidencia en §7
+
+- [x] E2E de god y auditoría Kelly APTO
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia |
@@ -69,4 +71,5 @@ Fuente: RFC 0002 §4 (`CaseMessage`), §6 (correo solo para eventos críticos). 
 | 2026-10-08 | A3 | ✅* | API 291 verdes / shared 68 verdes (incl. 31 nuevos: chat 12, reminders 11, criticalMail 4, mailer 1, shared chat 3). *1 fallo esperado hasta regenerar Prisma: `notifications/routes.test.ts` compara el mapa con el enum del cliente Prisma instalado (no incluye `CASE_MESSAGE`/`ORDER_APPOINTMENT_REMINDER`); pasa tras `prisma generate` |
 | 2026-10-08 | A4 | ✅ | `npm run docs:check` 81 rutas (+2 paths: `/cases/{id}/messages`, `/staff/cases/{id}/messages`; scanner registra `chatRoutes.ts`) |
 | 2026-10-08 | A5 | ✅ | chat.ts 44, chatRoutes.ts 15, reminders.ts 49, criticalMail.ts 26, CaseChat.tsx 41 líneas |
-| — | A7, A10, A11 | pendiente | requiere dev con migración aplicada (god) |
+| 2026-10-08 | A1–A4, suite integrada | ✅ | god en main `84c0f8e`: typecheck 0 errores; API 366, web 80, shared 83 tests verdes; lint 0; docs:check 94 rutas; any-budget 0. Sustituye las salvedades de shared/Prisma del worktree en el registro inicial. |
+| 2026-10-08 | A7, A10, A11; auditoría | ✅ | god confirma E2E chat: XSS mostrado literal, permisos de lectores, aviso agrupado, vacío 400, caso cerrado 409, auditoría sin cuerpo y recordatorio <24 h por correo con HTML escapado. Cierre de dev y Kelly APTO confirmados por god. |

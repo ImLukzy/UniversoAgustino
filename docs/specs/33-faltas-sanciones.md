@@ -61,7 +61,9 @@ Fuente: RFC 0002 §4 (`UserReview`, `Sanction`, strikes), §5 (Usuarios), §6 (s
 - [x] Guard en solicitar/publicar + `/auth/me`
 - [x] Rutas de equipo (reseñas, sanciones, perdón)
 - [x] UI Usuarios + banner
-- [x] Gates A1–A5 locales, registrar §7 (A7/A10/A11 pendientes en dev por god)
+- [x] Gates A1–A5 y verificación integrada de god; evidencia en §7
+
+- [x] E2E de god y auditoría Kelly APTO
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia |
@@ -71,4 +73,5 @@ Fuente: RFC 0002 §4 (`UserReview`, `Sanction`, strikes), §5 (Usuarios), §6 (s
 | 2026-10-08 | A3 | ✅ | API 355 verdes (+31 de sanctions: strikes 10, guard 4, users 17; +3 en requests/reviews), shared 79 verdes (+5 sanctions) |
 | 2026-10-08 | A4 | ✅ | `docs:check` 92 rutas (+6 `/staff/users…`) |
 | 2026-10-08 | A5 | ✅ | users.ts 94, strikes.ts 31, guard.ts 16, UserCard 47, SanctionForm 24 líneas |
-| — | A7, A10, A11 | pendiente | requiere migración 20261009093000 aplicada en dev por god |
+| 2026-10-08 | A1–A4, suite integrada | ✅ | god en main `84c0f8e`: typecheck 0 errores; API 366, web 80, shared 83 tests verdes; lint 0; docs:check 94 rutas; any-budget 0. Sustituye las salvedades de shared/Prisma del worktree en el registro inicial. |
+| 2026-10-08 | A7, A10, A11; auditoría | ✅ | god confirma: 3 ausencias → una suspensión de 14 días; `/bazar` y `/orders` bloquean con 403 `ACCOUNT_SUSPENDED`; banner con fecha fin; Trabajador WARNING 201 y suspensión/levantar/perdonar 403; staff 409; Técnico levanta y restablece acceso; usuario no ve reseñas. Cierre de dev y Kelly APTO confirmados por god. |

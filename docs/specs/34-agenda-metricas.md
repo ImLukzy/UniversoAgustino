@@ -45,7 +45,11 @@ Fuente: RFC 0002 §5 (Agenda, Hoy) y §7. Estado: **aprobada por god (2026-10-08
 - [x] Contratos shared
 - [x] Endpoints agenda y métricas
 - [x] UI Agenda + métricas
-- [x] Gates A1–A5 locales, registrar §7 (A7/A8/A10/A11 pendientes: god)
+- [x] Gates A1–A5 y A8; verificación integrada de god; evidencia en §7
+
+- [x] Agenda/métricas en dev, móvil y auditoría Kelly APTO confirmados por god
+- [x] Corrección ARIA de escritorio implementada y estructura comprobada
+- [ ] A10 escritorio: repetir axe a 1280 px en entorno que permita Chrome
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia |
@@ -55,4 +59,8 @@ Fuente: RFC 0002 §5 (Agenda, Hoy) y §7. Estado: **aprobada por god (2026-10-08
 | 2026-10-08 | A3 | ✅ | API 366 verdes (+11 en `agenda.test.ts`: semana→lunes Lima, domingo excluido, feriado/día cerrado, filtros, estados incluidos, tope 500, métricas, 401/403/400), shared 83 verdes (+4 `agenda.test.ts`) |
 | 2026-10-08 | A4 | ✅ | `docs:check` 94 rutas (+`/staff/agenda`, `/staff/metrics`) |
 | 2026-10-08 | A5 | ✅ | AgendaGrid 37, AgendaTab 25, AgendaFilters 20, MetricCards 26, week.ts 37, metrics.ts 28, Equipo.tsx 46 líneas |
-| — | A7, A8, A10, A11 | pendiente | build/bundle y E2E en dev por god (el build local resolvería el shared del repo principal por el `node_modules` compartido) |
+| 2026-10-08 | A1–A4, suite integrada | ✅ | god en main `84c0f8e`: typecheck 0 errores; API 366, web 80, shared 83 tests verdes; lint 0; docs:check 94 rutas; any-budget 0. Sustituye las salvedades de shared/Prisma del worktree en el registro inicial. |
+| 2026-10-08 | A7, A11; auditoría | ✅ | god: agenda 200 con semana normalizada al lunes y sin correos; métricas 200; estudiante 403; semana inválida 400; agenda/métricas E2E OK; a 375 px exceso 0 px y axe OK; Kelly APTO confirmado en despacho de reanudación. |
+| 2026-10-08 | A1, A2, A3, A4, A5, A8; corrección local | ✅ | Michael: typecheck 0; lint con `--ignore-pattern 'hive/**' --ignore-pattern 'worktrees/**'` 0; any-budget 0; web 80 tests; build raíz exit 0; docs:check 94; diff --check 0. AgendaGrid 47 líneas. JS inicial 164.98 KB gzip (<170); Equipo 13.88 KB gzip, incremento 3.93 KB sobre 31 (9.95 KB), <10 KB. |
+| 2026-10-08 | A10 escritorio | implementado; axe pendiente | `AgendaGrid.tsx`: tabla ARIA → filas por franja visual → celdas/encabezados, índices y spans; fondos decorativos ocultos al árbol accesible. Se conserva CSS Grid y sus coordenadas. Comprobación estática: 41 filas válidas tanto con 3 citas (2 en la misma franja) como con agenda vacía. Chrome bloqueado por sandbox (`setsockopt: Operation not permitted`, SIGTRAP); no se afirma axe aprobado a 1280 px. Fixture y comprobador en `hive/agents/michael-mv0avixd/agenda-fixture.html` y `verify-agenda.tsx` para repetir medición. |
+| 2026-10-09 | A7, A10 (re-medición) | Pasa | God, navegador real contra BD dev: `/equipo` Resumen y Agenda a 375 px y 1280 px con 0 px de exceso y axe sin violaciones serias/críticas tras el arreglo ARIA de AgendaGrid. |

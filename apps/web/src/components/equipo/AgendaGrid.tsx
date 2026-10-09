@@ -14,16 +14,26 @@ export function AgendaGrid({ data, onOpen }: { data: Agenda; onOpen: () => void 
   const rows = Math.ceil((to - from) / SLOT), row = (min: number) => Math.floor((min - from) / SLOT) + 2;
   const byDay = (date: string) => data.appointments.filter((a) => limaDate(a.startsAt) === date);
   return <>
-    <div className="hidden min-h-[400px] md:block" role="grid" aria-label="Agenda semanal" aria-rowcount={rows + 1}>
-      <div className="grid gap-px bg-zinc-200" style={{ gridTemplateColumns: "3rem repeat(6, minmax(0, 1fr))", gridTemplateRows: `2rem repeat(${rows}, ${ROW_PX}px)` }}>
-        {data.days.map((d) => <div key={d.date} role="columnheader" style={{ gridColumn: d.weekday + 1, gridRow: 1 }} className="bg-white px-1 text-xs font-bold">{dayName(d.date)}</div>)}
-        {Array.from({ length: Math.ceil(rows / 4) }, (_, i) => <div key={i} style={{ gridColumn: 1, gridRow: `${2 + i * 4} / span 4` }} className="bg-white text-xs text-zinc-600">{hhmm(from + i * 60)}</div>)}
-        {data.days.map((d) => d.open && d.opens !== null && d.closes !== null
-          ? <div key={d.date} aria-hidden="true" style={{ gridColumn: d.weekday + 1, gridRow: `${row(d.opens)} / ${row(d.closes)}` }} className="bg-zinc-50" />
-          : <div key={d.date} style={{ gridColumn: d.weekday + 1, gridRow: `2 / span ${rows}` }} className="flex items-start bg-zinc-100 p-1 text-xs text-zinc-600">{d.holiday ?? "Cerrado"}</div>)}
+    <div className="hidden min-h-[400px] md:block" role="table" aria-label="Agenda semanal" aria-rowcount={rows + 1} aria-colcount={7}>
+      <div role="presentation" className="grid gap-px bg-zinc-200" style={{ gridTemplateColumns: "3rem repeat(6, minmax(0, 1fr))", gridTemplateRows: `2rem repeat(${rows}, ${ROW_PX}px)` }}>
+        <div role="row" aria-rowindex={1} style={{ display: "contents" }}>
+          <div role="columnheader" aria-colindex={1} className="sr-only">Hora</div>
+          {data.days.map((d) => <div key={d.date} role="columnheader" aria-colindex={d.weekday + 1} style={{ gridColumn: d.weekday + 1, gridRow: 1 }} className="bg-white px-1 text-xs font-bold">{dayName(d.date)}</div>)}
+        </div>
+        {Array.from({ length: Math.ceil(rows / 4) }, (_, i) => <div key={i} aria-hidden="true" style={{ gridColumn: 1, gridRow: `${2 + i * 4} / span 4` }} className="bg-white text-xs text-zinc-600">{hhmm(from + i * 60)}</div>)}
+        {open.map((d) => <div key={d.date} aria-hidden="true" style={{ gridColumn: d.weekday + 1, gridRow: `${row(d.opens!)} / ${row(d.closes!)}` }} className="bg-zinc-50" />)}
         {data.shifts.map((s, i) => <div key={i} aria-hidden="true" style={{ gridColumn: s.weekday + 1, gridRow: `${row(s.startsMin)} / ${row(s.endsMin)}` }} className="bg-primary-soft opacity-60" />)}
-        {data.appointments.map((a) => { const min = limaMinute(a.startsAt), day = data.days.find((d) => d.date === limaDate(a.startsAt));
-          return day ? <div key={a.id} role="gridcell" style={{ gridColumn: day.weekday + 1, gridRow: `${row(min)} / span ${Math.max(1, Math.round((new Date(a.endsAt).getTime() - new Date(a.startsAt).getTime()) / 60_000 / SLOT))}` }} className="z-10"><Item a={a} onOpen={onOpen} /></div> : null; })}
+        {Array.from({ length: rows }, (_, i) => <div key={i} role="row" aria-rowindex={i + 2} style={{ display: "contents" }}>
+          <div role="rowheader" aria-colindex={1} className="sr-only">{hhmm(from + i * SLOT)}</div>
+          {i === 0 && data.days.filter((d) => !open.includes(d)).map((d) => <div key={d.date} role="cell" aria-colindex={d.weekday + 1} aria-rowspan={rows}
+            style={{ gridColumn: d.weekday + 1, gridRow: `2 / span ${rows}` }} className="flex items-start bg-zinc-100 p-1 text-xs text-zinc-600">{d.holiday ?? "Cerrado"}</div>)}
+          {data.appointments.filter((a) => row(limaMinute(a.startsAt)) === i + 2).map((a) => {
+            const day = data.days.find((d) => d.date === limaDate(a.startsAt));
+            const span = Math.max(1, Math.round((new Date(a.endsAt).getTime() - new Date(a.startsAt).getTime()) / 60_000 / SLOT));
+            return day ? <div key={a.id} role="cell" aria-colindex={day.weekday + 1} aria-rowspan={span}
+              style={{ gridColumn: day.weekday + 1, gridRow: `${i + 2} / span ${span}` }} className="z-10"><Item a={a} onOpen={onOpen} /></div> : null;
+          })}
+        </div>)}
       </div>
     </div>
     <div className="flex min-w-0 flex-col gap-3 md:hidden">
