@@ -11,7 +11,8 @@ const QUICK = [
 ];
 
 // Widget del hero (rudo): subir material (requiere cuenta) y buscar en el catálogo.
-export function HeroWidgetCard() {
+// Si withSession es true, no muestra el área de upload ya que el usuario está logueado.
+export function HeroWidgetCard({ withSession }: { withSession?: boolean } = {}) {
   const nav = useNavigate();
   const { openAuth } = useAuthModal();
   const [q, setQ] = useState("");
@@ -26,29 +27,31 @@ export function HeroWidgetCard() {
   const drop = (e: DragEvent) => {
     e.preventDefault();
     setDragging(false);
-    openAuth();
+    if (!withSession) openAuth();
   };
 
   return (
     <div className="relative mx-auto mt-12 max-w-3xl rounded-3xl border-2 border-zinc-900 bg-white shadow-[8px_8px_0_0_rgb(var(--hub-p))]">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={drop}
-        className={`flex flex-col items-center gap-2 rounded-t-[1.4rem] border-b-2 border-dashed border-zinc-900 px-6 pb-6 pt-8 text-center transition-colors ${dragging ? "bg-primary-soft" : "bg-zinc-50"}`}
-      >
-        <span className="material-symbols-outlined flex h-14 w-14 items-center justify-center rounded-full border-2 border-zinc-900 bg-white text-3xl text-zinc-900">cloud_upload</span>
-        <p className="font-display text-2xl font-bold tracking-tight text-zinc-900">Arrastra y suelta tus apuntes</p>
-        <p className="text-sm text-zinc-600">
-          O{" "}
-          <button type="button" onClick={openAuth} className="font-bold text-primary hover:underline">elige archivos</button>
-          {" "}para subirlos y ganar dinero
-        </p>
-        <p className="text-[11px] text-zinc-500">PDF, JPG o PNG · hasta 25 MB. Al subir aceptas nuestros términos y la política de derechos de autor.</p>
-      </div>
+      {!withSession && (
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={drop}
+          className={`flex flex-col items-center gap-2 rounded-t-[1.4rem] border-b-2 border-dashed border-zinc-900 px-6 pb-6 pt-8 text-center transition-colors ${dragging ? "bg-primary-soft" : "bg-zinc-50"}`}
+        >
+          <span className="material-symbols-outlined flex h-14 w-14 items-center justify-center rounded-full border-2 border-zinc-900 bg-white text-3xl text-zinc-900">cloud_upload</span>
+          <p className="font-display text-2xl font-bold tracking-tight text-zinc-900">Arrastra y suelta tus apuntes</p>
+          <p className="text-sm text-zinc-600">
+            O{" "}
+            <button type="button" onClick={openAuth} className="font-bold text-primary hover:underline">elige archivos</button>
+            {" "}para subirlos y ganar dinero
+          </p>
+          <p className="text-[11px] text-zinc-500">PDF, JPG o PNG · hasta 25 MB. Al subir aceptas nuestros términos y la política de derechos de autor.</p>
+        </div>
+      )}
 
       <form onSubmit={submit} className="flex flex-col gap-4 px-5 pb-5 pt-4">
         <input
@@ -59,9 +62,11 @@ export function HeroWidgetCard() {
           className="h-8 w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-400"
         />
         <div className="flex items-center gap-2">
-          <button type="button" onClick={openAuth} aria-label="Subir archivo" className="btn btn-secondary btn-icon h-9 w-9">
-            <span className="material-symbols-outlined text-xl">add</span>
-          </button>
+          {!withSession && (
+            <button type="button" onClick={openAuth} aria-label="Subir archivo" className="btn btn-secondary btn-icon h-9 w-9">
+              <span className="material-symbols-outlined text-xl">add</span>
+            </button>
+          )}
           <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto py-1">
             {QUICK.map((p) => (
               <button key={p.label} type="button" onClick={() => explore(p.q)} className="chip shrink-0">

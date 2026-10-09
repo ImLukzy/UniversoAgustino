@@ -3,6 +3,7 @@
 // antiguas usan el puente data-path de App.tsx (mismos destinos).
 export const ROUTES = {
   home: "/",
+  landing: "/inicio",
   appHome: "/home",
   explore: "/explorar",
   bazar: "/bazar",

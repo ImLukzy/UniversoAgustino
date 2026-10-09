@@ -4,11 +4,11 @@ import { HeroBlobs } from "./HeroBlobs";
 import { HeroWidgetCard } from "./HeroWidgetCard";
 import { SPRING } from "../../lib/motion";
 
-export function LandingHero() {
+export function LandingHero({ withSession }: { withSession?: boolean } = {}) {
   return (
     <header className="relative isolate overflow-hidden bg-[#28132c] pb-20">
       <HeroBlobs />
-      <LandingNav />
+      <LandingNav withSession={withSession} />
       <div className="mx-auto max-w-4xl px-4 pt-16 text-center sm:pt-24">
         <motion.h1
           initial={{ y: 12 }}
@@ -28,7 +28,7 @@ export function LandingHero() {
         transition={{ ...SPRING, delay: 0.1 }}
         className="px-4"
       >
-        <HeroWidgetCard />
+        <HeroWidgetCard withSession={withSession} />
       </motion.div>
     </header>
   );

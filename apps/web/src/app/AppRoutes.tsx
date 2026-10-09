@@ -59,11 +59,18 @@ export function RootRoute() {
   return user ? <Explorar /> : <PublicLanding />;
 }
 
+function LandingRoute() {
+  const { user, loading, hadSession } = useAuth();
+  if (loading && hadSession) return <RouteFallback />;
+  return <PublicLanding withSession={!!user} />;
+}
+
 export function AppRoutes() {
   return (
     <OnboardingGate>
       <Routes>
         <Route path="/" element={<RootRoute />} />
+        <Route path="/inicio" element={<LandingRoute />} />
         <Route path="/explorar" element={<Explorar />} />
         <Route path="/home" element={<Home />} />
         <Route path="/bazar" element={<Bazar />} />

@@ -12,7 +12,7 @@ import { SuspensionBanner } from "./SuspensionBanner";
 
 function Logo() {
   return (
-    <Link to={ROUTES.home} className="mb-4 flex items-center gap-2 px-1" aria-label="Universo Agustino, inicio">
+    <Link to={ROUTES.landing} className="mb-4 flex items-center gap-2 px-1" aria-label="Universo Agustino, inicio">
       <img alt="" src="/logo-ua.svg" width={36} height={36} className="h-9 w-9" />
       <span className="font-display text-base font-extrabold tracking-tight text-zinc-950">Universo Agustino</span>
     </Link>
@@ -51,6 +51,7 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar apuntes, cursos o artículos" aria-label="Buscar en el catálogo" />
           </form>
           <div className="flex shrink-0 items-center gap-2">
+            <Link to={ROUTES.landing} className="btn btn-ghost btn-sm hidden md:inline-flex">Inicio</Link>
             {user ? (
               <ProfileMenu />
             ) : (
