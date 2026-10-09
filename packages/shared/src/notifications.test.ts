@@ -13,6 +13,6 @@ describe("mapa de categorías", () => {
   });
 });
 
-it.each(["PAYMENT_VERIFIED", "PAYMENT_REJECTED", "PAYOUT_PENDING"] as const)("%s se agrupa como pedido", (type) => {
+it.each(["PAYMENT_VERIFIED", "PAYMENT_REJECTED", "PAYOUT_PENDING", "PAYOUT_COMPLETED", "PAYOUT_DUE", "PAYOUT_FROZEN", "PAYOUT_RESUMED"] as const)("%s se agrupa como pedido", (type) => {
   expect(notificationTypes("orders")).toContain(type);
 });

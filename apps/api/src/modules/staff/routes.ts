@@ -1,3 +1,4 @@
+import { payoutsRouter } from "../payouts/routes.js";
 import { staffPaymentsRouter } from "./payments.js";
 import { Router } from "express";
 import { StaffMemberSchema } from "@hub/shared";
@@ -20,6 +21,7 @@ export const staffRouter = Router();
 staffRouter.use(requireAuth, requireRole("moderator", "admin"));
 staffRouter.use("/payment-accounts", paymentAccountsRouter);
 staffRouter.use("/payments", staffPaymentsRouter);
+staffRouter.use("/payouts", payoutsRouter);
 staffRouter.use("/reviews", reviewsRouter);
 staffRouter.use("/sedes", staffSedesRouter);
 staffRouter.use("/schedule", scheduleRouter);

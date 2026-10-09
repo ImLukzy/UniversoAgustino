@@ -1,3 +1,4 @@
+import { sellerPayoutsRouter } from "../payouts/sellerRoutes.js";
 import { registerPaymentAccounts } from "./paymentAccounts.js";
 import { Router } from "express";
 import { registerReject } from "./rejectStep.js";
@@ -11,6 +12,7 @@ import { registerCloseSteps } from "./closeSteps.js";
 // con CANCELLED/REFUNDED como cierres. Orden de registro: las rutas fijas
 // (/mine, /sales) antes que /:id.
 export const ordersRouter = Router();
+ordersRouter.use("/payouts", sellerPayoutsRouter);
 registerCreate(ordersRouter);
 registerQueries(ordersRouter);
 registerSellerSteps(ordersRouter);

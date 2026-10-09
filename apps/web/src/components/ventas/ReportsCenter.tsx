@@ -63,12 +63,12 @@ export function ReportsCenter({ reports, onSent }: { reports: HubReport[]; onSen
             Tipo
             <select className="input" value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}>
               <option value="bazar">Artículo de bazar</option>
-              <option value="document">Apunte digital</option>
+              <option value="order">Pedido (congela liquidación pendiente)</option><option value="document">Apunte digital</option>
               <option value="user">Usuario</option>
             </select>
           </label>
           <label className={fieldLabel}>
-            ID del ítem o usuario
+            ID del pedido, ítem o usuario
             <input className="input" value={form.id} onChange={(e) => setForm((f) => ({ ...f, id: e.target.value }))} required />
           </label>
         </div>

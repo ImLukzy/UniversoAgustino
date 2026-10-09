@@ -13,3 +13,5 @@ export * from "./chat.js";
 export * from "./sanctions.js";
 export * from "./agenda.js";
 export * from "./paymentAccounts.js";
+
+export * from "./payouts.js";

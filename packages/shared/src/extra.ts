@@ -27,7 +27,7 @@ export const REPORT_STATUS_LABEL: Record<string, string> = {
 
 // --- Moderacion / legal ---
 export const CreateReportSchema = z.object({
-  targetType: z.enum(["document", "bazar", "user"]),
+  targetType: z.enum(["document", "bazar", "user", "order"]),
   targetId: z.string().min(1),
   reason: z.string().min(10).max(2000),
 });

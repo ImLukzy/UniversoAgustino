@@ -1,0 +1,14 @@
+import { beforeEach, expect, it, vi } from "vitest";
+import { createPaymentReport } from "./claims.js";
+const db = vi.hoisted(() => ({ $queryRaw: vi.fn(), order: { findUnique: vi.fn() }, payout: { findUnique: vi.fn(), update: vi.fn() }, report: { create: vi.fn() }, auditLog: { create: vi.fn() }, notice: vi.fn(), notify: vi.fn() }));
+vi.mock("../../lib/prisma.js", () => ({ prisma: { ...db, $transaction: async (fn: (tx: typeof db) => Promise<unknown>) => fn(db) } }));
+vi.mock("./notices.js", () => ({ payoutNotice: db.notice }));
+vi.mock("../../lib/notify.js", () => ({ notify: db.notify, buyerOrderLink: () => "/checkout/order" }));
+const input = { targetType: "order" as const, targetId: "order", reason: "El archivo no corresponde" };
+beforeEach(() => { vi.clearAllMocks(); db.order.findUnique.mockResolvedValue({ id: "order", buyerId: "buyer", sellerId: "seller" }); db.payout.findUnique.mockResolvedValue({ id: "payout", status: "PENDING" }); db.report.create.mockResolvedValue({ id: "report" }); db.payout.update.mockResolvedValue({ id: "payout", orderId: "order", status: "FROZEN" }); });
+it.each(["buyer", "seller"])("participante %s congela y avisa ambos lados", async (actor) => { expect((await createPaymentReport(input, actor)).id).toBe("report"); expect(db.payout.update).toHaveBeenCalledWith({ where: { id: "payout" }, data: { status: "FROZEN", frozenReason: input.reason } }); expect(db.notice.mock.calls[0][1]).toBe("PAYOUT_FROZEN"); expect(db.notify.mock.calls[0][0]).toMatchObject({ userId: "buyer", type: "PAYOUT_FROZEN" }); });
+it("tercero no congela ni crea reporte del pedido", async () => { await expect(createPaymentReport(input, "third")).rejects.toMatchObject({ status: 403 }); expect(db.report.create).not.toHaveBeenCalled(); });
+it("pedido inexistente no admite reclamo", async () => { db.order.findUnique.mockResolvedValue(null); await expect(createPaymentReport(input, "buyer")).rejects.toMatchObject({ status: 403 }); });
+it.each(["COMPLETED", "FROZEN"])("estado %s no congela de nuevo", async (status) => { db.payout.findUnique.mockResolvedValue({ id: "payout", status }); await createPaymentReport(input, "buyer"); expect(db.payout.update).not.toHaveBeenCalled(); expect(db.notice).not.toHaveBeenCalled(); });
+it("pedido sin Payout registra reclamo sin liquidación inventada", async () => { db.payout.findUnique.mockResolvedValue(null); await createPaymentReport(input, "buyer"); expect(db.report.create).toHaveBeenCalledTimes(1); expect(db.payout.update).not.toHaveBeenCalled(); });
+it("reporte de publicación conserva flujo anterior", async () => { await createPaymentReport({ ...input, targetType: "document" }, "third"); expect(db.order.findUnique).not.toHaveBeenCalled(); expect(db.payout.findUnique).not.toHaveBeenCalled(); expect(db.report.create).toHaveBeenCalledTimes(1); });

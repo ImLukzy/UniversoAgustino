@@ -322,6 +322,10 @@ enum NotificationType {
   PAYMENT_VERIFIED
   PAYMENT_REJECTED
   PAYOUT_PENDING
+  PAYOUT_COMPLETED
+  PAYOUT_DUE
+  PAYOUT_FROZEN
+  PAYOUT_RESUMED
 }
 
 model Notification {
@@ -609,6 +613,8 @@ model Payout {
   completedAt DateTime?
   completedById String?
   frozenReason String?
+  reminderSentAt DateTime?
+  refundRequired Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([collectorId, status, dueAt])

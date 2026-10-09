@@ -17,6 +17,103 @@ tags:
   - { name: legal }
   - { name: staff }
 paths:
+  /staff/payouts/{id}/refund-required:
+    post:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Técnico decide devolver con motivo auditado; conserva FROZEN y marca Requiere reembolso (pendiente de spec40). No transfiere dinero, cambia Order ni revoca grant
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [reason], additionalProperties: false, properties: { reason: { type: string, minLength: 5, maxLength: 300 } } }
+      responses:
+        '200': { description: "Payout FROZEN con decisión, avisos y correo a participantes" }
+        '400': { description: "Motivo inválido" }
+        '401': { description: "Sin sesión" }
+        '403': { description: "Solo Técnico" }
+        '404': { description: "Liquidación inexistente" }
+        '409': { description: "No congelada, decisión repetida o Order no ESCROW" }
+  /staff/payouts:
+    get:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Liquidaciones propias del cobrador o todas para Técnico; FIFO vencimiento, historial por fecha de pago, no-store
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [PENDING, COMPLETED, FROZEN], default: PENDING } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+      responses:
+        '200': { description: "data Payout[] hasta50, nextPage nullable; artículo, comprador, vendedor y cuenta del vendedor" }
+        '400': { description: "Consulta inválida" }
+        '401': { description: "Sin sesión" }
+        '403': { description: "No es miembro actual" }
+  /orders/payouts:
+    get:
+      tags: [orders]
+      security: [{ bearerAuth: [] }]
+      summary: Mis cobros del vendedor; solo propias, precios/comisión/neto congelados, estado y comprobante privado del equipo. Sin cuentas del equipo ni comprador
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+      responses:
+        '200': { description: "data Payout[] hasta50 y nextPage nullable" }
+        '400': { description: "Página inválida" }
+        '401': { description: "Sin sesión" }
+  /staff/payouts/earnings:
+    get:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Suma exclusivamente feeCents de pedidos verificados durante periodo; cobrador propio o Técnico global con desglose por trabajador
+      parameters:
+        - { name: from, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date-time } }
+      responses:
+        '200': { description: "data commissionCents, verifiedCount, collectors; intervalo from inclusivo/to exclusivo, máximo366 días" }
+        '400': { description: "Periodo inválido" }
+        '401': { description: "Sin sesión" }
+        '403': { description: "No es miembro actual" }
+  /staff/payouts/{id}/complete:
+    post:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Cobrador o Técnico registra foto propia JPG/PNG, liquida neto congelado y pasa Order a RELEASED atómicamente; avisos y correo vendedor/equipo, aviso comprador
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [proofUrl]
+              properties:
+                proofUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$' }
+                paymentRef: { type: string, minLength: 3, maxLength: 160 }
+      responses:
+        '200': { description: "Payout COMPLETED con foto privada para vendedor y equipo" }
+        '400': { description: "Foto ausente/ajena/inválida" }
+        '401': { description: "Sin sesión" }
+        '403': { description: "Cobrador ajeno o rol revocado" }
+        '404': { description: "Liquidación inexistente" }
+        '409': { description: "Congelada, completada o pedido no ESCROW" }
+  /staff/payouts/{id}/resume:
+    post:
+      tags: [staff]
+      security: [{ bearerAuth: [] }]
+      summary: Solo Técnico resuelve un reclamo autorizando liquidar; exige motivo auditado, FROZEN a PENDING sin cambiar Order ni grant
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: false, required: [reason], properties: { reason: { type: string, minLength: 5, maxLength: 300 } } }
+      responses:
+        '200': { description: "Payout PENDING y avisos vendedor/cobrador" }
+        '400': { description: "Motivo inválido" }
+        '401': { description: "Sin sesión" }
+        '403': { description: "Solo Técnico" }
+        '404': { description: "Liquidación inexistente" }
+        '409': { description: "No está congelada o pedido no ESCROW" }
   /documents/{id}/download:
     get:
       tags: [documents]
@@ -595,9 +692,14 @@ paths:
   /reports:
     post:
       tags: [reports]
-      summary: Crea reporte D.L. 822 (auth, reason mín 10)
+      summary: Crea reporte; targetType order requiere participante y congela Payout pendiente bajo mismo lock que completar; acceso permanente se conserva
       security: [{ bearerAuth: [] }]
-      responses: { '201': { description: Creado }, '400': { description: VALIDATION } }
+      responses: { '201': { description: Creado }, '400': { description: VALIDATION }, '401': { description: Sin sesión }, '403': { description: Solo participantes del pedido } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [targetType, targetId, reason], properties: { targetType: { type: string, enum: [document, bazar, user, order] }, targetId: { type: string, minLength: 1 }, reason: { type: string, minLength: 10, maxLength: 2000 } } }
     get:
       tags: [reports]
       summary: Cola global (moderator/admin, máx 50)
@@ -1520,7 +1622,7 @@ components:
         verifiedAt: { type: string, format: date-time, nullable: true }
     Payout:
       type: object
-      description: Scaffold37; gestión/listados/comprobantes del equipo y Mis cobros se implementan en38. Montos congelados, cuenta del vendedor separada del destino del comprador.
+      description: Liquidación38; pendientes, congeladas, historial y Mis cobros. Montos congelados, cuenta del vendedor separada del destino del comprador.
       properties:
         id: { type: string }
         orderId: { type: string }

@@ -1,3 +1,4 @@
+import { createPaymentReport } from "../payouts/claims.js";
 import { Router } from "express";
 import { CreateReportSchema, SimulateSchema, simulateEarnings } from "@hub/shared";
 import { prisma } from "../../lib/prisma.js";
@@ -21,7 +22,7 @@ reportsRouter.post(
   requireAuth,
   asyncHandler(async (req: AuthedRequest, res) => {
     const input = CreateReportSchema.parse(req.body);
-    const report = await prisma.report.create({ data: { ...input, reporterId: req.user!.sub } });
+    const report = await createPaymentReport(input, req.user!.sub);
     res.status(201).json({ data: report });
   })
 );

@@ -1,0 +1,10 @@
+export type PayoutRow = {
+  id: string; orderId: string; amountCents: number; feeCents: number; netCents: number;
+  status: "PENDING" | "COMPLETED" | "FROZEN"; dueAt: string; createdAt: string; completedAt: string | null;
+  refundRequired?: boolean;
+  proofUrl: string | null; paymentRef: string | null; frozenReason: string | null;
+  payMethod?: string | null; payDetail?: string | null; payQrUrl?: string | null;
+  seller?: { email: string; profile: { fullName: string } | null };
+  order: { itemTitle: string; feeBps?: number; buyer?: { email: string; profile: { fullName: string } | null } };
+};
+export type PayoutPage = { data: PayoutRow[]; nextPage: number | null };

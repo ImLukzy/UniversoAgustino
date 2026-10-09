@@ -1,3 +1,4 @@
+import { startPayoutReminders } from "./payoutReminders.js";
 import { expireReservations } from "./expireReservations.js";
 import { startReminderJob } from "./appointmentReminders.js";
 
@@ -26,4 +27,5 @@ export function startJobs(): void {
   timer.unref();
   console.log("[jobs] expireReservations every 60s");
   startReminderJob();
+  startPayoutReminders();
 }

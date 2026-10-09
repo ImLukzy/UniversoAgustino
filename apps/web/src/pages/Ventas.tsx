@@ -1,3 +1,4 @@
+import { MyPayouts } from "../components/ventas/MyPayouts";
 import { Link } from "react-router-dom";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { api, pen, type HubOrder, type HubReport } from "../lib/api";
@@ -39,12 +40,12 @@ export function Ventas() {
   ];
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-8">
+    <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-8">
       <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div className="max-w-2xl">
           <p className="eyebrow">Módulo de ventas · comisión 13 %</p>
           <h1 className="h-display mt-2 text-3xl sm:text-4xl">Gestión de ventas</h1>
-          <p className="mt-2 text-sm text-zinc-600">Acepta compras y alquileres, confirma pagos y gestiona tus reportes.</p>
+          <p className="mt-2 text-sm text-zinc-600">Gestiona tus ventas, consulta tus cobros y envía reclamos al equipo.</p>
         </div>
         <div className="flex gap-2">
           <Link to={ROUTES.myOrders} className="btn btn-secondary">Mis pedidos</Link>
@@ -74,7 +75,8 @@ export function Ventas() {
         </div>
       </section>
       <DigitalSales rows={digitals} more={!!sales.hasNextPage} loadingMore={sales.isFetchingNextPage} onMore={() => void sales.fetchNextPage()} />
+      <MyPayouts />
       <ReportsCenter reports={myReports} onSent={() => void reports.refetch()} />
-    </main>
+    </div>
   );
 }

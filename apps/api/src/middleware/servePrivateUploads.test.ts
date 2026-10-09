@@ -5,7 +5,7 @@ import { afterAll, beforeEach, expect, it, vi } from "vitest";
 import { serveUpload } from "./serveUploads.js";
 const h = vi.hoisted(() => ({ dir: `/tmp/hub-private-upload-${process.pid}`,
   documentAccessGrant: { findFirst: vi.fn().mockResolvedValue(null) },
-  upload: { findUnique: vi.fn() }, document: { findFirst: vi.fn() }, paymentAccount: { findFirst: vi.fn() }, order: { count: vi.fn() } }));
+  payout: { count: vi.fn().mockResolvedValue(0) }, upload: { findUnique: vi.fn() }, document: { findFirst: vi.fn() }, paymentAccount: { findFirst: vi.fn() }, order: { count: vi.fn() } }));
 vi.mock("../lib/prisma.js", () => ({ prisma: h }));
 vi.mock("../lib/storage.js", () => ({ storageConfig: { backend: "local", localDir: h.dir }, hasObject: vi.fn() }));
 fs.mkdirSync(h.dir, { recursive: true }); fs.writeFileSync(path.join(h.dir, "qr.png"), "private-fixture");

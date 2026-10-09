@@ -26,7 +26,7 @@ describe("correo de eventos críticos", () => {
   });
 });
 
-it.each(["ORDER_PAID", "PAYMENT_VERIFIED", "PAYMENT_REJECTED", "PAYOUT_PENDING"] as const)("aviso %s también envía correo", async (type) => {
+it.each(["ORDER_PAID", "PAYMENT_VERIFIED", "PAYMENT_REJECTED", "PAYOUT_PENDING", "PAYOUT_COMPLETED", "PAYOUT_DUE", "PAYOUT_FROZEN", "PAYOUT_RESUMED"] as const)("aviso %s también envía correo", async (type) => {
   await sendCriticalMail({ userId: "buyer", type, title: "Pago", body: "Apunte", link: "/checkout/order" });
   expect(h.send).toHaveBeenCalledWith("a@unsa.edu.pe", "Pago", "Apunte", "https://universoagustino.site/checkout/order");
 });

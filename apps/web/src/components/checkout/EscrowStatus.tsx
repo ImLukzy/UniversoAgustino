@@ -1,3 +1,4 @@
+import { PaymentClaim } from "./PaymentClaim";
 import { DownloadButton } from "../DownloadButton";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -46,6 +47,7 @@ export function EscrowStatus({ order }: { order: HubOrder }) {
         </Link>
       )}
       {doc && good && <DownloadButton documentId={order.itemId} className="btn btn-secondary">Descargar apunte</DownloadButton>}
+      {doc && order.status === "ESCROW" && <PaymentClaim orderId={order.id} />}
       <Link to={ROUTES.myOrders} className="text-sm font-semibold text-primary hover:underline">Ir a Mis pedidos</Link>
     </div>
   );

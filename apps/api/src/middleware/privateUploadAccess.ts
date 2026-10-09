@@ -6,6 +6,7 @@ export async function privateUploadAllowed(storedName: string, user?: { sub: str
     if (actor && ["admin", "moderator"].includes(actor.role)) return true;
   }
   const url = `/uploads/${storedName}`;
+  if (await prisma.payout.count({ where: { sellerId: user.sub, status: "COMPLETED", proofUrl: url } })) return true;
   const account = await prisma.paymentAccount.findFirst({ where: { active: true,
     user: { role: { in: ["moderator", "admin"] } }, OR: [{ photoUrl: url }, { qrUrl: url }] } });
   if (!account) return false;

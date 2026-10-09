@@ -1,3 +1,5 @@
+import { PayoutsTab } from "../components/equipo/PayoutsTab";
+import { EarningsTab } from "../components/equipo/EarningsTab";
 import { PaymentsTab } from "../components/equipo/PaymentsTab";
 import { useSearchParams } from "react-router-dom";
 import { PaymentAccountsTab } from "../components/equipo/PaymentAccountsTab";
@@ -14,13 +16,13 @@ import { ResumenTab } from "../components/equipo/ResumenTab";
 import { UsuariosTab } from "../components/equipo/UsuariosTab";
 import { AgendaTab } from "../components/equipo/AgendaTab";
 
-type Tab = "Pagos por verificar" | "Cuentas de cobro" | "Casos" | "Agenda" | "Resumen" | "Denuncias" | "Miembros" | "Usuarios" | "Publicaciones" | "Sedes y horarios";
+type Tab = "Pagos a vendedores" | "Completas" | "Ganancias" | "Pagos por verificar" | "Cuentas de cobro" | "Casos" | "Agenda" | "Resumen" | "Denuncias" | "Miembros" | "Usuarios" | "Publicaciones" | "Sedes y horarios";
 export function Equipo() {
   const { user } = useAuth();
   const [search, setSearch] = useSearchParams();
   const candidate = search.get("tab");
-  const tab = (candidate === "pagos" ? "Pagos por verificar" : candidate || "Resumen") as Tab;
-  const setTab = (value: Tab) => setSearch({ tab: value === "Pagos por verificar" ? "pagos" : value });
+  const tab = (candidate === "pagos" ? "Pagos por verificar" : candidate === "liquidaciones" ? "Pagos a vendedores" : candidate || "Resumen") as Tab;
+  const setTab = (value: Tab) => setSearch({ tab: value === "Pagos por verificar" ? "pagos" : value === "Pagos a vendedores" ? "liquidaciones" : value });
   const reviews = useQuery({ queryKey: ["staff", "review-count", user?.id],
     enabled: user?.role === "admin" || user?.role === "moderator",
     queryFn: async () => (await api.get("/staff/reviews", { params: { pageSize: 1 } })).data as { pendingTotal: number } });
@@ -30,7 +32,7 @@ export function Equipo() {
       <div className="card p-8"><h1 className="h-display text-2xl">No tienes acceso al panel del equipo</h1></div>
     </div>
   );
-  const tabs: Tab[] = user.role === "admin" ? ["Pagos por verificar", "Cuentas de cobro", "Resumen", "Casos", "Agenda", "Usuarios", "Publicaciones", "Denuncias", "Miembros", "Sedes y horarios"] : ["Pagos por verificar", "Cuentas de cobro", "Resumen", "Casos", "Agenda", "Usuarios", "Publicaciones", "Denuncias", "Sedes y horarios"];
+  const tabs: Tab[] = user.role === "admin" ? ["Pagos por verificar", "Pagos a vendedores", "Completas", "Ganancias", "Cuentas de cobro", "Resumen", "Casos", "Agenda", "Usuarios", "Publicaciones", "Denuncias", "Miembros", "Sedes y horarios"] : ["Pagos por verificar", "Pagos a vendedores", "Completas", "Ganancias", "Cuentas de cobro", "Resumen", "Casos", "Agenda", "Usuarios", "Publicaciones", "Denuncias", "Sedes y horarios"];
   return (
     <div className="mx-auto flex w-full min-w-0 max-w-5xl flex-col gap-6 px-4 py-8">
       <header><p className="eyebrow">Universo Agustino</p><h1 className="h-display text-3xl">Equipo</h1></header>
@@ -39,6 +41,9 @@ export function Equipo() {
           onClick={() => setTab(label)} className={`btn btn-sm ${tab === label ? "btn-primary" : "btn-secondary"}`}>{label}{label === "Publicaciones" && reviews.data ? ` (${reviews.data.pendingTotal})` : ""}</button>)}
       </nav>
       {tab === "Pagos por verificar" && <PaymentsTab />}
+      {tab === "Pagos a vendedores" && <PayoutsTab />}
+      {tab === "Completas" && <PayoutsTab completed />}
+      {tab === "Ganancias" && <EarningsTab />}
       {tab === "Cuentas de cobro" && <PaymentAccountsTab />}
       {tab === "Sedes y horarios" && <SedesTab />}
       {tab === "Casos" && <CasesTab />}
