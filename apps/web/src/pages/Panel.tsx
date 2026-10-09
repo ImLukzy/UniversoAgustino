@@ -10,7 +10,7 @@ import { PanelOrders } from "../components/panel/PanelOrders";
 import { usePanelData } from "../components/panel/usePanelData";
 import { paySummary } from "../lib/payments";
 
-// /panel: resumen personal (compras, publicaciones, ventas y moderación).
+// /actividad: resumen personal (compras, publicaciones, ventas y moderación).
 export function Panel() {
   const { user } = useAuth();
   const { career } = useCareerTheme();
@@ -19,7 +19,7 @@ export function Panel() {
   if (!user) return <LoginRequired what="ver tu panel" />;
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8">
+    <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8">
       <PanelSummary user={user} d={d} />
       <PanelSpaces d={d} email={user.email} />
       <PanelOrders list={d.list} loading={d.loading} />
@@ -44,6 +44,6 @@ export function Panel() {
           </ul>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

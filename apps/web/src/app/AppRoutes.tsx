@@ -27,6 +27,7 @@ const Visor = lazy(() => import("../pages/Visor").then((m) => ({ default: m.Viso
 const Panel = lazy(() => import("../pages/Panel").then((m) => ({ default: m.Panel })));
 const Publicar = lazy(() => import("../pages/Publicar").then((m) => ({ default: m.Publicar })));
 const Ventas = lazy(() => import("../pages/Ventas").then((m) => ({ default: m.Ventas })));
+const TeamPanel = lazy(() => import("../pages/TeamPanel").then((m) => ({ default: m.TeamPanel })));
 const Equipo = lazy(() => import("../pages/Equipo").then((m) => ({ default: m.Equipo })));
 const ResetPassword = lazy(() => import("../pages/ResetPassword").then((m) => ({ default: m.ResetPassword })));
 const Notificaciones = lazy(() => import("../pages/Notificaciones").then((m) => ({ default: m.Notificaciones })));
@@ -82,10 +83,11 @@ export function AppRoutes() {
         <Route path="/p/:type/:id" element={<AppLayout><Detalle /></AppLayout>} />
         <Route path="/v/:id" element={<AppLayout><Visor /></AppLayout>} />
         <Route path="/publicar" element={<AppLayout><Publicar /></AppLayout>} />
-        <Route path="/panel" element={<AppLayout><Panel /></AppLayout>} />
+        <Route path="/actividad" element={<AppLayout><Panel /></AppLayout>} />
+        <Route path="/panel/*" element={<TeamPanel />} />
         <Route path="/ventas" element={<AppLayout><Ventas /></AppLayout>} />
         <Route path="/checkout/:orderId" element={<AppLayout><Checkout /></AppLayout>} />
-        <Route path={ROUTES.equipo} element={<AppLayout><Equipo /></AppLayout>} />
+        <Route path={ROUTES.equipo} element={<Equipo />} />
         <Route path={ROUTES.admin} element={<Navigate to={ROUTES.equipo} replace />} />
         <Route path="/notificaciones" element={<Notificaciones />} />
         <Route path="/ajustes" element={<Ajustes />} />

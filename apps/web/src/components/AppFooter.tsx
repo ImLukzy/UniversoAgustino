@@ -10,7 +10,7 @@ const COLS: { h: string; links: { l: string; to?: string; auth?: boolean; logout
   { h: "Catálogo", links: [{ l: "Explorar", to: ROUTES.explore }, { l: "Bazar", to: ROUTES.bazar }, { l: "Publicar", to: ROUTES.publish }, { l: "Monetiza", to: ROUTES.monetiza }] },
   { h: "Cuenta", links: [{ l: "Iniciar sesión", auth: true }, { l: "Crear cuenta", to: ROUTES.register }, { l: "Mis pedidos", to: ROUTES.myOrders }, { l: "Mis ventas", to: ROUTES.mySales }] },
   { h: "Carreras", links: UNSA_CAREERS.slice(0, 4).map((c) => ({ l: c.label, to: `${ROUTES.explore}?career=${c.key}` })) },
-  { h: "Ayuda y legal", links: [{ l: "Marco legal D.L. 822", to: ROUTES.legal }, { l: "Mis publicaciones", to: ROUTES.myBazar }, { l: "Mi cuenta", to: ROUTES.account }, { l: "Panel", to: ROUTES.panel }] },
+  { h: "Ayuda y legal", links: [{ l: "Marco legal D.L. 822", to: ROUTES.legal }, { l: "Mis publicaciones", to: ROUTES.myBazar }, { l: "Mi cuenta", to: ROUTES.account }, { l: "Panel", to: ROUTES.activity }] },
 ];
 
 export function AppFooter() {

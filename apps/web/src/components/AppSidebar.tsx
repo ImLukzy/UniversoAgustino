@@ -16,7 +16,7 @@ const SECTIONS: { title?: string; links: { to: string; icon: string; label: stri
   {
     title: "Mi espacio",
     links: [
-      { to: ROUTES.panel, icon: "dashboard", label: "Panel" },
+      { to: ROUTES.activity, icon: "dashboard", label: "Panel" },
       { to: ROUTES.myOrders, icon: "receipt_long", label: "Mis pedidos" },
       { to: ROUTES.myBazar, icon: "menu_book", label: "Mis publicaciones" },
       { to: ROUTES.mySales, icon: "point_of_sale", label: "Mis ventas" },

@@ -79,7 +79,7 @@ export function ProfileMenu() {
             className="card absolute right-0 top-12 z-50 flex w-60 flex-col divide-y divide-dashed divide-zinc-300 p-1.5"
           >
             <div>
-              {(user.role === "admin" || user.role === "moderator") && <Link to={ROUTES.equipo} onClick={() => setOpen(false)} role="menuitem" className={itemCls}>
+              {(user.role === "admin" || user.role === "moderator") && <Link to={ROUTES.panel} target="_blank" rel="noopener" onClick={() => setOpen(false)} role="menuitem" className={itemCls}>
                 <span className="material-symbols-outlined text-xl text-zinc-500">dashboard</span> Mi panel
               </Link>}
               <Link to={ROUTES.notifications} onClick={() => setOpen(false)} role="menuitem" className={itemCls}>

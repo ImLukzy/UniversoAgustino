@@ -4,7 +4,8 @@
 const pageMods = import.meta.glob("../pages/*.tsx");
 
 const ROUTE_MODULE: Record<string, string> = {
-  "/panel": "../pages/Panel.tsx",
+  "/actividad": "../pages/Panel.tsx",
+  "/panel": "../pages/TeamPanel.tsx",
   "/pedidos": "../pages/Pedidos.tsx",
   "/publicaciones": "../pages/Publicaciones.tsx",
   "/ventas": "../pages/Ventas.tsx",
