@@ -1,0 +1,2 @@
+ALTER TABLE "Document" ADD COLUMN "pausedAt" TIMESTAMP(3);
+ALTER TABLE "BazarItem" ADD COLUMN "pausedAt" TIMESTAMP(3);

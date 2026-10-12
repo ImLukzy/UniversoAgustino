@@ -30,7 +30,7 @@ function request(path: string, sub: string, body: unknown = {}) {
   });
 }
 beforeEach(() => {
-  vi.clearAllMocks(); h.item.mockResolvedValue({ ownerId: "seller", reviewStatus: "APPROVED", status: "AVAILABLE", tx: "VENTA", priceCents: 1000, title: "Libro" });
+  vi.clearAllMocks(); h.item.mockResolvedValue({ ownerId: "seller", reviewStatus: "APPROVED", status: "AVAILABLE", pausedAt: null, tx: "VENTA", priceCents: 1000, title: "Libro" });
   h.order.findUniqueOrThrow.mockResolvedValue(pending); h.order.findFirst.mockResolvedValue(null);
   h.order.updateMany.mockResolvedValue({ count: 1 }); h.order.update.mockResolvedValue(pending);
   h.order.create.mockImplementation(async ({ data }) => ({ ...data, id: "order" })); h.guard.mockResolvedValue(null);
@@ -42,8 +42,13 @@ describe("solicitudes bazar", () => {
   it("comprador puede cancelar su solicitud", async () => {
     expect((await request("/order/cancel", "buyer")).status).toBe(200);
   });
+  it("POST /orders rechaza publicaciones pausadas", async () => {
+    h.item.mockResolvedValue({ ownerId: "seller", reviewStatus: "APPROVED", pausedAt: new Date(), status: "AVAILABLE", tx: "VENTA", priceCents: 1000, title: "Libro" });
+    expect(await request("/", "buyer", { itemType: "bazar", itemId: "item" })).toMatchObject({ status: 409, body: { error: { code: "LISTING_PAUSED", message: "Esta publicación está pausada por su autor" } } });
+    expect(h.order.create).not.toHaveBeenCalled();
+  });
   it.each(["VENTA", "ALQUILER"])("%s nace PENDING con plazo 48 h", async (tx) => {
-    h.item.mockResolvedValue({ ownerId: "seller", reviewStatus: "APPROVED", status: "AVAILABLE", tx, priceCents: 1000, title: "Libro" });
+    h.item.mockResolvedValue({ ownerId: "seller", reviewStatus: "APPROVED", status: "AVAILABLE", pausedAt: null, tx, priceCents: 1000, title: "Libro" });
     const start = Date.now();
     expect((await request("/", "buyer", { itemType: "bazar", itemId: "item", rentalStart: "2026-11-01T00:00:00Z", rentalEnd: "2026-11-02T00:00:00Z" })).status).toBe(201);
     const data = h.order.create.mock.calls[0][0].data;

@@ -478,16 +478,10 @@ paths:
   /documents/{id}:
     get:
       tags: [documents]
-      summary: Detalle público (404 si no existe); con token añade saved y fullAccess reales. fileType (pdf|image|null) siempre; fileUrl solo con fullAccess
+      summary: Detalle público incluye paused y pausedAt; con token añade saved y fullAccess reales. fileType (pdf|image|null) siempre; fileUrl solo con fullAccess
       security: [{}, { bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
-  /documents/{id}/preview:
-    get:
-      tags: [documents]
-      summary: Vista previa pública con las páginas de muestra que eligió el vendedor (previewPages, default 1–2) o la imagen. Cabeceras X-Preview-Pages (páginas reales incluidas) y X-Total-Pages. Cache-Control private
-      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: PDF con las páginas de muestra o imagen }, '404': { description: NOT_FOUND } }
     patch:
       tags: [documents]
       summary: Edita el dueño (auth)
@@ -500,6 +494,26 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
+  /documents/{id}/pause:
+    post:
+      tags: [documents]
+      summary: Pausa documento propio; 409 si hay pedidos en curso
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 'Estado actual con id y pausedAt' }, '401': { description: UNAUTHENTICATED }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
+  /documents/{id}/resume:
+    post:
+      tags: [documents]
+      summary: Reactiva documento propio sin cambiar su revisión
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 'Estado actual con id y pausedAt' }, '401': { description: UNAUTHENTICATED }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND } }
+  /documents/{id}/preview:
+    get:
+      tags: [documents]
+      summary: Vista previa pública con las páginas de muestra que eligió el vendedor (previewPages, default 1–2) o la imagen. Cabeceras X-Preview-Pages (páginas reales incluidas) y X-Total-Pages. Cache-Control private
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: PDF con las páginas de muestra o imagen }, '404': { description: NOT_FOUND } }
   /documents/{id}/save:
     post:
       tags: [documents]
@@ -545,7 +559,7 @@ paths:
   /bazar/{id}:
     get:
       tags: [bazar]
-      summary: Detalle público con vendedor (404 si no existe)
+      summary: Detalle público con vendedor; incluye paused y pausedAt (404 si no existe)
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
     patch:
@@ -560,6 +574,20 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
+  /bazar/{id}/pause:
+    post:
+      tags: [bazar]
+      summary: Pausa ítem propio; 409 si hay pedidos en curso
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 'Estado actual con id y pausedAt' }, '401': { description: UNAUTHENTICATED }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
+  /bazar/{id}/resume:
+    post:
+      tags: [bazar]
+      summary: Reactiva ítem propio sin cambiar su revisión
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 'Estado actual con id y pausedAt' }, '401': { description: UNAUTHENTICATED }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND } }
   /bazar/{id}/reserve:
     post:
       tags: [bazar]
@@ -588,7 +616,7 @@ paths:
         '200': { description: Apunte con pedido vivo del mismo comprador (PENDING/PAID) — se reutiliza, no se duplica }
         '201': { description: Creado (sellerId, expiresAt, itemTitle, itemPriceCents, feeBps) }
         '400': { description: SELF_PURCHASE, FREE_ITEM, DATES_REQUIRED o BAD_DATES }
-        '409': { description: NOT_AVAILABLE (con details.availableAt) o ALREADY_OWNED }
+        '409': { description: NOT_AVAILABLE (con details.availableAt), LISTING_PAUSED (Esta publicación está pausada por su autor) o ALREADY_OWNED }
   /orders/mine:
     get:
       tags: [orders]
@@ -1626,8 +1654,10 @@ components:
         conditionNote: { type: string, minLength: 5, maxLength: 500 }
     ReviewFields:
       type: object
-      description: Campos de Document y BazarItem; listados públicos solo APPROVED. Detalle y preview no aprobados devuelven 404 a terceros; dueño y equipo pueden consultarlos. Compra requiere APPROVED. Editar REJECTED reenvía a PENDING.
+      description: Campos de Document y BazarItem; listados públicos solo APPROVED y no pausados. Detalle expone paused. Detalle y preview no aprobados devuelven 404 a terceros; dueño y equipo pueden consultarlos. Compra requiere APPROVED. Editar REJECTED reenvía a PENDING.
       properties:
+        pausedAt: { type: string, format: date-time, nullable: true }
+        paused: { type: boolean, description: Derivado de pausedAt en el detalle }
         reviewStatus: { type: string, enum: [PENDING, APPROVED, REJECTED], default: APPROVED }
         reviewNote: { type: string, nullable: true, maxLength: 300 }
         reviewedAt: { type: string, format: date-time, nullable: true }
