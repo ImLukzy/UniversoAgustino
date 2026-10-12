@@ -29,7 +29,7 @@ Web (build-time): `VITE_API_URL`. BD: Neon `Universo_Agustino`(prod, ep-hidden-d
 ## Reglas críticas
 - Sesión: access en memoria (Bearer) + cookie `hub_refresh` httpOnly; prod `SameSite=None;Secure` (`lib/cookies.ts`). CSRF = `requireSameOrigin` con Origin **exacto** ∈ `WEB_ORIGIN`. `trust proxy` = `TRUST_PROXY` (1 en prod).
 - Acceso: Google (`hd=unsa.edu.pe`, token revocado si falla) · OTP 6 dígitos (HMAC, 10 min, 5 intentos) · cuenta nueva → `onboardedAt` null → `/bienvenida`.
-- Dinero: sin comisión (0 %, spec 35); cálculo solo vía `computePrice()`+`PLATFORM_FEE_PCT`; el equipo custodia objetos, nunca dinero (RFC 0002); pedido solo vía `canTransition` (PENDING→ACCEPTED→PAID→ESCROW→RELEASED|CANCELLED|REFUNDED).
+- Dinero: comisión 13 % que asume el vendedor (RFC 0003, specs 36–40), cálculo solo vía `computePrice()`+`PLATFORM_FEE_PCT`. El equipo es intermediario: el comprador paga a una cuenta del equipo y sube comprobante; un trabajador lo acepta o deniega; luego se liquida al vendedor el neto con comprobante. Físico: cobro en sede. Datos de cuentas del equipo nunca en el repo. Pedido solo vía `canTransition` (PENDING→ACCEPTED→PAID→ESCROW→RELEASED|CANCELLED|REFUNDED).
 - Modelos: User, Profile, EmailLoginCode, RefreshToken, Document, BazarItem, Order, Escrow, Upload, Report, Notification. Exámenes = datos estáticos web (no BD).
 - Migraciones: nueva y fechada; nunca editar una aplicada.
 - Contrato API: `{data}` / `{error:{code,message}}`; toda ruta nueva en `openapi.yaml`.
