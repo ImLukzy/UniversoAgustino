@@ -15,6 +15,7 @@ const steps = [
   ["budget:any", npm, ["run", "budget:any"]],
   ["budget:size", npm, ["run", "budget:size"]],
   ["subset-icons", process.execPath, ["scripts/subset-icons.mjs", "--check"]],
+  ["install-scripts", process.execPath, ["scripts/check-install-scripts.mjs"]],
   ["test", npm, ["test"]],
 ];
 

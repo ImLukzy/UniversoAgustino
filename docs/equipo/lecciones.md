@@ -7,6 +7,8 @@ Errores reales que ya nos costaron tiempo. Breve a propósito.
 - `any-budget` cuenta la **palabra** `any` en `src`, también en tests (`expect.any(...)` lo rompe). Usa `toBeInstanceOf`, `expect.objectContaining` u otras aserciones.
 - Vitest de la web ejecuta todo `src/**/*.test.{ts,tsx}` en entorno `node` (sin jsdom): los tests de componentes usan `renderToStaticMarkup`.
 
+- `allowScripts` fija versiones exactas: al actualizar esbuild o Prisma, `verify` falla en `install-scripts` hasta revisar y aprobar la nueva versión (`npm install-scripts approve <pkg>`).
+
 ## Web
 - Compila la web **desde `apps/web`** (`cd apps/web && npx vite build …`). Desde la raíz con `-c` Tailwind purga clases y aparecen falsos fallos de contraste o desborde.
 - UI estricta de `CLAUDE.md`: solo tokens `primary*`, error `#b91c1c`, `SPRING`, componentes < 150 líneas, 0 px de scroll a 375 px. Un icono nuevo exige `node scripts/subset-icons.mjs --write`.
