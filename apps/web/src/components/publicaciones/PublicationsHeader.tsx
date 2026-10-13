@@ -32,17 +32,17 @@ export function PublicationsHeader({ stats, onMyQr, qrMsg }: { stats: { active: 
         </div>
       </div>
       <p className="min-h-[1rem] text-xs font-semibold text-zinc-700" role="status">{qrMsg}</p>
-      <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {cards.map((c) => (
           <div key={c.label} className="card flex items-center gap-3 p-4">
-            <span className="material-symbols-outlined flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-zinc-900 bg-primary-soft text-primary">{c.icon}</span>
-            <div className="min-w-0">
+            <span aria-hidden="true" className="material-symbols-outlined flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-zinc-900 bg-primary-soft text-primary">{c.icon}</span>
+            <dl className="min-w-0">
               <dt className="truncate text-xs text-zinc-500">{c.label}</dt>
               <dd className="price text-xl text-zinc-950">{c.value}</dd>
-            </div>
+            </dl>
           </div>
         ))}
-      </dl>
+      </div>
     </header>
   );
 }
