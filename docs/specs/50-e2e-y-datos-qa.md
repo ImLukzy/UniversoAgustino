@@ -36,10 +36,14 @@
 | A4 | E2E | API y web locales contra dev + `npm run e2e` | todos ✓; datos restaurados |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: `qa-seed.mjs` + scripts npm.
-- [ ] Tarea 2: E2E de specs 45 y 46 + README + AGENTS.md.
-- [ ] Tarea 3: verificar A1–A4 (QA) y anotar en §7.
+- [x] Tarea 1: `qa-seed.mjs` + scripts npm.
+- [x] Tarea 2: E2E de specs 45 y 46 + README + AGENTS.md.
+- [x] Tarea 3: verificar A1–A4 (QA) y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-12 | A1 | OK `npm run verify` | Dwight e86bfd6 |
+| 2026-10-12 | A2/A3 | OK: URL con ep-hidden-dew aborta antes de conectar; `qa:seed` dos veces sin duplicados | Dwight; comprobado también por Kelly |
+| 2026-10-12 | A4 | OK: `npm run e2e` specs 45 y 46 ✓ con datos qa-* restaurados | Dwight contra servidores locales + BD dev |
+| 2026-10-12 | Auditoría | OK sin hallazgos | Kelly |

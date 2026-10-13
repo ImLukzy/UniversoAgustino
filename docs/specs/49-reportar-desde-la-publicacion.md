@@ -31,9 +31,12 @@
 | A11 | E2E: usuario no dueño reporta un apunte desde su detalle → aparece en `/panel/denuncias` con la publicación; el dueño no ve el botón | QA | pasa |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: formulario + botón en detalle + ReportsCenter sin IDs + tests.
-- [ ] Tarea 2: verificar A1–A11 y anotar en §7.
+- [x] Tarea 1: formulario + botón en detalle + ReportsCenter sin IDs + tests.
+- [x] Tarea 2: verificar A1–A11 y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-12 | A1–A2 | OK: `npm run verify` 10 pasos ✓; web 170 tests | Michael f0b9155 |
+| 2026-10-12 | Auditoría | OK sin hallazgos | Kelly |
+| 2026-10-12 | A7/A10/A11 (QA Pam) | OK: no dueño reporta apunte y bazar desde el detalle (201) → aparece en /panel/denuncias; dueño no ve el botón; sin sesión "Inicia sesión para reportar"; Mis reportes sin campos de ID; 0 px a 375 px y 0 violaciones serias/críticas a 1280/375 en detalle y /ventas | API+web locales contra BD dev; reportes de prueba desestimados |
