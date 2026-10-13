@@ -40,6 +40,7 @@ export interface HubDocument {
   previewPages?: number[];
   status: string;
   pausedAt?: string | null;
+  removedAt?: string | null;
   paused?: boolean;
   removed?: boolean;
   reviewStatus?: ReviewStatus;
@@ -62,6 +63,7 @@ export interface HubBazarItem {
   photos?: string[] | null;
   status: string;
   pausedAt?: string | null;
+  removedAt?: string | null;
   paused?: boolean;
   removed?: boolean;
   reviewStatus?: ReviewStatus;

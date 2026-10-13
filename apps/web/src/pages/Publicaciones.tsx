@@ -12,6 +12,7 @@ import { SalesOverview } from "../components/publicaciones/SalesOverview";
 import { QrModal, type QrInfo } from "../components/publicaciones/QrModal";
 import { SORTS, isSortKey, toListings, visibleListings, type ListingFilter, type SortKey } from "../components/publicaciones/listing";
 import { PAY_LABEL } from "../lib/payments";
+import { isActiveListing } from "../lib/listingState";
 
 // /publicaciones: panel del autor (apuntes + bazar propios, cobro y ventas).
 export function Publicaciones() {
@@ -50,7 +51,7 @@ export function Publicaciones() {
         onMyQr={openMyQr}
         qrMsg={qrMsg}
         stats={{
-          active: myDocs.filter((d) => d.status === "PUBLISHED").length + myBazar.filter((b) => b.status === "AVAILABLE").length,
+          active: myDocs.filter((d) => isActiveListing(d, "document")).length + myBazar.filter((b) => isActiveListing(b, "bazar")).length,
           docs: myDocs.length,
           bazar: myBazar.length,
           net: mySales.filter((o) => o.status === "RELEASED").reduce((a, o) => a + o.netCents, 0),

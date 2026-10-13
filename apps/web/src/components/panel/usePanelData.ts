@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { LIVE_ORDER_STATUS } from "@hub/shared";
 import { api, type HubBazarItem, type HubDocument, type HubOrder, type HubUser } from "../../lib/api";
+import { isActiveListing } from "../../lib/listingState";
 
 const isLive = (o: HubOrder) => (LIVE_ORDER_STATUS as readonly string[]).includes(o.status);
 
@@ -22,8 +23,8 @@ export function usePanelData(user: HubUser | null) {
   const mySales = sales.data ?? [];
   const escrow = list.filter((o) => o.status === "ESCROW");
   const open = (r?: Array<{ status: string }>) => (r ?? []).filter((x) => x.status === "OPEN").length;
-  const pubDocs = myDocs.filter((d) => d.status === "PUBLISHED").length;
-  const pubBazar = myBazar.filter((b) => b.status === "AVAILABLE").length;
+  const pubDocs = myDocs.filter((d) => isActiveListing(d, "document")).length;
+  const pubBazar = myBazar.filter((b) => isActiveListing(b, "bazar")).length;
 
   return {
     isMod,
