@@ -30,7 +30,8 @@ Web (build-time): `VITE_API_URL`. BD: Neon `Universo_Agustino`(prod, ep-hidden-d
 - Sesión: access en memoria (Bearer) + cookie `hub_refresh` httpOnly; prod `SameSite=None;Secure` (`lib/cookies.ts`). CSRF = `requireSameOrigin` con Origin **exacto** ∈ `WEB_ORIGIN`. `trust proxy` = `TRUST_PROXY` (1 en prod).
 - Acceso: Google (`hd=unsa.edu.pe`, token revocado si falla) · OTP 6 dígitos (HMAC, 10 min, 5 intentos) · cuenta nueva → `onboardedAt` null → `/bienvenida`.
 - Dinero: comisión 13 % que asume el vendedor (RFC 0003, specs 36–40), cálculo solo vía `computePrice()`+`PLATFORM_FEE_PCT`. El equipo es intermediario: el comprador paga a una cuenta del equipo y sube comprobante; un trabajador lo acepta o deniega; luego se liquida al vendedor el neto con comprobante. Físico: cobro en sede. Datos de cuentas del equipo nunca en el repo. Pedido solo vía `canTransition` (PENDING→ACCEPTED→PAID→ESCROW→RELEASED|CANCELLED|REFUNDED).
-- Modelos: User, Profile, EmailLoginCode, RefreshToken, Document, BazarItem, Order, Escrow, Upload, Report, Notification. Exámenes = datos estáticos web (no BD).
+- Modelos: cuentas (User, Profile, EmailLoginCode, RefreshToken, PasswordResetToken) · catálogo (Document, SavedDocument, DocumentAccessGrant, BazarItem; `pausedAt` = pausa del dueño, `removedAt/removedReason` = retiro por el equipo) · dinero (Order, Escrow, PaymentAccount, Payout) · custodia y sedes (HandoverCase, Appointment, CaseMessage, Sede, OpeningHours, Holiday, StaffShift) · moderación (Report con `category`, Strike, Sanction, UserReview, AuditLog) · Upload, Notification. Exámenes = datos estáticos web (no BD).
+- Permisos de publicaciones: solo el dueño edita, pausa o elimina; el equipo retira/restaura (restaurar solo técnico) y modera la revisión (specs 45–47).
 - Migraciones: nueva y fechada; nunca editar una aplicada.
 - Contrato API: `{data}` / `{error:{code,message}}`; toda ruta nueva en `openapi.yaml`.
 
