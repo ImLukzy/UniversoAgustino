@@ -2,8 +2,18 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const urls = [process.env.DATABASE_URL, process.env.DIRECT_DATABASE_URL].filter(Boolean);
-if (!urls.length || urls.some((url) => url.includes("ep-hidden-dew") || !url.includes("ep-orange-mountain"))) {
-  console.error("qa:seed abortado: DATABASE_URL debe apuntar a la base de desarrollo autorizada.");
+const localAllowed = process.env.CI === "true" || process.env.QA_SEED_ALLOW_LOCAL === "1";
+const allowedUrl = (value) => {
+  const url = value.toLowerCase();
+  if (url.includes("ep-hidden-dew")) return false;
+  if (url.includes("ep-orange-mountain")) return true;
+  try {
+    const host = new URL(value).hostname;
+    return localAllowed && (host === "localhost" || host === "127.0.0.1");
+  } catch { return false; }
+};
+if (!urls.length || urls.some((url) => !allowedUrl(url))) {
+  console.error("qa:seed abortado: usa la BD de desarrollo autorizada o una BD local con CI=true o QA_SEED_ALLOW_LOCAL=1.");
   process.exit(1);
 }
 
