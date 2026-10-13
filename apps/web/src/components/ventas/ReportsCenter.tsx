@@ -1,42 +1,22 @@
-import { useState, type FormEvent } from "react";
-import { api, apiError, fmtDate, type HubReport } from "../../lib/api";
+import { useState } from "react";
+import { fmtDate, type HubReport } from "../../lib/api";
 import { ITEM_TYPE_LABEL, REPORT_STATUS_LABEL } from "../../lib/orderLabels";
-import { fieldLabel } from "../publicar/StepDetails";
 import { EmptyState } from "../EmptyState";
 
 type Filter = "all" | "open" | "done";
 
-// Mis reportes (devoluciones, archivos, D.L. 822) + formulario para abrir uno.
-export function ReportsCenter({ reports, onSent }: { reports: HubReport[]; onSent: () => void }) {
+// Mis reportes enviados desde una publicación o pedido.
+export function ReportsCenter({ reports }: { reports: HubReport[]; onSent: () => void }) {
   const [filter, setFilter] = useState<Filter>("all");
-  const [form, setForm] = useState({ type: "bazar", id: "", reason: "" });
-  const [msg, setMsg] = useState("");
-  const [busy, setBusy] = useState(false);
   const open = reports.filter((r) => r.status === "OPEN");
   const shown = reports.filter((r) => (filter === "all" ? true : filter === "open" ? r.status === "OPEN" : r.status !== "OPEN"));
   const tabs: [Filter, string][] = [["all", `Todas (${reports.length})`], ["open", `Abiertas (${open.length})`], ["done", `Resueltas (${reports.length - open.length})`]];
-
-  const send = async (e: FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setMsg("");
-    try {
-      await api.post("/reports", { targetType: form.type, targetId: form.id.trim(), reason: form.reason.trim() });
-      setMsg("Reporte enviado. Lo revisaremos en menos de 48 horas.");
-      setForm((f) => ({ ...f, id: "", reason: "" }));
-      onSent();
-    } catch (ex) {
-      setMsg(apiError(ex));
-    } finally {
-      setBusy(false);
-    }
-  };
 
   return (
     <section id="seccion-reportes" className="flex flex-col gap-4">
       <div>
         <h2 className="h-display text-2xl">Soporte y reportes</h2>
-        <p className="mt-1 text-sm text-zinc-600">Reporta devoluciones del bazar, problemas con archivos o infracciones. Respondemos en menos de 48 horas.</p>
+        <p className="mt-1 text-sm text-zinc-600">Para reportar una publicación, usa “Reportar publicación” en su detalle. Para reportar un pedido, usa “Reportar al vendedor” en /pedidos.</p>
       </div>
       <div role="tablist" aria-label="Filtrar reportes" className="flex gap-2 overflow-x-auto p-1">
         {tabs.map(([v, l]) => (
@@ -56,29 +36,6 @@ export function ReportsCenter({ reports, onSent }: { reports: HubReport[]; onSen
           </div>
         ))}
       </div>
-      <form onSubmit={send} className="card flex flex-col gap-4 p-5">
-        <h3 className="font-extrabold text-zinc-950">Abrir un reporte</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className={fieldLabel}>
-            Tipo
-            <select className="input" value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}>
-              <option value="bazar">Artículo de bazar</option>
-              <option value="order">Pedido (congela liquidación pendiente)</option><option value="document">Apunte digital</option>
-              <option value="user">Usuario</option>
-            </select>
-          </label>
-          <label className={fieldLabel}>
-            ID del pedido, ítem o usuario
-            <input className="input" value={form.id} onChange={(e) => setForm((f) => ({ ...f, id: e.target.value }))} required />
-          </label>
-        </div>
-        <label className={fieldLabel}>
-          Motivo (mín. 10 caracteres)
-          <textarea className="input" rows={3} value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} required minLength={10} maxLength={2000} placeholder="Describe la devolución o el problema…" />
-        </label>
-        <p role="status" className="min-h-[1rem] text-xs font-bold text-zinc-700">{msg}</p>
-        <button disabled={busy} type="submit" className="btn btn-primary w-fit">{busy ? "Enviando…" : "Enviar reporte"}</button>
-      </form>
     </section>
   );
 }

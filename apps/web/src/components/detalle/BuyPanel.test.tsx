@@ -37,3 +37,13 @@ it("oculta el CTA de desbloqueo en la portada de un apunte pausado", () => {
   const html = renderToStaticMarkup(<DetailMedia d={d} />);
   expect(html).not.toContain("Desbloquear por"); expect(html).not.toContain("Contenido completo bloqueado");
 });
+
+it("muestra reporte solo a personas que no son dueñas y ofrece login sin sesión", () => {
+  const loggedIn = { ...detail(false), pausedForViewer: false, loggedIn: true, isOwner: false } as unknown as Detail;
+  const owner = { ...loggedIn, isOwner: true } as unknown as Detail;
+  const guest = { ...loggedIn, loggedIn: false, openAuth: () => {} } as unknown as Detail;
+  const render = (d: Detail) => renderToStaticMarkup(<StaticRouter location="/"><BuyPanel d={d} /></StaticRouter>);
+  expect(render(loggedIn)).toContain("Reportar publicación");
+  expect(render(owner)).not.toContain("Reportar publicación");
+  expect(render(guest)).toContain("Inicia sesión para reportar");
+});

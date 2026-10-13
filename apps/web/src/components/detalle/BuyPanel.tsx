@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { pen } from "../../lib/api";
 import { careerLabel } from "../../data/unsa";
 import { CareerAvatar } from "../CareerVisual";
 import { todayLocal, type Detail } from "./useDetail";
 import { ROUTES } from "../../lib/routes";
+import { ReportListingForm } from "./ReportListingForm";
 
 // Panel de compra: vendedor, precio con desglose real, cobro, fechas de alquiler y CTA.
 export function BuyPanel({ d }: { d: Detail }) {
+  const [reportOpen, setReportOpen] = useState(false);
   const p = d.person;
   const isBazar = !!d.item;
   const cta = !d.available ? "No disponible" : d.busy ? "Creando pedido…" : !d.loggedIn ? "Entrar y comprar" : isBazar ? (d.isRental ? "Solicitar alquiler" : "Solicitar compra") : "Comprar ahora";
@@ -49,6 +52,10 @@ export function BuyPanel({ d }: { d: Detail }) {
         {d.fullAccess && d.doc
           ? <Link to={ROUTES.document(d.doc.id)} className="btn btn-secondary btn-lg w-full">Abrir documento</Link>
           : !d.pausedForViewer && !d.removed && <button type="button" disabled={!d.available || d.busy} onClick={d.buy} className="btn btn-primary btn-lg w-full">{cta}</button>}
+        {!d.isOwner && (d.loggedIn
+          ? <button type="button" className="btn btn-secondary btn-sm w-full" aria-expanded={reportOpen} onClick={() => setReportOpen((open) => !open)}>{reportOpen ? "Cerrar reporte" : "Reportar publicación"}</button>
+          : <button type="button" className="btn btn-secondary btn-sm w-full" onClick={d.openAuth}>Inicia sesión para reportar</button>)}
+        {reportOpen && d.src && <ReportListingForm type={isBazar ? "bazar" : "document"} listingId={d.src.id} />}
         <p className="text-center text-xs text-zinc-500">El equipo verifica el pago y liquida al vendedor en 24–48 h.</p>
       </div>
       <ul className="card-dashed flex flex-col gap-2 p-5 text-sm text-zinc-700">
