@@ -2,7 +2,8 @@
 
 El ingreso social es 100% funcional a nivel código, pero exige credenciales
 que solo el propietario puede crear (Google Cloud / Apple Developer). Sin
-ellas, los botones muestran el toast "aún no disponible".
+ellas, los endpoints del proveedor responden como no disponibles; la interfaz consulta
+el estado de los proveedores.
 
 El modal también ofrece **correo institucional con código de 6 dígitos**
 (spec 22, `POST /auth/email/start` + `/verify`): funciona sin Google ni Apple.
@@ -39,9 +40,10 @@ APPLE_CLIENT_ID=<service-id>
 APPLE_REDIRECT_URI=http://localhost:4000/api/v1/auth/oauth/apple/callback
 ```
 
-Con las tres de Google vacías, `GET /auth/oauth/google` responde 503 y el
-frontend mantiene el toast. Igual para Apple. `GET /auth/oauth/status`
-dice qué proveedor está activo: `{ google, apple }`.
+`GET /auth/oauth/google` responde 503 si faltan sus credenciales. Apple inicia en
+`GET /auth/oauth/apple` y recibe el callback en
+`POST /auth/oauth/apple/callback`; ambos dependen de su configuración.
+`GET /auth/oauth/status` informa qué proveedor está activo: `{ google, apple }`.
 
 ## 3. Flujo implementado
 

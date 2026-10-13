@@ -61,6 +61,6 @@ CORS). Cloudflare Dashboard → R2 → `ua-uploads` → **Settings → CORS Poli
   `access-control-allow-origin: http://localhost:5173`.
 
 ## Notas
-- El bucket es **privado**: el navegador recibe un 302 a una URL prefirmada (15 min, `private, max-age=900`), nunca la clave del bucket.
-- Modelo de acceso sin cambios (paridad con disco): quien tenga la URL `/uploads/...` la puede abrir. Control por comprador/vendedor es follow-up pendiente, no parte de esta migración.
+- El bucket es **privado**: tras autorizar la solicitud, el navegador recibe un 302 a una URL prefirmada (15 min); nunca recibe la clave del bucket.
+- Los uploads marcados `private` requieren autorización: propietario, equipo vigente o una relación válida de comprador/vendedor con el pago. Los documentos digitales de pago tienen además el control de acceso de compra. Consulta `apps/api/src/middleware/serveUploads.ts` y `privateUploadAccess.ts`.
 - Deduplicación por checksum+dueño y validación por firma mágica funcionan igual en ambos backends.

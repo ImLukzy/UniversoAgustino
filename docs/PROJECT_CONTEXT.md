@@ -1,128 +1,47 @@
-# PROJECT_CONTEXT — Universo_Agustino (Universo Agustino)
+# Contexto del proyecto — Universo Agustino
 
-> Mapa mental para un LLM que va a trabajar en este monorepo. Hechos
-> verificados contra el código el 2026-09-23. Donde el brief original
-> discrepa de la realidad, manda esta sección (ver §0).
+Resumen operativo contrastado con el código. Para rutas y payloads, la fuente única es [`apps/api/docs/openapi.yaml`](../apps/api/docs/openapi.yaml); para modelos, [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.prisma).
 
-## 0. Divergencias conocidas con el brief (leer primero)
+## Producto y stack
 
-- El **bazar físico NO se eliminó**: existen `BazarItem`, `BazarStatus`
-  (AVAILABLE/RESERVED/SOLD/RENTED), rutas `/bazar`, páginas de bazar y
-  alquileres con garantía. El "pivote a solo documentos" es aspiracional.
-- La máquina de estados de `Order` tiene **7 estados**, no 3
-  (ver §2). `CANCELLED` exige motivo; existe `REFUNDED`.
-- La UI **no usa** `bg-zinc-50` / `text-zinc-900` / `#00685F` (cero
-  ocurrencias): usa tokens propios `surface-*` + slate + acentos por
-  carrera (20 colores únicos AA en `apps/web/src/data/unsa.ts`).
-- Existe modelo `Escrow` (1:1 con `Order`, con `releasedAt`): la custodia
-  no es solo un status.
-- Springs reales en uso: `stiffness: 400` (mayoría) y `350` (drawer/nav).
+Marketplace académico para la comunidad UNSA: apuntes digitales con vista previa y visor protegido, bazar de artículos en venta o alquiler, custodia y balotarios estáticos. Monorepo npm con `apps/api` (Express, Prisma, Postgres), `apps/web` (React/Vite) y `packages/shared` (Zod, tipos y reglas compartidas). Node requerido: 24.x.
 
-## 1. Stack y arquitectura
+El catálogo incluye 20 carreras con tema visual. La web usa `bg-white`/`bg-zinc-50`, tokens `--hub-p*` y acentos `primary`/`primary-soft`; el teal base es `#00685F`. El movimiento compartido usa `SPRING` de `apps/web/src/lib/motion.ts` (stiffness 400, damping 30). `/login` y `/register` son rutas que abren el modal de acceso; no son páginas de formulario independientes. El layout comparte sidebar de 264 px en escritorio, header con un formulario de búsqueda global y drawer en móvil; distintas rutas lo montan desde el router o desde el propio componente.
 
-- Monorepo npm workspaces (`apps/*`, `packages/*`). Tres unidades:
-  `apps/api`, `apps/web`, `packages/shared`.
-- **API**: Express + Prisma 5 + Postgres (Neon, São Paulo) + Zod vía
-  `@hub/shared`. Prefijo `/api/v1`, puerto 4000. `GET /health`, `/ready`,
-  Swagger en `/docs` (contrato en `apps/api/docs/openapi.yaml`, gate
-  `scripts/docs-check.mjs`: toda ruta montada debe estar documentada).
-- **Web**: React + Vite 5 + Tailwind 3.4 + TanStack Query + Framer Motion,
-  puerto 5173. Rutas con React Router y code-splitting por página
-  (pdfjs-dist va en lazy siempre; el worker es chunk separado).
-- **Shared** (`@hub/shared`): Zod schemas + `computePrice()` + etiquetas.
-  La API lo importa de verdad; la web lo importa solo para `computePrice`
-  y **duplica** las interfaces (`HubOrder`, `HubDocument`…) en
-  `apps/web/src/lib/api.ts` — grieta de tipos conocida: si cambia el
-  backend, el espejo manual se desincroniza.
-- Storage dual: disco local (dev) o Cloudflare R2 privado vía SDK S3 con
-  URLs prefirmadas de 15 min (`STORAGE_DRIVER=s3`). Uploads validados por
-  firma mágica, nombres UUID, dedupe por checksum+dueño (modelo `Upload`).
-  PDFs del visor viajan por `?stream=1` (misma API, con `Range`) para
-  esquivar CORS/preflights del navegador.
-- Migraciones Prisma numeradas por fecha; regla dura: jamás editar una
-  migración aplicada (los índices raw de sprint1a ni siquiera están en el
-  schema: drift conocido y documentado, no "arreglar" con diff a ciegas).
+## Roles y acceso
 
-## 2. Datos y máquina de estados
+Los roles son `student`, `creator`, `moderator` y `admin`. El acceso institucional admite `@unsa.edu.pe` y la excepción configurada en `packages/shared/src/common.ts`. El access token vive en memoria; el refresh usa cookie httpOnly `hub_refresh`. Las peticiones con cookie validan el origen exacto.
 
-- `User` (email único, `passwordHash` nullable para OAuth, `provider`/
-  `providerId` únicos, `avatarUrl`) 1—1 `Profile` (nombre, universidad
-  fija UNSA, carrera del enum de 20, ciclo). Roles:
-  student|creator|moderator|admin.
-- `Document` (apunte: course, career, cycle, type, priceCents, fileUrl,
-  payMethod/QR) y `BazarItem` (kind LIBRO|INSTRUMENTO|SCRUB, tx
-  VENTA|ALQUILER, priceCents, depositCents, photos[], payMethod/QR).
-- `Order` congela snapshot al crear: `sellerId` materializado, `itemTitle`,
-  `amountCents/feeCents/netCents`, TTL 30 min que bloquea el ítem
-  (`RESERVATION_TTL_MINUTES`). Invariante financiera no negociable:
-  `net + fee = amount`, calculada SOLO con `computePrice()` (sin comisión: tasa 0 %, fee 0 y neto igual al precio para pedidos nuevos; snapshots históricos intactos).
-- Estados: `PENDING → ACCEPTED` (solo bazar, alquiler) `→ PAID → ESCROW
-  → RELEASED`. Documentos saltan `ACCEPTED` (PENDING→PAID directo).
-  `CANCELLED` exige `cancelledReason`; `REFUNDED` existe.
-  Vocabulario estricto: `itemType` en minúsculas (`document|bazar`).
-- `Escrow` 1:1 con `Order` (marca `releasedAt`). `AuditLog` registra
-  auth/pedidos/pagos. `RefreshToken` con hash sha256 + revocación.
-  `Notification` (type/title/body/link/readAt) con índice de no-leídas.
-  `Report` para takedowns D.L. 822 (<48h).
+- Estudiante: consulta, compra, guarda publicaciones y reporta contenido o usuarios.
+- Creador/vendedor: publica y administra sus propios documentos y artículos; puede pausar y reanudar sus publicaciones.
+- Moderator: revisa reportes/publicaciones, retira contenido y opera funciones de equipo autorizadas.
+- Admin (técnico): puede restaurar publicaciones y ejecutar acciones de equipo restringidas, como completar reembolsos.
 
-## 3. Backend y seguridad
+## Publicaciones y moderación
 
-- Auth: registro/login con email+password; puerta estricta
-  `isAllowedEmail()` (`@unsa.edu.pe` + única excepción tecsup autorizada).
-  Access JWT corto en memoria del frontend; refresh rotativo en cookie
-  httpOnly `hub_refresh` (+ canal por body como respaldo); rotación con
-  ventana de gracia `*_PREV` (ver `docs/runbook-rotacion.md`).
-- OAuth Google/Apple implementado (`/auth/oauth/*`, `state` firmado,
-  códigos de un solo uso, verificación RS256/JWKS sin deps para Apple):
-  **apagado sin credenciales** (solo el propietario puede crearlas, ver
-  `docs/oauth.md`). Mismo `isAllowedEmail` + revocación del token en
-  Google ante dominio denegado. Cuentas OAuth no tienen clave: el login
-  clásico responde `OAUTH_ONLY`.
-- Contratos de error: `{ error: { code, message, details?, requestId } }`.
-  Auth siempre desde `req.user.sub` (nunca `req.user.id`). Rate limits:
-  global 300/min, login 50/15min, forgot doble, uploads 30/h, OAuth 50/15min.
-- Uploads: `POST /uploads` (multer→temporal→verificación→R2/disco),
-  `GET /uploads/:name` con 302 no-cacheable a prefirmada o `?stream=1`
-  con `Range` reenviado. CORS del bucket documentado en `docs/storage-r2.md`.
+El dueño puede editar, pausar/reanudar y eliminar sus publicaciones conforme a las reglas del catálogo. El equipo puede retirar una publicación por moderación; el registro conserva `removedAt`, motivo y actor. La restauración es exclusiva de admin. Los usuarios autenticados pueden crear reportes desde una publicación; los reportes tienen categoría, tipo de objetivo y estado. El equipo decide acción o descarte; las faltas, sanciones y reseñas se registran en los módulos de moderación. Las notificaciones se agrupan en las categorías `orders`, `publications` y `team`.
 
-## 4. Frontend y estado
+## Dinero y entregas
 
-- React Query global: `staleTime` 5 min, sin refetch al enfocar; claves
-  `["orders", …]`, `["notifications", …]`, `["live-documents", …]`,
-  intervalos de 30 s en campana/ventas. Contextos: `AuthContext` (sesión
-  en memoria + `refreshMe`), `CareerTheme` (carrera global → variable
-  `--hub-p` + acentos), `ToastContext`, `AuthModalHost` (modal flotante
-  global; no existe página `/login`: la ruta abre el modal).
-- Rutas reales: `/` (landing), `/home` (dashboard), `/bazar`, `/monetiza`,
-  `/legal`, `/v/:id` (visor PDF protegido págs. 1–2), `/p/bazar/:id`,
-  `/publicar`, `/subir-material` (wizard), `/checkout/:id`, `/pedidos`,
-  `/ventas`, `/publicaciones`, `/cuenta`, `/perfil`, `/ajustes`,
-  `/notificaciones`, `/suscripcion` (página honesta: no hay premium),
-  `/panel`, `/admin`, `/auth/callback`. Mapa central en
-  `apps/web/src/lib/routes.ts` (usarlo, no literales).
-- Layout: todo menos `/` usa `AppLayout` (sidebar 280px + header con
-  omnibox + footer único `AppFooter`; el drawer móvil reutiliza el
-  mismo contenido). Un solo footer por página (verificado).
-- UI: 15 acentos de carrera únicos + test que exige unicidad y contraste
-  AA; subset de Material Symbols generado (`scripts/subset-icons.mjs
-  --write`, test de paridad: todo icono nuevo debe entrar al subset);
-  skeletons con geometría 1:1 (CLS≈0); `EmptyState` compartido.
-- Motion: springs 400/25 en cards y botones, 350/32 en drawer/nav,
-  `AnimatePresence` en filtros/dropdowns/modales; entradas `ease-out`,
-  jank evitado (sin `layout` sobre imágenes lazy).
+La comisión predeterminada es **13 % y la asume el vendedor**. `computePrice()` calcula fee y neto; los pedidos guardan snapshots y cumplen `amount = fee + net`. La regla procede de RFC 0003 y specs 36–40; los pedidos históricos conservan su snapshot.
 
-## 5. Contratos y reglas de trabajo
+El equipo es intermediario. En el pago digital el comprador elige una cuenta administrada por el equipo, transfiere y sube el comprobante; un trabajador lo acepta o deniega. Al confirmarse el pago, el pedido entra en custodia y el contenido digital se habilita según su estado. Tras completar la operación se liquida al vendedor el neto con comprobante. La confirmación manual del vendedor no sustituye la verificación del equipo. Mercado Pago está deshabilitado por la mediación de equipo aunque existan credenciales.
 
-- `packages/shared`: Zod (`Register/Login/Forgot/Reset/UpdateProfile`,
-  `CreateDocument/Bazar`, `CareerSchema` 1:1 con `data/unsa.ts`),
-  `computePrice()` (única vía para los montos; sin comisión por defecto),
-  `isAllowedEmail()`, etiquetas y `simulateEarnings`.
-- Verificación obligatoria por cambio: `npm run typecheck` (0 errores),
-  `npm run lint` (0 errores), `npm test` (vitest), `npm run docs:check`
-  si tocas rutas, build web si tocas UI global.
-- Prohibido: inventar precios/ratings/vistas/seguidores/quizzes/premium/
-  stats; `any` (gate `budget:any`); iconos fuera del subset; datos de
-  negocio en fixtures sin prefijo `TEST-`/`@test.local`; commitear `.env`.
-- Convenciones: componentes pequeños, props tipadas, errores con el
-  contrato del §3, español en toda la UI, commits atómicos solo cuando el
-  usuario los pide explícitamente.
+En bazar físico, el comprador paga en sede al trabajador y presenta el comprobante correspondiente; el equipo registra y verifica el pago, coordina la entrega/custodia y libera o devuelve el dinero conforme al flujo aplicable. Los casos, citas, sedes y mensajes se gestionan en los módulos de custodia.
+
+Los pedidos usan `PENDING`, `ACCEPTED` (cuando aplica), `PAID`, `ESCROW`, `RELEASED`, `CANCELLED` o `REFUNDED`; las transiciones se validan en el backend. La comisión se calcula desde `PLATFORM_FEE_PCT` (por defecto 13 en la aplicación; el despliegue puede sobrescribirlo, así que verifica la configuración activa antes de operar).
+
+## Seguridad y archivos
+
+Auth clásica, código por correo y OAuth Google/Apple están implementados; proveedores externos requieren credenciales. Los archivos se validan por firma y pueden servirse desde disco local o R2. Los uploads marcados privados requieren sesión y autorización por propietario, rol de equipo o relación con pedido/pago; el archivo digital completo también exige acceso de compra, según el flujo.
+
+Los límites concretos se configuran por endpoint: global 300/min; login/registro 50/15 min; inicio de código 10/h por IP y 5/h por correo; verificación de código 30/15 min; uploads 30/h. Forgot y OAuth tienen sus propios limitadores. No asumir un único límite para todos los endpoints.
+
+## Trabajo y verificación
+
+- `npm run verify`: compilación shared, Prisma generate, typecheck, lint, docs:check, secretos, presupuestos, subset de iconos y tests.
+- `npm run qa:seed`: carga idempotente de datos de QA en una base permitida; sus cuentas usan dominio UNSA para pasar la validación real de acceso y son fixtures identificadas como `qa-*`.
+- `npm run e2e`: flujos E2E locales; `npm run e2e:ci`: ejecución contra una base CI efímera.
+- Despliegue: web con Vercel (`vercel.json`) y API con Render (`render.yaml`), ambos sobre Node 24. Migraciones mediante el comando predeploy de Render.
+
+La API responde `{data}` en éxito y `{error:{code,message,...}}` en error. Consulta [`API_SPECS.md`](API_SPECS.md) para convenciones y OpenAPI para el contrato exacto.

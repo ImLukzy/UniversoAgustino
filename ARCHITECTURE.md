@@ -1,3 +1,5 @@
+> **Documento histórico (2026-09-08).** Describe un prototipo anterior y no el estado actual del producto. Para la arquitectura vigente consulta `CLAUDE.md` y `docs/PROJECT_CONTEXT.md`.
+
 # Wawki Arequipa — Plan de Arquitectura Profesional (localhost-first)
 
 > Fecha: 2026-09-08 · Estado: v0.1 scaffold localhost · Objetivo: arquitectura 100% profesional, modular y desplegable.
