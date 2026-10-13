@@ -29,9 +29,10 @@
 | A5 | Tamaño | archivos tocados ≤ 150 líneas | OK |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: restringir permisos + tests + openapi.
-- [ ] Tarea 2: verificar A1–A5 y anotar en §7.
+- [x] Tarea 1: restringir permisos + tests + openapi.
+- [x] Tarea 2: verificar A1–A5 y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-12 | A1–A5 | OK: PATCH/DELETE de documento y bazar solo dueño; moderator y admin 403; API 625 tests | Michael 5cc041d; auditoría Kelly OK (sin hallazgos, ningún flujo del equipo dependía de esas rutas); `npm run verify` en ImLukzy/Claudio |

@@ -32,10 +32,13 @@
 | A4 | Sin avisos de deprecación de Node 20 en las anotaciones del CI | `gh run view` | 0 avisos de Node 20 |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: `scripts/verify.mjs` + script `verify` + docs en CLAUDE.md/AGENTS.md.
-- [ ] Tarea 2: actualizar `ci.yml`.
+- [x] Tarea 1: `scripts/verify.mjs` + script `verify` + docs en CLAUDE.md/AGENTS.md.
+- [x] Tarea 2: actualizar `ci.yml`.
 - [ ] Tarea 3: verificar A1–A4 y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-12 | A1 verify | OK: 10 pasos ✓ en ImLukzy/Claudio | `npm run verify` |
+| 2026-10-12 | A2 detecta fallos | OK: `// any` temporal → sale 1 en budget:any | Dwight 506fa6e |
+| 2026-10-12 | CI y Node | checkout@v7 (v7.0.1), setup-node@v7 (v7.1.0), node 24, ubuntu-24.04; producción alineada a Node 24 (`engines.node` 24.x, render.yaml) por decisión humana | Dwight 506fa6e, Claudio fb7199a; auditoría Kelly OK |
