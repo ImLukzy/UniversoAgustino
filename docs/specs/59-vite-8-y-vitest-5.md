@@ -47,12 +47,20 @@
 | A7 | Iconos y fuentes | `node scripts/subset-icons.mjs --check` + E2E de iconos | verde |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: medir la base (A5) en `ImLukzy/Claudio` sin cambios.
-- [ ] Tarea 2: actualizar dependencias y lockfile; resolver `allowScripts`.
-- [ ] Tarea 3: migrar `manualChunks`.
-- [ ] Tarea 4: corregir los tests que fallen (en particular por `clearMocks`).
-- [ ] Tarea 5: A1–A7 y anotar los números antes y después en el reporte.
+- [x] Tarea 1: medir la base (A5) en `ImLukzy/Claudio` sin cambios.
+- [x] Tarea 2: actualizar dependencias y lockfile; resolver `allowScripts`.
+- [x] Tarea 3: migrar `manualChunks`.
+- [x] Tarea 4: corregir los tests que fallen (en particular por `clearMocks`).
+- [x] Tarea 5: A1–A7 y anotar los números antes y después en el reporte.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1 | ✅ | `npm ls`: vite 8.3.4, vitest 5.0.4, @vitejs/plugin-react 6.1.2; `overrides.vite` eliminado (Michael 0f1b473) |
+| 2026-10-13 | A2–A3 | ✅ | `npm run verify` en verde (Michael y Claudio tras `npm ci`); tests antes = después: API 630, web 171, shared 132, scripts 6; sin `.skip`. Solo se tiparon 2 fixtures (TS2742 de Vitest 5) |
+| 2026-10-13 | A4–A5 | ✅ | vendor-react / vendor-query / vendor-pdf con `codeSplitting` de Rolldown; PDF, ExamenInteractivo y LandingSections fuera de las precargas. JS inicial gzip 120 670 → 118 646 B; CSS 10 567 → 10 294 B |
+| 2026-10-13 | A6 | ✅ | `npm run e2e:ci` en la rama integrada: 7 suites ✓ |
+| 2026-10-13 | A7 | ✅ | `subset-icons --check` en verde; QA Pam: iconos como glifos, fuentes desde /fonts/ |
+| 2026-10-13 | Auditoría | ✅ | Kelly (task_7141aacd0b4e): APROBADO; codeSplitting absorbe dependencias de React sin duplicar |
+| 2026-10-13 | QA | ✅ | Pam (task_9a8a39fa5560): /, /explorar, /balotarios (examen abierto), /p/document/x a 1280 y 375 px; 0 errores JS, 0 chunks 404, estilos idénticos a producción |
+| 2026-10-13 | allowScripts | ✅ | podado `esbuild@0.21.5`; sin aprobaciones nuevas; gate install-scripts en verde |
