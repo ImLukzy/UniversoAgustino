@@ -1,8 +1,10 @@
-import { vi } from "vitest";
+import { vi, type Mock } from "vitest";
 import { Router, type NextFunction, type Request, type Response } from "express";
 import { requireAuth, requireRole } from "../../middleware/auth.js";
 import { errorHandler } from "../../middleware/errors.js";
-const h = vi.hoisted(() => {
+type Model = Record<"findUnique" | "findUniqueOrThrow" | "findMany" | "findFirst" | "count" | "create" | "update" | "delete" | "upsert", Mock>;
+type Mocks = Record<"appointment" | "sede" | "openingHours" | "holiday" | "staffShift" | "user" | "auditLog", Model> & Record<"lock", Mock>;
+const h: Mocks = vi.hoisted(() => {
   const model = () => ({ findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), count: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), upsert: vi.fn() });
   return { appointment: model(), sede: model(), openingHours: model(), holiday: model(), staffShift: model(), user: model(), auditLog: model(), lock: vi.fn() };
 });

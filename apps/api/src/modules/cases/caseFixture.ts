@@ -1,5 +1,8 @@
-import { vi } from "vitest";
-const h = vi.hoisted(() => {
+import { vi, type Mock } from "vitest";
+type Model = Record<"findUnique" | "findUniqueOrThrow" | "findMany" | "findFirst" | "count" | "create" | "update" | "updateMany", Mock>;
+type Mocks = Record<"payout" | "paymentAccount" | "user" | "handoverCase" | "appointment" | "order" | "bazarItem" | "auditLog" | "report" | "openingHours" | "holiday" | "sede" | "staffShift" | "upload", Model> &
+  Record<"lock" | "notify" | "hasObject", Mock>;
+const h: Mocks = vi.hoisted(() => {
   const model = () => ({ findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), count: vi.fn(), create: vi.fn(), update: vi.fn(), updateMany: vi.fn() });
   return { payout: model(), paymentAccount: model(), user: model(), handoverCase: model(), appointment: model(), order: model(), bazarItem: model(), auditLog: model(),
     report: model(), openingHours: model(), holiday: model(), sede: model(), staffShift: model(), upload: model(), lock: vi.fn(), notify: vi.fn(), hasObject: vi.fn() };

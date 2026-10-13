@@ -11,12 +11,14 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 500,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-query": ["@tanstack/react-query"],
-          "vendor-pdf": ["pdfjs-dist"],
+        codeSplitting: {
+          groups: [
+            { name: "vendor-react", test: /node_modules\/(?:react|react-dom|react-router-dom)\// },
+            { name: "vendor-query", test: /node_modules\/@tanstack\/react-query\// },
+            { name: "vendor-pdf", test: /node_modules\/pdfjs-dist\//, includeDependenciesRecursively: false },
+          ],
         },
       },
     },
