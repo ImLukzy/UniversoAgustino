@@ -16,6 +16,7 @@ import { usersRouter } from "../sanctions/users.js";
 import { agendaRouter, metricsRouter } from "../agenda/routes.js";
 
 import { paymentAccountsRouter } from "./paymentAccounts.js";
+import { getListings, removeListingRoute, restoreListingRoute } from "./listings.js";
 
 export const staffRouter = Router();
 staffRouter.use(requireAuth, requireRole("moderator", "admin"));
@@ -23,6 +24,9 @@ staffRouter.use("/payment-accounts", paymentAccountsRouter);
 staffRouter.use("/payments", staffPaymentsRouter);
 staffRouter.use("/payouts", payoutsRouter);
 staffRouter.use("/reviews", reviewsRouter);
+staffRouter.get("/listings", getListings);
+staffRouter.post("/listings/:type/:id/remove", removeListingRoute);
+staffRouter.post("/listings/:type/:id/restore", requireRole("admin"), restoreListingRoute);
 staffRouter.use("/sedes", staffSedesRouter);
 staffRouter.use("/schedule", scheduleRouter);
 staffRouter.use("/shifts", shiftsRouter);

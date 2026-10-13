@@ -7,7 +7,7 @@ export async function itemOwner(itemType: string, itemId: string) {
   if (itemType === "document") {
     const d = await prisma.document.findUniqueOrThrow({
       where: { id: itemId },
-      select: { authorId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true, status: true, reviewStatus: true, pausedAt: true },
+      select: { authorId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true, status: true, reviewStatus: true, pausedAt: true, removedAt: true },
     });
     return {
       ownerId: d.authorId,
@@ -19,13 +19,15 @@ export async function itemOwner(itemType: string, itemId: string) {
       status: d.status as string,
       reviewStatus: d.reviewStatus,
       pausedAt: d.pausedAt,
+      removedAt: d.removedAt,
+      removed: Boolean(d.removedAt) || d.status === "TAKEDOWN",
       tx: "VENTA",
       releaseStatus: null as "SOLD" | "RENTED" | null,
     };
   }
   const b = await prisma.bazarItem.findUniqueOrThrow({
     where: { id: itemId },
-    select: { sellerId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true, status: true, reviewStatus: true, pausedAt: true, tx: true },
+    select: { sellerId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true, status: true, reviewStatus: true, pausedAt: true, removedAt: true, tx: true },
   });
   return {
     ownerId: b.sellerId,
@@ -37,6 +39,8 @@ export async function itemOwner(itemType: string, itemId: string) {
     status: b.status,
     reviewStatus: b.reviewStatus,
     pausedAt: b.pausedAt,
+    removedAt: b.removedAt,
+    removed: Boolean(b.removedAt),
     tx: b.tx,
     releaseStatus: (b.tx === "ALQUILER" ? "RENTED" : "SOLD") as "SOLD" | "RENTED",
   };

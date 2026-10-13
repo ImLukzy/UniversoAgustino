@@ -6,6 +6,9 @@ import { requireAuth, requireRole, type AuthedRequest } from "../../middleware/a
 
 import { resubmitReview } from "../../lib/moderation.js";
 import { changeListingPause } from "../../lib/pause.js";
+import { moderateListing } from "../../lib/moderationListing.js";
+import { notify } from "../../lib/notify.js";
+import { RemoveListingSchema } from "@hub/shared";
 
 // Guardados, edición/borrado del dueño y takedown de moderación.
 export function registerManage(router: Router) {
@@ -101,9 +104,14 @@ export function registerManage(router: Router) {
     requireAuth,
     requireRole("moderator", "admin"),
     asyncHandler(async (req: AuthedRequest, res) => {
-      const doc = await prisma.document.update({ where: { id: req.params.id }, data: { status: "TAKEDOWN" } });
-      await prisma.auditLog.create({ data: { actorId: req.user!.sub, action: "document.takedown", entity: "document", entityId: doc.id } });
-      res.json({ data: doc });
+      const doc = await prisma.document.findUnique({ where: { id: req.params.id } });
+      if (!doc) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Documento no existe" } });
+      const reason = RemoveListingSchema.parse(req.body).reason;
+      const result = await moderateListing({ id: doc.id, kind: "document", actorId: req.user!.sub, ownerId: doc.authorId,
+        removedAt: doc.removedAt, legacyTakedown: doc.status === "TAKEDOWN", reason,
+        update: (data) => prisma.document.update({ where: { id: doc.id }, data }),
+        audit: (action) => prisma.auditLog.create({ data: { actorId: req.user!.sub, action, entity: "document", entityId: doc.id } }), notify });
+      res.json({ data: result.data });
     })
   );
 }

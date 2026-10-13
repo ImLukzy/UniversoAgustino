@@ -6,6 +6,7 @@ export const NOTIFICATION_CATEGORY = {
   ORDER_CREATED: "orders", ORDER_ACCEPTED: "orders", ORDER_PAID: "orders",
   ORDER_RELEASED: "orders", ORDER_EXPIRED: "orders", ORDER_CANCELLED: "orders",
   REPORT_RESOLVED: "publications", REVIEW_APPROVED: "publications", REVIEW_REJECTED: "publications",
+  PUBLICATION_REMOVED: "publications", PUBLICATION_RESTORED: "publications",
   ORDER_CASE_ASSIGNED: "orders",
   ORDER_APPOINTMENT_SCHEDULED: "orders",
   ORDER_APPOINTMENT_NO_SHOW: "orders",

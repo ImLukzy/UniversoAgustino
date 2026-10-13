@@ -70,7 +70,7 @@
 ## 6. Checklist de ejecución
 - [x] D1–D4 aprobadas por el humano (2026-10-12).
 - [x] Tarea 0: integrar spec 45 en `ImLukzy/Claudio` (prerrequisito; publicada 2026-10-12, 34ed1ea).
-- [ ] Tarea 1 (API): schema + migración; `moderationListing`; `/staff/listings` (listar, retirar, restaurar); filtros catálogo/detalle/pedidos; takedown legado; tests; openapi.
+- [x] Tarea 1 (API): schema + migración; `moderationListing`; `/staff/listings` (listar, retirar, restaurar); filtros catálogo/detalle/pedidos; takedown legado; tests; openapi.
 - [ ] Tarea 2 (API): reportes enriquecidos, `category`, acción validada que retira; `canApplySanction` (D3); notificaciones; tests; openapi.
 - [ ] Tarea 3 (web): sección "Todas las publicaciones"; Denuncias con contexto y acciones; SanctionForm; aviso en detalle; tests.
 - [ ] Tarea 4 (web): "Reportar al vendedor" en `/pedidos`; tests.
@@ -79,3 +79,4 @@
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-12 | Tarea 1 (API) | OK; suite completa verde. Migración manual y Prisma Client generado; no aplicada a BD según el alcance. Los criterios UI/E2E y la migración real quedan para tareas posteriores. | `npm run build -w packages/shared`; `npm run typecheck`; ESLint global; `npm run docs:check` (115 rutas); `JWT_ACCESS_SECRET=ci-only-fictitious-access-secret-32-chars-xx JWT_REFRESH_SECRET=ci-only-fictitious-refresh-secret-32-chars-x npm test` (API 614, web 156, shared 132); `node scripts/any-budget.mjs --check`; todos en verde. Verificación de tamaño de archivos TS API modificados: ≤150 líneas. |

@@ -32,3 +32,6 @@ export const CreateReportSchema = z.object({
   reason: z.string().min(10).max(2000),
 });
 export type CreateReportInput = z.infer<typeof CreateReportSchema>;
+
+export const RemoveListingSchema = z.object({ reason: z.string().trim().min(10).max(500) });
+export type RemoveListingInput = z.infer<typeof RemoveListingSchema>;

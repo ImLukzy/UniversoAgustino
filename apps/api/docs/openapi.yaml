@@ -478,7 +478,7 @@ paths:
   /documents/{id}:
     get:
       tags: [documents]
-      summary: Detalle público incluye paused y pausedAt; con token añade saved y fullAccess reales. fileType (pdf|image|null) siempre; fileUrl solo con fullAccess
+      summary: Detalle público incluye paused, removed y sus timestamps; con token añade saved y fullAccess reales. fileType siempre; fileUrl solo con fullAccess
       security: [{}, { bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
@@ -530,10 +530,15 @@ paths:
   /documents/{id}/takedown:
     post:
       tags: [documents]
-      summary: Baja por moderación D.L. 822 (moderator/admin)
+      summary: Retiro por moderación con motivo de 10–500 caracteres (moderator/admin)
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK }, '403': { description: FORBIDDEN } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [reason], properties: { reason: { type: string, minLength: 10, maxLength: 500 } } }
+      responses: { '200': { description: Retirado; `{data: {id, removedAt}}` }, '400': { description: VALIDATION }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND } }
   /bazar:
     get:
       tags: [bazar]
@@ -559,7 +564,7 @@ paths:
   /bazar/{id}:
     get:
       tags: [bazar]
-      summary: Detalle público con vendedor; incluye paused y pausedAt (404 si no existe)
+      summary: Detalle público con vendedor; incluye paused, removed y timestamps (404 si no existe)
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
     patch:
@@ -598,7 +603,7 @@ paths:
   /orders:
     post:
       tags: [orders]
-      summary: Crea pedido PENDING con TTL 30min + snapshot (auth). Alquiler bazar exige rentalStart/End
+      summary: Crea pedido PENDING con TTL 30min + snapshot (auth). Retirado → 409 LISTING_REMOVED; pausado → LISTING_PAUSED
       security: [{ bearerAuth: [] }]
       requestBody:
         required: true
@@ -616,7 +621,7 @@ paths:
         '200': { description: Apunte con pedido vivo del mismo comprador (PENDING/PAID) — se reutiliza, no se duplica }
         '201': { description: Creado (sellerId, expiresAt, itemTitle, itemPriceCents, feeBps) }
         '400': { description: SELF_PURCHASE, FREE_ITEM, DATES_REQUIRED o BAD_DATES }
-        '409': { description: NOT_AVAILABLE (con details.availableAt), LISTING_PAUSED (Esta publicación está pausada por su autor) o ALREADY_OWNED }
+        '409': { description: NOT_AVAILABLE (con details.availableAt), LISTING_REMOVED (Esta publicación fue retirada por moderación), LISTING_PAUSED o ALREADY_OWNED }
   /orders/mine:
     get:
       tags: [orders]
@@ -1007,6 +1012,45 @@ paths:
         '403': { description: FORBIDDEN }
         '404': { description: USER_NOT_FOUND }
         '409': { description: SELF_REMOVE, IS_ADMIN o NOT_STAFF }
+  /staff/listings:
+    get:
+      tags: [staff]
+      summary: Catálogo de publicaciones con propietario y reportes abiertos (moderator/admin)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: type, in: query, schema: { type: string, enum: [document, bazar] } }
+        - { name: state, in: query, schema: { type: string, enum: [active, paused, removed, pending] } }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 50, default: 12 } }
+      responses:
+        '200': { description: "{data: [{id, type, title, priceCents, state, owner: {id, nombre, correo}, openReports, createdAt}], page, pageSize, total}" }
+        '400': { description: VALIDATION }
+        '401': { description: UNAUTHENTICATED }
+        '403': { description: FORBIDDEN }
+  /staff/listings/{type}/{id}/remove:
+    post:
+      tags: [staff]
+      summary: Retira publicación y notifica al dueño (moderator/admin); idempotente
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: type, in: path, required: true, schema: { type: string, enum: [document, bazar] } }
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [reason], properties: { reason: { type: string, minLength: 10, maxLength: 500 } } }
+      responses: { '200': { description: "{data: {id, removedAt}}" }, '400': { description: VALIDATION }, '401': { description: UNAUTHENTICATED }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND } }
+  /staff/listings/{type}/{id}/restore:
+    post:
+      tags: [staff]
+      summary: Restaura publicación retirada (solo admin)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: type, in: path, required: true, schema: { type: string, enum: [document, bazar] } }
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses: { '200': { description: "{data: {id, removedAt: null}}" }, '401': { description: UNAUTHENTICATED }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND }, '409': { description: NOT_REMOVED } }
   /staff/reviews:
     get:
       tags: [staff]
