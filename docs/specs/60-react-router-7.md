@@ -43,11 +43,17 @@
 | A6 | Navegación | Playwright: `/` → `/explorar` → detalle → atrás; `/balotarios` → examen; ruta inexistente; `/panel` sin sesión → redirige; con sesión QA de moderador → `/panel/pagos-por-verificar` | sin errores de consola ni pantallas en blanco |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: medir la base (A4).
-- [ ] Tarea 2: actualizar dependencias y lockfile.
-- [ ] Tarea 3: ajustar el regex de `vendor-react` y los imports de tests si hace falta.
-- [ ] Tarea 4: A1–A6 y anotar los números antes y después en el reporte.
+- [x] Tarea 1: medir la base (A4).
+- [x] Tarea 2: actualizar dependencias y lockfile.
+- [x] Tarea 3: ajustar el regex de `vendor-react` y los imports de tests si hace falta.
+- [x] Tarea 4: A1–A6 y anotar los números antes y después en el reporte.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1 | ✅ | react-router-dom y react-router 7.18.4, una versión de cada uno (Dwight de30ab7) |
+| 2026-10-13 | A2–A3 | ✅ | `npm run verify` en verde (Dwight y Claudio tras `npm ci`); tests antes = después: API 630, web 171, shared 132, scripts 6. Cambios: `void navigate(...)` (v7 devuelve promesa) e import de `StaticRouter` desde `react-router-dom` |
+| 2026-10-13 | A4 | ✅ | JS inicial gzip 119 645 → 124 654 B (+4,19 %, ≤ 5 %); el router queda en `vendor-react` (regex con `react-router`) |
+| 2026-10-13 | A5 | ✅ | `npm run e2e:ci` en la rama integrada: 7 suites ✓ |
+| 2026-10-13 | A6 | ✅ | Dwight: 5 rutas OK; la ruta inexistente queda en blanco igual en v6 y v7 (preexistente, también en producción) → spec 61. Pam: 11 flujos OK a 1280 y 375 px (atrás/adelante, `?next=`, onboarding, vendedor, panel del moderador, F5 en rutas profundas); 0 errores no capturados |
+| 2026-10-13 | Auditoría | ✅ | Kelly (task_ec7d8e67e427): APROBADO; sin `await` críticos omitidos; el aumento de bundle es del router v7 |
