@@ -68,7 +68,7 @@
 - [x] Tarea 2: `lib/pause.ts` + tests; rutas pause/resume en documentos y bazar.
 - [x] Tarea 3 (API): filtros de catálogo, `paused` en detalle, bloqueo en `POST /orders`; openapi. UI pendiente.
 - [x] Tarea 4: UI en `/publicaciones` (botón y etiqueta) y aviso en el detalle.
-- [ ] Tarea 5: verificar A1–A12 y anotar en §7.
+- [x] Tarea 5: verificar A1–A12 y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
@@ -83,3 +83,8 @@
 | 2026-10-12 | A5 tamaño | OK; todo `.ts` tocado tiene ≤150 líneas | `wc -l` sobre los `.ts` modificados y nuevos |
 | 2026-10-12 | Shared | OK | `npm run build -w packages/shared` |
 | 2026-10-12 | Tarea 4 (web) | OK; botones Pausar/Reactivar, etiqueta Pausada, aviso sin compra y acceso conservado para fullAccess; suite web: 155 tests en 31 archivos, 6 nuevos | `apps/web/src/components/publicaciones/pausedListings.test.tsx`; `apps/web/src/components/detalle/BuyPanel.test.tsx`; `npm test -w apps/web` |
+| 2026-10-12 | A12 migración | OK en BD dev (`ep-orange-mountain`); producción pendiente de OK humano | `prisma migrate deploy` (Claudio) |
+| 2026-10-12 | A11 E2E (QA Pam) | OK apuntes y bazar: pausa idempotente, fuera de catálogo y búsqueda, `paused:true`, `POST /orders` 409 `LISTING_PAUSED`, moderador/técnico 403, comprador previo conserva `fullAccess`, UI "Pausada"/"Reactivar"/aviso sin compra, reactivar conserva `reviewStatus` | Playwright + API local contra BD dev, commit a28804e; datos restaurados |
+| 2026-10-12 | A7 scroll 375 px | OK, 0 px en `/publicaciones` y detalle | Playwright (Pam) |
+| 2026-10-12 | A10 axe | ❌ en a28804e (`definition-list`, `dlitem` en `PublicationsHeader.tsx`, preexistente) → ✅ en 22147f1: 0 serias/críticas a 1280 y 375 px | axe-core (Pam); fix auditado por Kelly |
+| 2026-10-12 | Integración | OK: API 604, web 156, shared 132; typecheck, lint, docs:check en verde | rama `ImLukzy/Claudio` |
