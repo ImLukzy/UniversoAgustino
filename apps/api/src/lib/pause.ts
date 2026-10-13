@@ -23,7 +23,7 @@ export async function changeListingPause(input: PauseChange) {
         activeOrders: active.length,
         statuses,
         canForce: onlyPending,
-        message: onlyPending ? "Hay una reserva activa. Podrás eliminarla cuando expire o si la cancelas." : "Tiene pedidos en curso, no se puede eliminar",
+        message: onlyPending ? "Hay una reserva activa. Podrás pausarla cuando expire o si la cancelas." : "Tiene pedidos en curso, no se puede pausar",
       } };
     }
   }

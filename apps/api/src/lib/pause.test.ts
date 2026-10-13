@@ -45,8 +45,12 @@ describe("pausar publicaciones", () => {
   });
   it("bloquea pedidos en curso con el detalle de conflicto", async () => {
     db.order.findMany.mockResolvedValue([{ status: "ACCEPTED", expiresAt: null }]);
-    expect(await accountRequest(documents, "POST", "/doc/pause", "owner")).toMatchObject({ status: 409, body: { error: { code: "CONFLICT_ACTIVE_ORDERS", details: { activeOrders: 1, statuses: ["ACCEPTED"], canForce: false } } } });
+    expect(await accountRequest(documents, "POST", "/doc/pause", "owner")).toMatchObject({ status: 409, body: { error: { code: "CONFLICT_ACTIVE_ORDERS", message: "Tiene pedidos en curso, no se puede pausar", details: { activeOrders: 1, statuses: ["ACCEPTED"], canForce: false } } } });
     expect(db.document.update).not.toHaveBeenCalled();
+  });
+  it("indica cuándo se puede pausar tras una reserva PENDING", async () => {
+    db.order.findMany.mockResolvedValue([{ status: "PENDING", expiresAt: new Date() }]);
+    expect(await accountRequest(documents, "POST", "/doc/pause", "owner")).toMatchObject({ status: 409, body: { error: { message: "Hay una reserva activa. Podrás pausarla cuando expire o si la cancelas." } } });
   });
   it("pausar/reactivar es idempotente", async () => {
     const pausedAt = new Date(); db.document.findUnique.mockResolvedValue({ ...doc, pausedAt });
