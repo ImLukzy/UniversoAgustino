@@ -23,9 +23,11 @@ export function ListingRow({ listing, sales, open, onToggle, onQr }: {
   const src = isDoc ? listing.doc : listing.item;
   const st = itemStats(sales, listing.id);
   const href = isDoc ? ROUTES.document(listing.id) : ROUTES.bazarItem(listing.id);
-  const status = isDoc
-    ? { label: listing.doc.status === "PUBLISHED" ? "Activa" : listing.doc.status, cls: "bg-[#dcfce7]" }
-    : (BAZAR_STATUS[listing.item.status] ?? { label: listing.item.status, cls: "bg-zinc-100" });
+  const status = src.pausedAt
+    ? { label: "Pausada", cls: "bg-zinc-100" }
+    : isDoc
+      ? { label: listing.doc.status === "PUBLISHED" ? "Activa" : listing.doc.status, cls: "bg-[#dcfce7]" }
+      : (BAZAR_STATUS[listing.item.status] ?? { label: listing.item.status, cls: "bg-zinc-100" });
   const photo = !isDoc ? listing.item.photos?.[0] : undefined;
 
   return (
@@ -38,7 +40,7 @@ export function ListingRow({ listing, sales, open, onToggle, onQr }: {
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="tag">{listing.sub.split(" · ")[0]}</span>
-            {(!src.reviewStatus || src.reviewStatus === "APPROVED") && <span className={`tag ${status.cls}`}>{status.label}</span>}
+            {(src.pausedAt || !src.reviewStatus || src.reviewStatus === "APPROVED") && <span className={`tag ${status.cls}`}>{status.label}</span>}
             <ReviewChip status={src.reviewStatus} note={src.reviewNote} />
           </div>
           <span className="price text-xl text-primary">{pen(listing.price)}</span>

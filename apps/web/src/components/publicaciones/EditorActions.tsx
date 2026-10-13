@@ -19,10 +19,19 @@ export function EditorActions({ ed, title, liveOrders, oldPrice, newPrice, onSav
           Tienes {liveOrders} pedido(s) activos con el precio anterior ({pen(oldPrice)}). El cambio solo aplicará a nuevas reservas.
         </p>
       )}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button type="button" disabled={ed.busy} onClick={onSave} className="btn btn-primary btn-sm">Guardar cambios</button>
+        {ed.pausedAt
+          ? <button type="button" disabled={ed.busy} onClick={ed.resume} className="btn btn-secondary btn-sm">Reactivar</button>
+          : <button type="button" disabled={ed.busy} onClick={ed.askPause} className="btn btn-secondary btn-sm">Pausar</button>}
         <button type="button" disabled={ed.busy} onClick={ed.askDelete} className="btn btn-secondary btn-sm text-[#dc2626]">Eliminar</button>
       </div>
+      <ConfirmModal
+        info={ed.confirmingPause ? { title: "Pausar publicación", message: `¿Pausar "${title}"? No aparecerá en el catálogo hasta que la reactives.`, confirmLabel: "Pausar" } : null}
+        busy={false}
+        onConfirm={ed.pause}
+        onClose={ed.cancelPause}
+      />
       <ConfirmModal
         info={ed.confirming ? { title: "Eliminar publicación", message: `¿Eliminar "${title}"? Esta acción no se puede deshacer.` } : null}
         busy={ed.busy}

@@ -12,8 +12,8 @@ interface Person {
   career?: string | null;
   cycle?: string | null;
 }
-type Doc = HubDocument & { author?: { profile?: Person | null } | null; fileType?: "pdf" | "image" | null };
-type Item = HubBazarItem & { seller?: { profile?: Person | null } | null };
+type Doc = HubDocument & { authorId?: string; fullAccess?: boolean; author?: { profile?: Person | null } | null; fileType?: "pdf" | "image" | null };
+type Item = HubBazarItem & { sellerId?: string; seller?: { profile?: Person | null } | null };
 
 // Fecha local YYYY-MM-DD (evita el desfase UTC de toISOString).
 export function todayLocal(): string {
@@ -41,7 +41,10 @@ export function useDetail(kind: "document" | "bazar", id: string | undefined) {
 
   const src = kind === "document" ? doc.data : item.data;
   const isRental = kind === "bazar" && item.data?.tx === "ALQUILER";
-  const available = kind === "document" ? !!doc.data : item.data?.status === "AVAILABLE";
+  const isOwner = kind === "document" ? doc.data?.authorId === user?.id : item.data?.sellerId === user?.id;
+  const pausedForViewer = !!src?.paused && !isOwner;
+  const fullAccess = kind === "document" && !!doc.data?.fullAccess;
+  const available = (kind === "document" ? !!doc.data : item.data?.status === "AVAILABLE") && !pausedForViewer;
 
   const buy = async () => {
     // Sin sesión: el modal se abre sobre esta página; al entrar, el usuario sigue aquí.
@@ -75,6 +78,8 @@ export function useDetail(kind: "document" | "bazar", id: string | undefined) {
     payQr: resolveQr(src?.payQrUrl),
     isRental,
     available,
+    pausedForViewer,
+    fullAccess,
     loggedIn: !!user,
     rental,
     setRental,

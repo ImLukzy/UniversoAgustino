@@ -67,7 +67,7 @@
 - [x] Tarea 1: schema + migración fechada; regenerar cliente Prisma (aplicación en dev a cargo del coordinador).
 - [x] Tarea 2: `lib/pause.ts` + tests; rutas pause/resume en documentos y bazar.
 - [x] Tarea 3 (API): filtros de catálogo, `paused` en detalle, bloqueo en `POST /orders`; openapi. UI pendiente.
-- [ ] Tarea 4: UI en `/publicaciones` (botón y etiqueta) y aviso en el detalle.
+- [x] Tarea 4: UI en `/publicaciones` (botón y etiqueta) y aviso en el detalle.
 - [ ] Tarea 5: verificar A1–A12 y anotar en §7.
 
 ## 7. Registro de verificación
@@ -82,3 +82,4 @@
 | 2026-10-12 | A4 contrato API | OK; 112 rutas cubiertas | `npm run docs:check` |
 | 2026-10-12 | A5 tamaño | OK; todo `.ts` tocado tiene ≤150 líneas | `wc -l` sobre los `.ts` modificados y nuevos |
 | 2026-10-12 | Shared | OK | `npm run build -w packages/shared` |
+| 2026-10-12 | Tarea 4 (web) | OK; botones Pausar/Reactivar, etiqueta Pausada, aviso sin compra y acceso conservado para fullAccess; suite web: 155 tests en 31 archivos, 6 nuevos | `apps/web/src/components/publicaciones/pausedListings.test.tsx`; `apps/web/src/components/detalle/BuyPanel.test.tsx`; `npm test -w apps/web` |
