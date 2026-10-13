@@ -12,7 +12,7 @@ Bloqueante: el release no sale sin los 26 ítems verificados.
 - [ ] `CSP_ENFORCE` en `false` (report-only) hasta completar 48 h sin violaciones en consola.
 
 ## Base de datos
-- [ ] Migraciones aplicadas en staging con datos representativos (`npx prisma migrate status` al día; actual: 8 migraciones).
+- [ ] Migraciones aplicadas en staging con datos representativos (`npx prisma migrate status` al día; revisar el estado desde Prisma, sin fijar un conteo en esta lista).
 - [ ] Backfills verificados: `sellerId`/`itemTitle`/`itemPriceCents`/`feeBps` sin nulos; PENDING antiguos en `CANCELLED/TTL_BACKFILL`.
 - [ ] Consulta de duplicados vivos por ítem devuelve 0 filas antes de crear `order_active_item_unique`.
 - [ ] Índices creados (`order_active_item_unique` solo bazar, `order_status_expires_idx`, `order_seller_created_idx`).
@@ -23,17 +23,17 @@ Bloqueante: el release no sale sin los 26 ítems verificados.
 ## Seguridad
 - [ ] Suite de archivos maliciosos rechazada (exe/elf/html/svg/php/zip/jpg truncado/pdf falso/epub falso/0 bytes → 415/400).
 - [ ] Cabeceras verificadas: `X-Content-Type-Options: nosniff` en `/uploads/*`, HSTS, `frame-ancestors: none`, `Permissions-Policy`.
-- [ ] Rate limits en login (50/15min), global (300/min) y mismos de forgot/uploads al implementarlos.
+- [ ] Rate limits en login/registro (50/15min), global (300/min), forgot, OAuth, código por correo y uploads según sus límites por endpoint.
 - [ ] CORS con origen explícito, nunca `*`, y `credentials: true`.
 - [ ] Sin access token en `localStorage` (solo memoria + cookie httpOnly).
 
 ## Calidad
-- [ ] `tsc --noEmit` y `vite build` en verde (api + web + shared).
-- [ ] E2E de custodia + Sprint 1A (`node scripts/e2e-sprint1a.mjs base`) en verde contra staging.
-- [ ] Prueba de concurrencia de reservas (50 simultáneas → 1 éxito) — ver criterio F1-05.
-- [ ] `node scripts/docs-check.mjs` en verde y `/docs` accesible.
+- [ ] `npm run verify` en verde (incluye build shared, Prisma, typecheck, lint, docs, controles y tests).
+- [ ] E2E requerido para el cambio en una base de pruebas; consulta `tests/e2e/README.md`.
+- [ ] Pruebas de concurrencia pertinentes al release en un entorno no productivo.
+- [ ] `npm run docs:check` en verde y `/docs` accesible.
 
 ## Operación
 - [ ] `GET /health` y `GET /ready` responden detrás del balanceador.
 - [ ] Logs con `requestId` correlacionable (ver `middleware/errors.ts`).
-- [ ] Alertas: tasa 5xx > 1 %, fallo del job de expiración, `refresh_reuse_detected` (al implementar F1-02 completo).
+- [ ] Alertas: tasa 5xx > 1 %, fallo del job de expiración, `refresh_reuse_detected`.

@@ -20,7 +20,7 @@
 | Problema | Cómo lo resuelve la plataforma |
 |---|---|
 | Apuntes dispersos en grupos de WhatsApp, Drive y fotocopias | Catálogo único con buscador y filtros, vista previa gratuita de las páginas de muestra y visor protegido con marca de agua |
-| Compra y venta entre estudiantes sin garantías | Bazar con pedidos registrados, comprobante de pago y **custodia**: el dinero queda retenido hasta que el comprador confirma que recibió el producto |
+| Compra y venta entre estudiantes sin garantías | Bazar con pedidos registrados, pago mediado por el equipo, comprobantes y **custodia** hasta completar la entrega y liquidación |
 | Preparación desordenada para parciales, finales y admisión | Biblioteca de balotarios en «modo juego»: preguntas por facultad, marcador de aciertos y errores, y una explicación de cada respuesta |
 
 ---
@@ -47,9 +47,11 @@ Navegador ──► Frontend (Vercel) ──HTTPS/JSON──► Backend API (Ren
   - **Pantalla estable:** **cero saltos de pantalla** (CLS ≈ 0): cada bloque reserva su espacio antes de cargar. Se verifica con pruebas en navegador a 1280 px y 375 px (móvil).
   - **Colores:** acento institucional **Teal `#00685F`** y tema de color por carrera.
 
+La regla financiera vigente establece una comisión predeterminada del **13 % a cargo del vendedor**. El comprador paga a una cuenta del equipo con comprobante; un trabajador verifica el pago y el equipo liquida después el neto al vendedor. Mercado Pago permanece deshabilitado mientras se use esta mediación.
+
 ### 2.2 Backend y base de datos (lo que no ves)
 - **Node.js + Express + TypeScript:** una API REST que expone más de 60 operaciones documentadas en Swagger/OpenAPI.
-- **Prisma ORM** sobre **PostgreSQL alojado en Neon**, con migraciones versionadas: 18 hasta hoy, aplicadas de forma controlada.
+- **Prisma ORM** sobre **PostgreSQL alojado en Neon**, con migraciones versionadas, aplicadas de forma controlada (consulta Prisma para el estado actual).
 - **Zod:** valida todos los datos que entran, con las mismas reglas en el frontend y en el backend.
 
 ### 2.3 Seguridad, dominio y despliegue
@@ -58,7 +60,7 @@ Navegador ──► Frontend (Vercel) ──HTTPS/JSON──► Backend API (Ren
 - **CORS estricto:** la API solo acepta peticiones de los orígenes exactos de la web; un dominio parecido pero distinto queda bloqueado.
 - **Ingreso institucional:**
   - **Google OAuth 2.0:** implementación propia, sin librerías intermedias. El backend verifica la firma del token de Google y exige una cuenta del Workspace de la UNSA; un Gmail personal se rechaza y su token se revoca.
-  - **Código de 6 dígitos al correo `@unsa.edu.pe`:** caduca en 10 minutos, admite 5 intentos y en la base se guarda cifrado, nunca en texto plano.
+  - **Código de 6 dígitos al correo `@unsa.edu.pe`:** caduca en 10 minutos, admite 5 intentos y en la base se guarda como hash HMAC, nunca en texto plano.
 - **Correo transaccional con Resend:** el dominio está autenticado con registros DNS propios (DKIM y SPF), para que los correos no terminen en spam.
 - **Sesión segura:**
   - un token de acceso de corta duración que vive solo en memoria;
@@ -66,7 +68,7 @@ Navegador ──► Frontend (Vercel) ──HTTPS/JSON──► Backend API (Ren
 - **Archivos:**
   - al subirlos, se verifica su tipo real (no solo la extensión) y se les da un nombre aleatorio;
   - se guardan en **Cloudflare R2**;
-  - el visor muestra solo las páginas de muestra hasta que el pedido está pagado.
+  - el visor muestra solo las páginas de muestra cuando el pedido alcanza el estado de custodia verificada (ESCROW) o RELEASED.
 
 ---
 
@@ -76,7 +78,7 @@ Navegador ──► Frontend (Vercel) ──HTTPS/JSON──► Backend API (Ren
 Una plantilla resuelve una página informativa, pero no un sistema con pedidos, custodia de pagos, roles de moderación y reglas de acceso por dominio. En este proyecto:
 - **Frontend y backend están separados:** cada parte escala, se despliega y se corrige por su cuenta, y una falla en una no tira a la otra.
 - **Las reglas de negocio viven en el servidor:** el precio y la comisión se calculan allí, y los estados de un pedido solo pueden avanzar por transiciones permitidas. Manipular el navegador no altera nada.
-- **Hay pruebas automáticas y controles de calidad en cada cambio:** 147 pruebas unitarias, verificación de tipos, lint, tamaño de archivos y que la documentación de la API coincida con las rutas reales.
+- **Hay pruebas automáticas y controles de calidad en cada cambio:** pruebas automatizadas y `npm run verify`, que incluye tipos, lint, tamaño de archivos y la comprobación de documentación API.
 
 ### 3.2 Desafíos reales de producción que se resolvieron
 | Desafío | Solución aplicada |
@@ -101,10 +103,10 @@ Una plantilla resuelve una página informativa, pero no un sistema con pedidos, 
 | **Biblioteca de balotarios en modo juego:** 5 áreas (Salud, Ingenierías, Derecho, Económicas y Sociales) × 4 tipos (parcial, final, balotario, admisión) = 20 exámenes y 120 preguntas con explicación | ✅ En producción (`/balotarios`) |
 | Catálogo de apuntes con vista previa, visor protegido y marca de agua | ✅ Implementado |
 | Publicación de apuntes (uno o en lote) y de artículos del bazar | ✅ Implementado |
-| Pedidos con cobro por Yape/Plin validado por el vendedor y **custodia** hasta la entrega | ✅ Implementado |
-| Pasarela Mercado Pago (cobro automático con webhook firmado) | 🟡 Programada; se activa al configurar las credenciales |
+| Pedidos con pago a una cuenta del equipo, comprobante verificado por un trabajador y **custodia** hasta la entrega | ✅ Implementado |
+| Mercado Pago | Deshabilitado mientras rige la mediación del equipo; configurar credenciales no lo activa |
 | Reportes por derechos de autor (D.L. 822), moderación y notificaciones | ✅ Implementado |
-| Ingreso con Apple | 🟡 Programado; requiere una cuenta de Apple Developer |
+| Ingreso con Apple | Implementado en código; requiere credenciales de Apple Developer para habilitarse |
 
 ---
 
@@ -112,15 +114,14 @@ Una plantilla resuelve una página informativa, pero no un sistema con pedidos, 
 
 **Mejoras inmediatas**
 1. **Ampliar el banco de preguntas por facultad.** Hoy son 120 preguntas en archivos del frontend. El siguiente paso es moverlas a la base de datos, con un panel de carga masiva y revisión docente.
-2. **Activar Mercado Pago** para cobros automáticos sin validación manual.
-3. **Rotar las credenciales** compartidas durante la puesta en marcha y cerrar la configuración del correo transaccional.
+2. **Rotar las credenciales** compartidas durante la puesta en marcha y cerrar la configuración del correo transaccional.
 
 **Próximas fases**
 - **Analítica de rendimiento:** historial de intentos por estudiante, percentil por curso y temas débiles.
 - **PWA con modo sin conexión:** instalar la web en el celular y practicar balotarios sin internet.
 - **Escalado:** caché compartida (Redis) para códigos de un solo uso y límites de intentos cuando haya varias instancias del servidor.
 
-El almacenamiento en la nube (Cloudflare R2) y el bazar con custodia ya están construidos. No son fases futuras, sino módulos por ampliar según el uso real.
+El almacenamiento en la nube (Cloudflare R2), el bazar con custodia y la mediación de pagos ya están construidos. Se ampliarán según el uso real.
 
 ---
 

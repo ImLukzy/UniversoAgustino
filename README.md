@@ -1,62 +1,43 @@
 # Universo Agustino
 
-Marketplace académico de la comunidad UNSA (`@unsa.edu.pe`): apuntes, PAE y
-exámenes en PDF con visor protegido, bazar entre estudiantes, monetización
-para creadores y marco legal (D.L. 822).
+Marketplace académico para la comunidad UNSA: apuntes digitales, bazar entre estudiantes, custodia de pagos, moderación y balotarios.
 
-## Stack
+## Stack y despliegue
 
-```
-apps/api/         Express + TypeScript + Prisma (Postgres/Neon) + Zod + JWT — /api/v1
-apps/web/         Vite + React + TypeScript + Tailwind + framer-motion
-packages/shared/  Esquemas Zod y tipos compartidos (contrato único API ↔ web)
-docs/             Contexto, specs, runbooks y guías (OAuth, pagos, R2)
-```
+Monorepo npm: API Express/Prisma/PostgreSQL (`apps/api`), web React/Vite (`apps/web`) y contratos compartidos (`packages/shared`). Requiere **Node.js 24.x** y npm.
 
-## Arranque local
+- La API se despliega en Render según [`render.yaml`](render.yaml); incluye generación de Prisma y migraciones en predeploy.
+- La web se despliega en Vercel según [`vercel.json`](vercel.json); configura `VITE_API_URL` en el build.
+- La API usa `/api/v1`; Swagger está disponible en `/docs`.
 
-Requisitos: Node 20+ y una base Postgres (Neon o `docker compose`).
+## Desarrollo local
+
+Necesitas una base PostgreSQL de desarrollo. Configura las variables requeridas en `.env` a partir de `.env.example`; no guardes credenciales en Git.
 
 ```bash
-cp .env.example .env              # completa DATABASE_URL y los secretos JWT
-npm install
-npm run db:up                     # opcional: Postgres + Redis en Docker
+npm ci
+npm run db:up                 # opcional: PostgreSQL y Redis con Docker
 npm run prisma:generate
 npm run prisma:migrate
-npm run prisma:seed
-npm run build -w packages/shared
-npm run dev                       # API + web
+npm run prisma:seed           # seed de desarrollo
+npm run dev                   # API y web
 ```
 
-| Servicio | URL |
-| --- | --- |
-| Web | http://localhost:5173 |
-| API | http://localhost:4000/api/v1 (`/health`, `/ready`) |
-| Swagger | http://localhost:4000/docs |
+Direcciones locales por defecto: web `http://localhost:5173`, API `http://localhost:4000/api/v1`.
 
-Usuarios seed: `admin@unsa.edu.pe / Admin1234!` · `rosa.quispe@unsa.edu.pe / Creadora123!`
-
-## Acceso (solo comunidad UNSA)
-
-- **Google** con cuenta del Workspace UNSA (`hd = unsa.edu.pe`). Apple opcional.
-- **Código de 6 dígitos al correo institucional** (`MAIL_DRIVER=console`
-  imprime el código en la terminal de la API en desarrollo; `resend` en producción).
-- Cuentas nuevas pasan por `/bienvenida` para completar su perfil.
-- Única excepción de dominio autorizada: `ALLOWED_EMAIL_EXCEPTIONS` en `packages/shared`.
-
-Configuración de credenciales en [`docs/oauth.md`](docs/oauth.md). Pagos en
-[`docs/payments.md`](docs/payments.md) y almacenamiento en
-[`docs/storage-r2.md`](docs/storage-r2.md).
-
-## Calidad
+## Calidad y pruebas
 
 ```bash
-npm run typecheck
-npm run lint
-npm test
-npm run secrets                   # busca secretos antes de commitear
+npm run verify               # comprobación obligatoria equivalente a CI
+npm run qa:seed              # datos fijos E2E; requiere BD de desarrollo autorizada
+npm run e2e                  # flujos locales con API y web levantadas
+npm run e2e:ci               # E2E de CI contra PostgreSQL efímero
 ```
 
-El `.env` nunca se commitea. Mapa del backend y reglas de negocio en
-[`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md); arquitectura en
-[`ARCHITECTURE.md`](ARCHITECTURE.md); especificaciones en [`docs/specs/`](docs/specs/).
+`qa:seed` y `e2e` requieren PostgreSQL; consulta [`tests/e2e/README.md`](tests/e2e/README.md) para levantar servicios y preparar el entorno. La definición de rutas está en [`apps/api/docs/openapi.yaml`](apps/api/docs/openapi.yaml), el contexto del producto en [`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md) y las guías de operación en `docs/`.
+
+
+## Documentación
+
+- [Contexto del producto](docs/PROJECT_CONTEXT.md) · [guía de la API](docs/API_SPECS.md) · [OpenAPI](apps/api/docs/openapi.yaml)
+- [Pagos y liquidaciones](docs/payments.md) · [OAuth](docs/oauth.md) · [Almacenamiento R2](docs/storage-r2.md)

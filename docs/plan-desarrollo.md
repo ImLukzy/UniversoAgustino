@@ -1,5 +1,7 @@
 # Plan de Desarrollo e Implementación Técnica — Universo Agustino
 
+> **Archivo histórico (snapshot al 2026-09-22, HEAD b24147d).** Sus cifras, ramas, comandos y estado del producto describen ese corte y pueden estar desactualizados. No usar como guía operativa actual; consultar `README.md`, `docs/PROJECT_CONTEXT.md` y `apps/api/docs/openapi.yaml`.
+
 > Documento único y ordenado del proyecto. Consolida: ficha técnica, reglas de
 > ingeniería, cronología completa con avance real, guías operativas íntegras,
 > el módulo nuevo de subida de archivos (R2), lo que sigue en el roadmap y el

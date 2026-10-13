@@ -1,38 +1,29 @@
-# Pagos (spec 16)
+# Pagos y liquidaciones
 
-El pedido sigue la máquina de estados de siempre: `PENDING → (ACCEPTED, solo alquiler) → PAID → ESCROW → RELEASED`.
-Un apunte solo se desbloquea con **pago verificado** (`ESCROW` o `RELEASED`). `PAID` es una declaración del comprador y no da acceso por sí sola.
+El sistema usa mediación del equipo conforme a RFC 0003 y specs 36–40. La comisión predeterminada es **13 % a cargo del vendedor**; el comprador paga el importe publicado y el neto del vendedor se calcula con `computePrice()`/`PLATFORM_FEE_PCT`. Cada pedido conserva el snapshot de importe, comisión y neto.
 
-## Modo manual (por defecto, sin credenciales)
+## Pago digital
 
-1. El comprador crea el pedido (`POST /orders`). En apuntes: debe estar publicado y ser de pago; si ya tiene un pedido vivo se reutiliza y, si ya lo compró, responde `409 ALREADY_OWNED`.
-2. Paga por Yape/Plin al QR o dato del vendedor y declara el pago (`POST /orders/:id/pay`) con n.º de operación y/o voucher. El voucher debe ser un archivo que subió él mismo (`400 BAD_PROOF`). → `PAID`.
-3. El vendedor revisa su app de Yape/Plin y confirma (`POST /orders/:id/confirm-payment`). → `ESCROW`: el apunte se desbloquea.
-4. El comprador confirma la recepción (`POST /orders/:id/confirm-receipt`). → `RELEASED`.
+1. El comprador crea el pedido y consulta las cuentas habilitadas del equipo.
+2. Transfiere a una cuenta del equipo y registra el comprobante en el pedido.
+3. Un trabajador verifica el comprobante y acepta o deniega el pago. La declaración del comprador por sí sola no da acceso.
+4. Al verificarlo, el pedido avanza a custodia (`ESCROW`); el comprador obtiene acceso al archivo digital cuando corresponde.
+5. Tras completar la entrega/operación, el equipo liquida al vendedor el neto y registra el comprobante de liquidación.
 
-## Mercado Pago (Checkout Pro)
+La confirmación de pago por el vendedor no ejecuta la verificación del equipo. Los pedidos de bazar pueden continuar por el flujo de casos y entrega aplicable.
 
-Se activa solo si están `MP_ACCESS_TOKEN` y `MP_WEBHOOK_SECRET`. Con la pasarela activa `POST /orders/:id/pay` responde `409 GATEWAY_REQUIRED`: el pago solo lo confirma el webhook.
+## Cobro físico en sede
 
-| Variable | Dónde se obtiene |
-|---|---|
-| `MP_ACCESS_TOKEN` | Mercado Pago Developers → Tus integraciones → Credenciales (`TEST-…` en pruebas, `APP_USR-…` en producción) |
-| `MP_WEBHOOK_SECRET` | Tus integraciones → Webhooks → "Clave secreta" (evento **Pagos**) |
-| `API_PUBLIC_URL` | URL HTTPS pública de la API. Mercado Pago no notifica a `localhost`: en dev usa un túnel (`ngrok http 4000`) |
-| `MP_API_BASE` | Opcional; por defecto `https://api.mercadopago.com` |
+Para el flujo físico, el comprador paga en una sede al trabajador, entrega el comprobante y el equipo registra/verifica el cobro. El pedido y la entrega se gestionan mediante el caso de custodia; las acciones de recojo, devolución, ausencia y liquidación siguen los permisos y transiciones del sistema.
 
-URL del webhook que hay que registrar: `${API_PUBLIC_URL}/api/v1/payments/webhook`.
+## Reembolsos
 
-Flujo:
-1. El checkout pide `GET /payments/config` y, si es `mercadopago`, muestra "Pagar con Mercado Pago".
-2. `POST /payments/checkout/:orderId` crea la preferencia (`external_reference` = id del pedido, moneda PEN, vence con la reserva) y redirige al comprador.
-3. El webhook valida `x-signature` (HMAC-SHA256 del manifiesto `id;request-id;ts`), vuelve a leer el pago en la API de Mercado Pago y exige `approved`, `external_reference` y monto exacto. → `ESCROW` + notificaciones.
-4. Si el monto no cuadra (`payment.mismatch`) o el pedido ya estaba cerrado (`payment.orphan`), no se libera nada: queda en `AuditLog` para reembolso manual desde el panel de Mercado Pago.
+Los reembolsos se ejecutan desde el flujo de payouts y requieren autorización técnica, comprobante y registro del resultado. La ruta antigua de refund de pedido está restringida y no representa por sí sola una devolución efectiva; consulta OpenAPI y el panel del equipo para la operación vigente.
 
-Con la pasarela, el dinero entra a la cuenta de la plataforma, no a la del vendedor. El pago al vendedor (neto después del 13 %) sigue siendo manual. Los reembolsos (`POST /orders/:id/refund`) solo cambian el estado; la devolución hay que hacerla en Mercado Pago.
+## Mercado Pago
 
-## Pruebas locales de la pasarela
+Los endpoints de configuración, checkout y webhook existen, pero la mediación `TEAM_MEDIATION` mantiene el checkout deshabilitado y el webhook no procesa pagos. Configurar credenciales no activa la pasarela. No uses este flujo para cobros reales hasta que el código y la especificación operativa indiquen que fue habilitado.
 
-1. Crea usuarios de prueba (vendedor y comprador) en Tus integraciones → Cuentas de prueba.
-2. Pon en `.env` el `MP_ACCESS_TOKEN` TEST, el `MP_WEBHOOK_SECRET` y el `API_PUBLIC_URL` del túnel, y reinicia la API.
-3. Compra un apunte con la tarjeta de prueba aprobada (titular `APRO`). En segundos el checkout pasa a "Pago verificado" y el visor muestra el documento completo.
+## Contrato y pruebas
+
+Rutas, esquemas, estados y roles están en [`apps/api/docs/openapi.yaml`](../apps/api/docs/openapi.yaml). La suite E2E de pagos se describe en [`tests/e2e/README.md`](../tests/e2e/README.md); no se deben introducir credenciales reales en fixtures o documentación.
