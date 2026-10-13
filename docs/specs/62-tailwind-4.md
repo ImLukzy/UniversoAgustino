@@ -44,7 +44,7 @@
   - JS inicial en gzip.
   - Capturas a 1440 y 375 px de `/`, `/explorar`, `/balotarios`, `/bazar`, `/login`, `/esta-ruta-no-existe`, un detalle de documento y, con sesión E2E, el panel del equipo.
 - **Después:**
-  - CSS en gzip ≤ base + 10 %.
+  - CSS en gzip ≤ base + 25 % (el límite inicial era +10 %; el humano aceptó la excepción el 2026-10-13: Tailwind 4 añade unos 2,5 KB fijos de `@property` y variables de tema).
   - JS inicial ≤ base + 2 %.
   - Las capturas, comparadas una a una, sin diferencias de maquetación (posiciones, tamaños, saltos de línea).
 
@@ -54,7 +54,7 @@
 | A1 | Versiones | `npm ls tailwindcss @tailwindcss/vite` | 4.3.x; sin `autoprefixer` ni `postcss.config.js` |
 | A2 | Gate | `npm run verify` | en verde |
 | A3 | Sin clases v3 | grep de `shadow-sm`, `outline-none`, `bg-gradient-to-`, `@tailwind ` en `apps/web/src` | 0 restos v3 (salvo los ya renombrados con su nuevo sentido) |
-| A4 | Tamaño | CSS gzip y JS inicial gzip antes/después | CSS ≤ +10 %, JS ≤ +2 % |
+| A4 | Tamaño | CSS gzip y JS inicial gzip antes/después | CSS ≤ +25 % (excepción aprobada), JS ≤ +2 % |
 | A5 | Visual | capturas antes/después (páginas y anchos de §4) | sin diferencias de maquetación; 0 px de scroll horizontal a 375 |
 | A6 | E2E y axe | `npm run e2e:ci` | 7 suites ✓ (axe en 0 incluido) |
 | A7 | Iconos y fuentes | `node scripts/subset-icons.mjs --check`; fuentes locales cargan | verde |
