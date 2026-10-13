@@ -331,7 +331,7 @@ paths:
   /auth/refresh:
     post:
       tags: [auth]
-      summary: Rota el refresh (cookie) y emite access. Requiere Origin permitido
+      summary: Rota el refresh (cookie) y emite access. Un refresh rotado se acepta por 30 s para recuperar una respuesta perdida; logout, cambio de contraseña y expulsión revocan sin gracia. Requiere Origin permitido
       responses:
         '200': { description: OK }
         '401': { description: UNAUTHENTICATED o TOKEN_EXPIRED }

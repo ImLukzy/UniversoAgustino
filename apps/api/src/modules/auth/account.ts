@@ -8,6 +8,7 @@ import { limit } from "../../middleware/rateLimit.js";
 import { requireSameOrigin } from "../../middleware/csrf.js";
 
 const loginLimiter = limit({ windowMs: 15 * 60 * 1000, max: 50 });
+const REFRESH_ROTATION_GRACE_MS = 30_000;
 
 // Cuenta con correo y clave: registro, login, rotación del refresh y logout.
 export function registerAccount(router: Router) {
@@ -69,12 +70,21 @@ export function registerAccount(router: Router) {
       } catch {
         return res.status(401).json({ error: { code: "BAD_REFRESH", message: "Refresh invalido" } });
       }
+      const now = new Date();
       const stored = await prisma.refreshToken.findUnique({ where: { hash: sha256(raw) } });
-      if (!stored || stored.revoked || stored.expiresAt < new Date()) {
+      if (!stored || stored.expiresAt < now) {
         return res.status(401).json({ error: { code: "BAD_REFRESH", message: "Refresh revocado" } });
       }
-      // Rotación: el refresh usado se revoca y se emite uno nuevo.
-      await prisma.refreshToken.update({ where: { id: stored.id }, data: { revoked: true } });
+      const inGrace = (rotatedAt: Date | null) => rotatedAt !== null && now.getTime() >= rotatedAt.getTime() && now.getTime() - rotatedAt.getTime() <= REFRESH_ROTATION_GRACE_MS;
+      if (stored.revoked) {
+        if (!inGrace(stored.rotatedAt)) return res.status(401).json({ error: { code: "BAD_REFRESH", message: "Refresh revocado" } });
+      } else {
+        const rotation = await prisma.refreshToken.updateMany({ where: { id: stored.id, revoked: false }, data: { revoked: true, rotatedAt: now } });
+        if (!rotation.count) {
+          const latest = await prisma.refreshToken.findUnique({ where: { hash: sha256(raw) } });
+          if (!latest || latest.expiresAt < now || !inGrace(latest.rotatedAt)) return res.status(401).json({ error: { code: "BAD_REFRESH", message: "Refresh revocado" } });
+        }
+      }
       const user = await prisma.user.findUniqueOrThrow({ where: { id: payload.sub } });
       const access = await startSession(res, user.id, user.role);
       res.json({ data: { access } });
@@ -86,7 +96,7 @@ export function registerAccount(router: Router) {
     requireSameOrigin,
     asyncHandler(async (req, res) => {
       const raw = req.cookies?.["hub_refresh"];
-      if (raw) await prisma.refreshToken.updateMany({ where: { hash: sha256(raw) }, data: { revoked: true } });
+      if (raw) await prisma.refreshToken.updateMany({ where: { hash: sha256(raw) }, data: { revoked: true, rotatedAt: null } });
       clearRefreshCookie(res);
       res.json({ data: { ok: true } });
     }),

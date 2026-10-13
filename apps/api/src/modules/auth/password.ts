@@ -52,7 +52,7 @@ export function registerPassword(router: Router) {
       await prisma.$transaction([
         prisma.user.update({ where: { id: record.userId }, data: { passwordHash, passwordChangedAt: new Date() } }),
         prisma.passwordResetToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
-        prisma.refreshToken.updateMany({ where: { userId: record.userId, revoked: false }, data: { revoked: true } }),
+        prisma.refreshToken.updateMany({ where: { userId: record.userId }, data: { revoked: true, rotatedAt: null } }),
       ]);
       return res.json({ ok: true });
     }),

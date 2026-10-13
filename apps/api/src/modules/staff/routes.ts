@@ -80,7 +80,7 @@ staffRouter.delete("/members/:userId", requireRole("admin"), asyncHandler(async 
     const changed = await tx.user.updateMany({ where: { id: userId, role: "moderator" }, data: { role: "creator" } });
     if (!changed.count) fail(409, "NOT_STAFF", "Esa persona no es moderadora");
     await tx.paymentAccount.updateMany({ where: { userId }, data: { active: false } });
-    await tx.refreshToken.updateMany({ where: { userId, revoked: false }, data: { revoked: true } });
+    await tx.refreshToken.updateMany({ where: { userId }, data: { revoked: true, rotatedAt: null } });
     await tx.auditLog.create({ data: { actorId: req.user!.sub, action: "staff.remove", entity: "user", entityId: userId } });
   });
   await notify({ userId, type: "STAFF_REMOVED", title: "Tu acceso al equipo terminó", body: "Tu cuenta conserva el acceso al marketplace.", link: "/panel" });
