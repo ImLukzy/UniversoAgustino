@@ -6,6 +6,11 @@ reenvío, aceptación, acceso y descarga, liquidación al vendedor, reclamo,
 congelación, reembolso y revocación del acceso. Los pagos usan una cuenta
 ficticia `QA Cuenta` / `900000000`; nunca se cargan datos reales.
 
+También ejecutan el cobro físico en sede (spec 55): aceptación del artículo,
+cita de entrega, ausencia con falta perdonada por el Técnico, recepción en
+custodia, cita y cobro con comprobante de la cuenta ficticia, entrega y
+liquidación reflejada en «Mis cobros».
+
 ## Preparación
 
 1. Carga el entorno de la base de desarrollo sin imprimirlo:
@@ -48,6 +53,10 @@ docker run --rm --name ua-e2e-postgres -e POSTGRES_USER=hub -e POSTGRES_PASSWORD
 CI=true DATABASE_URL='postgresql://hub:hub123@localhost:5433/test_hub?schema=public' npm run e2e:ci
 docker stop ua-e2e-postgres
 ```
+
+El seed prepara además una sede, horarios y turnos QA para las citas, sin
+sobrescribir horarios de apertura existentes. Los tests limpian órdenes, casos,
+citas, liquidaciones, faltas, notificaciones y comprobantes que generan.
 
 El seed y `e2e:ci` rechazan siempre `ep-hidden-dew`. Para permitir una base local
 fuera de CI se puede usar `QA_SEED_ALLOW_LOCAL=1`; esa excepción es solo para

@@ -23,6 +23,31 @@ const bcryptModule = await import("bcryptjs");
 const bcrypt = bcryptModule.default ?? bcryptModule;
 const db = new PrismaClient();
 const passwordHash = await bcrypt.hash(process.env.QA_PASSWORD || "QaPrueba2026!", 12);
+async function resetQaOrders(db, userIds) {
+  const base = await db.order.findFirst({ where: { buyerId: userIds[0], itemType: "document", itemId: "qa-e2e-document" }, select: { id: true } });
+  const orders = await db.order.findMany({ where: { OR: [{ buyerId: { in: userIds } }, { sellerId: { in: userIds } }], ...(base ? { id: { not: base.id } } : {}) }, select: { id: true } });
+  const ids = orders.map((row) => row.id);
+  if (!ids.length) return;
+  const cases = await db.handoverCase.findMany({ where: { orderId: { in: ids } }, select: { id: true } });
+  const caseIds = cases.map((row) => row.id);
+  const appointments = caseIds.length ? await db.appointment.findMany({ where: { caseId: { in: caseIds } }, select: { id: true } }) : [];
+  const appointmentIds = appointments.map((row) => row.id);
+  await db.report.deleteMany({ where: { OR: [{ targetType: "order", targetId: { in: ids } }, { reporterId: { in: userIds } }, { targetType: "user", targetId: { in: userIds } }] } });
+  await db.userReview.deleteMany({ where: { OR: [{ authorId: { in: userIds } }, { subjectId: { in: userIds } }, { caseId: { in: caseIds } }] } });
+  await db.auditLog.deleteMany({ where: { OR: [{ actorId: { in: userIds } }, { entityId: { in: [...ids, ...caseIds, ...appointmentIds] } }] } });
+  await db.notification.deleteMany({ where: { userId: { in: userIds } } });
+  await db.sanction.deleteMany({ where: { userId: { in: userIds } } });
+  await db.strike.deleteMany({ where: { userId: { in: userIds } } });
+  if (caseIds.length) {
+    await db.caseMessage.deleteMany({ where: { caseId: { in: caseIds } } });
+    await db.appointment.deleteMany({ where: { caseId: { in: caseIds } } });
+    await db.handoverCase.deleteMany({ where: { id: { in: caseIds } } });
+  }
+  await db.payout.deleteMany({ where: { orderId: { in: ids } } });
+  await db.escrow.deleteMany({ where: { orderId: { in: ids } } });
+  await db.documentAccessGrant.deleteMany({ where: { orderId: { in: ids } } });
+  await db.order.deleteMany({ where: { id: { in: ids } } });
+}
 const people = [
   ["qa-est@unsa.edu.pe", "Estudiante QA", "student"],
   ["qa-mod@unsa.edu.pe", "Moderación QA", "moderator"],
@@ -39,6 +64,7 @@ try {
       update: { passwordHash, role, profile: { upsert: { create: { fullName, onboardedAt: new Date("2025-01-01T00:00:00Z") }, update: { fullName, onboardedAt: new Date("2025-01-01T00:00:00Z") } } } },
     });
   }
+  await resetQaOrders(db, Object.values(users).map((user) => user.id));
   const seller = users["qa-vendedor@unsa.edu.pe"], buyer = users["qa-est@unsa.edu.pe"];
   const title = "QA E2E publicación fija";
   const doc = await db.document.upsert({
@@ -72,6 +98,14 @@ try {
   const accountData = { userId: users["qa-mod@unsa.edu.pe"].id, method: "YAPE", holder: "QA Cuenta", number: "900000000", photoUrl: "/uploads/qa-e2e-account.png", qrUrl: "/uploads/qa-e2e-account.png", active: true };
   if (account) await db.paymentAccount.update({ where: { id: account.id }, data: accountData });
   else await db.paymentAccount.create({ data: accountData });
+  const sede = await db.sede.upsert({ where: { id: "qa-e2e-sede" }, create: { id: "qa-e2e-sede", name: "QA Sede E2E", address: "Sede de pruebas", meetingPoint: "Punto QA" }, update: { name: "QA Sede E2E", address: "Sede de pruebas", meetingPoint: "Punto QA", active: true } });
+  const defaults = [1, 2, 3, 4, 5].map((weekday) => ({ weekday, opens: 480, closes: 1080 })).concat([{ weekday: 6, opens: 480, closes: 780 }]);
+  for (const hours of defaults) await db.openingHours.upsert({ where: { weekday: hours.weekday }, create: hours, update: {} });
+  const openHours = await db.openingHours.findMany();
+  for (const hours of openHours) {
+    const id = `qa-e2e-shift-${hours.weekday}`;
+    await db.staffShift.upsert({ where: { id }, create: { id, userId: users["qa-mod@unsa.edu.pe"].id, sedeId: sede.id, weekday: hours.weekday, startsMin: hours.opens, endsMin: hours.closes }, update: { userId: users["qa-mod@unsa.edu.pe"].id, sedeId: sede.id, weekday: hours.weekday, startsMin: hours.opens, endsMin: hours.closes } });
+  }
   const { PDFDocument } = await import("pdf-lib");
   const pdf = await PDFDocument.create();
   pdf.addPage();
