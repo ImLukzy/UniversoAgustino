@@ -2,6 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { ensayoBranchName, assertEnsayoUrl, maskDatabaseUrl } from './lib/db-tools.mjs';
 
 const projectId = process.env.NEON_PROJECT_ID;
+// El proyecto de producción tiene más de una base; la de la app es neondb salvo que se indique otra.
+const databaseName = process.env.NEON_DATABASE || 'neondb';
 const keep = process.argv.includes('--keep');
 const branch = ensayoBranchName();
 let created = false;
@@ -13,7 +15,7 @@ const run = (command, args, env = process.env) => {
 };
 const neon = (...args) => run('npx', ['--yes', 'neonctl@latest', ...args]);
 const jsonFrom = (output) => {
-  try { return JSON.parse(output); } catch { throw new Error('Neon CLI devolvió una respuesta inválida.'); }
+  try { return JSON.parse(output); } catch { return output.trim(); }
 };
 const findConnection = (value) => {
   if (typeof value === 'string' && /^postgres(?:ql)?:\/\//.test(value)) return value;
@@ -34,7 +36,7 @@ try {
   created = true;
   const branchData = jsonFrom(create.stdout);
   const branchId = branchData.branch?.id ?? branchData.id ?? branch;
-  const response = neon('connection-string', branchId, '--project-id', projectId, '-o', 'json');
+  const response = neon('connection-string', branchId, '--project-id', projectId, '--database-name', databaseName, '-o', 'json');
   if (response.code !== 0) throw new Error('Neon no pudo obtener la conexión de ensayo.');
   databaseUrl = findConnection(jsonFrom(response.stdout));
   if (!databaseUrl) throw new Error('Neon no devolvió una conexión de ensayo.');

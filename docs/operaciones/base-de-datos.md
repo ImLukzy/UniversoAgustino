@@ -8,13 +8,13 @@ Carga `DIRECT_DATABASE_URL` desde el archivo seguro de producción sin mostrarlo
 set -a
 . /ruta/segura/ua-prod-db.env
 set +a
-export BACKUP_DIR=/mnt/secure/ua-db-backups
+export BACKUP_DIR=/ruta/segura/backups   # en la máquina del integrador: hive/backups
 npm run db:backup -- --label pre-migration
 ```
 
 El comando crea un `prod-*.dump` con permisos 600, lo valida con `pg_restore -l` y conserva las diez copias más recientes. Ajusta la retención con `--keep N`. No almacenes los dumps en el repositorio.
 
-Con `NEON_PROJECT_ID` definido y Neon CLI autenticado en la máquina, ejecuta el ensayo:
+Con `NEON_PROJECT_ID` definido (proyecto de producción en Neon) y Neon CLI autenticado en la máquina, ejecuta el ensayo. La base de la app es `neondb`; el proyecto tiene otra (`portafolio`), así que `NEON_DATABASE` la fija si algún día cambia:
 
 ```sh
 npm run db:ensayo
@@ -35,14 +35,14 @@ Primero conserva el estado actual con `db:backup`, identifica el alcance del da�
 
 ### Error dentro de las últimas seis horas
 
-Usa un instante UTC anterior al error. Crea una rama desde el historial de producción y verifica sus datos antes de recuperar nada:
+Usa un instante UTC anterior al error. `--parent` recibe solo el instante (la rama por defecto es `production`; `production@<instante>` no funciona). Crea una rama desde el historial de producción y verifica sus datos antes de recuperar nada:
 
 ```sh
 export NEON_PROJECT_ID='proyecto-aprobado'
 export RESTORE_BRANCH="pitr-$(date -u +%Y%m%d-%H%M%S)"
 export PITR_AT='AAAA-MM-DDTHH:mm:ssZ'
-npx --yes neonctl@latest branches create --project-id "$NEON_PROJECT_ID" --name "$RESTORE_BRANCH" --parent "production@$PITR_AT" --no-secrets -o json
-npx --yes neonctl@latest connection-string "$RESTORE_BRANCH" --project-id "$NEON_PROJECT_ID" -o json
+npx --yes neonctl@latest branches create --project-id "$NEON_PROJECT_ID" --name "$RESTORE_BRANCH" --parent "$PITR_AT" --no-secrets -o json
+npx --yes neonctl@latest connection-string "$RESTORE_BRANCH" --project-id "$NEON_PROJECT_ID" --database-name neondb -o json
 ```
 
 Usa la cadena obtenida solo mediante una variable de entorno segura. Compara recuentos y registros afectados con la copia; decide si copiar únicamente los datos necesarios o restaurar la rama de producción. La restauración completa es destructiva y exige OK humano:
@@ -63,7 +63,7 @@ Crea una rama aislada para restaurar el dump. Obtén su cadena por un canal segu
 
 ```sh
 export RESTORE_BRANCH="restore-$(date -u +%Y%m%d-%H%M%S)"
-export BACKUP_FILE=/mnt/secure/ua-db-backups/prod-AAAA-MM-DD-HHMMSS.dump
+export BACKUP_FILE=/ruta/segura/backups/prod-AAAAMMDD-HHMMSS.dump
 npx --yes neonctl@latest branches create --project-id "$NEON_PROJECT_ID" --name "$RESTORE_BRANCH" --parent production --no-secrets -o json
 docker run --rm -e DATABASE_URL -v "$BACKUP_FILE:/backup.dump:ro" postgres:18 sh -c 'pg_restore --no-owner --no-privileges --clean --if-exists -d "$DATABASE_URL" /backup.dump'
 docker run --rm -e DATABASE_URL postgres:18 sh -c 'psql "$DATABASE_URL" -Atc "SELECT count(*) FROM \"_prisma_migrations\""'
@@ -73,4 +73,8 @@ Valida migraciones, recuentos y comportamiento de la aplicación en esa rama. So
 
 ## Seguridad y costos
 
-Las ramas de ensayo y recuperación contienen datos reales; limita el acceso, no las uses para pruebas manuales y elimínalas al terminar. Neon puede cobrar almacenamiento y cómputo mientras existan ramas. Los scripts no imprimen cadenas de conexión; evita activar trazas que las expongan.
+Las ramas de ensayo y recuperación contienen datos reales; limita el acceso, no las uses para pruebas manuales y elimínalas al terminar. En el plan gratis Neon no cobra, pero cada rama activa consume horas de cómputo del mes. Los scripts no imprimen cadenas de conexión; evita activar trazas que las expongan.
+
+## Simulacros
+
+- 2026-10-13: PITR (rama desde hace 1 h) y `pg_restore` de la copia en una base aislada de una rama de Neon; recuentos iguales a producción y a la copia. Ensayo con migración pendiente de prueba: aplicada en la rama efímera, producción intacta.
