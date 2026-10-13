@@ -37,9 +37,11 @@
 | A4 | Tamaño | archivos < 150 líneas | OK |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: seed + fixture + flujos de pago + README.
-- [ ] Tarea 2: verificar A1–A4 y anotar en §7.
+- [x] Tarea 1: seed + fixture + flujos de pago + README.
+- [x] Tarea 2: verificar A1–A4 y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1–A4 | OK: verify ✓; `npm run e2e` dos veces seguidas con specs 45, 46 y pagos ✓ (montos 1500/195/1305; denegación y reenvío; aceptación con descarga; liquidación y Mis cobros; reclamo, reembolso y acceso revocado; notificaciones); limpieza sin residuos; sin bugs de app | Michael 85d132f contra BD dev |
+| 2026-10-13 | Auditoría | OK sin hallazgos | Kelly |
