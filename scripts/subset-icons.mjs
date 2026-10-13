@@ -1,17 +1,4 @@
-// F4-04 opcion A: subset de Material Symbols Outlined (3.9 MB -> pocos KB).
-// Extrae iconos literales de los tsx + `icon:`/`visualIcon:`/`iconName:` de
-// apps/web/src/data/*.ts y data/career/*.ts, y genera la URL css2 de Google Fonts
-// con `icon_names=` (parametro oficial para Material Symbols, sucesor del generico
-// `text=`; ver https://developers.google.com/fonts/docs/material_symbols :
-// "Subset the font ... using the &icon_names query parameter, using an
-// alphabetically sorted comma-separated list of icon names").
-// Cubre FILL 0..1 porque hay `fontVariationSettings: "'FILL' 1"` en uso real
-// (CareerVisual, Bazar, Legal, Explorar).
-//
-// Uso:
-//   node scripts/subset-icons.mjs            -> imprime URL + conteo (exit 0)
-//   node scripts/subset-icons.mjs --check    -> valida el subset local y el archivo woff2
-//   node scripts/subset-icons.mjs --write    -> descarga el subset local desde Google Fonts y actualiza su manifiesto
+// Extrae los iconos usados y mantiene el subset local de Material Symbols.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,8 +10,6 @@ const tokenCss = path.join(webSrc, "styles/tokens.css");
 const iconFont = path.join(root, "apps/web/public/fonts/material-symbols.woff2");
 const subsetMarker = "/* material-symbols-subset:";
 
-// Mismo eje que la linea 11 original: cubre FILL 0..1 (y opsz/wght/GRAD completos
-// para no cambiar el look; solo se recorta el set de glifos via icon_names).
 const AXES = "opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200";
 const FAMILY = "Material+Symbols+Outlined";
 
@@ -48,8 +33,6 @@ export function extractIcons() {
   for (const f of files) {
     if (!f.endsWith(".tsx")) continue;
     const c = fs.readFileSync(f, "utf8");
-    // 1) <span|motion.span class="material-symbols-outlined...>literal</span>  (directo)
-    // 2) <span ...>{ternario con "literales"}</span> -> todos los quoted del inner
     const spanRe = /<(?:motion\.)?span[^>]*material-symbols-outlined[^>]*>([\s\S]*?)<\/(?:motion\.)?span>/g;
     let m;
     while ((m = spanRe.exec(c))) {
@@ -59,21 +42,14 @@ export function extractIcons() {
       let q;
       while ((q = qre.exec(inner))) innerQuoted.add(q[1]);
     }
-    // 3) icon: "..." en tsx (Panel, Pedidos, Cuenta, Legal...)
-    //    Excluye clases Tailwind con guiones porque el grupo solo admite [a-z0-9_].
     const ire = /\bicon\s*:\s*["']([a-z0-9_]+)["']/g;
     while ((m = ire.exec(c))) iconProp.add(m[1]);
-    // 3b) prop JSX icon="..." (EmptyState, Accordion, tarjetas).
     const are = /\bicon=["']([a-z0-9_]+)["']/g;
     while ((m = are.exec(c))) iconProp.add(m[1]);
-    // 4) iconName: "..." (Toast: check_circle, error, info)
     const nre = /\biconName\s*:\s*["']([a-z0-9_]+)["']/g;
     while ((m = nre.exec(c))) iconName.add(m[1]);
   }
 
-  // 5) data/*.ts y data/career/*.ts: icon: "..." + visualIcon: "..."
-  //    (Select-String es case-insensitive; aqui cubrimos ambos explicitamente).
-  // Tambien navigation.ts del panel del equipo: sus iconos se pintan con {s.icon} (no literales).
   const navFile = path.join(webSrc, "components/teamPanel/navigation.ts");
   for (const f of files) {
     if (!f.startsWith(dataDir) && f !== navFile) continue;
@@ -86,8 +62,6 @@ export function extractIcons() {
   }
 
   const all = new Set([...direct, ...innerQuoted, ...iconProp, ...iconName, ...dataIcons]);
-  // FILTRO: 'FILL' viene de fontVariationSettings, no es icono (solo aparece en
-  // atributos, pero se excluye por seguridad si algun regex lo captura).
   all.delete("FILL");
   return {
     all: [...all].sort(),
@@ -116,6 +90,14 @@ const url = buildUrl(all);
 
 if (args.has("--check")) {
   const css = fs.readFileSync(tokenCss, "utf8");
+  const iconFace = css.match(/@font-face\s*\{[^}]*\/fonts\/material-symbols\.woff2[^}]*\}/s)?.[0];
+  const iconFamily = iconFace?.match(/font-family:\s*["']?([^;"']+)["']?\s*;/)?.[1].trim();
+  const iconClass = css.match(/\.material-symbols-outlined\s*\{([^}]*)\}/s)?.[1];
+  const classFamily = iconClass?.match(/font-family:\s*["']?([^;"']+)["']?\s*;/)?.[1].trim();
+  if (!iconFamily || !classFamily || classFamily !== iconFamily) {
+    console.error("subset-icons --check FALLIDO: .material-symbols-outlined debe usar la familia del @font-face local");
+    process.exit(1);
+  }
   const match = css.match(/\/\* material-symbols-subset: ([^*]+) \*\//);
   const names = match?.[1].split(",").filter(Boolean) ?? [];
   const have = new Set(names);
