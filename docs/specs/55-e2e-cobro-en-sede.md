@@ -33,9 +33,11 @@
 | A3 | E2E en CI | `CI=true npm run e2e:ci` con Postgres local, o el job `e2e` tras integrar | ✓ |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: seed (si hace falta) + flujo físico + README.
-- [ ] Tarea 2: verificar A1–A3 y anotar en §7.
+- [x] Tarea 1: seed (si hace falta) + flujo físico + README.
+- [x] Tarea 2: verificar A1–A3 y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1–A3 | OK: verify ✓; qa:seed ×2; `npm run e2e` ×2 con todas las suites ✓; `CI=true npm run e2e:ci` con Postgres 16 local ✓; sin bugs de app | Dwight 87726f0 |
+| 2026-10-13 | Auditoría | OK con observaciones (Kelly): alcance de borrado del seed, sede QA visible, riesgo 429 → corregidos en 4a23983 (solo pedidos QA↔QA o fixtures qa-e2e-*, sede "QA E2E (pruebas, no usar)", logins por corrida 27→15); revisado por Claudio | Kelly + Dwight |
