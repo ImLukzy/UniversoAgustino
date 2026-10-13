@@ -32,7 +32,7 @@ export function QuizPractice({ exam }: { exam: Exam }) {
           ) : (
             <motion.div key={s.index} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={SPRING} className="flex h-full flex-col">
               <div data-quiz-scroll className="relative -mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-1">
-                <p className="font-display text-base font-bold leading-snug text-zinc-950 sm:text-lg">{cur.q}</p>
+                <p className="font-display text-base font-bold leading-snug text-zinc-950 sm:text-lg sm:leading-7">{cur.q}</p>
                 <div className="mt-3 space-y-2">
                   {cur.opts.map((o, i) => (
                     <QuizOption key={o} label={o} letter={LETTERS[i]} state={stateOf(i)} locked={pick !== null} onPick={() => setS((x) => answer(x, i))} />

@@ -12,7 +12,7 @@ export function LandingStats() {
   return (
     <section className="bg-white pb-20 pt-4 sm:pb-24">
       <Reveal className="mx-auto max-w-3xl px-4 text-center">
-        <h2 className="text-balance font-display text-4xl font-extrabold leading-tight tracking-tight text-zinc-950 sm:text-5xl">Miles de estudiantes agustinos conectados</h2>
+        <h2 className="text-balance font-display text-4xl font-extrabold leading-tight tracking-tight text-zinc-950 sm:text-5xl sm:leading-none">Miles de estudiantes agustinos conectados</h2>
         <p className="mx-auto mt-5 max-w-xl text-lg text-zinc-600 sm:text-xl">Material nuevo cada semana, de la comunidad estudiantil más activa de Arequipa.</p>
       </Reveal>
       <div className="mx-auto mt-12 grid max-w-5xl gap-5 px-4 text-center sm:grid-cols-3">

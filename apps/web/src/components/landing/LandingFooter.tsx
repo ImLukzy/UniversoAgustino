@@ -31,7 +31,7 @@ export function LandingFooter() {
     <footer className="bg-white">
       <div className="bg-[#3b5a5c]">
         <Reveal className="mx-auto max-w-4xl px-4 py-16 text-center">
-          <h2 className="text-balance font-display text-3xl font-extrabold tracking-tight text-white sm:text-[2.5rem]">¡Estudiamos juntos, crecemos juntos!</h2>
+          <h2 className="text-balance font-display text-3xl font-extrabold tracking-tight text-white sm:text-[2.5rem] sm:leading-9">¡Estudiamos juntos, crecemos juntos!</h2>
           <p className="mx-auto mt-4 max-w-lg text-lg text-white/85">Crea tu cuenta con tu correo @unsa.edu.pe y empieza a estudiar mejor hoy.</p>
           <button type="button" onClick={openAuth} className="btn btn-lg mt-8 bg-[#e3f98b]">
             Crear cuenta gratis

@@ -35,7 +35,7 @@ export function LandingFeatures() {
       <section id="practica" className="scroll-mt-4 overflow-hidden bg-zinc-50 py-20 sm:py-24">
         <Reveal className="mx-auto max-w-4xl px-4 text-center">
           <p className="eyebrow">Práctica real</p>
-          <h2 className="mt-2 text-balance font-display text-4xl font-extrabold leading-tight tracking-tight text-zinc-950 sm:text-5xl">Biblioteca de Balotarios y Exámenes UNSA</h2>
+          <h2 className="mt-2 text-balance font-display text-4xl font-extrabold leading-tight tracking-tight text-zinc-950 sm:text-5xl sm:leading-none">Biblioteca de Balotarios y Exámenes UNSA</h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-zinc-600">Elige tu facultad y un examen tipo parcial, final, balotario o admisión: responde, mira tu marcador y aprende con la explicación de cada pregunta.</p>
         </Reveal>
         <Reveal className="mx-auto max-w-5xl px-4">

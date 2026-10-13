@@ -15,7 +15,7 @@ export function LandingShowcase() {
   return (
     <section id="carreras" className="scroll-mt-4 bg-zinc-50 py-20 sm:py-24">
       <Reveal className="mx-auto max-w-6xl px-4 text-center">
-        <h2 className="text-balance font-display text-4xl font-extrabold leading-tight tracking-tight text-zinc-950 sm:text-5xl">Explora lo que estudian en la UNSA</h2>
+        <h2 className="text-balance font-display text-4xl font-extrabold leading-tight tracking-tight text-zinc-950 sm:text-5xl sm:leading-none">Explora lo que estudian en la UNSA</h2>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-600 sm:text-xl">{SHOWCASE.length} escuelas profesionales. Elige la tuya y encuentra el material de tus cursos.</p>
         <ChipTabs
           id="showcase-filter"

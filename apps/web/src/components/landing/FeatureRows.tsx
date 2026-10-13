@@ -48,7 +48,7 @@ export function FeatureRows() {
           <Reveal key={r.title} className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
             <div className={r.flip ? "md:order-2" : ""}>
               <h3 className="text-balance font-display text-3xl font-extrabold leading-[1.15] tracking-tight text-zinc-950 sm:text-[2.5rem]">{r.title}</h3>
-              <p className="mt-4 max-w-xl text-pretty text-lg leading-relaxed text-zinc-600 sm:text-xl">{r.body}</p>
+              <p className="mt-4 max-w-xl text-pretty text-lg leading-relaxed text-zinc-600 sm:text-xl sm:leading-7">{r.body}</p>
               <ul className="mt-5 space-y-2">
                 {r.points.map((p) => (
                   <li key={p} className="flex items-center gap-2 font-semibold text-zinc-800">

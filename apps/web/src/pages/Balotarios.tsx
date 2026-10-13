@@ -14,7 +14,7 @@ export function Balotarios() {
         <div className="mx-auto max-w-5xl">
           <div className="mx-auto max-w-3xl text-center">
             <p className="eyebrow">Modo juego</p>
-            <h1 className="mt-2 text-balance font-display text-4xl font-extrabold leading-tight tracking-tight text-zinc-950 sm:text-5xl">Biblioteca de Balotarios y Exámenes</h1>
+            <h1 className="mt-2 text-balance font-display text-4xl font-extrabold leading-tight tracking-tight text-zinc-950 sm:text-5xl sm:leading-none">Biblioteca de Balotarios y Exámenes</h1>
             <p className="mx-auto mt-4 max-w-xl text-lg text-zinc-600">Practica con preguntas tipo parcial, final, balotario y admisión. Cada respuesta trae su explicación experta.</p>
             <dl className="mx-auto mt-6 flex max-w-md justify-center gap-3">
               {[

@@ -12,7 +12,7 @@ export function LandingHero({ withSession, sessionPending }: { withSession?: boo
       <HeroBlobs />
       <LandingNav withSession={withSession} sessionPending={sessionPending} />
       <div className="mx-auto max-w-4xl px-4 pt-16 text-center sm:pt-24">
-        <h1 className="hero-enter text-balance font-display text-[2.5rem] font-extrabold leading-[1.08] tracking-tight text-white sm:text-6xl">
+        <h1 className="hero-enter text-balance font-display text-[2.5rem] font-extrabold leading-[1.08] tracking-tight text-white sm:text-6xl sm:leading-none">
           Aprueba con los apuntes de quienes ya lo lograron
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-zinc-200 sm:text-[1.375rem] sm:leading-8">

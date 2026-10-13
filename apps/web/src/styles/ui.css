@@ -79,7 +79,10 @@
 
   /* ---- Tipografía ---- */
   .eyebrow { @apply text-xs font-bold uppercase tracking-[0.18em] text-zinc-500; }
-  .h-display { @apply font-display font-extrabold leading-[1.08] tracking-tight text-zinc-950; }
+  .h-display {
+    @apply font-display font-extrabold tracking-tight text-zinc-950;
+    line-height: 1.08;
+  }
   .price { @apply font-display font-extrabold tabular-nums tracking-tight; }
 }
 

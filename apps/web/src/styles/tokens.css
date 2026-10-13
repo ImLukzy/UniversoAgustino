@@ -174,23 +174,25 @@
   transition: background-color 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out, box-shadow 200ms ease-out;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
-}
+@layer base {
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
 
-body {
-  font-family: Inter, system-ui, sans-serif;
-  background: #faf8ff;
-  color: #131b2e;
-  overscroll-behavior: none;
+  body {
+    font-family: Inter, system-ui, sans-serif;
+    background: #faf8ff;
+    color: #131b2e;
+    overscroll-behavior: none;
+  }
+  /* Base heredada del diseño original (era el <style> inline de cada code.html) */
+  main > :first-child { margin-top: 0 !important; }
+  main > :last-child { margin-bottom: 0 !important; }
+  ::-webkit-scrollbar { display: none; }
+  /* Micro-interacción: pulso al presionar botones */
+  button { transition: transform 120ms ease; }
+  button:active { transform: scale(0.95); }
 }
-/* Base heredada del diseño original (era el <style> inline de cada code.html) */
-main > :first-child { margin-top: 0 !important; }
-main > :last-child { margin-bottom: 0 !important; }
-::-webkit-scrollbar { display: none; }
-/* Micro-interacción: pulso al presionar botones */
-button { transition: transform 120ms ease; }
-button:active { transform: scale(0.95); }
 .font-display { font-family: "Plus Jakarta Sans", sans-serif; }
 .hero-enter { animation: hero-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 .hero-enter-delay { animation-delay: 100ms; }
