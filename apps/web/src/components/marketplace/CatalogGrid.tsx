@@ -1,9 +1,7 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { DocumentCard } from "../DocumentCard";
 import { EmptyState } from "../EmptyState";
 import { BazarCard } from "./BazarCard";
 import type { CatalogEntry } from "../../lib/useCatalog";
-import { SPRING } from "../../lib/motion";
 
 const CATALOG_GRID = "grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] justify-items-center gap-6 sm:justify-items-start";
 
@@ -13,7 +11,7 @@ const CATALOG_GRID = "grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] justi
 export function CatalogGrid({ entries, loading, error, onRetry }: { entries: CatalogEntry[]; loading: boolean; error: boolean; onRetry: () => void }) {
   if (loading) {
     return (
-      <div className={CATALOG_GRID} aria-label="Cargando catálogo">
+      <div className={CATALOG_GRID} role="status" aria-label="Cargando catálogo">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="h-[15.5rem] w-48 animate-pulse rounded-xl bg-zinc-100" aria-hidden="true" />
         ))}
@@ -36,21 +34,15 @@ export function CatalogGrid({ entries, loading, error, onRetry }: { entries: Cat
     );
   }
   return (
-    <motion.div layout transition={SPRING} className={CATALOG_GRID}>
-      <AnimatePresence mode="popLayout" initial={false}>
+    <div className={CATALOG_GRID}>
         {entries.map((e) => (
-          <motion.div
+          <div
             key={`${e.kind}-${e.item.id}`}
-            layout
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.97 }}
-            transition={SPRING}
+            className="card-enter"
           >
             {e.kind === "doc" ? <DocumentCard doc={e.item} /> : <BazarCard item={e.item} />}
-          </motion.div>
+          </div>
         ))}
-      </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

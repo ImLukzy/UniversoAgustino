@@ -1,6 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
-import { SPRING } from "../lib/motion";
 import { ROUTES } from "../lib/routes";
 import { prefetchRoute } from "../lib/prefetch";
 
@@ -32,8 +30,8 @@ const SECTIONS: { title?: string; links: { to: string; icon: string; label: stri
 ];
 
 // Navegación principal (sidebar fijo y drawer móvil). Solo rutas reales.
-// `animateActive` desactiva el pill compartido en el drawer: dos layoutId
-// iguales montados a la vez romperían la animación.
+// `animateActive` conserva el aspecto seleccionado en el drawer y el sidebar;
+// el indicador usa CSS para evitar cargar el motor de animación en Explorar.
 export function AppSidebar({ onAction, animateActive = true }: { onAction?: () => void; animateActive?: boolean }) {
   const { pathname } = useLocation();
   return (
@@ -54,9 +52,8 @@ export function AppSidebar({ onAction, animateActive = true }: { onAction?: () =
                 onMouseEnter={() => prefetchRoute(l.to)}
                 onFocus={() => prefetchRoute(l.to)}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-sm transition-colors ${active ? "font-extrabold text-zinc-950" : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950"} ${active && !animateActive ? "bg-primary-soft" : ""}`}
+                className={`relative flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-sm transition-colors ${active ? `border-2 border-zinc-900 bg-primary-soft font-extrabold text-zinc-950 ${animateActive ? "sidebar-active" : ""}` : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950"}`}
               >
-                {active && animateActive && <motion.span layoutId="appSideActive" transition={SPRING} className="absolute inset-0 rounded-xl border-2 border-zinc-900 bg-primary-soft" aria-hidden="true" />}
                 <span className="material-symbols-outlined relative text-xl">{l.icon}</span>
                 <span className="relative">{l.label}</span>
               </Link>

@@ -1,8 +1,11 @@
 import { expect, it } from "vitest";
-import html from "../../index.html?raw";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { PANEL_SECTIONS } from "../components/teamPanel/navigation";
 
-const subset = new Set((html.match(/icon_names=([^"&\s]+)/)?.[1] ?? "").split(","));
+const css = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../styles/tokens.css"), "utf8");
+const subset = new Set((css.match(/material-symbols-subset: ([^*]+) \*\//)?.[1] ?? "").split(","));
 
 it("todos los iconos del menú del panel están en el subset de Material Symbols", () => {
   const missing = PANEL_SECTIONS.map((s) => s.icon).filter((icon) => !subset.has(icon));

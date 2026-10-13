@@ -1,13 +1,15 @@
+import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../lib/routes";
 import { useAuthModal } from "../AuthModalHost";
-import { ProfileMenu } from "../ProfileMenu";
+
+const ProfileMenu = lazy(() => import("../ProfileMenu").then((module) => ({ default: module.ProfileMenu })));
 
 const pill = "btn btn-secondary btn-sm hidden md:inline-flex";
 
 // Header Studocu: logo + enlaces de texto a la izquierda; píldoras blancas y login verde a la derecha.
 // Si withSession es true, muestra botones que van a Explorar en lugar de login.
-export function LandingNav({ withSession }: { withSession?: boolean } = {}) {
+export function LandingNav({ withSession, sessionPending }: { withSession?: boolean; sessionPending?: boolean } = {}) {
   const { openAuth } = useAuthModal();
   return (
     <nav className="relative z-20 mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -22,8 +24,10 @@ export function LandingNav({ withSession }: { withSession?: boolean } = {}) {
       <div className="flex items-center gap-2">
         <Link to={ROUTES.explore} className={pill}>Explorar apuntes</Link>
         <Link to={ROUTES.monetiza} className={pill}>Vende tus apuntes</Link>
-        {withSession ? (
-          <ProfileMenu />
+        {sessionPending ? (
+          <span aria-hidden="true" className="h-11 w-11 shrink-0" />
+        ) : withSession ? (
+          <Suspense fallback={<span aria-hidden="true" className="h-11 w-11 shrink-0" />}><ProfileMenu /></Suspense>
         ) : (
           <button
             type="button"

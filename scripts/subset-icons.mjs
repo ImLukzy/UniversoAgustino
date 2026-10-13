@@ -1,17 +1,4 @@
-// F4-04 opcion A: subset de Material Symbols Outlined (3.9 MB -> pocos KB).
-// Extrae iconos literales de los tsx + `icon:`/`visualIcon:`/`iconName:` de
-// apps/web/src/data/*.ts y data/career/*.ts, y genera la URL css2 de Google Fonts
-// con `icon_names=` (parametro oficial para Material Symbols, sucesor del generico
-// `text=`; ver https://developers.google.com/fonts/docs/material_symbols :
-// "Subset the font ... using the &icon_names query parameter, using an
-// alphabetically sorted comma-separated list of icon names").
-// Cubre FILL 0..1 porque hay `fontVariationSettings: "'FILL' 1"` en uso real
-// (CareerVisual, Bazar, Legal, Explorar).
-//
-// Uso:
-//   node scripts/subset-icons.mjs            -> imprime URL + conteo (exit 0)
-//   node scripts/subset-icons.mjs --check    -> exit 1 si un icono usado falta del subset en apps/web/index.html
-//   node scripts/subset-icons.mjs --write    -> reescribe solo la linea del href de Material Symbols en index.html
+// Extrae los iconos usados y mantiene el subset local de Material Symbols.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,10 +6,10 @@ import { fileURLToPath } from "node:url";
 const root = path.dirname(fileURLToPath(import.meta.url)) + "/..";
 const webSrc = path.join(root, "apps/web/src");
 const dataDir = path.join(webSrc, "data");
-const indexHtml = path.join(root, "apps/web/index.html");
+const tokenCss = path.join(webSrc, "styles/tokens.css");
+const iconFont = path.join(root, "apps/web/public/fonts/material-symbols.woff2");
+const subsetMarker = "/* material-symbols-subset:";
 
-// Mismo eje que la linea 11 original: cubre FILL 0..1 (y opsz/wght/GRAD completos
-// para no cambiar el look; solo se recorta el set de glifos via icon_names).
 const AXES = "opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200";
 const FAMILY = "Material+Symbols+Outlined";
 
@@ -46,8 +33,6 @@ export function extractIcons() {
   for (const f of files) {
     if (!f.endsWith(".tsx")) continue;
     const c = fs.readFileSync(f, "utf8");
-    // 1) <span|motion.span class="material-symbols-outlined...>literal</span>  (directo)
-    // 2) <span ...>{ternario con "literales"}</span> -> todos los quoted del inner
     const spanRe = /<(?:motion\.)?span[^>]*material-symbols-outlined[^>]*>([\s\S]*?)<\/(?:motion\.)?span>/g;
     let m;
     while ((m = spanRe.exec(c))) {
@@ -57,21 +42,14 @@ export function extractIcons() {
       let q;
       while ((q = qre.exec(inner))) innerQuoted.add(q[1]);
     }
-    // 3) icon: "..." en tsx (Panel, Pedidos, Cuenta, Legal...)
-    //    Excluye clases Tailwind con guiones porque el grupo solo admite [a-z0-9_].
     const ire = /\bicon\s*:\s*["']([a-z0-9_]+)["']/g;
     while ((m = ire.exec(c))) iconProp.add(m[1]);
-    // 3b) prop JSX icon="..." (EmptyState, Accordion, tarjetas).
     const are = /\bicon=["']([a-z0-9_]+)["']/g;
     while ((m = are.exec(c))) iconProp.add(m[1]);
-    // 4) iconName: "..." (Toast: check_circle, error, info)
     const nre = /\biconName\s*:\s*["']([a-z0-9_]+)["']/g;
     while ((m = nre.exec(c))) iconName.add(m[1]);
   }
 
-  // 5) data/*.ts y data/career/*.ts: icon: "..." + visualIcon: "..."
-  //    (Select-String es case-insensitive; aqui cubrimos ambos explicitamente).
-  // Tambien navigation.ts del panel del equipo: sus iconos se pintan con {s.icon} (no literales).
   const navFile = path.join(webSrc, "components/teamPanel/navigation.ts");
   for (const f of files) {
     if (!f.startsWith(dataDir) && f !== navFile) continue;
@@ -84,8 +62,6 @@ export function extractIcons() {
   }
 
   const all = new Set([...direct, ...innerQuoted, ...iconProp, ...iconName, ...dataIcons]);
-  // FILTRO: 'FILL' viene de fontVariationSettings, no es icono (solo aparece en
-  // atributos, pero se excluye por seguridad si algun regex lo captura).
   all.delete("FILL");
   return {
     all: [...all].sort(),
@@ -108,59 +84,60 @@ export function buildUrl(icons) {
   return `https://fonts.googleapis.com/css2?family=${FAMILY}:${AXES}&icon_names=${list}&display=block`;
 }
 
-export function parseSubsetFromHtml(html) {
-  // Acepta icon_names= (oficial) y text= (legado/generico) para --check.
-  const m = html.match(/[?&](icon_names|text)=([^"&'\s]+)/);
-  if (!m) return { param: null, names: [] };
-  const raw = m[2];
-  // text= legacy suele venir %2C-joined o con '+'; icon_names con comas planas.
-  const decoded = decodeURIComponent(raw.replace(/\+/g, " "));
-  const names = decoded
-    .split(/[^a-z0-9_]+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return { param: m[1], names };
-}
-
 const args = new Set(process.argv.slice(2));
 const { all, bySource } = extractIcons();
 const url = buildUrl(all);
 
 if (args.has("--check")) {
-  const html = fs.readFileSync(indexHtml, "utf8");
-  const { param, names } = parseSubsetFromHtml(html);
+  const css = fs.readFileSync(tokenCss, "utf8");
+  const iconFace = css.match(/@font-face\s*\{[^}]*\/fonts\/material-symbols\.woff2[^}]*\}/s)?.[0];
+  const iconFamily = iconFace?.match(/font-family:\s*["']?([^;"']+)["']?\s*;/)?.[1].trim();
+  const iconClass = css.match(/\.material-symbols-outlined\s*\{([^}]*)\}/s)?.[1];
+  const classFamily = iconClass?.match(/font-family:\s*["']?([^;"']+)["']?\s*;/)?.[1].trim();
+  if (!iconFamily || !classFamily || classFamily !== iconFamily) {
+    console.error("subset-icons --check FALLIDO: .material-symbols-outlined debe usar la familia del @font-face local");
+    process.exit(1);
+  }
+  const match = css.match(/\/\* material-symbols-subset: ([^*]+) \*\//);
+  const names = match?.[1].split(",").filter(Boolean) ?? [];
   const have = new Set(names);
   const missing = all.filter((n) => !have.has(n));
-  if (!param) {
-    console.error("subset-icons --check FALLIDO: index.html no tiene icon_names= ni text=");
+  if (!match) {
+    console.error("subset-icons --check FALLIDO: tokens.css no tiene manifiesto material-symbols-subset");
     process.exit(1);
   }
   if (missing.length > 0) {
-    console.error(`subset-icons --check FALLIDO (${missing.length} iconos fuera del subset [${param}=]):`);
+    console.error(`subset-icons --check FALLIDO (${missing.length} iconos fuera del subset local):`);
     for (const m of missing) console.error("  FALTA:", m);
     console.error(`Usados: ${all.length} | En subset: ${have.size}`);
     process.exit(1);
   }
-  console.log(`subset-icons --check OK (${all.length} iconos cubiertos via ${param}=)`);
+  if (!fs.existsSync(iconFont) || fs.statSync(iconFont).size < 1000) {
+    console.error("subset-icons --check FALLIDO: falta apps/web/public/fonts/material-symbols.woff2");
+    process.exit(1);
+  }
+  console.log(`subset-icons --check OK (${all.length} iconos cubiertos por el subset local)`);
   process.exit(0);
 }
 
 if (args.has("--write")) {
-  const lines = fs.readFileSync(indexHtml, "utf8").split("\n");
-  let idx = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].includes("Material+Symbols+Outlined")) {
-      idx = i;
-      break;
-    }
-  }
-  if (idx === -1) {
-    console.error("subset-icons --write FALLIDO: no se encontro la linea de Material Symbols en index.html");
-    process.exit(1);
-  }
-  lines[idx] = `    <link href="${url}" rel="stylesheet" />`;
-  fs.writeFileSync(indexHtml, lines.join("\n"));
-  console.log(`subset-icons --write OK (linea ${idx + 1}, ${all.length} iconos)`);
+  const cssResponse = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" },
+  });
+  if (!cssResponse.ok) throw new Error(`Google Fonts CSS respondió ${cssResponse.status}`);
+  const css = await cssResponse.text();
+  const fontUrl = css.match(/src:\s*url\((https:[^)]+)\)\s*format\('woff2'\)/)?.[1];
+  if (!fontUrl) throw new Error("Google Fonts no devolvió el woff2 del subset Material Symbols");
+  const fontResponse = await fetch(fontUrl);
+  if (!fontResponse.ok) throw new Error(`Material Symbols respondió ${fontResponse.status}`);
+  fs.writeFileSync(iconFont, Buffer.from(await fontResponse.arrayBuffer()));
+  const tokenText = fs.readFileSync(tokenCss, "utf8");
+  const marker = `${subsetMarker} ${all.join(",")} */`;
+  const next = /\/\* material-symbols-subset: [^*]+ \*\//.test(tokenText)
+    ? tokenText.replace(/\/\* material-symbols-subset: [^*]+ \*\//, marker)
+    : `${tokenText.trimEnd()}\n\n${marker}\n`;
+  fs.writeFileSync(tokenCss, next);
+  console.log(`subset-icons --write OK (woff2 local, ${all.length} iconos)`);
   process.exit(0);
 }
 

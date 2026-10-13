@@ -1,14 +1,13 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { lazy, Suspense, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import { SPRING } from "../lib/motion";
 import { AppSidebar } from "./AppSidebar";
-import { ProfileMenu } from "./ProfileMenu";
 import { AppFooter } from "./AppFooter";
 import { useAuth } from "../auth/AuthContext";
 import { useAuthModal } from "./AuthModalHost";
 import { ROUTES } from "../lib/routes";
 import { SuspensionBanner } from "./SuspensionBanner";
+
+const ProfileMenu = lazy(() => import("./ProfileMenu").then((module) => ({ default: module.ProfileMenu })));
 
 function Logo() {
   return (
@@ -22,7 +21,7 @@ function Logo() {
 // Layout de la app: sidebar fijo (lg) o drawer (móvil) + header con buscador
 // global que lleva a /explorar?q= + sesión. Solo rutas reales.
 export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: boolean }) {
-  const { user } = useAuth();
+  const { user, loading, hadSession } = useAuth();
   const { openAuth } = useAuthModal();
   const nav = useNavigate();
   const [drawer, setDrawer] = useState(false);
@@ -53,7 +52,9 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
           <div className="flex shrink-0 items-center gap-2">
             <Link to={ROUTES.landing} className="btn btn-ghost btn-sm shrink-0 whitespace-nowrap">Inicio</Link>
             {user ? (
-              <ProfileMenu />
+              <Suspense fallback={<span aria-hidden="true" className="h-11 w-11 shrink-0" />}><ProfileMenu /></Suspense>
+            ) : hadSession && loading ? (
+              <span aria-hidden="true" className="h-9 w-28 shrink-0 rounded-full bg-zinc-100" />
             ) : (
               <button type="button" onClick={openAuth} className="btn btn-primary btn-sm">Iniciar sesión</button>
             )}
@@ -63,27 +64,20 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
         <AppFooter />
       </div>
 
-      <AnimatePresence>
-        {drawer && (
+      {drawer && (
           <>
-            <motion.div key="app-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => setDrawer(false)} aria-hidden="true" className="fixed inset-0 z-[70] bg-zinc-900/50 lg:hidden" />
-            <motion.aside
-              key="app-panel"
+            <div onClick={() => setDrawer(false)} aria-hidden="true" className="drawer-backdrop fixed inset-0 z-[70] bg-zinc-900/50 lg:hidden" />
+            <aside
               role="dialog"
               aria-modal="true"
               aria-label="Menú principal"
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={SPRING}
-              className="fixed left-0 top-0 z-[71] flex h-full w-72 max-w-[85vw] flex-col overflow-y-auto border-r-2 border-zinc-900 bg-[rgb(var(--ua-paper))] p-4 lg:hidden"
+              className="drawer-enter fixed left-0 top-0 z-[71] flex h-full w-72 max-w-[85vw] flex-col overflow-y-auto border-r-2 border-zinc-900 bg-[rgb(var(--ua-paper))] p-4 lg:hidden"
             >
               <Logo />
               <AppSidebar onAction={() => setDrawer(false)} animateActive={false} />
-            </motion.aside>
+            </aside>
           </>
         )}
-      </AnimatePresence>
     </div>
   );
 }

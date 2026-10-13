@@ -21,6 +21,12 @@ async function sessionFor(name) {
   })());
   return sessions.get(name);
 }
+
+export async function checkIconFont(page) {
+  await page.goto(`${WEB}/explorar`);
+  const family = await page.locator(".material-symbols-outlined").first().evaluate((element) => globalThis.getComputedStyle(element).fontFamily);
+  check(family.includes("Material Symbols Outlined"), `familia de iconos incorrecta: ${family}`);
+}
 export async function api(path, { token, method = "GET", body } = {}) {
   const response = await globalThis.fetch(`${API}${path}`, { method, headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const data = await response.json().catch(() => ({}));

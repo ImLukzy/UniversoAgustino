@@ -38,11 +38,17 @@
 | A7 | Iconos | `node scripts/subset-icons.mjs --check` | OK |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: fuentes e iconos autohospedados.
-- [ ] Tarea 2: sesión diferida en páginas públicas.
-- [ ] Tarea 3: lazy de ExamenInteractivo y dieta del index; caché de assets.
-- [ ] Tarea 4: medir antes/después y verificar A1–A7 (§7).
+- [x] Tarea 1: fuentes e iconos autohospedados.
+- [x] Tarea 2: sesión diferida en páginas públicas.
+- [x] Tarea 3: lazy de ExamenInteractivo y dieta del index; caché de assets.
+- [x] Tarea 4: medir antes/después y verificar A1–A7 (§7).
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A2 LCP (Lighthouse móvil 4G, mediana de 3, build local contra API prod) | Mejora: producción antes ~4.6 s → / 2.55 s, /explorar 2.48 s, /inicio 2.55 s, detalle 2.82 s. Umbral ≤2.5 s no cumplido por poco en 3 rutas; el humano acepta el resultado (2026-10-13) | Michael 60506d4 |
+| 2026-10-13 | A3/A4 | CLS 0, TBT ≤ 4.5 ms; JS inicial 166 → 121 KB gzip (framer-motion fuera de Explorar) | Michael 4d7fc52 |
+| 2026-10-13 | A5/A6/A7 | axe 0 serias/críticas en 4 rutas a 1280/375; `npm run e2e` ✓; subset-icons ✓ | Michael |
+| 2026-10-13 | Auditoría | OK (Kelly) con observación de bundle → resuelta en 4d7fc52 | Kelly |
+| 2026-10-13 | QA (Pam) | Sesión diferida OK (sin parpadeo, rutas protegidas sin redirección, refresh transparente, oauth/status al abrir login). BLOQUEANTE: iconos como texto (faltaba `.material-symbols-outlined`) → corregido en 82a67f6 con verificación en subset-icons y E2E; glifos comprobados en capturas a 1280/375 | Pam + Michael |
+| 2026-10-13 | Nota | animaciones de empty state y sidebar pasan a CSS (cubic-bezier) para sacar framer-motion de la carga inicial; respetan prefers-reduced-motion | Michael 4d7fc52 |

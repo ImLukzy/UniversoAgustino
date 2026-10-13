@@ -13,6 +13,7 @@ vi.mock("../lib/api", () => ({ api: { get: vi.fn(), post: vi.fn() }, setAccessTo
 let state: ReturnType<typeof useAuth>;
 let storage: Map<string, string>;
 let events: EventTarget;
+let runIdle: (() => void) | undefined;
 let cleanup: ReturnType<EffectCallback>;
 const hint = "ua-session-hint";
 const user = { id: "test-user", email: "test@unsa.edu.pe", role: "USER" };
@@ -21,23 +22,35 @@ function mount() {
   renderToStaticMarkup(<AuthProvider><Probe /></AuthProvider>);
   cleanup = effects[0]();
 }
+function startIdle() { runIdle?.(); }
 async function settle() { await Promise.resolve(); await Promise.resolve(); }
 beforeEach(() => {
-  vi.clearAllMocks(); effects.length = 0; storage = new Map(); events = new EventTarget();
+  vi.clearAllMocks(); effects.length = 0; storage = new Map(); events = new EventTarget(); runIdle = undefined;
   vi.stubGlobal("localStorage", {
     getItem: (key: string) => storage.get(key) ?? null,
     setItem: (key: string, value: string) => storage.set(key, value),
     removeItem: (key: string) => storage.delete(key),
   });
-  vi.stubGlobal("window", events);
+  vi.stubGlobal("window", Object.assign(events, {
+    location: { pathname: "/" },
+    requestIdleCallback: (callback: () => void) => { runIdle = callback; return 1; },
+    cancelIdleCallback: vi.fn(),
+  }));
   vi.mocked(api.get).mockImplementation(() => new Promise(() => {}));
   vi.mocked(api.post).mockResolvedValue({ data: { data: { ...user, access: "test-access" } } });
 });
 afterEach(() => { if (typeof cleanup === "function") cleanup(); vi.unstubAllGlobals(); });
 
 describe("pista de sesión", () => {
-  it("sin pista arranca cargando y consulta la sesión en segundo plano", () => {
+  it("sin pista pospone la sesión hasta idle en una ruta pública", () => {
     mount(); expect(state.hadSession).toBe(false); expect(state.loading).toBe(true);
+    expect(api.get).not.toHaveBeenCalled();
+    startIdle();
+    expect(api.get).toHaveBeenCalledWith("/auth/me");
+  });
+  it("consulta la sesión de inmediato en rutas privadas", () => {
+    (window as Window).location.pathname = "/pedidos";
+    mount();
     expect(api.get).toHaveBeenCalledWith("/auth/me");
   });
   it("solo el valor 1 indica una sesión previa", () => {
@@ -46,11 +59,11 @@ describe("pista de sesión", () => {
   });
   it("bootstrap guarda únicamente la pista no sensible", async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: user } });
-    mount(); await settle(); expect([...storage]).toEqual([[hint, "1"]]);
+    mount(); startIdle(); await settle(); expect([...storage]).toEqual([[hint, "1"]]);
   });
   it("bootstrap fallido borra la pista", async () => {
     storage.set(hint, "1"); vi.mocked(api.get).mockRejectedValue(new Error("sin sesión"));
-    mount(); await settle(); expect(storage.has(hint)).toBe(false);
+    mount(); startIdle(); await settle(); expect(storage.has(hint)).toBe(false);
   });
   it.each(["login", "register", "refreshMe"] as const)("%s escribe la pista tras /auth/me", async (action) => {
     mount(); vi.mocked(api.get).mockResolvedValue({ data: { data: user } });
@@ -84,7 +97,7 @@ describe("pista de sesión", () => {
   it("una respuesta tras desmontar no modifica la pista", async () => {
     let resolve!: (value: { data: { data: typeof user } }) => void;
     vi.mocked(api.get).mockImplementation(() => new Promise((done) => { resolve = done; }));
-    mount(); if (typeof cleanup === "function") cleanup();
+    mount(); startIdle(); if (typeof cleanup === "function") cleanup();
     resolve({ data: { data: user } }); await settle(); expect(storage.has(hint)).toBe(false);
   });
 });

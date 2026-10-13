@@ -1,11 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, lazy, Suspense, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { API_BASE } from "../lib/api";
 import { ROUTES } from "../lib/routes";
-import { Modal } from "./ui/Modal";
 import { OAuthButtons, type OAuthStatus } from "./auth/OAuthButtons";
-import { EmailCodeLogin } from "./auth/EmailCodeLogin";
+const EmailCodeLogin = lazy(() => import("./auth/EmailCodeLogin").then((module) => ({ default: module.EmailCodeLogin })));
+
+const Modal = lazy(() => import("./ui/Modal").then((module) => ({ default: module.Modal })));
 
 // Modal de autenticación global (sin página propia: /login y /register solo lo abren): openAuth() lo abre
 // desde cualquier parte. Google/Apple o correo UNSA con código al buzón
@@ -17,23 +18,24 @@ export const useAuthModal = () => useContext(Ctx);
 export function AuthModalHost({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<OAuthStatus | null>(null);
+  const statusRequested = useRef(false);
 
-  // Se consulta al montar para que los botones ya estén decididos al abrir.
-  useEffect(() => {
+  const openAuth = useCallback(() => {
+    setOpen(true);
+    if (statusRequested.current) return;
+    statusRequested.current = true;
     void fetch(`${API_BASE}/auth/oauth/status`)
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => j?.data && setStatus({ google: !!j.data.google, apple: !!j.data.apple }))
-      .catch(() => {});
+      .catch(() => { statusRequested.current = false; });
   }, []);
-
-  const openAuth = useCallback(() => setOpen(true), []);
   const close = useCallback(() => setOpen(false), []);
   const api = useMemo(() => ({ openAuth, openRegister: openAuth }), [openAuth]);
 
   return (
     <Ctx.Provider value={api}>
       {children}
-      <Modal open={open} onClose={close} labelledBy="auth-title">
+      {open && <Suspense fallback={null}><Modal open onClose={close} labelledBy="auth-title">
         <h2 id="auth-title" className="h-display pr-8 text-2xl">
           Te damos la bienvenida a Universo Agustino
         </h2>
@@ -42,7 +44,7 @@ export function AuthModalHost({ children }: { children: ReactNode }) {
         <div className="my-4 flex items-center gap-3 text-xs font-semibold uppercase text-zinc-400" aria-hidden="true">
           <span className="h-px flex-1 bg-zinc-200" />o<span className="h-px flex-1 bg-zinc-200" />
         </div>
-        <EmailCodeLogin onDone={close} />
+        <Suspense fallback={<p role="status" className="py-3 text-center text-sm text-zinc-500">Cargando acceso por correo…</p>}><EmailCodeLogin onDone={close} /></Suspense>
         <p className="mt-4 flex items-start gap-2 rounded-xl border-2 border-zinc-900 bg-primary-soft p-3 text-xs text-zinc-700">
           <span className="material-symbols-outlined text-base text-primary" aria-hidden="true">verified_user</span>
           <span>
@@ -56,7 +58,7 @@ export function AuthModalHost({ children }: { children: ReactNode }) {
           </Link>
           .
         </p>
-      </Modal>
+      </Modal></Suspense>}
     </Ctx.Provider>
   );
 }

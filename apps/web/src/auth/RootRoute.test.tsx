@@ -5,16 +5,16 @@ import { RootRoute } from "../app/AppRoutes";
 const auth = vi.hoisted(() => ({ loading: true, hadSession: false, user: null as null | { id: string } }));
 vi.mock("./AuthContext", () => ({ useAuth: () => auth }));
 vi.mock("../pages/Explorar", () => ({ Explorar: () => <div>marketplace</div> }));
-vi.mock("../components/RouteFallback", () => ({ RouteFallback: () => <div>cargando</div> }));
+vi.mock("../pages/PublicLanding", () => ({ PublicLanding: () => <div>portada</div> }));
 vi.mock("react", async (original) => ({
   ...await original<typeof import("react")>(),
-  lazy: () => () => <div>portada</div>,
+  lazy: (factory: () => Promise<unknown>) => () => <div>{factory.toString().includes("pages/Explorar") ? "marketplace" : "portada"}</div>,
 }));
 
 describe("RootRoute", () => {
   it.each([
     [true, false, null, "portada"],
-    [true, true, null, "cargando"],
+    [true, true, null, "portada"],
     [false, false, null, "portada"],
     [false, true, null, "portada"],
     [false, true, { id: "test" }, "marketplace"],

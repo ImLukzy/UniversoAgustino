@@ -1,10 +1,11 @@
-import { api, audit, browserFor, check, fixture, login, withDatabase, WEB } from "./helper.mjs";
+import { api, audit, browserFor, check, checkIconFont, fixture, login, withDatabase, WEB } from "./helper.mjs";
 
 await withDatabase(async (db) => {
   const data = await fixture(db);
   const baseline = { pausedAt: data.doc.pausedAt, status: data.doc.status, reviewStatus: data.doc.reviewStatus };
   const session = await browserFor("vendedor");
   try {
+    await checkIconFont(session.page);
     await session.page.goto(`${WEB}/publicaciones`);
     const row = session.page.locator("article.card").filter({ hasText: data.doc.title });
     await row.getByRole("button", { name: "Editar" }).click();

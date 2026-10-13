@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import { ROUTES } from "../../lib/routes";
 import { Reveal } from "./Reveal";
-import { SPRING } from "../../lib/motion";
 import { AREAS, byArea, SHOWCASE, TOP_COURSES, type Area } from "../../data/landingCareers";
 import { ChipTabs } from "./ChipTabs";
 
@@ -27,10 +25,9 @@ export function LandingShowcase() {
           onChange={setArea}
         />
       </Reveal>
-      <motion.ul layout className="mx-auto mt-10 grid max-w-6xl grid-cols-1 content-start gap-4 px-4 text-left sm:grid-cols-2 lg:grid-cols-3">
-        <AnimatePresence initial={false} mode="popLayout">
+      <ul className="mx-auto mt-10 grid max-w-6xl grid-cols-1 content-start gap-4 px-4 text-left sm:grid-cols-2 lg:grid-cols-3">
           {list.map((c) => (
-            <motion.li key={c.key} layout initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={SPRING}>
+            <li key={c.key} className="card-enter">
               <Link to={`${ROUTES.explore}?career=${c.key}`} className="card card-hover flex h-full items-start gap-4 p-4">
                 <span
                   aria-hidden="true"
@@ -46,10 +43,9 @@ export function LandingShowcase() {
                 </span>
                 <span aria-hidden="true" className="material-symbols-outlined self-center text-zinc-400">arrow_forward</span>
               </Link>
-            </motion.li>
+            </li>
           ))}
-        </AnimatePresence>
-      </motion.ul>
+      </ul>
       <div className="mx-auto mt-12 max-w-4xl px-4 text-center">
         <p className="eyebrow">Cursos destacados</p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">

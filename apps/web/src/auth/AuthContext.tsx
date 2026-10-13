@@ -17,6 +17,10 @@ function readSessionHint(): boolean {
   try { return localStorage.getItem(SESSION_HINT) === "1"; } catch { return false; }
 }
 
+function isPublicInitialPath(path: string): boolean {
+  return path === "/" || path === "/inicio" || path === "/explorar" || path === "/bazar" || path === "/home" || path.startsWith("/p/");
+}
+
 const Ctx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -48,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Bootstrap: /auth/me dispara la rotación silenciosa vía interceptor si
     // el access venció pero la cookie de refresh sigue válida (Sprint 1A).
     let cancelled = false;
-    void (async () => {
+    const bootstrap = async () => {
       try {
         const r = await api.get("/auth/me");
         if (!cancelled) updateSession(r.data.data);
@@ -57,11 +61,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } finally {
         if (!cancelled) setLoading(false);
       }
-    })();
+    };
+    let idleId: number | undefined;
+    let timerId: number | undefined;
+    const idleWindow = window as Window & { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+    if (isPublicInitialPath(window.location.pathname)) {
+      if (idleWindow.requestIdleCallback) idleId = idleWindow.requestIdleCallback(() => void bootstrap(), { timeout: 1500 });
+      else timerId = window.setTimeout(() => void bootstrap(), 250);
+    } else void bootstrap();
     const onLogout = () => updateSession(null);
     window.addEventListener("auth:logout", onLogout);
     return () => {
       cancelled = true;
+      if (idleId !== undefined) idleWindow.cancelIdleCallback?.(idleId);
+      if (timerId !== undefined) window.clearTimeout(timerId);
       window.removeEventListener("auth:logout", onLogout);
     };
   }, [updateSession]);
