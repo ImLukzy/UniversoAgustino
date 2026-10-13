@@ -35,5 +35,7 @@ describe("reporte del vendedor desde el pedido", () => {
     expect(html).toContain("Cuéntanos los detalles");
     expect(html).toContain('minLength="10"');
     expect(html).toContain('maxLength="2000"');
+    expect(html).toContain('aria-describedby="report-count-order-1"');
+    expect(html).not.toContain("aria-live");
   });
 });
