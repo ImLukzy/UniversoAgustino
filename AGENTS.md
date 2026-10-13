@@ -1,6 +1,6 @@
 # AGENTS.md — UniversoAgustino
 
-Reglas para cualquier agente (Codex, Antigravity/Gemini, OpenCode, Claude). **Antes de empezar, lee `CLAUDE.md` completo**: arquitectura, comandos, reglas críticas y UI estricta del proyecto.
+Reglas para cualquier agente (Codex, Antigravity/Gemini, OpenCode, Claude). **Antes de empezar, lee `CLAUDE.md` completo y `docs/equipo/lecciones.md`**: arquitectura, comandos, reglas críticas y UI estricta del proyecto.
 
 @[CLAUDE.md](CLAUDE.md)
 
