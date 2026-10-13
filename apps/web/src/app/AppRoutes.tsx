@@ -1,19 +1,18 @@
 import { lazy, useEffect } from "react";
 import { Navigate, Route, Routes, useNavigate, useSearchParams } from "react-router-dom";
 import { Explorar } from "../pages/Explorar";
+import { PublicLanding } from "../pages/PublicLanding";
 import { useAuth } from "../auth/AuthContext";
-import { Forgot } from "../pages/Forgot";
-import { AppLayout } from "../components/AppLayout";
 import { useAuthModal } from "../components/AuthModalHost";
-import { RouteFallback } from "../components/RouteFallback";
 import { ROUTES } from "../lib/routes";
 import { safeReturnPath } from "../lib/authRedirect";
 import { OnboardingGate } from "./OnboardingGate";
 
 // Sprint 4 (F4-04): rutas pesadas en lazy (Visor arrastra pdfjs-dist).
 // Eager solo home + auth (entradas).
+const Forgot = lazy(() => import("../pages/Forgot").then((m) => ({ default: m.Forgot })));
 const Bazar = lazy(() => import("../pages/Bazar").then((m) => ({ default: m.Bazar })));
-const PublicLanding = lazy(() => import("../pages/PublicLanding").then((m) => ({ default: m.PublicLanding })));
+const AppLayout = lazy(() => import("../components/AppLayout").then((m) => ({ default: m.AppLayout })));
 const Home = lazy(() => import("../pages/Home").then((m) => ({ default: m.Home })));
 const Monetiza = lazy(() => import("../pages/Monetiza").then((m) => ({ default: m.Monetiza })));
 const Legal = lazy(() => import("../pages/Legal").then((m) => ({ default: m.Legal })));
@@ -37,6 +36,11 @@ const Perfil = lazy(() => import("../pages/Perfil").then((m) => ({ default: m.Pe
 const AuthCallback = lazy(() => import("../pages/AuthCallback").then((m) => ({ default: m.AuthCallback })));
 const Bienvenida = lazy(() => import("../pages/Bienvenida").then((m) => ({ default: m.Bienvenida })));
 
+if (typeof window !== "undefined" && window.location.pathname.startsWith("/p/")) {
+  void import("../components/AppLayout");
+  void import("../pages/Detalle");
+}
+
 // /login y /register no son páginas: abren el modal global sobre el destino
 // (?next=) o sobre el inicio. Tras entrar, el usuario sigue en esa página.
 function LoginOpener({ tab = "login" }: { tab?: "login" | "register" }) {
@@ -55,13 +59,13 @@ function LoginOpener({ tab = "login" }: { tab?: "login" | "register" }) {
 // el marketplace. El catálogo público sigue en /explorar para todos.
 export function RootRoute() {
   const { user, loading, hadSession } = useAuth();
-  if (loading && hadSession) return <RouteFallback />;
+  if (loading && hadSession) return <PublicLanding sessionPending />;
   return user ? <Explorar /> : <PublicLanding />;
 }
 
 function LandingRoute() {
   const { user, loading, hadSession } = useAuth();
-  if (loading && hadSession) return <RouteFallback />;
+  if (loading && hadSession) return <PublicLanding sessionPending />;
   return <PublicLanding withSession={!!user} />;
 }
 

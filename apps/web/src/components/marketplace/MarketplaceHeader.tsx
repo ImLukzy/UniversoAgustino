@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-import { SPRING } from "../../lib/motion";
 
 type Props = {
   query: string;
@@ -11,7 +9,7 @@ type Props = {
 
 export function MarketplaceHeader({ query, onQueryChange, onSubmit, resultCount, careerLabel }: Props) {
   return (
-    <motion.header initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={SPRING} className="border-b-2 border-zinc-900 bg-[rgb(var(--ua-paper))]">
+    <header className="market-enter border-b-2 border-zinc-900 bg-[rgb(var(--ua-paper))]">
       <div className="mx-auto max-w-6xl px-4 pb-6 pt-8">
         <p className="eyebrow">{careerLabel ?? "Toda la comunidad UNSA"}</p>
         <h1 className="h-display mt-2 text-3xl sm:text-4xl">Explora el catálogo</h1>
@@ -33,6 +31,6 @@ export function MarketplaceHeader({ query, onQueryChange, onSubmit, resultCount,
           <button type="submit" className="btn btn-dark btn-sm">Buscar</button>
         </form>
       </div>
-    </motion.header>
+    </header>
   );
 }

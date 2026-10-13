@@ -1,8 +1,31 @@
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Reveal } from "./Reveal";
-import { ExamenInteractivo } from "../ExamenInteractivo";
 import { FeatureRows } from "./FeatureRows";
 import { ROUTES } from "../../lib/routes";
+
+const ExamenInteractivo = lazy(() => import("../ExamenInteractivo").then((module) => ({ default: module.ExamenInteractivo })));
+
+function DeferredExam() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || !("IntersectionObserver" in window)) { setVisible(true); return; }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setVisible(true);
+      observer.disconnect();
+    }, { rootMargin: "0px" });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className="min-h-[42rem] md:min-h-[28rem]">
+      {visible ? <Suspense fallback={<div aria-hidden="true" className="min-h-[42rem] animate-pulse rounded-2xl bg-zinc-100 md:min-h-[28rem]" />}><ExamenInteractivo /></Suspense> : <div aria-hidden="true" className="min-h-[42rem] md:min-h-[28rem]" />}
+    </div>
+  );
+}
 
 // Biblioteca de Balotarios y Exámenes UNSA (specs 19 y 23): facultad →
 // examen → práctica en modo juego con explicación de cada respuesta.
@@ -16,7 +39,7 @@ export function LandingFeatures() {
           <p className="mx-auto mt-4 max-w-xl text-lg text-zinc-600">Elige tu facultad y un examen tipo parcial, final, balotario o admisión: responde, mira tu marcador y aprende con la explicación de cada pregunta.</p>
         </Reveal>
         <Reveal className="mx-auto max-w-5xl px-4">
-          <ExamenInteractivo />
+          <DeferredExam />
           <div className="mt-8 flex justify-center">
             <Link to={ROUTES.balotarios} className="btn btn-secondary">
               <span className="material-symbols-outlined text-lg" aria-hidden="true">menu_book</span>

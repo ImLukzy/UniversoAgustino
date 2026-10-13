@@ -1,11 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, lazy, Suspense, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { API_BASE } from "../lib/api";
 import { ROUTES } from "../lib/routes";
-import { Modal } from "./ui/Modal";
 import { OAuthButtons, type OAuthStatus } from "./auth/OAuthButtons";
 import { EmailCodeLogin } from "./auth/EmailCodeLogin";
+
+const Modal = lazy(() => import("./ui/Modal").then((module) => ({ default: module.Modal })));
 
 // Modal de autenticación global (sin página propia: /login y /register solo lo abren): openAuth() lo abre
 // desde cualquier parte. Google/Apple o correo UNSA con código al buzón
@@ -17,23 +18,24 @@ export const useAuthModal = () => useContext(Ctx);
 export function AuthModalHost({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<OAuthStatus | null>(null);
+  const statusRequested = useRef(false);
 
-  // Se consulta al montar para que los botones ya estén decididos al abrir.
-  useEffect(() => {
+  const openAuth = useCallback(() => {
+    setOpen(true);
+    if (statusRequested.current) return;
+    statusRequested.current = true;
     void fetch(`${API_BASE}/auth/oauth/status`)
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => j?.data && setStatus({ google: !!j.data.google, apple: !!j.data.apple }))
-      .catch(() => {});
+      .catch(() => { statusRequested.current = false; });
   }, []);
-
-  const openAuth = useCallback(() => setOpen(true), []);
   const close = useCallback(() => setOpen(false), []);
   const api = useMemo(() => ({ openAuth, openRegister: openAuth }), [openAuth]);
 
   return (
     <Ctx.Provider value={api}>
       {children}
-      <Modal open={open} onClose={close} labelledBy="auth-title">
+      {open && <Suspense fallback={null}><Modal open onClose={close} labelledBy="auth-title">
         <h2 id="auth-title" className="h-display pr-8 text-2xl">
           Te damos la bienvenida a Universo Agustino
         </h2>
@@ -56,7 +58,7 @@ export function AuthModalHost({ children }: { children: ReactNode }) {
           </Link>
           .
         </p>
-      </Modal>
+      </Modal></Suspense>}
     </Ctx.Provider>
   );
 }

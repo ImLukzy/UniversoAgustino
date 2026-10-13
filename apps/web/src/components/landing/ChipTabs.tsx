@@ -1,6 +1,4 @@
 import type { ReactNode } from "react";
-import { motion } from "framer-motion";
-import { SPRING } from "../../lib/motion";
 
 // Fila de chips-pestaña con el relleno activo compartido (layoutId): filtro
 // único de la landing (exámenes por facultad, escuelas por área).
@@ -26,6 +24,7 @@ export function ChipTabs<T extends string | number>({
         return (
           <button
             key={it.value}
+            id={`${id}-tab-${it.value}`}
             type="button"
             role="tab"
             aria-selected={on}
@@ -33,7 +32,7 @@ export function ChipTabs<T extends string | number>({
             onClick={() => onChange(it.value)}
             className={`chip relative ${on ? "text-white hover:bg-zinc-900" : ""}`}
           >
-            {on && <motion.span layoutId={id} transition={SPRING} className="absolute inset-0 rounded-full bg-zinc-900" />}
+            {on && <span aria-hidden="true" className="absolute inset-0 rounded-full bg-zinc-900" />}
             <span className="relative">{it.label}</span>
           </button>
         );
