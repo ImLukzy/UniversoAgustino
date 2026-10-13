@@ -52,3 +52,5 @@
 | 2026-10-13 | Auditoría | OK (Kelly) con observación de bundle → resuelta en 4d7fc52 | Kelly |
 | 2026-10-13 | QA (Pam) | Sesión diferida OK (sin parpadeo, rutas protegidas sin redirección, refresh transparente, oauth/status al abrir login). BLOQUEANTE: iconos como texto (faltaba `.material-symbols-outlined`) → corregido en 82a67f6 con verificación en subset-icons y E2E; glifos comprobados en capturas a 1280/375 | Pam + Michael |
 | 2026-10-13 | Nota | animaciones de empty state y sidebar pasan a CSS (cubic-bezier) para sacar framer-motion de la carga inicial; respetan prefers-reduced-motion | Michael 4d7fc52 |
+
+- 2026-10-13 hotfix post-publicación: en producción la portada mostraba solo el hero. El hueco diferido medía 0 px y `rootMargin: -100px` nunca intersectaba, y sin scroll posible no se cargaba nada. Fix: `rootMargin` positivo, hueco `min-h-screen` y carga de respaldo a los 1,5 s. E2E `tests/e2e/landing.mjs` (1440 y 375 px): falla con el código anterior (TimeoutError) y pasa con el fix; `npm run verify` y E2E completa en verde.
