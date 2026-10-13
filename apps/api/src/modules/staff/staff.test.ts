@@ -102,7 +102,7 @@ describe("altas y bajas del equipo", () => {
     const r = await request("DELETE", "/members/member", "admin");
     expect(r.status).toBe(200); expect(r.body.data).toEqual({ id: "member", role: "creator" });
     expect(db.user.updateMany).toHaveBeenCalledWith({ where: { id: "member", role: "moderator" }, data: { role: "creator" } });
-    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({ where: { userId: "member", revoked: false }, data: { revoked: true } });
+    expect(db.refreshToken.updateMany).toHaveBeenCalledWith({ where: { userId: "member" }, data: { revoked: true, rotatedAt: null } });
     expect(db.auditLog.create).toHaveBeenCalledWith({ data: { actorId: "actor", action: "staff.remove", entity: "user", entityId: "member" } });
   });
   it("baja inexistente → 404", async () => {
