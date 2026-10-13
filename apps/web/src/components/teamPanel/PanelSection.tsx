@@ -4,6 +4,7 @@ import { EarningsTab } from "../equipo/EarningsTab";
 import { PaymentsTab } from "../equipo/PaymentsTab";
 import { PaymentAccountsTab } from "../equipo/PaymentAccountsTab";
 import { PublicacionesTab } from "../equipo/PublicacionesTab";
+import { CatalogoTab } from "../equipo/CatalogoTab";
 import { DenunciasTab } from "../equipo/DenunciasTab";
 import { MiembrosTab } from "../equipo/MiembrosTab";
 import { CasesTab } from "../equipo/CasesTab";
@@ -24,6 +25,7 @@ export function PanelSection({ slug }: { slug: PanelSlug }) {
     case "ganancias": return <EarningsTab />;
     case "cuentas-de-cobro": return <PaymentAccountsTab />;
     case "publicaciones": return <PublicacionesTab />;
+    case "catalogo": return <CatalogoTab />;
     case "denuncias": return <DenunciasTab />;
     case "usuarios": return <UsuariosTab />;
     case "sedes-y-horarios": return <SedesTab />;

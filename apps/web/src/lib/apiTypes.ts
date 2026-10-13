@@ -12,6 +12,17 @@ export interface HubUser {
 
 export type PayMethod = "YAPE" | "PLIN" | "AMBAS";
 
+export interface StaffListing {
+  id: string;
+  type: "document" | "bazar";
+  title: string;
+  priceCents: number;
+  state: "active" | "paused" | "removed" | "pending";
+  owner: { id: string; nombre: string; correo: string };
+  openReports: number;
+  createdAt: string;
+}
+
 export interface HubDocument {
   id: string;
   createdAt?: string;
@@ -30,6 +41,7 @@ export interface HubDocument {
   status: string;
   pausedAt?: string | null;
   paused?: boolean;
+  removed?: boolean;
   reviewStatus?: ReviewStatus;
   reviewNote?: string | null;
   payMethod?: PayMethod | null;
@@ -51,6 +63,7 @@ export interface HubBazarItem {
   status: string;
   pausedAt?: string | null;
   paused?: boolean;
+  removed?: boolean;
   reviewStatus?: ReviewStatus;
   reviewNote?: string | null;
   payMethod?: PayMethod | null;

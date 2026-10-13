@@ -72,8 +72,8 @@
 - [x] Tarea 0: integrar spec 45 en `ImLukzy/Claudio` (prerrequisito; publicada 2026-10-12, 34ed1ea).
 - [x] Tarea 1 (API): schema + migración; `moderationListing`; `/staff/listings` (listar, retirar, restaurar); filtros catálogo/detalle/pedidos; takedown legado; tests; openapi.
 - [x] Tarea 2 (API): reportes enriquecidos, `category`, acción validada que retira; `canApplySanction` (D3); notificaciones; tests; openapi.
-- [ ] Tarea 3 (web): sección "Todas las publicaciones"; Denuncias con contexto y acciones; SanctionForm; aviso en detalle; tests.
-- [ ] Tarea 4 (web): "Reportar al vendedor" en `/pedidos`; tests.
+- [x] Tarea 3 (web): sección "Todas las publicaciones" y aviso de retirada (Dwight, 81c043f + d9c6ae4); Denuncias con contexto y acciones y SanctionForm (Michael, 011cae2 + 30b2ff2); tests.
+- [x] Tarea 4 (web): "Reportar al vendedor" en `/pedidos` (Michael, e7a88f5 + 30b2ff2); tests.
 - [ ] Tarea 5: verificar A1–A12 y anotar en §7.
 
 ## 7. Registro de verificación
@@ -81,3 +81,4 @@
 |---|---|---|---|
 | 2026-10-12 | Tarea 1 (API) | OK; suite completa verde. Migración manual y Prisma Client generado; no aplicada a BD según el alcance. Los criterios UI/E2E y la migración real quedan para tareas posteriores. | `npm run build -w packages/shared`; `npm run typecheck`; ESLint global; `npm run docs:check` (115 rutas); `JWT_ACCESS_SECRET=ci-only-fictitious-access-secret-32-chars-xx JWT_REFRESH_SECRET=ci-only-fictitious-refresh-secret-32-chars-x npm test` (API 614, web 156, shared 132); `node scripts/any-budget.mjs --check`; todos en verde. Verificación de tamaño de archivos TS API modificados: ≤150 líneas. |
 | 2026-10-12 | Tarea 2 (API) | OK; reportes enriquecidos y acciones ACTIONED/DISMISSED implementados; sanciones D3 verificadas. Suite completa verde; quedan pendientes UI/E2E y validación de migración de la Tarea 1. | `npm run build -w packages/shared`; `npm run typecheck`; ESLint global; `npm run docs:check` (115 rutas); `node scripts/any-budget.mjs --check`; `node scripts/check-file-size.mjs`; `JWT_ACCESS_SECRET=ci-only-fictitious-access-secret-32-chars-xx JWT_REFRESH_SECRET=ci-only-fictitious-refresh-secret-32-chars-x npm test` (API 623, web 156, shared 132); todos en verde. Archivos TypeScript tocados: ≤150 líneas. |
+| 2026-10-12 | Tarea 3 (web), primera mitad | Implementadas sección `catalogo`, filtros/paginación, retiro con motivo, restauración solo admin y aviso de retirada en detalle; Denuncias y `SanctionForm` pendientes. | `npm run build -w packages/shared`; `npm run typecheck -w apps/web`; `npx eslint apps/web/src --max-warnings=0`; `npm test -w apps/web` (161 tests, antes 156); `node scripts/subset-icons.mjs --check`; `node scripts/any-budget.mjs --check`; `node scripts/check-file-size.mjs`; todo en verde. |

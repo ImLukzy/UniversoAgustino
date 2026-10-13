@@ -16,4 +16,5 @@ it.each(["student", "creator"])("rol %s va a actividad incluso por ruta directa"
 it("panel tiene main único y scroll propio sin cabecera/footer públicos", () => { const out = render(); expect((out.match(/<main/g) ?? [])).toHaveLength(1); expect(out).toContain("overflow-y-auto"); expect(out).toContain("h-dvh"); expect(out).not.toContain("Buscar en el catálogo"); expect(out).not.toContain("Marco legal"); });
 it("trabajador que abre Miembros directamente vuelve al resumen", () => { auth.user = { id: "worker", role: "moderator" }; expect(render("/panel/miembros")).toContain('data-redirect="/panel/resumen"'); });
 it("Técnico sí obtiene Miembros", () => { expect(render("/panel/miembros")).toContain("<section>miembros</section>"); });
+it.each(["admin", "moderator"]) ("%s obtiene Todas las publicaciones", (role) => { auth.user = { id: "staff", role }; expect(render("/panel/catalogo")).toContain("<section>catalogo</section>"); });
 it("sección desconocida ofrece enlace al resumen", () => { const out = render("/panel/desconocida"); expect(out).toContain("Sección no disponible"); expect(out).toContain('/panel/resumen'); });

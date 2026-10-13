@@ -8,6 +8,7 @@ export const PANEL_SECTIONS = [
   { slug: "ganancias", label: "Ganancias", group: "Pagos", icon: "monitoring", description: "Comisión de pedidos verificados durante el periodo. Horario de Lima." },
   { slug: "cuentas-de-cobro", label: "Cuentas de cobro", group: "Pagos", icon: "account_balance", description: "Solo las cuentas activas se muestran a compradores con un pedido activo." },
   { slug: "publicaciones", label: "Publicaciones", group: "Moderación", icon: "menu_book", description: "Documentos y bazar pendientes de revisión." },
+  { slug: "catalogo", label: "Todas las publicaciones", group: "Moderación", icon: "inventory", description: "Busca, retira y restaura publicaciones del catálogo." },
   { slug: "denuncias", label: "Denuncias", group: "Moderación", icon: "flag", description: "Reportes D.L. 822 por resolver en menos de 48 horas." },
   { slug: "usuarios", label: "Usuarios", group: "Moderación", icon: "group", description: "Busca por correo o nombre para ver y sancionar cuentas." },
   { slug: "sedes-y-horarios", label: "Sedes y horarios", group: "Configuración", icon: "location_on", description: "Sedes, horario hábil, feriados y turnos · America/Lima." },
