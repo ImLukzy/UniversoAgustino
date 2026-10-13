@@ -27,8 +27,9 @@ beforeEach(() => {
 describe("pausar publicaciones", () => {
   it("dueño pausa y reactiva documento sin alterar revisión", async () => {
     const paused = await accountRequest(documents, "POST", "/doc/pause", "owner");
-    expect(paused.status).toBe(200); expect(paused.body.data).toMatchObject({ id: "doc", pausedAt: expect.any(Date) });
-    expect(db.document.update).toHaveBeenLastCalledWith({ where: { id: "doc" }, data: { pausedAt: expect.any(Date) } });
+    const pausedData = (paused.body as { data: { id: string; pausedAt: unknown } }).data;
+    expect(paused.status).toBe(200); expect(pausedData.id).toBe("doc"); expect(pausedData.pausedAt).toBeInstanceOf(Date);
+    expect(db.document.update.mock.lastCall?.[0]).toMatchObject({ where: { id: "doc" } }); expect(db.document.update.mock.lastCall?.[0].data.pausedAt).toBeInstanceOf(Date);
     db.document.findUnique.mockResolvedValue({ ...doc, pausedAt: new Date() });
     expect((await accountRequest(documents, "POST", "/doc/resume", "owner")).body.data).toMatchObject({ id: "doc", pausedAt: null });
     expect(db.document.update).toHaveBeenLastCalledWith({ where: { id: "doc" }, data: { pausedAt: null } });
@@ -59,7 +60,8 @@ describe("pausar publicaciones", () => {
     expect(await accountRequest(documents, "POST", "/doc/resume", "owner")).toMatchObject({ status: 200, body: { data: { pausedAt: null } } });
   });
   it("permite al dueño pausar ítem bazar", async () => {
-    expect(await accountRequest(bazar, "POST", "/item/pause", "owner")).toMatchObject({ status: 200, body: { data: { id: "item", pausedAt: expect.any(Date) } } });
+    const pausedItem = await accountRequest(bazar, "POST", "/item/pause", "owner");
+    expect(pausedItem).toMatchObject({ status: 200, body: { data: { id: "item" } } }); expect((pausedItem.body as { data: { pausedAt: unknown } }).data.pausedAt).toBeInstanceOf(Date);
     expect(db.auditLog.create).toHaveBeenCalledWith({ data: { actorId: "owner", action: "bazar.pause", entity: "bazar", entityId: "item" } });
   });
 });
