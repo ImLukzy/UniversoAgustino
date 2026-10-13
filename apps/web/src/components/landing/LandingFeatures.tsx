@@ -21,8 +21,8 @@ function DeferredExam() {
     return () => observer.disconnect();
   }, []);
   return (
-    <div ref={ref} className="min-h-[42rem] md:min-h-[28rem]">
-      {visible ? <Suspense fallback={<div aria-hidden="true" className="min-h-[42rem] animate-pulse rounded-2xl bg-zinc-100 md:min-h-[28rem]" />}><ExamenInteractivo /></Suspense> : <div aria-hidden="true" className="min-h-[42rem] md:min-h-[28rem]" />}
+    <div ref={ref} className="min-h-168 md:min-h-112">
+      {visible ? <Suspense fallback={<div aria-hidden="true" className="min-h-168 animate-pulse rounded-2xl bg-zinc-100 md:min-h-112" />}><ExamenInteractivo /></Suspense> : <div aria-hidden="true" className="min-h-168 md:min-h-112" />}
     </div>
   );
 }

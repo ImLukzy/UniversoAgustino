@@ -23,7 +23,7 @@ export function UsuariosTab() {
       {found.data?.length === 0 && <p>Sin resultados.</p>}
     </div>
     {found.data?.map((u) => <button key={u.id} type="button" onClick={() => setPicked(u.id)} aria-pressed={picked === u.id}
-      className={`card min-w-0 break-words p-4 text-left ${picked === u.id ? "ring-2 ring-primary" : ""}`}>
+      className={`card min-w-0 wrap-break-word p-4 text-left ${picked === u.id ? "ring-2 ring-primary" : ""}`}>
       <span className="font-bold">{u.fullName || u.email}</span><span className="block text-sm">{u.email}</span></button>)}
     {picked && <UserCard id={picked} />}
   </section>;

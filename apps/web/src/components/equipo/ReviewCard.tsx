@@ -13,7 +13,7 @@ export function ReviewCard({ item, busy, decide }: {
   const [reason, setReason] = useState("");
   function reject(event: FormEvent) { event.preventDefault(); decide(item, reason.trim()); }
   return (
-    <article className="card flex min-w-0 flex-col gap-3 break-words p-5">
+    <article className="card flex min-w-0 flex-col gap-3 wrap-break-word p-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <h3 className="min-w-0 flex-1 font-bold">{item.title}</h3><span className="price text-primary">{pen(item.priceCents)}</span>
       </div>

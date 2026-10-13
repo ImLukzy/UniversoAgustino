@@ -17,6 +17,6 @@ export function SellerPaymentActions({ orderId, confirmedAt }: { orderId: string
         <textarea id={`payment-report-${orderId}`} required minLength={5} maxLength={500} className="input min-h-20" value={reason} onChange={(e) => setReason(e.target.value)} /></label>
       <div className="flex flex-wrap gap-2"><button type="submit" disabled={busy || reason.trim().length < 5} className="btn btn-primary btn-sm">Abrir reporte</button><button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={() => setReporting(false)}>Volver</button></div>
     </form>}
-    <p className="min-h-5 break-words text-sm" role="status">{message}</p>
+    <p className="min-h-5 wrap-break-word text-sm" role="status">{message}</p>
   </div>;
 }

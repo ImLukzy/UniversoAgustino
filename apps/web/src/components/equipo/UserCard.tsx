@@ -21,25 +21,25 @@ export function UserCard({ id }: { id: string }) {
   if (ficha.isError) return <p role="alert" className="text-[#b91c1c]">{apiError(ficha.error)}</p>;
   const f = ficha.data, live = f.strikes.filter((s) => !s.forgivenAt).length;
   return <article className="card flex min-w-0 flex-col gap-4 p-5" aria-label={`Ficha de ${f.user.email}`}>
-    <header className="min-w-0 break-words"><h2 className="font-bold">{f.user.fullName || f.user.email}</h2><p className="text-sm">{f.user.email} · {f.user.career}</p>
+    <header className="min-w-0 wrap-break-word"><h2 className="font-bold">{f.user.fullName || f.user.email}</h2><p className="text-sm">{f.user.email} · {f.user.career}</p>
       <p className="text-sm">Faltas vigentes: {live} · Calificación media: {f.average ?? "sin calificaciones"}</p></header>
     {act.isError && <p role="alert" className="text-sm text-[#b91c1c]">{apiError(act.error)}</p>}
     <section aria-label="Sanciones"><h3 className="font-bold">Sanciones</h3>
       {f.sanctions.length === 0 && <p className="text-sm">Sin sanciones.</p>}
-      {f.sanctions.map((s) => <p key={s.id} className="min-w-0 break-words text-sm">{s.kind}{s.auto ? " (automática)" : ""} · {s.reason} · {caseTime(s.createdAt)}{s.endsAt ? ` → ${caseTime(s.endsAt)}` : ""}{s.liftedAt ? " · levantada" : ""}
+      {f.sanctions.map((s) => <p key={s.id} className="min-w-0 wrap-break-word text-sm">{s.kind}{s.auto ? " (automática)" : ""} · {s.reason} · {caseTime(s.createdAt)}{s.endsAt ? ` → ${caseTime(s.endsAt)}` : ""}{s.liftedAt ? " · levantada" : ""}
         {admin && isBlocking(s) && <button type="button" className="btn btn-secondary btn-sm ml-2" disabled={act.isPending} onClick={() => act.mutate({ path: `sanctions/${s.id}/lift` })}>Levantar</button>}</p>)}
     </section>
     <section aria-label="Faltas"><h3 className="font-bold">Faltas</h3>
       {f.strikes.length === 0 && <p className="text-sm">Sin faltas.</p>}
-      {f.strikes.map((s) => <p key={s.id} className="min-w-0 break-words text-sm">{s.kind} · {caseTime(s.startsAt)}{s.forgivenAt ? " · perdonada" : ""}
+      {f.strikes.map((s) => <p key={s.id} className="min-w-0 wrap-break-word text-sm">{s.kind} · {caseTime(s.startsAt)}{s.forgivenAt ? " · perdonada" : ""}
         {admin && !s.forgivenAt && <button type="button" className="btn btn-secondary btn-sm ml-2" disabled={act.isPending} onClick={() => act.mutate({ path: `strikes/${s.id}/forgive` })}>Perdonar</button>}</p>)}
     </section>
     <section aria-label="Calificaciones del equipo"><h3 className="font-bold">Calificaciones (solo equipo)</h3>
       {f.reviews.length === 0 && <p className="text-sm">Sin calificaciones.</p>}
-      {f.reviews.map((r) => <p key={r.id} className="min-w-0 break-words text-sm">{r.score}/5 · {r.authorName} · {r.comment || "sin comentario"}</p>)}
+      {f.reviews.map((r) => <p key={r.id} className="min-w-0 wrap-break-word text-sm">{r.score}/5 · {r.authorName} · {r.comment || "sin comentario"}</p>)}
     </section>
     <section aria-label="Tratos recientes"><h3 className="font-bold">Tratos recientes</h3>
-      {f.deals.map((d) => <p key={d.id} className="min-w-0 break-words text-sm">{d.itemTitle} · {d.as} · {d.status}</p>)}
+      {f.deals.map((d) => <p key={d.id} className="min-w-0 wrap-break-word text-sm">{d.itemTitle} · {d.as} · {d.status}</p>)}
     </section>
     <ReviewForm userId={id} done={refresh} />
     <SanctionForm userId={id} admin={!!admin} done={refresh} />

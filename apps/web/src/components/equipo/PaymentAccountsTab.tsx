@@ -13,7 +13,7 @@ export function PaymentAccountsTab() {
   return <section className="flex min-w-0 flex-col gap-4">
     {accounts.error && <p role="alert">{apiError(accounts.error)}</p>}{members.error && <p role="alert">{apiError(members.error)}</p>}
     {accounts.data?.map((a) => <div key={a.id} className="card flex min-w-0 flex-wrap items-center justify-between gap-3 p-4">
-      <p className="min-w-0 break-words">{a.holder} · {a.method} · {a.number} · {a.active ? "Activa" : "Inactiva"}</p>
+      <p className="min-w-0 wrap-break-word">{a.holder} · {a.method} · {a.number} · {a.active ? "Activa" : "Inactiva"}</p>
       <button className="btn btn-secondary btn-sm" type="button" onClick={() => { setEditing(a); setVersion((v) => v + 1); }}>Editar</button></div>)}
     <button className="btn btn-secondary" type="button" onClick={() => { setEditing(undefined); setVersion((v) => v + 1); }}>Nueva cuenta</button>
     {user && <PaymentAccountForm key={version} account={editing} userId={user.id} members={members.data} saved={() => {

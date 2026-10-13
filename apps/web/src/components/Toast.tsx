@@ -26,7 +26,7 @@ const TONE: Record<ToastItem["tone"], { wrap: string; icon: string; iconName: st
 
 export function ToastStack({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: number) => void }) {
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-20 z-[60] flex flex-col items-center gap-2 px-4 sm:bottom-6 sm:items-end sm:pr-6">
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-20 z-60 flex flex-col items-center gap-2 px-4 sm:bottom-6 sm:items-end sm:pr-6">
       <AnimatePresence>
         {items.map((t) => {
           const s = TONE[t.tone];
@@ -44,7 +44,7 @@ export function ToastStack({ items, onDismiss }: { items: ToastItem[]; onDismiss
               <span className={`material-symbols-outlined text-xl ${s.icon}`}>{s.iconName}</span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold leading-snug">{t.title}</p>
-                {t.detail && <p className="mt-0.5 break-words text-xs opacity-80">{t.detail}</p>}
+                {t.detail && <p className="mt-0.5 wrap-break-word text-xs opacity-80">{t.detail}</p>}
               </div>
               <motion.button
                 onClick={() => onDismiss(t.id)}

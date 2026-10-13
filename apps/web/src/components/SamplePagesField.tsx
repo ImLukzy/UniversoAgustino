@@ -22,7 +22,7 @@ export function SamplePagesField({ id, value, onChange, className = "" }: { id: 
         aria-describedby={hint}
         onChange={(e) => onChange(e.target.value)}
       />
-      <p id={hint} className={`min-h-[1rem] text-xs ${invalid ? "font-bold text-[#b91c1c]" : "text-zinc-500"}`}>
+      <p id={hint} className={`min-h-4 text-xs ${invalid ? "font-bold text-[#b91c1c]" : "text-zinc-500"}`}>
         {invalid ? "Usa números y rangos, p. ej. 1-2, 5 (máx. 20 páginas)." : "Visibles antes de comprar, p. ej. 1-2, 5. El resto queda bloqueado."}
       </p>
     </div>

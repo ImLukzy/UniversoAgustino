@@ -48,7 +48,7 @@ export function BuyPanel({ d }: { d: Detail }) {
             <p className="col-span-2 text-xs text-zinc-500">El vendedor debe aceptar tu solicitud antes de que pagues.</p>
           </div>
         )}
-        <p role="alert" className="min-h-[1rem] text-sm font-bold text-[#b91c1c]">{d.err}</p>
+        <p role="alert" className="min-h-4 text-sm font-bold text-[#b91c1c]">{d.err}</p>
         {d.fullAccess && d.doc
           ? <Link to={ROUTES.document(d.doc.id)} className="btn btn-secondary btn-lg w-full">Abrir documento</Link>
           : !d.pausedForViewer && !d.removed && <button type="button" disabled={!d.available || d.busy} onClick={d.buy} className="btn btn-primary btn-lg w-full">{cta}</button>}

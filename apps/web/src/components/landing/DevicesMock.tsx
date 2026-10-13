@@ -24,7 +24,7 @@ export function DevicesMock() {
           <div className="grid grid-cols-[1fr_2fr] gap-2">
             <div className="space-y-1.5 rounded-md border border-zinc-200 bg-zinc-50 p-2">
               {["Mis pedidos", "Visor", "Avisos"].map((t, i) => (
-                <p key={t} className={`truncate rounded px-1 text-[9px] font-bold ${i === 1 ? "bg-primary text-primary-ink" : "text-zinc-600"}`}>{t}</p>
+                <p key={t} className={`truncate rounded-sm px-1 text-[9px] font-bold ${i === 1 ? "bg-primary text-primary-ink" : "text-zinc-600"}`}>{t}</p>
               ))}
             </div>
             <div className="relative h-32 overflow-hidden rounded-md border border-zinc-900 bg-white p-2 sm:h-36">

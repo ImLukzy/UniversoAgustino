@@ -44,7 +44,7 @@ export function ReportSellerForm({ orderId }: { orderId: string }) {
       <textarea id={`report-reason-${orderId}`} aria-describedby={`report-count-${orderId}`} className="input min-h-24 w-full min-w-0" required minLength={10} maxLength={2000} value={reason} onChange={(event) => setReason(event.target.value)} />
     </label>
     <p id={`report-count-${orderId}`} className="text-right text-xs text-zinc-500">{reason.length}/2000</p>
-    {error && <p className="break-words text-sm text-[#b91c1c]" role="alert">{error}</p>}
+    {error && <p className="wrap-break-word text-sm text-[#b91c1c]" role="alert">{error}</p>}
     {message && <p className="text-sm text-zinc-700" role="status">{message}</p>}
     <button className="btn btn-primary btn-sm self-start" type="submit" disabled={busy || reason.trim().length < 10}>
       {busy ? "Enviando…" : "Enviar reporte"}

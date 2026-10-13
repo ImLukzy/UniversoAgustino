@@ -15,7 +15,7 @@ export function BazarCard({ item }: { item: HubBazarItem }) {
     <Link
       to={ROUTES.bazarItem(item.id)}
       aria-disabled={reserved || undefined}
-      className={`card group flex h-[15.5rem] w-48 flex-col overflow-hidden ${reserved ? "" : "card-hover"}`}
+      className={`card group flex h-62 w-48 flex-col overflow-hidden ${reserved ? "" : "card-hover"}`}
     >
       <div className="relative h-32 overflow-hidden border-b-2 border-zinc-900 bg-zinc-100">
         {photo ? (
@@ -35,7 +35,7 @@ export function BazarCard({ item }: { item: HubBazarItem }) {
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <p className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-snug text-zinc-900 group-hover:underline">{item.title}</p>
+        <p className="line-clamp-2 min-h-10 text-sm font-bold leading-snug text-zinc-900 group-hover:underline">{item.title}</p>
         <p className="truncate text-xs text-zinc-500">
           {rent && item.depositCents ? `Garantía ${pen(item.depositCents)}` : "Bazar UNSA"}
         </p>

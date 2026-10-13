@@ -51,7 +51,7 @@ export function Paywall({ range, compact, ratio = 1.414, priceCents, buying, err
   return (
     <section aria-label={title} className="relative">
       <div aria-hidden="true" className="pointer-events-none min-h-80 w-full sheet" style={{ aspectRatio: `1 / ${ratio}` }} />
-      <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-gradient-to-b from-zinc-100 via-white/90 to-white p-6 text-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-linear-to-b from-zinc-100 via-white/90 to-white p-6 text-center">
         <span className="material-symbols-outlined flex h-12 w-12 items-center justify-center rounded-full border-2 border-zinc-900 bg-primary-soft text-2xl text-primary">
           lock
         </span>

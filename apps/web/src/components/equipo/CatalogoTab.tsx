@@ -32,7 +32,7 @@ export function CatalogoTab() {
       <label className="flex flex-col gap-1 text-sm font-bold">Estado<select className="input" value={state} onChange={(e) => { setState(e.target.value as typeof state); reset(); }}><option value="">Todos</option><option value="active">Activas</option><option value="paused">Pausadas</option><option value="removed">Retiradas</option><option value="pending">Pendientes</option></select></label>
       <label className="flex flex-col gap-1 text-sm font-bold">Buscar<input className="input min-w-0" value={q} onChange={(e) => { setQ(e.target.value); reset(); }} placeholder="Título" /></label>
     </div>
-    <p role="status" className={message ? "break-words text-sm" : "sr-only"}>{message}</p>
+    <p role="status" className={message ? "wrap-break-word text-sm" : "sr-only"}>{message}</p>
     {query.isPending && <PanelLoading label="Cargando publicaciones…" />}
     {query.isError && <p role="alert" className="text-[#b91c1c]">{apiError(query.error)}</p>}
     {query.data?.data.length === 0 && <p className="card p-5">No se encontraron publicaciones.</p>}

@@ -15,7 +15,7 @@ export function DocumentCard({ doc }: { doc: HubDocument }) {
   return (
     <Link
       to={`/v/${doc.id}`}
-      className="card card-hover group flex h-[15.5rem] w-48 cursor-pointer flex-col overflow-hidden"
+      className="card card-hover group flex h-62 w-48 cursor-pointer flex-col overflow-hidden"
     >
       <div className="relative h-32 overflow-hidden border-b-2 border-zinc-900 bg-zinc-100">
         {doc.fileType ? (
@@ -32,7 +32,7 @@ export function DocumentCard({ doc }: { doc: HubDocument }) {
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <p className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-snug text-zinc-900 group-hover:underline">{doc.title}</p>
+        <p className="line-clamp-2 min-h-10 text-sm font-bold leading-snug text-zinc-900 group-hover:underline">{doc.title}</p>
         <p className="truncate text-xs text-zinc-500" style={{ color: career }}>
           {doc.course}
           {doc.author?.profile?.fullName ? ` · ${doc.author.profile.fullName}` : ""}

@@ -6,7 +6,7 @@ export function ShiftsForm({ shifts, sedes, members, save, busy, admin }: { shif
   return <section className="card flex min-w-0 flex-col gap-4 p-5"><h2 className="font-bold">{admin ? "Turnos del equipo" : "Mis turnos"}</h2>
     {shifts.length === 0 && <p className="text-sm text-zinc-600">Sin turnos asignados.</p>}
     {shifts.map((s) => <div key={s.id} className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-b py-2">
-      <p className="min-w-0 break-words text-sm">{s.user.profile?.fullName || s.user.email} · {s.sede.name}<br />{DAYS[s.weekday]} {timeText(s.startsMin)}–{timeText(s.endsMin)}</p>
+      <p className="min-w-0 wrap-break-word text-sm">{s.user.profile?.fullName || s.user.email} · {s.sede.name}<br />{DAYS[s.weekday]} {timeText(s.startsMin)}–{timeText(s.endsMin)}</p>
       {admin && <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={() => {
         setId(s.id); setUserId(s.userId); setSedeId(s.sedeId); setDay(s.weekday); setStart(timeText(s.startsMin)); setEnd(timeText(s.endsMin));
       }}>Editar turno</button><button type="button" disabled={busy} className="btn btn-secondary btn-sm" onClick={() => {

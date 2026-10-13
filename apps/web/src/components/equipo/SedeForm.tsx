@@ -10,7 +10,7 @@ export function SedeForm({ sedes, save, busy }: { sedes: Sede[]; save: SaveSched
       onChange={(e) => setForm({ ...form, [key]: e.target.value })} /></label>;
   return <section className="card flex min-w-0 flex-col gap-4 p-5"><h2 className="font-bold">Sedes</h2>
     {sedes.map((s) => <div key={s.id} className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-b py-2">
-      <span className="min-w-0 break-words text-sm">{s.name} · {s.active ? "Activa" : "Inactiva"}</span>
+      <span className="min-w-0 wrap-break-word text-sm">{s.name} · {s.active ? "Activa" : "Inactiva"}</span>
       <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-secondary btn-sm" disabled={busy || uploading} onClick={() => {
         setId(s.id); setForm({ name: s.name, address: s.address, meetingPoint: s.meetingPoint, photoUrl: s.photoUrl ?? "", active: s.active });
       }}>Editar {s.name}</button>

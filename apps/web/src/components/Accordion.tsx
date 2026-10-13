@@ -28,7 +28,7 @@ export function Accordion({ items, defaultOpen = -1, variant = "cards" }: { item
               aria-expanded={isOpen}
               aria-controls={`acc-panel-${it.id}`}
               id={`acc-button-${it.id}`}
-              className={`flex w-full items-center justify-between gap-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${rows ? "py-6" : "p-5"}`}
+              className={`flex w-full items-center justify-between gap-4 text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary ${rows ? "py-6" : "p-5"}`}
             >
               <span className="flex min-w-0 items-center gap-3">
                 {it.icon && <span className="material-symbols-outlined shrink-0 text-2xl text-primary">{it.icon}</span>}

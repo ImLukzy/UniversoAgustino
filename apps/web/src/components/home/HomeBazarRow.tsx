@@ -26,9 +26,9 @@ export function HomeBazarRow() {
         </div>
         <Link to={ROUTES.bazar} className="shrink-0 text-sm font-semibold text-primary hover:underline">Ver todo</Link>
       </div>
-      <div className="-mx-4 mt-6 flex h-[16rem] snap-x snap-mandatory scroll-px-4 gap-6 overflow-x-auto px-4 pb-2 pt-1 [scrollbar-width:thin]">
+      <div className="-mx-4 mt-6 flex h-64 snap-x snap-mandatory scroll-px-4 gap-6 overflow-x-auto px-4 pb-2 pt-1 scrollbar-thin">
         {isLoading
-          ? Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-[15.5rem] w-48 shrink-0 animate-pulse rounded-xl bg-zinc-100" aria-hidden="true" />)
+          ? Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-62 w-48 shrink-0 animate-pulse rounded-xl bg-zinc-100" aria-hidden="true" />)
           : items.map((b) => (
               <div key={b.id} className="shrink-0 snap-start">
                 <BazarCard item={b} />

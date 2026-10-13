@@ -69,7 +69,7 @@ export function Publicaciones() {
             <span className="material-symbols-outlined text-zinc-500" aria-hidden="true">search</span>
             <input value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar mis publicaciones" placeholder="Título o curso…" />
           </label>
-          <select aria-label="Ordenar" value={sort} onChange={(e) => setSort(isSortKey(e.target.value) ? e.target.value : "recent")} className="input h-11 w-auto min-w-0 max-w-[10.5rem] shrink font-bold md:max-w-none">
+          <select aria-label="Ordenar" value={sort} onChange={(e) => setSort(isSortKey(e.target.value) ? e.target.value : "recent")} className="input h-11 w-auto min-w-0 max-w-42 shrink font-bold md:max-w-none">
             {SORTS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
         </div>

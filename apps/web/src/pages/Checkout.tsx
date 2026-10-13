@@ -123,7 +123,7 @@ export function Checkout() {
 
         ) : payable ? (
           <Block key="pay" n={2} title="Paga a una cuenta del equipo">
-            {o.paymentRejectedReason && <p role="alert" className="mb-4 break-words text-sm text-[#b91c1c]">Comprobante denegado: {o.paymentRejectedReason}. Puedes reenviarlo.</p>}
+            {o.paymentRejectedReason && <p role="alert" className="mb-4 wrap-break-word text-sm text-[#b91c1c]">Comprobante denegado: {o.paymentRejectedReason}. Puedes reenviarlo.</p>}
             <TeamPayPanel orderId={o.id} amountCents={o.amountCents} onPaid={refresh} />
           </Block>
         ) : (

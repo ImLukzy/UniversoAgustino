@@ -31,7 +31,7 @@ export function PublicationsHeader({ stats, onMyQr, qrMsg }: { stats: { active: 
           </Link>
         </div>
       </div>
-      <p className="min-h-[1rem] text-xs font-semibold text-zinc-700" role="status">{qrMsg}</p>
+      <p className="min-h-4 text-xs font-semibold text-zinc-700" role="status">{qrMsg}</p>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {cards.map((c) => (
           <div key={c.label} className="card flex items-center gap-3 p-4">

@@ -13,7 +13,7 @@ export function CatalogGrid({ entries, loading, error, onRetry }: { entries: Cat
     return (
       <div className={CATALOG_GRID} role="status" aria-label="Cargando catálogo">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="h-[15.5rem] w-48 animate-pulse rounded-xl bg-zinc-100" aria-hidden="true" />
+          <div key={i} className="h-62 w-48 animate-pulse rounded-xl bg-zinc-100" aria-hidden="true" />
         ))}
       </div>
     );

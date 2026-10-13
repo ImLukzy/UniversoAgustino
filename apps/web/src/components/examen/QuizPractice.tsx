@@ -23,7 +23,7 @@ export function QuizPractice({ exam }: { exam: Exam }) {
   const stateOf = (i: number): OptionState => (pick === null ? "idle" : i === cur.ok ? "ok" : i === pick ? "bad" : "dim");
 
   return (
-    <div className="card flex h-[40rem] w-full flex-col p-5 text-left sm:h-[38rem] sm:p-6">
+    <div className="card flex h-160 w-full flex-col p-5 text-left sm:h-152 sm:p-6">
       <ScoreBoard label={done ? "Resultado" : `Pregunta ${s.index + 1} de ${qs.length}`} questions={qs} picks={s.picks} index={s.index} correct={correct} wrong={wrong} />
       <div className="mt-4 min-h-0 flex-1">
         <AnimatePresence mode="wait" initial={false}>

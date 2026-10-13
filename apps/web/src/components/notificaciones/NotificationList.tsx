@@ -13,11 +13,11 @@ export function NotificationList({ rows, open }: { rows: HubNotification[]; open
       <ul className="flex flex-col gap-3">{items.map((n) => <li key={n.id}>
         <button type="button" onClick={() => open(n)} className={`card card-hover flex w-full min-w-0 flex-col gap-2 p-4 text-left ${n.readAt ? "" : "bg-primary-soft"}`}>
           <span className="flex flex-wrap items-center justify-between gap-2">
-            <span className="min-w-0 break-words font-extrabold text-zinc-950">{n.title}</span>
+            <span className="min-w-0 wrap-break-word font-extrabold text-zinc-950">{n.title}</span>
             <span className="text-xs text-zinc-500">{fmtDate(n.createdAt)}</span>
           </span>
           {!n.readAt && <span className="text-xs font-bold text-primary">No leída</span>}
-          <span className="break-words text-sm text-zinc-600">{n.body}</span>
+          <span className="wrap-break-word text-sm text-zinc-600">{n.body}</span>
         </button>
       </li>)}</ul>
     </section>

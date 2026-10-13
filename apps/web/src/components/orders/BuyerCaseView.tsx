@@ -15,21 +15,21 @@ export function BuyerCaseView({ orderId }: { orderId: string }) {
   const { user } = useAuth();
   const query = useQuery({ refetchInterval: 30_000, queryKey: ["case", orderId, user?.id], queryFn: async () => (await api.get(`/cases/order/${orderId}`)).data.data as ParticipantCase | null });
   if (query.isPending) return <p role="status" className="min-h-16 text-sm">Cargando coordinación…</p>;
-  if (query.error) return <p role="alert" className="break-words text-sm">{apiError(query.error)}</p>;
+  if (query.error) return <p role="alert" className="wrap-break-word text-sm">{apiError(query.error)}</p>;
   const row = query.data;
   return <section className="flex min-w-0 flex-col gap-2 rounded-xl bg-primary-soft p-3 text-sm">
     <p className="font-bold">{row ? CASE_LABELS[row.status] : "Coordinación pendiente"}</p>
     <p>Pagas al equipo al recoger en sede; no se requiere pago anticipado.</p>
-    {row && <><p className="break-words">{row.staffName} · {pen(row.amountCents)}</p>
-      {row.appointments.map((a) => <div key={a.id} className="min-w-0 break-words"><p>{appointmentLabel(a.kind)} · {caseTime(a.startsAt)} (Lima) · {a.status === "SCHEDULED" ? "Programada" : a.status === "NO_SHOW" ? "Ausencia" : a.status === "DONE" ? "Completada" : "Cancelada"}</p>
+    {row && <><p className="wrap-break-word">{row.staffName} · {pen(row.amountCents)}</p>
+      {row.appointments.map((a) => <div key={a.id} className="min-w-0 wrap-break-word"><p>{appointmentLabel(a.kind)} · {caseTime(a.startsAt)} (Lima) · {a.status === "SCHEDULED" ? "Programada" : a.status === "NO_SHOW" ? "Ausencia" : a.status === "DONE" ? "Completada" : "Cancelada"}</p>
         <p>{a.sede.name} · {a.sede.address} · {a.sede.meetingPoint}</p></div>)}
       {row.receivedPhotoUrl && <img src={resolveQr(row.receivedPhotoUrl) ?? undefined} alt="Estado del objeto recibido" className="h-36 w-full rounded-lg object-contain" />}
-      {row.paymentRef && <p className="break-words">Pago registrado: {row.paymentMethod === "CASH" ? "Efectivo" : row.paymentRef}</p>}
+      {row.paymentRef && <p className="wrap-break-word">Pago registrado: {row.paymentMethod === "CASH" ? "Efectivo" : row.paymentRef}</p>}
       {row.isSeller && row.paymentRecorded && <Link className="font-semibold underline" to="/ventas?tab=cobros#mis-cobros">Consultar mi liquidación en Mis cobros</Link>}
       {!row.isSeller && row.paymentRecorded && <PaymentClaim orderId={orderId} />}
-      {row.returnConditionNote && <p className="break-words">Revisión de devolución: {row.returnConditionNote}</p>}
+      {row.returnConditionNote && <p className="wrap-break-word">Revisión de devolución: {row.returnConditionNote}</p>}
       {row.returnPhotoUrl && <img src={resolveQr(row.returnPhotoUrl) ?? undefined} alt="Objeto al devolver el alquiler" className="h-36 w-full rounded-lg object-contain" />}
-      {row.conditionNote && <p className="break-words">{row.conditionNote}</p>}
+      {row.conditionNote && <p className="wrap-break-word">{row.conditionNote}</p>}
       <CaseChat caseId={row.id} base="/cases" closed={!isCaseOpen(row.status)} /></>}
   </section>;
 }

@@ -14,7 +14,7 @@ export function ReviewForm({ userId, done }: { userId: string; done: () => void 
         {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n}</option>)}</select></label>
     <label className="flex flex-col gap-1 text-sm" htmlFor={`comment-${userId}`}>Comentario interno (opcional, máx. 500)
       <textarea id={`comment-${userId}`} className="input min-h-20" maxLength={500} value={comment} onChange={(e) => setComment(e.target.value)} /></label>
-    {send.isError && <p role="alert" className="break-words text-sm text-[#b91c1c]">{apiError(send.error)}</p>}
+    {send.isError && <p role="alert" className="wrap-break-word text-sm text-[#b91c1c]">{apiError(send.error)}</p>}
     <button type="submit" className="btn btn-secondary btn-sm self-start" disabled={send.isPending}>Guardar calificación</button>
   </form>;
 }

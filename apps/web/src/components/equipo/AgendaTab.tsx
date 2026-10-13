@@ -19,7 +19,7 @@ export function AgendaTab({ goCases }: { goCases: () => void }) {
     <AgendaFilters sedes={sedes.data ?? []} staff={agenda.data?.staff ?? []} sedeId={sedeId} staffId={staffId} week={week} onSede={setSede} onStaff={setStaff} onWeek={move} />
     <div className="min-h-[420px] min-w-0" aria-busy={agenda.isFetching}>
       {agenda.isPending && <PanelLoading label="Cargando agenda…" rows={3} />}
-      {agenda.isError && <p role="alert" className="break-words text-[#b91c1c]">{apiError(agenda.error)}</p>}
+      {agenda.isError && <p role="alert" className="wrap-break-word text-[#b91c1c]">{apiError(agenda.error)}</p>}
       {agenda.data && <AgendaGrid data={agenda.data} onOpen={goCases} />}
     </div>
   </section>;

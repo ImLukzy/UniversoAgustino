@@ -42,7 +42,7 @@ export function GatewayPay({ order }: { order: HubOrder }) {
       <motion.button type="button" onClick={go} disabled={busy} whileTap={{ scale: 0.97 }} transition={SPRING} className="btn btn-primary btn-lg w-full">
         {busy ? "Abriendo Mercado Pago…" : "Pagar con Mercado Pago"}
       </motion.button>
-      <p role="alert" className="min-h-[1.25rem] text-xs text-red-600">{err}</p>
+      <p role="alert" className="min-h-5 text-xs text-red-600">{err}</p>
     </div>
   );
 }

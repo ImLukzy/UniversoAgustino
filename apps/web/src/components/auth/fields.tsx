@@ -9,7 +9,7 @@ export const primaryBtn = "btn btn-primary btn-lg w-full";
 // Línea reservada para errores/ayuda: altura fija, no mueve el layout.
 export function FormMessage({ error, hint }: { error?: string; hint?: ReactNode }) {
   return (
-    <p role={error ? "alert" : undefined} className={`min-h-[1.25rem] text-xs ${error ? "font-semibold text-red-600" : "text-zinc-500"}`}>
+    <p role={error ? "alert" : undefined} className={`min-h-5 text-xs ${error ? "font-semibold text-red-600" : "text-zinc-500"}`}>
       {error || hint}
     </p>
   );

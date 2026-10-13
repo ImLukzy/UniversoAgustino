@@ -25,19 +25,19 @@ export function SedesTab() {
   const error = sedes.error ?? schedule.error ?? shifts.error ?? members.error;
   if (sedes.isPending || schedule.isPending || shifts.isPending) return <PanelLoading label="Cargando sedes y horarios…" />;
   return <div className="flex min-w-0 flex-col gap-5">
-    <p role="status" className={msg ? "break-words text-sm" : "sr-only"}>{msg}</p>{error && <p role="alert">{apiError(error)}</p>}
+    <p role="status" className={msg ? "wrap-break-word text-sm" : "sr-only"}>{msg}</p>{error && <p role="alert">{apiError(error)}</p>}
     {admin ? <>
       <SedeForm sedes={sedes.data ?? []} save={save} busy={busy} />
       <HoursForm hours={schedule.data?.hours ?? []} save={save} busy={busy} />
       <HolidaysForm holidays={schedule.data?.holidays ?? []} save={save} busy={busy} />
     </> : <section className="card flex min-w-0 flex-col gap-3 p-5"><h2 className="font-bold">Sedes y horario</h2>
-      {sedes.data?.map((s) => <div key={s.id} className="min-w-0 break-words text-sm">
+      {sedes.data?.map((s) => <div key={s.id} className="min-w-0 wrap-break-word text-sm">
         <p className="font-bold">{s.name} · {s.active ? "Activa" : "Inactiva"}</p>
         {s.address.trim() && <p>{s.address}</p>}
         <p>{s.meetingPoint.trim() || "Punto por definir"}</p>
       </div>)}
       {DAYS.map((day, weekday) => { const h = schedule.data?.hours.find((v) => v.weekday === weekday); return <p key={day} className="text-sm">{day}: {h ? `${timeText(h.opens)}–${timeText(h.closes)}${h.special ? " (especial)" : ""}` : "Cerrado"}</p>; })}
-      {schedule.data?.holidays.map((h) => <p key={h.id} className="break-words text-sm">Cerrado {h.date.slice(0, 10)} · {h.reason}</p>)}
+      {schedule.data?.holidays.map((h) => <p key={h.id} className="wrap-break-word text-sm">Cerrado {h.date.slice(0, 10)} · {h.reason}</p>)}
     </section>}
     <ShiftsForm shifts={shifts.data ?? []} sedes={sedes.data ?? []} members={members.data ?? []} admin={admin} save={save} busy={busy} />
   </div>;

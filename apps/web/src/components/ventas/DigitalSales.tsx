@@ -16,7 +16,7 @@ export function DigitalSales({ rows, more, loadingMore, onMore }: { rows: HubOrd
       </div>
       <div className="card overflow-hidden">
         <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Ventas de documentos digitales">
-          <table className="w-full min-w-[40rem] text-left text-sm">
+          <table className="w-full min-w-160 text-left text-sm">
             <thead>
               <tr className="border-b-2 border-zinc-900 text-[11px] uppercase tracking-wider text-zinc-500">
                 <th className="px-4 py-3">Fecha y archivo</th>

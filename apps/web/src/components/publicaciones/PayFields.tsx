@@ -44,7 +44,7 @@ export function PayFields({ method, detail, qr, onMethod, onDetail, onQr }: {
         QR de cobro (imagen)
         <input type="file" accept="image/*" className="text-xs font-normal" onChange={(e) => pick(e.target.files?.[0])} />
       </label>
-      <p className="min-h-[1rem] text-xs sm:col-span-2" role={upErr ? "alert" : undefined}>
+      <p className="min-h-4 text-xs sm:col-span-2" role={upErr ? "alert" : undefined}>
         {up ? <span className="text-zinc-500">Subiendo QR…</span> : upErr ? <span className="font-semibold text-[#dc2626]">{upErr}</span> : null}
       </p>
       {preview && (

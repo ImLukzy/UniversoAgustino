@@ -22,7 +22,7 @@ export function RentalCard({ order }: { order: HubOrder }) {
             <p className="truncate text-xs text-zinc-500">{meta || "Comunidad UNSA"} · {order.buyerCompleted ?? 0} alquileres previos</p>
           </div>
         </div>
-        <span className="tag max-w-full whitespace-normal break-words text-left sm:max-w-[50%]">{getOrderLabel(order.status, "seller", order.cancelledReason)}</span>
+        <span className="tag max-w-full whitespace-normal wrap-break-word text-left sm:max-w-[50%]">{getOrderLabel(order.status, "seller", order.cancelledReason)}</span>
       </header>
       <div className="rounded-xl border border-dashed border-zinc-300 p-3">
         <p className="eyebrow">{order.rentalStart ? "Alquiler de bazar" : "Compra de bazar"}</p>

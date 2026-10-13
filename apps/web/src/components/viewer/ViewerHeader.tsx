@@ -21,7 +21,7 @@ interface Props {
 export function ViewerHeader({ doc, fileUrl, fullAccess, saved, buying, onSave, onBuy }: Props) {
   const paid = doc.priceCents > 0 && !fullAccess;
   return (
-    <header className="sticky top-0 z-30 border-b-2 border-zinc-900 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b-2 border-zinc-900 bg-white/90 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4">
         <div className="min-w-0 flex-1">
           <h1 className="truncate font-display text-base font-bold text-zinc-900">{doc.title}</h1>

@@ -33,7 +33,7 @@ export function PanelOrders({ list, loading }: { list: HubOrder[]; loading: bool
           <button key={v} type="button" role="tab" aria-selected={filter === v} onClick={() => setFilter(v)} className={`chip ${filter === v ? "chip-active" : ""}`}>{l}</button>
         ))}
       </div>
-      <div className="flex min-h-[10rem] flex-col gap-2">
+      <div className="flex min-h-40 flex-col gap-2">
         {loading && <ListRowSkeleton count={6} />}
         {!loading && rows.length === 0 && (
           <EmptyState

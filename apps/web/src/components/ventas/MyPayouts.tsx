@@ -13,13 +13,13 @@ export function MyPayouts() {
     {q.isLoading && <p role="status">Cargando cobros…</p>}{q.error && <p role="alert">{apiError(q.error)}</p>}
     {q.data?.pages[0].data.length === 0 && <p>Aún no tienes ventas verificadas.</p>}
     {(q.data?.pages ?? []).flatMap((p) => p.data).map((p) => <article key={p.id} className="card flex min-w-0 flex-col gap-3 p-5">
-      <h3 className="break-words font-semibold">{p.order.itemTitle}</h3>
+      <h3 className="wrap-break-word font-semibold">{p.order.itemTitle}</h3>
       <dl className="grid grid-cols-2 gap-3 text-sm"><div><dt>Precio</dt><dd>{pen(p.amountCents)}</dd></div>
         <div><dt>Comisión {(p.order.feeBps ?? 1300) / 100}%</dt><dd>{pen(p.feeCents)}</dd></div>
         <div><dt>Neto {p.status === "COMPLETED" ? "recibido" : p.status === "REFUNDED" ? "sin liquidación" : "por recibir"}</dt><dd className="font-bold">{pen(p.status === "REFUNDED" ? 0 : p.netCents)}</dd></div>
         <div><dt>Estado</dt><dd>{p.status === "COMPLETED" ? "Pagado" : p.status === "REFUNDED" ? "Reembolsado al comprador" : p.status === "FROZEN" ? "Congelado" : "Pendiente"}</dd></div></dl>
       <p className="text-sm text-zinc-600">{p.status === "REFUNDED" ? "Venta reembolsada: sin comisión ni pago al vendedor." : p.completedAt ? `Pagado ${fmtDate(p.completedAt)}` : `Vence ${fmtDate(p.dueAt)}`}</p>
-      {p.frozenReason && <p className="break-words text-sm">Reclamo: {p.frozenReason}</p>}
+      {p.frozenReason && <p className="wrap-break-word text-sm">Reclamo: {p.frozenReason}</p>}
       {p.status === "COMPLETED" && p.proofUrl && <PrivateImage path={p.proofUrl} alt="Comprobante del pago recibido" expandable />}
       {p.paymentRef && <p className="break-all text-sm">Operación: {p.paymentRef}</p>}
     </article>)}

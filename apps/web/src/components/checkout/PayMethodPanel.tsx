@@ -36,12 +36,12 @@ export function PayMethodPanel({ order }: { order: HubOrder }) {
             onClick={() => setMethod(m)}
             className={`relative flex-1 rounded-lg py-2 text-sm font-semibold ${m === method ? "text-zinc-900" : "text-zinc-500"}`}
           >
-            {m === method && <motion.span layoutId="pay-method" transition={SPRING} className="absolute inset-0 rounded-lg bg-white shadow-sm" />}
+            {m === method && <motion.span layoutId="pay-method" transition={SPRING} className="absolute inset-0 rounded-lg bg-white shadow-xs" />}
             <span className="relative">{LABEL[m]}</span>
           </button>
         ))}
       </div>
-      <div className="flex h-56 w-56 items-center justify-center rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm">
+      <div className="flex h-56 w-56 items-center justify-center rounded-2xl border border-zinc-100 bg-white p-3 shadow-xs">
         {qr ? (
           <img src={qr} alt={`QR de ${LABEL[method]} del vendedor`} width={200} height={200} className="h-full w-full rounded-xl object-contain" />
         ) : (

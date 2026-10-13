@@ -59,7 +59,7 @@ export function HeroWidgetCard({ withSession }: { withSession?: boolean } = {}) 
           onChange={(e) => setQ(e.target.value)}
           aria-label="Buscar materiales de estudio"
           placeholder="Busca un curso, parcial, final o balotario"
-          className="h-8 w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-400"
+          className="h-8 w-full bg-transparent text-base text-zinc-900 outline-hidden placeholder:text-zinc-400"
         />
         <div className="flex items-center gap-2">
           {!withSession && (

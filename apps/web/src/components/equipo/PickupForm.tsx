@@ -21,7 +21,7 @@ export function PickupForm({ caseId, rental, amountCents, busy, save }: { caseId
       <select id={`return-slot-${caseId}`} className="input w-full min-w-0" value={selected} onChange={(e) => setSelected(e.target.value)}>
         <option value="">Programar después</option>{slots.data?.map((s) => <option key={`${s.sedeId}|${s.startsAt}`} value={`${s.sedeId}|${s.startsAt}`}>{s.sedeName} · {caseTime(s.startsAt)}</option>)}
       </select></label><p className="text-sm">La devolución se programa desde la fecha final, en días hábiles con turno. Las fechas acordadas del alquiler se conservan.</p>
-      {slots.error && <p role="status" className="break-words text-sm">{apiError(slots.error)}. El Técnico puede revisar la disponibilidad después del recojo.</p>}</>}
+      {slots.error && <p role="status" className="wrap-break-word text-sm">{apiError(slots.error)}. El Técnico puede revisar la disponibilidad después del recojo.</p>}</>}
     <button type="submit" disabled={busy || !paymentReady(payment)} className="btn btn-primary self-start">Registrar pago y entregar</button>
   </form>;
 }

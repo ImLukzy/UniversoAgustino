@@ -13,7 +13,7 @@ export function PanelNavigation({ onAction }: { onAction?: () => void }) {
     {groups.map((group) => <div key={group}><p className="eyebrow mb-1 px-3">{group}</p><ul className="flex flex-col gap-0.5">
       {items.filter((s) => s.group === group).map((s) => <li key={s.slug}>
         <NavLink to={panelPath(s.slug)} onClick={onAction} className={({ isActive }) => `flex min-h-10 lg:min-h-9 min-w-0 items-center gap-3 rounded-lg px-3 py-1 text-sm font-semibold ${isActive ? "bg-primary-soft text-primary" : "text-zinc-700 hover:bg-zinc-100"}`}>
-          <span className="material-symbols-outlined shrink-0 text-xl" aria-hidden="true">{s.icon}</span><span className="min-w-0 break-words">{s.label}</span>
+          <span className="material-symbols-outlined shrink-0 text-xl" aria-hidden="true">{s.icon}</span><span className="min-w-0 wrap-break-word">{s.label}</span>
           {s.slug === "publicaciones" && !!reviews.data?.pendingTotal && <span className="ml-auto shrink-0 rounded-full bg-primary-soft px-2 py-0.5 text-xs text-primary">{reviews.data.pendingTotal}<span className="sr-only"> pendientes</span></span>}
         </NavLink>
       </li>)}

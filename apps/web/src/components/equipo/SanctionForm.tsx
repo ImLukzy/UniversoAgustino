@@ -59,7 +59,7 @@ export function SanctionForm({ userId, admin, done }: { userId: string; admin: b
     <label className="flex min-w-0 flex-col gap-1 text-sm" htmlFor={`reason-${userId}`}>Motivo (obligatorio, 5–300)
       <textarea id={`reason-${userId}`} className="input min-h-20 w-full min-w-0" required minLength={5} maxLength={300} value={reason} onChange={(event) => setReason(event.target.value)} />
     </label>
-    {error && <p role="alert" className="break-words text-sm text-[#b91c1c]">{error}</p>}
+    {error && <p role="alert" className="wrap-break-word text-sm text-[#b91c1c]">{error}</p>}
     <button type="submit" className="btn btn-secondary btn-sm self-start" disabled={busy || reason.trim().length < 5 || (kind === "SUSPENSION" && (days < 1 || days > 30))}>
       {`Aplicar ${LABELS[kind].toLowerCase()}`}
     </button>

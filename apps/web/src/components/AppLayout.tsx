@@ -41,7 +41,7 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-50 flex h-16 items-center gap-3 border-b border-zinc-200 bg-white/95 px-4 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-50 flex h-16 items-center gap-3 border-b border-zinc-200 bg-white/95 px-4 backdrop-blur-sm md:px-8">
           <button type="button" onClick={() => setDrawer(true)} aria-label="Abrir menú" className="btn-ghost h-11 w-11 shrink-0 px-0 lg:hidden">
             <span className="material-symbols-outlined">menu</span>
           </button>
@@ -66,12 +66,12 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
 
       {drawer && (
           <>
-            <div onClick={() => setDrawer(false)} aria-hidden="true" className="drawer-backdrop fixed inset-0 z-[70] bg-zinc-900/50 lg:hidden" />
+            <div onClick={() => setDrawer(false)} aria-hidden="true" className="drawer-backdrop fixed inset-0 z-70 bg-zinc-900/50 lg:hidden" />
             <aside
               role="dialog"
               aria-modal="true"
               aria-label="Menú principal"
-              className="drawer-enter fixed left-0 top-0 z-[71] flex h-full w-72 max-w-[85vw] flex-col overflow-y-auto border-r-2 border-zinc-900 bg-[rgb(var(--ua-paper))] p-4 lg:hidden"
+              className="drawer-enter fixed left-0 top-0 z-71 flex h-full w-72 max-w-[85vw] flex-col overflow-y-auto border-r-2 border-zinc-900 bg-[rgb(var(--ua-paper))] p-4 lg:hidden"
             >
               <Logo />
               <AppSidebar onAction={() => setDrawer(false)} animateActive={false} />

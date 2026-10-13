@@ -31,7 +31,7 @@ export function PublicacionesTab() {
           onClick={() => { setType(value); setPage(1); setMsg(""); }} className={`btn btn-sm ${type === value ? "btn-primary" : "btn-secondary"}`}>
           {value === "document" ? "Documentos" : "Bazar"}</button>)}
       </div>
-      <p role="status" className={msg ? "break-words text-sm" : "sr-only"}>{msg}</p>
+      <p role="status" className={msg ? "wrap-break-word text-sm" : "sr-only"}>{msg}</p>
       {queue.isPending && <PanelLoading label="Cargando publicaciones…" />}
       {queue.isError && <p role="alert">{apiError(queue.error)}</p>}
       {queue.data?.data.length === 0 && <p className="card p-5">No hay publicaciones pendientes de este tipo.</p>}

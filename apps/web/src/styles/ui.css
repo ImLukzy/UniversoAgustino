@@ -22,7 +22,7 @@
   .btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 0 rgb(var(--ua-ink)); }
   .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 0 rgb(var(--ua-ink)); }
   .btn:disabled, .btn[aria-disabled="true"] { @apply cursor-not-allowed opacity-50; transform: none; box-shadow: 3px 3px 0 0 rgb(var(--ua-ink)); }
-  .btn:focus-visible { @apply outline-none ring-2 ring-primary ring-offset-2; }
+  .btn:focus-visible { @apply outline-hidden ring-2 ring-primary ring-offset-2; }
   .btn-sm { @apply h-9 px-4 text-[13px]; }
   .btn-lg { @apply h-12 px-7 text-[15px]; }
 
@@ -59,7 +59,7 @@
     @apply h-11 w-full rounded-xl border-2 border-zinc-200 bg-white px-4 text-[15px] text-zinc-900 transition-colors placeholder:text-zinc-400;
   }
   .input:hover { @apply border-zinc-300; }
-  .input:focus, .input:focus-visible { @apply border-zinc-900 outline-none ring-0; }
+  .input:focus, .input:focus-visible { @apply border-zinc-900 outline-hidden ring-0; }
   textarea.input { @apply h-auto py-3; }
 
   /* ---- Buscador píldora ---- */
@@ -68,7 +68,7 @@
     box-shadow: 3px 3px 0 0 rgb(var(--ua-ink));
   }
   .searchbar:focus-within { box-shadow: 4px 4px 0 0 rgb(var(--hub-p)); }
-  .searchbar input { @apply h-full min-w-0 flex-1 bg-transparent text-[15px] text-zinc-900 outline-none placeholder:text-zinc-400; }
+  .searchbar input { @apply h-full min-w-0 flex-1 bg-transparent text-[15px] text-zinc-900 outline-hidden placeholder:text-zinc-400; }
 
   /* ---- Chips / filtros ---- */
   .chip {

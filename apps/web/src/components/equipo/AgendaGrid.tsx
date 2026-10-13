@@ -4,7 +4,7 @@ const SLOT = 15, ROW_PX = 22;
 function label(a: AgendaAppt) { return `${hhmm(limaMinute(a.startsAt))} ${KIND_LABEL[a.kind] ?? a.kind} · ${STATUS_LABEL[a.status] ?? a.status}`; }
 function Item({ a, onOpen }: { a: AgendaAppt; onOpen: () => void }) {
   return <button type="button" onClick={onOpen} title={`${a.itemTitle} — ${a.party}`}
-    className={`h-full w-full min-w-0 overflow-hidden rounded border-l-4 px-1 text-left text-xs leading-tight ${STATUS_CLASS[a.status] ?? ""}`}>
+    className={`h-full w-full min-w-0 overflow-hidden rounded-sm border-l-4 px-1 text-left text-xs leading-tight ${STATUS_CLASS[a.status] ?? ""}`}>
     <span className="block truncate font-bold">{label(a)}</span><span className="block truncate">{a.staff.name} · {a.sede.name}</span></button>;
 }
 // Escritorio: semana lun–sáb × franjas de 15 min. Móvil: una lista por día (sin scroll horizontal).

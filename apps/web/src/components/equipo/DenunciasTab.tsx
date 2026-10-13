@@ -54,7 +54,7 @@ export function DenunciasTab() {
       <Link to={ROUTES.mySales} className="btn btn-secondary btn-sm">Gestión de ventas</Link>
     </div>
     {message && <p role="status" className="text-sm font-bold text-zinc-800">{message}</p>}
-    {error && <p role="alert" className="break-words text-sm text-[#b91c1c]">{error}</p>}
+    {error && <p role="alert" className="wrap-break-word text-sm text-[#b91c1c]">{error}</p>}
     {reports.isLoading && <PanelLoading label="Cargando denuncias…" />}
     {reports.isError && <p role="alert" className="text-sm text-[#b91c1c]">{apiError(reports.error)}</p>}
     {reports.data?.data.length === 0 && <EmptyState boxed icon="task_alt" title={filter === "OPEN" ? "Sin reportes abiertos" : "Sin reportes resueltos"} />}

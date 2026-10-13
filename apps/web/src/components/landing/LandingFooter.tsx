@@ -76,7 +76,7 @@ export function LandingFooter() {
             <label className="flex items-center gap-1 rounded-full border border-white/20 px-3 py-1.5">
               <span className="material-symbols-outlined text-base">location_on</span>
               <span className="sr-only">Idioma y sede</span>
-              <select defaultValue="aqp" className="bg-transparent text-white/80 outline-none">
+              <select defaultValue="aqp" className="bg-transparent text-white/80 outline-hidden">
                 <option value="aqp" className="text-zinc-900">Español · Arequipa</option>
               </select>
             </label>

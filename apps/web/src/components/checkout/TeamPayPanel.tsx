@@ -14,7 +14,7 @@ export function TeamPayPanel({ orderId, amountCents, onPaid }: { orderId: string
   return <div className="flex min-w-0 flex-col gap-4">
     <label className="flex min-w-0 flex-col gap-1 text-sm">Cuenta destino del equipo<select className="input w-full min-w-0" value={account.id} onChange={(e) => setSelected(e.target.value)}>
       {query.data?.map((a) => <option key={a.id} value={a.id}>{a.holder} · {a.method === "OTHER" ? "Otro" : a.method}</option>)}</select></label>
-    <p className="break-words text-sm">Paga <strong>{pen(amountCents)}</strong> a <strong>{account.holder}</strong> · {account.number}</p>
+    <p className="wrap-break-word text-sm">Paga <strong>{pen(amountCents)}</strong> a <strong>{account.holder}</strong> · {account.number}</p>
     <div className="flex min-w-0 flex-wrap gap-4"><PrivateImage path={account.photoUrl} alt="Foto del titular" /><PrivateImage path={account.qrUrl} alt="QR de cobro del equipo" /></div>
     <p className="text-sm text-zinc-600">Verifica el titular en tu aplicación antes de pagar. Adjunta el comprobante para que el equipo revise el abono.</p>
     <ProofForm key={account.id} orderId={orderId} paymentAccountId={account.id} onPaid={onPaid} />

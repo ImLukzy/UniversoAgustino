@@ -4,7 +4,7 @@ import { API_ORIGIN, api, apiError, uploadFileWithProgress } from "../../lib/api
 import { useToast } from "../../context/ToastContext";
 
 const inputCls =
-  "h-12 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 transition-shadow focus:border-primary focus:outline-none focus:shadow-[0_0_0_4px_rgb(var(--hub-p)/0.12)]";
+  "h-12 w-full rounded-xl border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 transition-shadow focus:border-primary focus:outline-hidden focus:shadow-[0_0_0_4px_rgb(var(--hub-p)/0.12)]";
 
 // Paso "Constancia": n° de operación opcional y foto obligatoria (POST /uploads →
 // ruta /uploads/<uuid> en payProofUrl) → POST /orders/:id/pay (PAID).
@@ -67,7 +67,7 @@ export function ProofForm({ orderId, paymentAccountId, onPaid }: { orderId: stri
         </span>
       </button>
       <input ref={fileRef} type="file" accept="image/png,image/jpeg" hidden onChange={(e) => void pick(e.target.files?.[0])} />
-      <p role="alert" className="min-h-[1.25rem] text-xs text-[#b91c1c]">{err}</p>
+      <p role="alert" className="min-h-5 text-xs text-[#b91c1c]">{err}</p>
       <button type="submit" disabled={busy || progress !== null || !voucher || !paymentAccountId}
         className="btn btn-primary btn-lg w-full">
         {busy ? "Enviando…" : "Ya pagué"}

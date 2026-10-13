@@ -13,7 +13,7 @@ export function MarketplaceHeader({ query, onQueryChange, onSubmit, resultCount,
       <div className="mx-auto max-w-6xl px-4 pb-6 pt-8">
         <p className="eyebrow">{careerLabel ?? "Toda la comunidad UNSA"}</p>
         <h1 className="h-display mt-2 text-3xl sm:text-4xl">Explora el catálogo</h1>
-        <p className="mt-1 min-h-[1.25rem] text-sm text-zinc-600">
+        <p className="mt-1 min-h-5 text-sm text-zinc-600">
           Apuntes y productos del Bazar de tu comunidad agustina
           {typeof resultCount === "number" && ` · ${resultCount} recursos`}
         </p>

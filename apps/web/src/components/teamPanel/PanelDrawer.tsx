@@ -13,7 +13,7 @@ export function PanelDrawer({ close }: { close: () => void }) {
     media.addEventListener("change", resize);
     return () => { stop(); media.removeEventListener("change", resize); };
   }, [close]);
-  return <div className="fixed inset-0 z-[70] lg:hidden">
+  return <div className="fixed inset-0 z-70 lg:hidden">
     <div className="absolute inset-0 bg-zinc-900/50" onClick={close} aria-hidden="true" />
     <motion.div id="panel-drawer" ref={dialog} role="dialog" aria-modal="true" aria-label="Menú del panel" tabIndex={-1}
       initial={reduced ? false : { x: "-100%" }} animate={{ x: 0 }} transition={SPRING}

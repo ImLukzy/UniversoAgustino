@@ -21,7 +21,7 @@ export function CasesTab() {
     <label className="flex flex-col gap-1 text-sm" htmlFor="case-status">Estado
       <select id="case-status" className="input" value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}>
         <option value="">Todos los estados</option>{Object.entries(CASE_LABELS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-      </select></label><p role="status" className={message ? "break-words text-sm" : "sr-only"}>{message}</p>
+      </select></label><p role="status" className={message ? "wrap-break-word text-sm" : "sr-only"}>{message}</p>
     {user?.role === "admin" && <label className="flex flex-col gap-1 text-sm" htmlFor="case-assignee">Custodio
       <select id="case-assignee" className="input" value={assigneeId} onChange={(e) => { setAssigneeId(e.target.value); setPage(1); }}>
         <option value="">Todos los custodios</option>{members.data?.map((m) => <option key={m.id} value={m.id}>{m.fullName || m.email}</option>)}

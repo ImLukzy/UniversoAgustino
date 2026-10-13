@@ -21,7 +21,7 @@ export function Publicar() {
           <StepDetails form={form} />
           <StepFile form={form} />
           <StepPriceLegal form={form} />
-          <p role="alert" className="min-h-[1.25rem] text-sm font-bold text-[#b91c1c]">{form.err}</p>
+          <p role="alert" className="min-h-5 text-sm font-bold text-[#b91c1c]">{form.err}</p>
           <div className="flex justify-end pb-8">
             <button type="button" disabled={form.busy} onClick={form.submit} className="btn btn-primary btn-lg">
               {form.busy ? "Publicando…" : form.mode === "digital" ? "Publicar en el catálogo" : "Publicar en el Bazar"}

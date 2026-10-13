@@ -17,11 +17,11 @@ export function HomeRecentDocs({ docs, loading, searching }: { docs: HubDocument
       <p className="mt-1 text-sm text-zinc-500">
         {searching ? "Documentos que coinciden con tu búsqueda." : "Lo último que subieron estudiantes de tu universidad."}
       </p>
-      <div className="mt-6 min-h-[15rem]">
+      <div className="mt-6 min-h-60">
         {loading ? (
           <div className={GRID} aria-label="Cargando documentos">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-[15.5rem] w-48 animate-pulse rounded-xl bg-zinc-100" aria-hidden="true" />
+              <div key={i} className="h-62 w-48 animate-pulse rounded-xl bg-zinc-100" aria-hidden="true" />
             ))}
           </div>
         ) : docs.length === 0 ? (

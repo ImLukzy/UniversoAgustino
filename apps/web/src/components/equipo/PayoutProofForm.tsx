@@ -21,7 +21,7 @@ export function PayoutProofForm({ id, refreshed, refund = false }: { id: string;
       <input className="input max-w-full min-w-0 text-xs" type="file" accept="image/jpeg,image/png" disabled={busy || progress !== null} onChange={(e) => void upload(e.target.files?.[0])} /></label>
     {progress !== null && <p role="status">Subiendo: {progress}%</p>}{proof && <p role="status">Foto adjunta</p>}
     <label className="flex flex-col gap-1 text-sm">N.º de operación (opcional)<input className="input" maxLength={160} value={ref} disabled={busy} onChange={(e) => setRef(e.target.value)} /></label>
-    {error && <p role="alert" className="break-words text-sm text-error">{error}</p>}
+    {error && <p role="alert" className="wrap-break-word text-sm text-error">{error}</p>}
     <button className="btn btn-primary self-start" disabled={busy || !proof || progress !== null || (!!ref.trim() && ref.trim().length < 3)}>{busy ? "Guardando…" : refund ? "Registrar reembolso" : "Registrar liquidación"}</button>
   </form>;
 }

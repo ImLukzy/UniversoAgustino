@@ -24,16 +24,16 @@ export function ReportCard({ report, admin, busy, onAction }: { report: ReportEn
     event.preventDefault();
     if (!busy && reason.trim().length >= 10) onAction(report.id, "ACTIONED", reason.trim());
   };
-  return <article className="card flex min-w-0 flex-col gap-3 break-words p-5 text-sm">
+  return <article className="card flex min-w-0 flex-col gap-3 wrap-break-word p-5 text-sm">
     <header className="flex min-w-0 flex-wrap items-start justify-between gap-2">
       <div className="min-w-0"><p className="font-bold">{CATEGORIES[report.category ?? ""] ?? "Otro"}</p><p className="text-xs text-zinc-500">{fmtDate(report.createdAt)} · {report.status === "OPEN" ? "Abierta" : "Resuelta"}</p></div>
       <span className="tag">{report.targetType}</span>
     </header>
     <p className="whitespace-pre-wrap text-zinc-800">{report.reason}</p>
     <dl className="grid min-w-0 grid-cols-1 gap-2 border-t border-zinc-200 pt-3 sm:grid-cols-2">
-      <div className="min-w-0"><dt className="font-bold">Denunciante</dt><dd className="break-words">{report.reporter?.nombre || "Usuario"}</dd></div>
-      <div className="min-w-0"><dt className="font-bold">Dueño / vendedor</dt><dd className="break-words">{report.owner ? <>{report.owner.nombre || "Sin nombre"}<br />{report.owner.correo}</> : "No disponible"}</dd></div>
-      <div className="min-w-0 sm:col-span-2"><dt className="font-bold">Publicación</dt><dd className="break-words">{report.publication ? <Link className="font-bold text-primary-ink underline" to={`/p/${report.publication.type}/${report.publication.id}`}>{report.publication.title}</Link> : "No aplica"}</dd></div>
+      <div className="min-w-0"><dt className="font-bold">Denunciante</dt><dd className="wrap-break-word">{report.reporter?.nombre || "Usuario"}</dd></div>
+      <div className="min-w-0"><dt className="font-bold">Dueño / vendedor</dt><dd className="wrap-break-word">{report.owner ? <>{report.owner.nombre || "Sin nombre"}<br />{report.owner.correo}</> : "No disponible"}</dd></div>
+      <div className="min-w-0 sm:col-span-2"><dt className="font-bold">Publicación</dt><dd className="wrap-break-word">{report.publication ? <Link className="font-bold text-primary-ink underline" to={`/p/${report.publication.type}/${report.publication.id}`}>{report.publication.title}</Link> : "No aplica"}</dd></div>
     </dl>
     {message && <p role="status" className="text-sm">{message}</p>}
     {report.status === "OPEN" && <div className="flex min-w-0 flex-wrap gap-2 border-t border-dashed border-zinc-300 pt-3">

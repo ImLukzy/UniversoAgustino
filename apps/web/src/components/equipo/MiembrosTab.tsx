@@ -34,12 +34,12 @@ export function MiembrosTab() {
         <input id="staff-email" type="email" required maxLength={160} value={email} onChange={(e) => setEmail(e.target.value)}
           className="input w-full min-w-0" placeholder="nombre@unsa.edu.pe" autoComplete="email" />
         <button type="submit" className="btn btn-primary w-fit" disabled={change.isPending}>Añadir al equipo</button>
-        <p role="status" className={msg ? "break-words text-sm" : "sr-only"}>{msg}</p>
+        <p role="status" className={msg ? "wrap-break-word text-sm" : "sr-only"}>{msg}</p>
       </form>
       {members.isPending && <PanelLoading label="Cargando miembros…" />}
       {members.isError && <p role="alert">{apiError(members.error)}</p>}
       {members.data?.map((member) => <article key={member.id} className="card flex min-w-0 flex-wrap items-center gap-3 p-5">
-        <div className="w-full min-w-0 flex-none break-words sm:w-auto sm:flex-1"><h3 className="font-bold">{member.fullName || member.email}</h3>
+        <div className="w-full min-w-0 flex-none wrap-break-word sm:w-auto sm:flex-1"><h3 className="font-bold">{member.fullName || member.email}</h3>
           <p className="break-all text-sm text-zinc-600">{member.email}</p>
           <p className="text-xs text-zinc-500">Desde {fmtDate(member.since)}</p></div>
         <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-3">

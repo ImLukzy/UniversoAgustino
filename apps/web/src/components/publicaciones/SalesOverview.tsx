@@ -34,7 +34,7 @@ export function SalesOverview({ sales, isStaff }: { sales: HubOrder[]; isStaff: 
             {statusBars(sales).map((b) => (
               <div key={b.label} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                 <span className="text-xs font-bold text-zinc-700">{b.n}</span>
-                <div className="w-full max-w-[36px] rounded-t border-2 border-b-0 border-zinc-900" style={{ height: `${b.h}%`, backgroundColor: b.color }} />
+                <div className="w-full max-w-[36px] rounded-t-sm border-2 border-b-0 border-zinc-900" style={{ height: `${b.h}%`, backgroundColor: b.color }} />
                 <span className="text-[11px] text-zinc-500">{b.label}</span>
               </div>
             ))}

@@ -66,7 +66,7 @@ function PdfSheet({ doc, index, page, ratio, watermark }: SheetProps) {
       onDragStart={(e) => e.preventDefault()}
     >
       <canvas ref={canvas} aria-label={`Página ${page}`} className="absolute inset-0 h-full w-full" />
-      <span className="absolute bottom-2 right-2 rounded bg-white/90 px-1.5 text-[11px] font-bold text-zinc-500">{page}</span>
+      <span className="absolute bottom-2 right-2 rounded-sm bg-white/90 px-1.5 text-[11px] font-bold text-zinc-500">{page}</span>
     </motion.div>
   );
 }

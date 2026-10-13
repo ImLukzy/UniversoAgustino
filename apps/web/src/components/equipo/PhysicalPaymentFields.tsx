@@ -34,6 +34,6 @@ export function PhysicalPaymentFields({ value: v, setValue, amountCents, busy }:
     </>}
     <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={v.confirmed} disabled={busy || v.uploading} onChange={(e) => setValue((p) => ({ ...p, confirmed: e.target.checked }))} />
       {v.method === "CASH" ? "Confirmo que recibí el efectivo del comprador en sede." : "Verifiqué el abono real en la cuenta del equipo y el comprobante adjunto."}</label>
-    {error && <p role="alert" className="break-words text-sm text-error">{error}</p>}
+    {error && <p role="alert" className="wrap-break-word text-sm text-error">{error}</p>}
   </div>;
 }

@@ -17,11 +17,11 @@ export function CatalogoRow({ item, admin, busy, act }: { item: StaffListing; ad
   return (
     <article className="card flex min-w-0 flex-col gap-3 p-4">
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0"><h3 className="break-words font-bold">{item.title}</h3><p className="text-sm text-zinc-600">{typeLabel} · {pen(item.priceCents)}</p></div>
+        <div className="min-w-0"><h3 className="wrap-break-word font-bold">{item.title}</h3><p className="text-sm text-zinc-600">{typeLabel} · {pen(item.priceCents)}</p></div>
         <span className="tag shrink-0">{labels[item.state]}</span>
       </div>
       <div className="grid min-w-0 grid-cols-1 gap-1 text-sm text-zinc-600 sm:grid-cols-2">
-        <p className="break-words">Dueño: {item.owner.nombre || "Sin nombre"}</p><p className="break-all">{item.owner.correo}</p>
+        <p className="wrap-break-word">Dueño: {item.owner.nombre || "Sin nombre"}</p><p className="break-all">{item.owner.correo}</p>
         <p>Reportes abiertos: {item.openReports}</p><p>Publicado: {new Date(item.createdAt).toLocaleDateString("es-PE")}</p>
       </div>
       {item.state === "removed" ? admin && <button className="btn btn-secondary btn-sm self-start" type="button" disabled={busy} onClick={() => act("restore", item)}>Restaurar</button>

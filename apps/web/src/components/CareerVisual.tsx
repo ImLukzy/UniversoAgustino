@@ -48,7 +48,7 @@ export function CareerAvatar({ name, className = "w-14 h-14" }: { name: string; 
   const initial = (name.trim().charAt(0) || "U").toUpperCase();
   return (
     <span
-      className={`${className} rounded-full text-white flex items-center justify-center font-bold text-title-lg shrink-0 shadow-sm`}
+      className={`${className} rounded-full text-white flex items-center justify-center font-bold text-title-lg shrink-0 shadow-xs`}
       style={{ backgroundColor: accent?.color ?? "#0f766e" }}
       aria-hidden
     >

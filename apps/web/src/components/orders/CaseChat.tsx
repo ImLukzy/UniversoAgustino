@@ -23,9 +23,9 @@ export function CaseChat({ caseId, base, closed = false }: { caseId: string; bas
     {open && <div id={regionId} className="flex min-w-0 flex-col gap-2">
       <ul aria-live="polite" className="flex max-h-64 min-h-16 min-w-0 flex-col gap-2 overflow-y-auto rounded-lg border bg-white p-2">
         {list.isPending && <li role="status" className="text-sm">Cargando mensajes…</li>}
-        {list.isError && <li role="alert" className="break-words text-sm text-[#b91c1c]">{apiError(list.error)}</li>}
+        {list.isError && <li role="alert" className="wrap-break-word text-sm text-[#b91c1c]">{apiError(list.error)}</li>}
         {list.data?.length === 0 && <li className="text-sm text-zinc-600">Aún no hay mensajes.</li>}
-        {list.data?.map((m) => <li key={m.id} className={`min-w-0 break-words rounded-lg p-2 text-sm ${m.authorId === user?.id ? "bg-primary-soft" : "bg-zinc-50"}`}>
+        {list.data?.map((m) => <li key={m.id} className={`min-w-0 wrap-break-word rounded-lg p-2 text-sm ${m.authorId === user?.id ? "bg-primary-soft" : "bg-zinc-50"}`}>
           <p className="text-xs font-bold">{m.authorId === user?.id ? "Tú" : m.authorName}{m.staff ? " · Equipo" : ""} · {when(m.createdAt)}</p>
           <p className="whitespace-pre-wrap">{m.body}</p></li>)}
       </ul>
@@ -33,7 +33,7 @@ export function CaseChat({ caseId, base, closed = false }: { caseId: string; bas
         <form className="flex min-w-0 flex-col gap-2" onSubmit={(e) => { e.preventDefault(); if (text.trim()) send.mutate(); }}>
           <label className="flex flex-col gap-1 text-sm" htmlFor={`${regionId}-text`}>Escribe un mensaje
             <textarea id={`${regionId}-text`} className="input min-h-20 w-full" maxLength={CHAT_MAX} required value={text} onChange={(e) => setText(e.target.value)} /></label>
-          {send.isError && <p role="alert" className="break-words text-sm text-[#b91c1c]">{apiError(send.error)}</p>}
+          {send.isError && <p role="alert" className="wrap-break-word text-sm text-[#b91c1c]">{apiError(send.error)}</p>}
           <button type="submit" className="btn btn-primary btn-sm self-start" disabled={send.isPending || !text.trim()}>{send.isPending ? "Enviando…" : "Enviar"}</button>
         </form>}
     </div>}

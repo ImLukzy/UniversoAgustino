@@ -32,7 +32,7 @@ export function PaymentAccountForm({ account, userId, members, saved }: {
       <label className="flex min-w-0 flex-col gap-1">{key === "qrUrl" ? "QR" : "Foto de perfil"}<input className="w-full min-w-0" type="file" accept="image/jpeg,image/png" disabled={busy} onChange={(e) => void upload(key, e.target.files?.[0])} /></label>
       {form[key] && <PrivateImage path={form[key]} alt={key === "qrUrl" ? "QR de cobro" : "Foto de perfil"} />}</div>)}
     <label className="flex items-center gap-2"><input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />Activa</label>
-    {error && <p role="alert" className="break-words text-sm">{error}</p>}
+    {error && <p role="alert" className="wrap-break-word text-sm">{error}</p>}
     <button className="btn btn-primary" disabled={busy || !form.photoUrl || !form.qrUrl} type="submit">{busy ? "Guardando…" : "Guardar cuenta"}</button>
   </form>;
 }

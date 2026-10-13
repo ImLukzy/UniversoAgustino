@@ -68,7 +68,7 @@ export function PhotoManager({
               >
                 <img src={u} alt={`Foto ${i + 1} del producto`} draggable={false} className="h-full w-full object-cover" />
                 {i === 0 && (
-                  <span className="absolute left-1 top-1 rounded bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                  <span className="absolute left-1 top-1 rounded-sm bg-black/65 px-1.5 py-0.5 text-[10px] font-bold text-white">
                     <motion.span layoutId="primaryPhotoBadge" className="inline-block">
                       Portada
                     </motion.span>

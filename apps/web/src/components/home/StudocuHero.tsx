@@ -47,7 +47,7 @@ export function StudocuHero({ onSearch }: { onSearch: (q: string) => void }) {
         transition={{ ...SPRING, delay: 0.1 }}
         className="mt-8 w-full max-w-2xl"
       >
-        <label className="searchbar h-16 px-6 md:h-[4.5rem]">
+        <label className="searchbar h-16 px-6 md:h-18">
           <span className="material-symbols-outlined text-2xl text-primary theme-transition" aria-hidden="true">search</span>
           <input
             type="search"
