@@ -15,7 +15,7 @@ app.use("/users", usersRouter); app.use(errorHandler);
 let base = ""; let server: ReturnType<typeof app.listen>;
 beforeAll(async () => { server = app.listen(0, "127.0.0.1"); await new Promise((r) => server.once("listening", r)); base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`; });
 afterAll(() => { server.close(); });
-const call = (method: string, path: string, body?: unknown) => fetch(base + path, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined }).then(async (r) => ({ status: r.status, json: await r.json() as { error?: { code: string } } }));
+const call = (method: string, path: string, body?: unknown) => fetch(base + path, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined }).then(async (r) => ({ status: r.status, json: await r.json() as { error?: { code: string; message?: string } } }));
 const as = (role: string) => { h.role.current = role; };
 beforeEach(() => {
   vi.resetAllMocks(); as("moderator");
@@ -25,9 +25,13 @@ beforeEach(() => {
 });
 describe("sanciones del equipo", () => {
   it("Trabajador advierte", async () => { expect((await call("POST", "/users/student/sanctions", { kind: "WARNING", reason: "Llegó tarde" })).status).toBe(201); expect(h.notify).toHaveBeenCalledWith(expect.objectContaining({ type: "SANCTION_APPLIED" })); });
-  it.each(["SUSPENSION", "BAN"])("Trabajador no aplica %s", async (kind) => {
-    const r = await call("POST", "/users/student/sanctions", { kind, reason: "Motivo claro", ...(kind === "SUSPENSION" ? { days: 5 } : {}) });
-    expect(r.status).toBe(403); expect(h.sanction.create).not.toHaveBeenCalled();
+  it("Trabajador suspende 7 días, pero BAN requiere Técnico", async () => {
+    const suspension = await call("POST", "/users/student/sanctions", { kind: "SUSPENSION", reason: "Motivo claro", days: 7 });
+    expect(suspension.status).toBe(201); expect(h.sanction.create).toHaveBeenCalledWith({ data: expect.objectContaining({ kind: "SUSPENSION" }) });
+    expect(h.sanction.create.mock.calls[0]?.[0].data.endsAt).toBeInstanceOf(Date);
+    const ban = await call("POST", "/users/student/sanctions", { kind: "BAN", reason: "Fraude comprobado" });
+    expect(ban.status).toBe(403); expect(ban.json.error?.code).toBe("FORBIDDEN");
+    expect(ban.json.error?.message).toBe("Solo el Técnico aplica bloqueos");
   });
   it("Técnico aplica BAN y SUSPENSION con auditoría", async () => {
     as("admin");

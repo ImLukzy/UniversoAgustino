@@ -29,9 +29,16 @@ export const REPORT_STATUS_LABEL: Record<string, string> = {
 export const CreateReportSchema = z.object({
   targetType: z.enum(["document", "bazar", "user", "order"]),
   targetId: z.string().min(1),
+  category: z.enum(["NO_SHOW", "NO_PRODUCT", "NOT_AS_DESCRIBED", "OTHER"]).optional(),
   reason: z.string().min(10).max(2000),
 });
 export type CreateReportInput = z.infer<typeof CreateReportSchema>;
+
+export const ReportActionSchema = z.object({
+  decision: z.enum(["ACTIONED", "DISMISSED"]),
+  reason: z.string().trim().min(10).max(500).optional(),
+});
+export type ReportActionInput = z.infer<typeof ReportActionSchema>;
 
 export const RemoveListingSchema = z.object({ reason: z.string().trim().min(10).max(500) });
 export type RemoveListingInput = z.infer<typeof RemoveListingSchema>;

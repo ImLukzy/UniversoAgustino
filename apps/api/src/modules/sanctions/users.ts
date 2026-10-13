@@ -53,7 +53,7 @@ usersRouter.post("/:id/reviews", asyncHandler(async (req: AuthedRequest, res) =>
 }));
 usersRouter.post("/:id/sanctions", asyncHandler(async (req: AuthedRequest, res) => {
   const role = await roleOf(req.user!.sub), input = SanctionInputSchema.parse(req.body), subject = await target(String(req.params.id));
-  if (!canApplySanction(role, input.kind)) scheduleFail("FORBIDDEN", "Solo el Técnico aplica suspensiones y bloqueos", 403);
+  if (!canApplySanction(role, input.kind)) scheduleFail("FORBIDDEN", "Solo el Técnico aplica bloqueos", 403);
   const now = new Date(), endsAt = input.days ? new Date(now.getTime() + input.days * DAY_MS) : null;
   const row = await prisma.$transaction(async (tx) => {
     if (input.kind !== "WARNING") {

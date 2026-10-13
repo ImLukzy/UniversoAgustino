@@ -3,9 +3,9 @@ import { SanctionInputSchema, ReviewInputSchema, canApplySanction, isBlocking, s
 
 describe("sanciones", () => {
   it("3 faltas activan la suspensión", () => { expect(shouldAutoSuspend(2)).toBe(false); expect(shouldAutoSuspend(3)).toBe(true); });
-  it("el Trabajador solo advierte", () => {
+  it("el Trabajador advierte o suspende; el bloqueo es del Técnico", () => {
     expect(canApplySanction("moderator", "WARNING")).toBe(true);
-    expect(canApplySanction("moderator", "SUSPENSION")).toBe(false);
+    expect(canApplySanction("moderator", "SUSPENSION")).toBe(true);
     expect(canApplySanction("moderator", "BAN")).toBe(false);
     expect(canApplySanction("admin", "BAN")).toBe(true);
     expect(canApplySanction("student", "WARNING")).toBe(false);

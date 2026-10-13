@@ -21,7 +21,7 @@ export const LiftSchema = z.object({ reason: z.string().trim().min(5).max(300) }
 
 // 3 faltas vigentes dentro de 90 días activan la suspensión automática.
 export const shouldAutoSuspend = (activeStrikes: number) => activeStrikes >= STRIKE_LIMIT;
-// Trabajador (moderator) solo advierte; Técnico (admin) aplica todo.
-export const canApplySanction = (role: string, kind: SanctionKind) => role === "admin" || (role === "moderator" && kind === "WARNING");
+// Trabajador puede advertir o suspender hasta 30 días; solo Técnico bloquea.
+export const canApplySanction = (role: string, kind: SanctionKind) => role === "admin" || (role === "moderator" && kind !== "BAN");
 export const isBlocking = (s: { kind: SanctionKind; liftedAt: Date | string | null; endsAt: Date | string | null }, now = new Date()) =>
   s.kind !== "WARNING" && !s.liftedAt && (!s.endsAt || new Date(s.endsAt) > now);
