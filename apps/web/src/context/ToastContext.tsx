@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { createContext, lazy, Suspense, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 // Sistema liviano de toasts (Sprint 3): éxito / error / info, apilables,
@@ -26,6 +26,7 @@ let seq = 1;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
+  const [hasShownToast, setHasShownToast] = useState(false);
   const timers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
 
   const dismiss = useCallback((id: number) => {
@@ -41,6 +42,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (t: Omit<ToastItem, "id">) => {
       const id = seq++;
       const durationMs = t.durationMs ?? (t.tone === "error" ? 0 : 5000);
+      setHasShownToast(true);
       setItems((cur) => [...cur.slice(-2), { ...t, id, durationMs }]);
       if (durationMs > 0) {
         timers.current.set(
@@ -67,7 +69,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={api}>
       {children}
-      <ToastViewport items={items} onDismiss={dismiss} />
+      <ToastViewport activated={hasShownToast} items={items} onDismiss={dismiss} />
     </Ctx.Provider>
   );
 }
@@ -79,8 +81,9 @@ export function useToast(): ToastCtx {
 }
 
 // Viewport separado para no re-renderizar consumidores al apilar.
-import { ToastStack } from "../components/Toast";
+const ToastStack = lazy(() => import("../components/Toast").then((module) => ({ default: module.ToastStack })));
 
-function ToastViewport({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: number) => void }) {
-  return <ToastStack items={items} onDismiss={onDismiss} />;
+function ToastViewport({ activated, items, onDismiss }: { activated: boolean; items: ToastItem[]; onDismiss: (id: number) => void }) {
+  if (!activated) return null;
+  return <Suspense fallback={null}><ToastStack items={items} onDismiss={onDismiss} /></Suspense>;
 }

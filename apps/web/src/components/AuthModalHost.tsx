@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { API_BASE } from "../lib/api";
 import { ROUTES } from "../lib/routes";
 import { OAuthButtons, type OAuthStatus } from "./auth/OAuthButtons";
-import { EmailCodeLogin } from "./auth/EmailCodeLogin";
+const EmailCodeLogin = lazy(() => import("./auth/EmailCodeLogin").then((module) => ({ default: module.EmailCodeLogin })));
 
 const Modal = lazy(() => import("./ui/Modal").then((module) => ({ default: module.Modal })));
 
@@ -44,7 +44,7 @@ export function AuthModalHost({ children }: { children: ReactNode }) {
         <div className="my-4 flex items-center gap-3 text-xs font-semibold uppercase text-zinc-400" aria-hidden="true">
           <span className="h-px flex-1 bg-zinc-200" />o<span className="h-px flex-1 bg-zinc-200" />
         </div>
-        <EmailCodeLogin onDone={close} />
+        <Suspense fallback={<p role="status" className="py-3 text-center text-sm text-zinc-500">Cargando acceso por correo…</p>}><EmailCodeLogin onDone={close} /></Suspense>
         <p className="mt-4 flex items-start gap-2 rounded-xl border-2 border-zinc-900 bg-primary-soft p-3 text-xs text-zinc-700">
           <span className="material-symbols-outlined text-base text-primary" aria-hidden="true">verified_user</span>
           <span>

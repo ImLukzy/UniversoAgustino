@@ -74,6 +74,8 @@ button:active { transform: scale(0.95); }
 .drawer-backdrop { animation: backdrop-enter 180ms ease-out both; }
 .drawer-enter { animation: drawer-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 .market-enter { animation: market-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.empty-state-enter { animation: empty-state-enter 400ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.sidebar-active { animation: sidebar-active 400ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 @keyframes hero-enter {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -85,8 +87,13 @@ button:active { transform: scale(0.95); }
 @keyframes backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
 @keyframes drawer-enter { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 @keyframes market-enter { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes empty-state-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sidebar-active {
+  from { background-color: transparent; }
+  to { background-color: rgb(var(--hub-p-soft)); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .hero-enter, .card-enter, .drawer-backdrop, .drawer-enter, .market-enter { animation: none; }
+  .hero-enter, .card-enter, .drawer-backdrop, .drawer-enter, .market-enter, .empty-state-enter, .sidebar-active { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
 }
 /* Publicar: anillo de foco con el accent de la carrera SELECCIONADA
