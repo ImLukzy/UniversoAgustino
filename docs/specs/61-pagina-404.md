@@ -39,11 +39,17 @@
 | A5 | Tamaño | `wc -l` de los archivos nuevos | < 150 |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: `NotFound.tsx` + test.
-- [ ] Tarea 2: ruta comodín en `AppRoutes.tsx`.
-- [ ] Tarea 3: E2E en `landing.mjs` e iconos si hace falta.
-- [ ] Tarea 4: A1–A5.
+- [x] Tarea 1: `NotFound.tsx` + test.
+- [x] Tarea 2: ruta comodín en `AppRoutes.tsx`.
+- [x] Tarea 3: E2E en `landing.mjs` e iconos si hace falta.
+- [x] Tarea 4: A1–A5.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1 | ✅ | `npm run verify` en verde (Michael bdd40f8 y Claudio tras integrar) |
+| 2026-10-13 | A2 | ✅ | `apps/web/src/app/NotFound.test.tsx`: h1, textos exactos, `href="/"` y `href="/explorar"` |
+| 2026-10-13 | A3 | ✅ | `npm run e2e:ci`: `landing.mjs` comprueba `/esta-ruta-no-existe` a 1440 y 375 px (h1, sin scroll horizontal, axe 0); 7 suites ✓. Capturas `/tmp/spec61-notfound-{1440,375}.png` |
+| 2026-10-13 | A4 | ✅ | Rutas existentes intactas (E2E completa); `/panel/*` sin cambios (TeamPanel no se tocó) |
+| 2026-10-13 | A5 | ✅ | `NotFound.tsx` 35 líneas; `EmptyState` acepta `titleAs` (por defecto `p`, sin cambios para el resto de usos) |
+| 2026-10-13 | Revisión | ✅ | Cambio de UI sin lógica: revisado por Claudio (práctica acordada), sin auditoría de Kelly |
