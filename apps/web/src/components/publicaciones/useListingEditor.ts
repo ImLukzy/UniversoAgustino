@@ -9,6 +9,9 @@ export function useListingEditor(endpoint: string, listKey: string, onDone: () =
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [confirming, setConfirming] = useState(false);
+  const [confirmingPause, setConfirmingPause] = useState(false);
+  const id = endpoint.slice(endpoint.lastIndexOf("/") + 1);
+  const pausedAt = qc.getQueryData<{ id: string; pausedAt?: string | null }[]>([listKey])?.find((row) => row.id === id)?.pausedAt ?? null;
 
   const run = async (op: () => Promise<unknown>) => {
     setBusy(true);
@@ -22,6 +25,7 @@ export function useListingEditor(endpoint: string, listKey: string, onDone: () =
     } finally {
       setBusy(false);
       setConfirming(false);
+      setConfirmingPause(false);
     }
   };
 
@@ -29,9 +33,15 @@ export function useListingEditor(endpoint: string, listKey: string, onDone: () =
     busy,
     msg,
     confirming,
+    confirmingPause,
+    pausedAt,
     askDelete: () => setConfirming(true),
     cancelDelete: () => !busy && setConfirming(false),
+    askPause: () => setConfirmingPause(true),
+    cancelPause: () => !busy && setConfirmingPause(false),
     save: (body: Record<string, unknown>) => run(() => api.patch(endpoint, body)),
     remove: () => run(() => api.delete(endpoint)),
+    pause: () => { setConfirmingPause(false); return run(() => api.post(`${endpoint}/pause`)); },
+    resume: () => run(() => api.post(`${endpoint}/resume`)),
   };
 }

@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
 import { pen } from "../../lib/api";
 import { careerLabel } from "../../data/unsa";
 import { CareerAvatar } from "../CareerVisual";
 import { todayLocal, type Detail } from "./useDetail";
+import { ROUTES } from "../../lib/routes";
 
 // Panel de compra: vendedor, precio con desglose real, cobro, fechas de alquiler y CTA.
 export function BuyPanel({ d }: { d: Detail }) {
@@ -12,6 +14,7 @@ export function BuyPanel({ d }: { d: Detail }) {
     <aside className="flex flex-col gap-4">
       <div className="card flex flex-col gap-4 p-6">
         <h1 className="h-display text-2xl">{d.src?.title}</h1>
+        {d.pausedForViewer && <p role="status" className="chip w-fit">Pausada por su autor</p>}
         <div className="flex items-center gap-3">
           <CareerAvatar name={p?.fullName ?? "?"} className="h-11 w-11" />
           <div className="text-sm">
@@ -42,7 +45,9 @@ export function BuyPanel({ d }: { d: Detail }) {
           </div>
         )}
         <p role="alert" className="min-h-[1rem] text-sm font-bold text-[#b91c1c]">{d.err}</p>
-        <button type="button" disabled={!d.available || d.busy} onClick={d.buy} className="btn btn-primary btn-lg w-full">{cta}</button>
+        {d.fullAccess && d.doc
+          ? <Link to={ROUTES.document(d.doc.id)} className="btn btn-secondary btn-lg w-full">Abrir documento</Link>
+          : !d.pausedForViewer && <button type="button" disabled={!d.available || d.busy} onClick={d.buy} className="btn btn-primary btn-lg w-full">{cta}</button>}
         <p className="text-center text-xs text-zinc-500">El equipo verifica el pago y liquida al vendedor en 24–48 h.</p>
       </div>
       <ul className="card-dashed flex flex-col gap-2 p-5 text-sm text-zinc-700">

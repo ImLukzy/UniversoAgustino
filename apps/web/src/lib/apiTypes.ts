@@ -28,6 +28,8 @@ export interface HubDocument {
   fileType?: "pdf" | "image" | null;
   previewPages?: number[];
   status: string;
+  pausedAt?: string | null;
+  paused?: boolean;
   reviewStatus?: ReviewStatus;
   reviewNote?: string | null;
   payMethod?: PayMethod | null;
@@ -47,6 +49,8 @@ export interface HubBazarItem {
   description?: string | null;
   photos?: string[] | null;
   status: string;
+  pausedAt?: string | null;
+  paused?: boolean;
   reviewStatus?: ReviewStatus;
   reviewNote?: string | null;
   payMethod?: PayMethod | null;
