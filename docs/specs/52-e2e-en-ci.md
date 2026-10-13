@@ -37,11 +37,11 @@
 ## 6. Checklist de ejecución
 - [x] Tarea 1: guard del seed + `e2e-ci.mjs` + script npm + README.
 - [x] Tarea 2: job `e2e` en `ci.yml`.
-- [ ] Tarea 3: verificar A1–A4 y anotar en §7.
+- [x] Tarea 3: verificar A1–A4 y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
 | 2026-10-13 | A1–A3 | OK: verify ✓; guard: ep-hidden-dew y localhost sin CI abortan, localhost con CI pasa; `CI=true npm run e2e:ci` local ✓ (45/46) | Dwight c87c7a4 |
 | 2026-10-13 | Auditoría | IMPORTANTE: guard por subcadena de la URL → corregido para decidir por hostname (1af390e), casos trampa abortan; revisado por Claudio | Kelly + Dwight |
-| 2026-10-13 | A4 | pendiente: primer job `e2e` en GitHub tras el push | — |
+| 2026-10-13 | A4 | OK: job `e2e` en verde en 1m44s (specs 45, 46, pagos y reembolso ✓) y el gate lo exige | GitHub Actions, commit cdd4158 |
