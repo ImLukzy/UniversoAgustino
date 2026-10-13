@@ -51,6 +51,43 @@ jobs:
       - run: npx prisma generate --schema apps/api/prisma/schema.prisma
       - run: npm run test --workspaces --if-present
 
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: hub
+          POSTGRES_PASSWORD: hub123
+          POSTGRES_DB: test_hub
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U hub"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      CI: "true"
+      DATABASE_URL: postgresql://hub:hub123@localhost:5433/test_hub?schema=public
+      JWT_ACCESS_SECRET: ci-only-fictitious-access-key-for-tests
+      JWT_REFRESH_SECRET: ci-only-fictitious-refresh-key-for-tests
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - run: npm run build -w packages/shared
+      - run: npx prisma generate --schema apps/api/prisma/schema.prisma
+      - run: npx playwright install --with-deps chromium
+      - name: Set Chromium path
+        run: echo "E2E_CHROME=$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
+      - run: npm run e2e:ci
+      - uses: actions/upload-artifact@v7.0.1
+        if: failure()
+        with:
+          name: e2e-api-log
+          path: ${{ runner.temp }}/ua-e2e-ci/api.log
+          if-no-files-found: ignore
+
   secrets:
     runs-on: ubuntu-24.04
     steps:
@@ -79,6 +116,6 @@ jobs:
 
   gate:
     runs-on: ubuntu-24.04
-    needs: [typecheck, lint, test, secrets, docs, budgets]
+    needs: [typecheck, lint, test, e2e, secrets, docs, budgets]
     steps:
       - run: echo "CI verde"

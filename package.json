@@ -25,6 +25,7 @@
     "verify": "node scripts/verify.mjs",
     "qa:seed": "node scripts/qa-seed.mjs",
     "e2e": "node tests/e2e/run.mjs",
+    "e2e:ci": "node scripts/e2e-ci.mjs",
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "prisma:generate": "npm run prisma:generate -w apps/api",

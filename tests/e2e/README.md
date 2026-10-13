@@ -27,3 +27,24 @@ El seed aborta si la URL no identifica `ep-orange-mountain` o identifica
 `ep-hidden-dew`. Los tests solo modifican registros de los usuarios QA y restauran
 la publicación, los reportes y las sanciones en `finally`. No ejecutes estas
 pruebas contra una base compartida o de producción.
+
+## CI y reproducción local
+
+GitHub Actions crea un Postgres 16 efímero, instala Chromium y ejecuta
+`npm run e2e:ci`; el gate espera ese job y adjunta `api.log` si falla. El script
+migra el esquema, carga fixtures, compila API/web, espera la disponibilidad de
+ambos servidores, ejecuta los casos y apaga los procesos aunque falle un paso.
+
+Para reproducir el job localmente, inicia un Postgres 16 aislado en un puerto
+libre y exporta una URL con host `localhost` o `127.0.0.1`, por ejemplo:
+
+```sh
+docker run --rm --name ua-e2e-postgres -e POSTGRES_USER=hub -e POSTGRES_PASSWORD=hub123 \
+  -e POSTGRES_DB=test_hub -p 5433:5432 -d postgres:16
+CI=true DATABASE_URL='postgresql://hub:hub123@localhost:5433/test_hub?schema=public' npm run e2e:ci
+docker stop ua-e2e-postgres
+```
+
+El seed y `e2e:ci` rechazan siempre `ep-hidden-dew`. Para permitir una base local
+fuera de CI se puede usar `QA_SEED_ALLOW_LOCAL=1`; esa excepción es solo para
+`localhost` o `127.0.0.1`.
