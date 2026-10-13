@@ -31,7 +31,7 @@ export function AuthCallback() {
     const error = params.get("error");
     if (!code) {
       toast.error(ERROR_MSG[error ?? ""] ?? "No se pudo completar el ingreso con Google o Apple.");
-      nav(ROUTES.home, { replace: true });
+      void nav(ROUTES.home, { replace: true });
       return;
     }
     api
@@ -39,12 +39,12 @@ export function AuthCallback() {
       .then(async (r) => {
         setAccessToken(String(r.data?.data?.access ?? ""));
         await refreshMe();
-        nav(takeReturnTo() ?? ROUTES.home, { replace: true });
+        void nav(takeReturnTo() ?? ROUTES.home, { replace: true });
       })
       .catch(() => {
         setMsg("No se pudo completar el ingreso.");
         toast.error("No se pudo completar el ingreso con Google o Apple.");
-        nav(ROUTES.home, { replace: true });
+        void nav(ROUTES.home, { replace: true });
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

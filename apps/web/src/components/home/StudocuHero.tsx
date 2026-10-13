@@ -40,7 +40,7 @@ export function StudocuHero({ onSearch }: { onSearch: (q: string) => void }) {
         onSubmit={(e) => {
           e.preventDefault();
           const t = value.trim();
-          nav(t ? `${ROUTES.explore}?q=${encodeURIComponent(t)}` : ROUTES.explore);
+          void nav(t ? `${ROUTES.explore}?q=${encodeURIComponent(t)}` : ROUTES.explore);
         }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

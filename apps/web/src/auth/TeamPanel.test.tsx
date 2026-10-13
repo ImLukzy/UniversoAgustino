@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router-dom";
 import { TeamPanel } from "../pages/TeamPanel";
 const auth = vi.hoisted(() => ({ user: null as null | { id: string; role: string }, loading: false }));
 vi.mock("./AuthContext", () => ({ useAuth: () => auth }));

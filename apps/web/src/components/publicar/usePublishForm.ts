@@ -84,7 +84,7 @@ export function usePublishForm() {
       throw new Error(partialMessage(published, total, apiError(e)));
     }
     toast.success(`${total} apuntes publicados`, "Ya están en el catálogo con el mismo precio y cobro.");
-    nav(ROUTES.myBazar);
+    void nav(ROUTES.myBazar);
   };
 
   const submit = async () => {
@@ -102,7 +102,7 @@ export function usePublishForm() {
         const deposit = f.tx === "ALQUILER" && f.deposit ? Math.round(Number(f.deposit) * 100) : undefined;
         const description = [f.description.trim(), `Entrega: ${f.campus}`].filter(Boolean).join(" ");
         const r = await api.post("/bazar", { title: f.title.trim(), kind: f.kind, tx: f.tx, priceCents: quote.amountCents, depositCents: deposit, description, photos, ...pay });
-        nav(ROUTES.bazarItem(r.data.data.id));
+        void nav(ROUTES.bazarItem(r.data.data.id));
       }
     } catch (e) {
       setErr(apiError(e));

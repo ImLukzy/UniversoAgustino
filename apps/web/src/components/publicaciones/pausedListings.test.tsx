@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router-dom";
 import { ListingRow } from "./ListingRow";
 import { EditorActions } from "./EditorActions";
 import type { useListingEditor } from "./useListingEditor";

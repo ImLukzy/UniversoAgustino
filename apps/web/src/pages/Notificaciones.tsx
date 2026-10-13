@@ -28,7 +28,7 @@ export function Notificaciones() {
   const markAll = useMutation({ mutationFn: () => api.post("/notifications/read-all"), onSuccess: refresh });
   const markOne = useMutation({
     mutationFn: async (n: HubNotification) => { if (!n.readAt) await api.post(`/notifications/${n.id}/read`); return n; },
-    onSuccess: (n) => { void refresh(); if (n.link?.startsWith("/") && !n.link.startsWith("//")) nav(n.link); },
+    onSuccess: (n) => { void refresh(); if (n.link?.startsWith("/") && !n.link.startsWith("//")) void nav(n.link); },
   });
   if (!user) return <AppLayout><LoginRequired what="ver tus avisos" /></AppLayout>;
   const rows = notifs.data?.pages.flatMap((p) => p.data) ?? [];

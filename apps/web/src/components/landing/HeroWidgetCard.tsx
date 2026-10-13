@@ -21,7 +21,7 @@ export function HeroWidgetCard({ withSession }: { withSession?: boolean } = {}) 
   const explore = (term: string) => nav(term ? `${ROUTES.explore}?q=${encodeURIComponent(term)}` : ROUTES.explore);
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    explore(q.trim());
+    void explore(q.trim());
   };
   // Subir requiere cuenta: abre el registro.
   const drop = (e: DragEvent) => {

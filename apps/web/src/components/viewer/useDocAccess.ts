@@ -70,7 +70,7 @@ export function useDocAccess(id: string | undefined) {
     setError("");
     try {
       const r = await api.post("/orders", { itemType: "document", itemId: id });
-      nav(ROUTES.checkout(r.data.data.id));
+      void nav(ROUTES.checkout(r.data.data.id));
     } catch (e) {
       setError(apiError(e));
     } finally {

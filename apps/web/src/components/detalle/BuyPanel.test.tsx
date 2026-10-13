@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router-dom";
 import { BuyPanel } from "./BuyPanel";
 import { DetailMedia } from "./DetailMedia";
 import type { Detail } from "./useDetail";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router-dom";
 import { ReportCard, type ReportEntry } from "./ReportCard";
 import { SanctionForm } from "./SanctionForm";
 
@@ -17,7 +17,8 @@ describe("contexto de denuncias", () => {
     expect(html).toContain("Ana Compradora");
     expect(html).toContain("Luis Vendedor");
     expect(html).toContain("luis@unsa.edu.pe");
-    expect(html).toContain('<a class="font-bold text-primary-ink underline" href="/p/bazar/listing-1">Calculadora científica</a>');
+    expect(html).toContain('href="/p/bazar/listing-1"');
+    expect(html).toContain("Calculadora científica</a>");
     expect(html).toContain("Retirar publicación");
   });
 

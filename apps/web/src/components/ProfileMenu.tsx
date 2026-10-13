@@ -48,7 +48,7 @@ export function ProfileMenu() {
   const out = async () => {
     setOpen(false);
     await logout();
-    nav(ROUTES.home);
+    void nav(ROUTES.home);
   };
 
   const itemCls =

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { HubOrder } from "../../lib/api";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router-dom";
 import { BuyerOrderRow } from "./BuyerOrderRow";
 import { ReportSellerForm } from "./ReportSellerForm";
 

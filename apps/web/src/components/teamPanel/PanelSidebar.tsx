@@ -10,7 +10,7 @@ export function PanelSidebar({ close }: { close?: () => void }) {
   const name = user?.profile?.fullName?.trim() || user?.email || "Equipo";
   const out = async () => {
     setBusy(true); setError("");
-    try { await logout(); close?.(); navigate(ROUTES.home, { replace: true }); }
+    try { await logout(); close?.(); void navigate(ROUTES.home, { replace: true }); }
     catch (e) { setError(apiError(e)); } finally { setBusy(false); }
   };
   return <div className="flex h-full min-w-0 flex-col">

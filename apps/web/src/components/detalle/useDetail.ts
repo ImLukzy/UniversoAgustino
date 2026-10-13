@@ -61,7 +61,7 @@ export function useDetail(kind: "document" | "bazar", id: string | undefined) {
         body.rentalEnd = new Date(`${rental.end}T23:59:00`).toISOString();
       }
       const r = await api.post("/orders", body);
-      nav(ROUTES.checkout(r.data.data.id));
+      void nav(ROUTES.checkout(r.data.data.id));
     } catch (e) {
       setErr(apiError(e));
     } finally {

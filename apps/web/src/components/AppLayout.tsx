@@ -30,7 +30,7 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
   const search = (e: FormEvent) => {
     e.preventDefault();
     const term = q.trim();
-    nav(term ? `${ROUTES.explore}?q=${encodeURIComponent(term)}` : ROUTES.explore);
+    void nav(term ? `${ROUTES.explore}?q=${encodeURIComponent(term)}` : ROUTES.explore);
   };
 
   return (

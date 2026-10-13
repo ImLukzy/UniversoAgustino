@@ -50,7 +50,7 @@ function LoginOpener({ tab = "login" }: { tab?: "login" | "register" }) {
   const next = safeReturnPath(params.get("next"));
   useEffect(() => {
     (tab === "register" ? openRegister : openAuth)();
-    navigate(next ?? ROUTES.home, { replace: true });
+    void navigate(next ?? ROUTES.home, { replace: true });
   }, [openAuth, openRegister, navigate, next, tab]);
   return null;
 }

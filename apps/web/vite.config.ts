@@ -15,7 +15,7 @@ export default defineConfig({
       output: {
         codeSplitting: {
           groups: [
-            { name: "vendor-react", test: /node_modules\/(?:react|react-dom|react-router-dom)\// },
+            { name: "vendor-react", test: /node_modules\/(?:react|react-dom|react-router-dom|react-router)\// },
             { name: "vendor-query", test: /node_modules\/@tanstack\/react-query\// },
             { name: "vendor-pdf", test: /node_modules\/pdfjs-dist\//, includeDependenciesRecursively: false },
           ],

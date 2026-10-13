@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router-dom";
 import { ProfileMenu } from "../components/ProfileMenu";
 const auth = vi.hoisted(() => ({ user: { id: "u", email: "staff@unsa.edu.pe", role: "admin", profile: null } }));
 vi.mock("./AuthContext", () => ({ useAuth: () => ({ ...auth, logout: vi.fn() }) }));

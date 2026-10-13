@@ -21,7 +21,7 @@ export function Bienvenida() {
 
   const done = async () => {
     await refreshMe();
-    nav(next, { replace: true });
+    void nav(next, { replace: true });
   };
 
   return (
