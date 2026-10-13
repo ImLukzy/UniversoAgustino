@@ -17,7 +17,7 @@ export function registerListing(router: Router) {
         course: ListQuerySchema.shape.course.optional(),
         type: DocumentTypeSchema.optional(),
       }).parse(req.query);
-      const where: Prisma.DocumentWhereInput = { status: "PUBLISHED", reviewStatus: "APPROVED", university: "UNSA" };
+      const where: Prisma.DocumentWhereInput = { status: "PUBLISHED", reviewStatus: "APPROVED", university: "UNSA", pausedAt: null };
       if (q.university) where.university = q.university;
       if (q.career) where.career = q.career;
       if (q.type) where.type = q.type;
@@ -82,7 +82,7 @@ export function registerListing(router: Router) {
       ]);
       // Spec 15 (T7): sin acceso completo no se expone la ruta del archivo.
       const { fileUrl, ...rest } = doc;
-      const data = { ...rest, ...(fullAccess ? { fileUrl } : {}), fileType: fileKind(fileUrl), saved: saved > 0, fullAccess };
+      const data = { ...rest, ...(fullAccess ? { fileUrl } : {}), fileType: fileKind(fileUrl), saved: saved > 0, fullAccess, paused: doc.pausedAt !== null };
       res.json({ data });
     })
   );

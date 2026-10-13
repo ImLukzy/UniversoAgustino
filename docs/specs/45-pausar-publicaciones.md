@@ -64,12 +64,21 @@
 
 ## 6. Checklist de ejecución
 - [x] D1 y D2 aprobadas por el humano (2026-10-12).
-- [ ] Tarea 1: schema + migración fechada; aplicar en dev; regenerar cliente Prisma.
-- [ ] Tarea 2: `lib/pause.ts` + tests; rutas pause/resume en documentos y bazar.
-- [ ] Tarea 3: filtros de catálogo, `paused` en detalle, bloqueo en `POST /orders`; openapi.
+- [x] Tarea 1: schema + migración fechada; regenerar cliente Prisma (aplicación en dev a cargo del coordinador).
+- [x] Tarea 2: `lib/pause.ts` + tests; rutas pause/resume en documentos y bazar.
+- [x] Tarea 3 (API): filtros de catálogo, `paused` en detalle, bloqueo en `POST /orders`; openapi. UI pendiente.
 - [ ] Tarea 4: UI en `/publicaciones` (botón y etiqueta) y aviso en el detalle.
 - [ ] Tarea 5: verificar A1–A12 y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-12 | Tarea 1 (API) | OK; migración creada sin aplicarla a una BD y cliente Prisma regenerado | `apps/api/prisma/schema.prisma`; `apps/api/prisma/migrations/20261012000000_pause_listings/migration.sql`; `cd apps/api && ../../node_modules/.bin/prisma generate --schema prisma/schema.prisma` |
+| 2026-10-12 | Tarea 2 (API) | OK; permisos exclusivos del dueño, conflictos de pedidos activos, idempotencia, auditoría y reactivación sin alterar reviewStatus | `apps/api/src/lib/pause.test.ts`: 7 tests pasan; rutas POST de documentos y bazar |
+| 2026-10-12 | Tarea 3 (API) | OK; catálogo excluye pausados, detalle informa `paused` y los pedidos responden `LISTING_PAUSED` | `apps/api/src/modules/documents/listingPause.test.ts`; `apps/api/src/modules/bazar/physicalNotes.test.ts`; `apps/api/src/modules/orders/requests.test.ts`; `npm run docs:check` |
+| 2026-10-12 | A1 tipos | OK | `npm run typecheck` |
+| 2026-10-12 | A2 lint | OK | `npx eslint . --max-warnings=0 --ignore-pattern 'hive/**' --ignore-pattern 'roster-backups/**' --ignore-pattern 'worktrees/**'` |
+| 2026-10-12 | A3 tests API | OK; 603 tests en 61 archivos, 9 tests más que la línea base de 594; 0 omitidos | `JWT_ACCESS_SECRET=ci-only-fictitious-access-secret-32-chars-xx JWT_REFRESH_SECRET=ci-only-fictitious-refresh-secret-32-chars-x npm test -w apps/api` |
+| 2026-10-12 | A4 contrato API | OK; 112 rutas cubiertas | `npm run docs:check` |
+| 2026-10-12 | A5 tamaño | OK; todo `.ts` tocado tiene ≤150 líneas | `wc -l` sobre los `.ts` modificados y nuevos |
+| 2026-10-12 | Shared | OK | `npm run build -w packages/shared` |

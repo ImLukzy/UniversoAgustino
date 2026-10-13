@@ -7,7 +7,7 @@ export async function itemOwner(itemType: string, itemId: string) {
   if (itemType === "document") {
     const d = await prisma.document.findUniqueOrThrow({
       where: { id: itemId },
-      select: { authorId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true, status: true, reviewStatus: true },
+      select: { authorId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true, status: true, reviewStatus: true, pausedAt: true },
     });
     return {
       ownerId: d.authorId,
@@ -18,13 +18,14 @@ export async function itemOwner(itemType: string, itemId: string) {
       payDetail: d.payDetail,
       status: d.status as string,
       reviewStatus: d.reviewStatus,
+      pausedAt: d.pausedAt,
       tx: "VENTA",
       releaseStatus: null as "SOLD" | "RENTED" | null,
     };
   }
   const b = await prisma.bazarItem.findUniqueOrThrow({
     where: { id: itemId },
-    select: { sellerId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true, status: true, reviewStatus: true, tx: true },
+    select: { sellerId: true, title: true, priceCents: true, payMethod: true, payQrUrl: true, payDetail: true, status: true, reviewStatus: true, pausedAt: true, tx: true },
   });
   return {
     ownerId: b.sellerId,
@@ -35,6 +36,7 @@ export async function itemOwner(itemType: string, itemId: string) {
     payDetail: b.payDetail,
     status: b.status,
     reviewStatus: b.reviewStatus,
+    pausedAt: b.pausedAt,
     tx: b.tx,
     releaseStatus: (b.tx === "ALQUILER" ? "RENTED" : "SOLD") as "SOLD" | "RENTED",
   };

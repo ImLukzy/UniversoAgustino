@@ -11,5 +11,5 @@ beforeEach(() => { vi.clearAllMocks(); db.bazarItem.create.mockImplementation(as
 it("publica APUNTE físico pasando por moderación", async () => { const r = await accountRequest(bazarRouter, "POST", "/", "creator", { title: "Apunte físico", kind: "APUNTE", tx: "VENTA", priceCents: 1500, payMethod: "PLIN" }); expect(r.status).toBe(201); expect(r.body.data).toMatchObject({ kind: "APUNTE", sellerId: "seller", reviewStatus: "PENDING" }); });
 it("filtra APUNTE en servidor antes de paginar", async () => {
   const r = Router(); r.use((req, _res, next) => { req.query = { kind: "APUNTE", page: "2" }; next(); }); r.use(bazarRouter);
-  expect((await accountRequest(r, "GET", "/")).status).toBe(200); expect(db.bazarItem.findMany.mock.calls[0][0]).toMatchObject({ where: { kind: "APUNTE", status: "AVAILABLE", reviewStatus: "APPROVED" }, skip: 12, take: 12 });
+  expect((await accountRequest(r, "GET", "/")).status).toBe(200); expect(db.bazarItem.findMany.mock.calls[0][0]).toMatchObject({ where: { kind: "APUNTE", status: "AVAILABLE", reviewStatus: "APPROVED", pausedAt: null }, skip: 12, take: 12 });
 });

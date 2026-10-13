@@ -127,6 +127,7 @@ model Document {
   reviewedAt DateTime?
   reviewedById String?
   status      DocStatus @default(PUBLISHED)
+  pausedAt    DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   grants      DocumentAccessGrant[]
@@ -169,6 +170,7 @@ model BazarItem {
   reviewedAt DateTime?
   reviewedById String?
   status       BazarStatus @default(AVAILABLE)
+  pausedAt     DateTime?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 

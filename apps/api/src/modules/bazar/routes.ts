@@ -7,6 +7,7 @@ import { optionalAuth, requireAuth, type AuthedRequest } from "../../middleware/
 
 import { canViewReview, initialReview, resubmitReview } from "../../lib/moderation.js";
 import { assertNotSuspended } from "../sanctions/guard.js";
+import { bazarPauseHandler } from "./pause.js";
 
 export const bazarRouter = Router();
 
@@ -14,7 +15,7 @@ bazarRouter.get(
   "/",
   asyncHandler(async (req, res) => {
     const q = ListBazarQuerySchema.parse(req.query);
-    const where: Prisma.BazarItemWhereInput = { status: "AVAILABLE", reviewStatus: "APPROVED" };
+    const where: Prisma.BazarItemWhereInput = { status: "AVAILABLE", reviewStatus: "APPROVED", pausedAt: null };
     if (q.kind) where.kind = q.kind;
     if (q.tx) where.tx = q.tx;
     if (q.q) where.OR = [{ title: { contains: q.q, mode: "insensitive" } }, { kind: { contains: q.q, mode: "insensitive" } }];
@@ -37,6 +38,9 @@ bazarRouter.post(
   })
 );
 
+bazarRouter.post("/:id/pause", requireAuth, bazarPauseHandler(false));
+bazarRouter.post("/:id/resume", requireAuth, bazarPauseHandler(true));
+
 bazarRouter.get(
   "/mine",
   requireAuth,
@@ -53,7 +57,7 @@ bazarRouter.get(
     // Hardening: seller con select explícito (nunca passwordHash).
     const item = await prisma.bazarItem.findUnique({ where: { id: req.params.id }, include: { seller: { select: { id: true, profile: true } } } });
     if (!item || !canViewReview(item, item.sellerId, req.user)) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Ítem no existe" } });
-    res.json({ data: item });
+    res.json({ data: { ...item, paused: item.pausedAt !== null } });
   })
 );
 
