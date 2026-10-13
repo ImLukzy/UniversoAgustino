@@ -23,9 +23,15 @@ async function sessionFor(name) {
 }
 
 export async function checkIconFont(page) {
-  await page.goto(`${WEB}/explorar`);
-  const family = await page.locator(".material-symbols-outlined").first().evaluate((element) => globalThis.getComputedStyle(element).fontFamily);
-  check(family.includes("Material Symbols Outlined"), `familia de iconos incorrecta: ${family}`);
+  const browser = page.context().browser();
+  check(browser, "el navegador debe estar disponible para comprobar la fuente de iconos");
+  const context = await browser.newContext({ viewport: page.viewportSize() ?? undefined });
+  try {
+    const iconPage = await context.newPage();
+    await iconPage.goto(`${WEB}/explorar`);
+    const family = await iconPage.locator(".material-symbols-outlined").first().evaluate((element) => globalThis.getComputedStyle(element).fontFamily);
+    check(family.includes("Material Symbols Outlined"), `familia de iconos incorrecta: ${family}`);
+  } finally { await context.close(); }
 }
 export async function api(path, { token, method = "GET", body } = {}) {
   const response = await globalThis.fetch(`${API}${path}`, { method, headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
