@@ -65,13 +65,19 @@ Ambas se describen con comandos exactos y con la regla de que tocar producción 
 | A8 | Sin secretos | `npm run secrets` y revisión de la salida de A5–A7 | ninguna URL ni contraseña impresa |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: `scripts/lib/db-tools.mjs` + tests (A3).
-- [ ] Tarea 2: `scripts/db-backup.mjs`.
-- [ ] Tarea 3: `scripts/db-ensayo.mjs`.
-- [ ] Tarea 4: `package.json` (scripts y test).
-- [ ] Tarea 5: `docs/operaciones/base-de-datos.md` (copia → ensayo → publicar → verificar; restauración 1 y 2).
-- [ ] Tarea 6: A1–A4 en verde (implementador). A5–A8 los ejecuta el integrador con credenciales.
+- [x] Tarea 1: `scripts/lib/db-tools.mjs` + tests (A3).
+- [x] Tarea 2: `scripts/db-backup.mjs`.
+- [x] Tarea 3: `scripts/db-ensayo.mjs`.
+- [x] Tarea 4: `package.json` (scripts y test).
+- [x] Tarea 5: `docs/operaciones/base-de-datos.md` (copia → ensayo → publicar → verificar; restauración 1 y 2).
+- [x] Tarea 6: A1–A4 en verde (implementador). A5–A8 los ejecuta el integrador con credenciales.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1–A4 | ✅ | `npm run verify` en verde (Dwight 78ee2a1 y tras el fix ea1b110); 6 tests `node --test` en `scripts/lib/db-tools.test.mjs` |
+| 2026-10-13 | A5 | ✅ | `npm run db:backup -- --label prueba-spec53` → `prod-20261013-173215-prueba-spec53.dump` (600, en hive/backups); `BACKUP_DIR=./tmp-backups` rechazado sin crear nada |
+| 2026-10-13 | A6 | ✅ | 1.ª corrida falló: el proyecto tiene dos bases (`neondb`, `portafolio`) → fix ea1b110 (`--database-name`, `NEON_DATABASE`). Luego: rama creada, «up to date», recuentos User 7 / Document 1 / Order 2 / migs 32, rama borrada. Con migración pendiente de prueba: aplicada en la rama (33), prod intacta (32, sin tabla) |
+| 2026-10-13 | A7 | ✅ | PITR: rama desde hace 1 h = prod (User 7, Document 1, Order 2, RefreshToken 94, migs 32). `pg_restore` de la copia de 07:34 en base aislada de una rama Neon = copia (RefreshToken 90, migs 31). Ramas borradas; solo queda `production`. Guía corregida: `--parent "<instante>"` (no `production@…`) |
+| 2026-10-13 | A8 | ✅ | `npm run secrets` en verde; 0 URLs con contraseña en salidas de A5–A7 (grep) |
+| 2026-10-13 | Auditoría | ✅ | Kelly (task_7a2cf8eed66d): APROBADO, solo observaciones menores de usabilidad |
