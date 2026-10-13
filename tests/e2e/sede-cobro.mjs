@@ -1,4 +1,4 @@
-import { api, browserFor, check, login, withDatabase, WEB } from "./helper.mjs";
+import { api, browserFor, check, eventually, login, withDatabase, WEB } from "./helper.mjs";
 import { activateAppointment, book, expireAppointment, futureSlot, uploadProof } from "./sede-helpers.mjs";
 
 await withDatabase(async (db) => {
@@ -24,7 +24,7 @@ await withDatabase(async (db) => {
     await expireAppointment(db, first.id);
     check((await api(`/staff/cases/${caseId}/appointments/${first.id}/no-show`, { token: workerToken, method: "POST" })).status === 200, "equipo registra ausencia tras la cita");
     const strike = await db.strike.findUniqueOrThrow({ where: { appointmentId: first.id } });
-    check(await db.notification.count({ where: { userId: seller.id, type: "ORDER_APPOINTMENT_NO_SHOW", createdAt: { gte: started } } }) > 0, "ausencia notificada al vendedor");
+    await eventually(async () => await db.notification.count({ where: { userId: seller.id, type: "ORDER_APPOINTMENT_NO_SHOW", createdAt: { gte: started } } }) > 0, "ausencia notificada al vendedor");
     const replacementSlot = await futureSlot(workerToken, caseId, "DROP_OFF");
     const replacement = await book(workerToken, caseId, "DROP_OFF", replacementSlot, first.id);
     await activateAppointment(db, replacement.id);

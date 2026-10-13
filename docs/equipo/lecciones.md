@@ -26,3 +26,5 @@ Errores reales que ya nos costaron tiempo. Breve a propósito.
 - Commits a nombre de `ImLukzy <lukas.melgar@tecsup.edu.pe>`, sin menciones a IA ni `Co-Authored-By`.
 - No edites `docs/specs/NN` §6/§7 (lo hace el integrador) para evitar conflictos entre escritores.
 - Si te llega una aclaración a mitad de tarea, léela con `orca-ide orchestration check` antes del `worker_done`.
+
+- **E2E y efectos posteriores al commit (2026-10-13):** los avisos (`notify`) se crean después de confirmar la transacción del pedido. Esperar al pedido no garantiza que el aviso ya exista. Comprobar avisos u otros efectos asíncronos con `eventually()` de `tests/e2e/helper.mjs`, nunca con una consulta única. En el CI, más lento, falló `pagos-digital` por esto.

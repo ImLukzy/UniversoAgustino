@@ -1,5 +1,5 @@
 import process from "node:process";
-import { api, browserFor, check, login, withDatabase } from "./helper.mjs";
+import { api, browserFor, check, eventually, login, withDatabase } from "./helper.mjs";
 import { cleanupOrder, createOrder, proofFile, waitOrder } from "./paymentHelpers.mjs";
 
 await withDatabase(async (db) => {
@@ -33,8 +33,8 @@ await withDatabase(async (db) => {
     await row.getByRole("status").filter({ hasText: "Reporte enviado" }).waitFor();
     const frozen = await db.payout.findUniqueOrThrow({ where: { id: payout.id } });
     check(frozen.status === "FROZEN", "reclamo del comprador congela la liquidación");
-    check(await db.notification.count({ where: { userId: buyer.id, type: "PAYOUT_FROZEN", createdAt: { gte: started } } }) > 0, "notificación al comprador por reclamo congelado");
-    check(await db.notification.count({ where: { userId: seller.id, type: "PAYOUT_FROZEN", createdAt: { gte: started } } }) > 0, "notificación al vendedor por reclamo congelado");
+    await eventually(async () => await db.notification.count({ where: { userId: buyer.id, type: "PAYOUT_FROZEN", createdAt: { gte: started } } }) > 0, "notificación al comprador por reclamo congelado");
+    await eventually(async () => await db.notification.count({ where: { userId: seller.id, type: "PAYOUT_FROZEN", createdAt: { gte: started } } }) > 0, "notificación al vendedor por reclamo congelado");
     await adminSession.page.goto(`${process.env.E2E_WEB_URL}/panel/pagos-a-vendedores`);
     const frozenCard = adminSession.page.locator("article.card").filter({ hasText: doc.title });
     adminSession.page.on("dialog", (dialog) => void dialog.accept());
@@ -49,9 +49,9 @@ await withDatabase(async (db) => {
     check((await api(`/documents/${doc.id}/download`, { token: await login("est") })).status === 403, "descarga denegada después de revocar el acceso");
     const after = await api(`/staff/payouts/earnings?from=${encodeURIComponent(new Date(started.getTime() - 1000).toISOString())}&to=${encodeURIComponent(new Date(Date.now() + 86400000).toISOString())}`, { token: await login("mod") });
     check(after.data.verifiedCount === before.data.verifiedCount - 1 && after.data.commissionCents === before.data.commissionCents - payout.feeCents, "Ganancias excluye el reembolso");
-    check(await db.notification.count({ where: { userId: buyer.id, type: "ORDER_REFUNDED", createdAt: { gte: started } } }) > 0, "notificación de reembolso al comprador");
-    check(await db.notification.count({ where: { userId: seller.id, type: "ORDER_REFUNDED", createdAt: { gte: started } } }) > 0, "notificación de reembolso al vendedor");
-    check(await db.notification.count({ where: { userId: collector.id, type: "ORDER_REFUNDED", createdAt: { gte: started } } }) > 0, "notificación de reembolso al cobrador");
+    await eventually(async () => await db.notification.count({ where: { userId: buyer.id, type: "ORDER_REFUNDED", createdAt: { gte: started } } }) > 0, "notificación de reembolso al comprador");
+    await eventually(async () => await db.notification.count({ where: { userId: seller.id, type: "ORDER_REFUNDED", createdAt: { gte: started } } }) > 0, "notificación de reembolso al vendedor");
+    await eventually(async () => await db.notification.count({ where: { userId: collector.id, type: "ORDER_REFUNDED", createdAt: { gte: started } } }) > 0, "notificación de reembolso al cobrador");
     globalThis.console.log("✓ reembolso digital: reclamo congela, técnico devuelve, acceso revocado, Ganancias ajusta y avisos enviados");
   } finally {
     await Promise.all([buyerSession.browser.close(), modSession.browser.close(), adminSession.browser.close()]);

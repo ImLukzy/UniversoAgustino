@@ -7,6 +7,14 @@ export const API = process.env.E2E_API_URL || "http://localhost:4300/api/v1";
 export const WEB = process.env.E2E_WEB_URL || "http://localhost:4373";
 export const creds = (name) => ({ email: `qa-${name}@unsa.edu.pe`, password: process.env.QA_PASSWORD || "QaPrueba2026!" });
 export const check = (condition, message) => assert.ok(condition, message);
+// Los avisos se crean tras confirmar la transacción: reintenta hasta 10 s antes de fallar.
+export async function eventually(probe, message) {
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    if (await probe()) return;
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 200));
+  }
+  check(false, message);
+}
 const sessions = new Map();
 async function sessionFor(name) {
   if (!sessions.has(name)) sessions.set(name, (async () => {

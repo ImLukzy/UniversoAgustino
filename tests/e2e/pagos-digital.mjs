@@ -1,5 +1,5 @@
 import process from "node:process";
-import { api, browserFor, check, login, withDatabase } from "./helper.mjs";
+import { api, browserFor, check, eventually, login, withDatabase } from "./helper.mjs";
 import { cleanupOrder, createOrder, proofFile, waitOrder } from "./paymentHelpers.mjs";
 
 await withDatabase(async (db) => {
@@ -28,8 +28,7 @@ await withDatabase(async (db) => {
       await waitOrder(db, order.id, (row) => row.status === "PAID" && !!row.payProofUrl && row.paymentRejectedReason === null);
     };
     await submitProof();
-    const sent = await db.notification.findMany({ where: { createdAt: { gte: started }, type: "ORDER_PAID", body: { contains: doc.title } } });
-    check([buyer.id, seller.id, moderator.id].every((id) => sent.some((notice) => notice.userId === id)), "aviso de pago a comprador, vendedor y cobrador");
+    await eventually(async () => { const sent = await db.notification.findMany({ where: { createdAt: { gte: started }, type: "ORDER_PAID", body: { contains: doc.title } } }); return [buyer.id, seller.id, moderator.id].every((id) => sent.some((notice) => notice.userId === id)); }, "aviso de pago a comprador, vendedor y cobrador");
     await modSession.page.goto(`${process.env.E2E_WEB_URL}/panel/pagos-por-verificar`);
     const card = modSession.page.locator("article.card").filter({ hasText: doc.title });
     await card.getByText("Estudiante QA").waitFor(); await card.getByText("QA Cuenta").waitFor();
@@ -39,8 +38,7 @@ await withDatabase(async (db) => {
     await card.getByLabel(/Motivo para denegar/).fill(rejection);
     await card.getByRole("button", { name: "Denegar comprobante" }).click();
     await waitOrder(db, order.id, (row) => row.status === "PAID" && row.paymentRejectedReason === rejection);
-    const rejectedNotices = await db.notification.findMany({ where: { createdAt: { gte: started }, type: "PAYMENT_REJECTED", body: { contains: doc.title } } });
-    check([buyer.id, seller.id].every((id) => rejectedNotices.some((notice) => notice.userId === id)), "aviso de denegación a comprador y vendedor");
+    await eventually(async () => { const rejectedNotices = await db.notification.findMany({ where: { createdAt: { gte: started }, type: "PAYMENT_REJECTED", body: { contains: doc.title } } }); return [buyer.id, seller.id].every((id) => rejectedNotices.some((notice) => notice.userId === id)); }, "aviso de denegación a comprador y vendedor");
     await buyerSession.page.reload();
     await buyerSession.page.getByRole("alert").filter({ hasText: rejection }).waitFor();
     await submitProof();
@@ -51,9 +49,8 @@ await withDatabase(async (db) => {
     const payout = await waitOrder(db, order.id, (row) => row.status === "ESCROW").then(() => db.payout.findUniqueOrThrow({ where: { orderId: order.id } }));
     check(payout.status === "PENDING" && payout.feeCents === 195 && payout.netCents === 1305, "aceptar crea liquidación pendiente por el neto del 13%");
     check(await db.documentAccessGrant.count({ where: { orderId: order.id, revokedAt: null } }) === 1, "aceptar concede acceso permanente");
-    const verified = await db.notification.findMany({ where: { createdAt: { gte: started }, type: "PAYMENT_VERIFIED", body: { contains: doc.title } } });
-    check([buyer.id, seller.id].every((id) => verified.some((notice) => notice.userId === id)), "aviso de pago verificado a comprador y vendedor");
-    check(await db.notification.count({ where: { userId: seller.id, type: "PAYOUT_PENDING", body: { contains: doc.title }, createdAt: { gte: started } } }) > 0, "aviso de liquidación pendiente al vendedor");
+    await eventually(async () => { const verified = await db.notification.findMany({ where: { createdAt: { gte: started }, type: "PAYMENT_VERIFIED", body: { contains: doc.title } } }); return [buyer.id, seller.id].every((id) => verified.some((notice) => notice.userId === id)); }, "aviso de pago verificado a comprador y vendedor");
+    await eventually(async () => await db.notification.count({ where: { userId: seller.id, type: "PAYOUT_PENDING", body: { contains: doc.title }, createdAt: { gte: started } } }) > 0, "aviso de liquidación pendiente al vendedor");
     await buyerSession.page.goto(`${process.env.E2E_WEB_URL}/pedidos`);
     const buyerOrder = buyerSession.page.locator("article.card").filter({ hasText: doc.title });
     await buyerOrder.getByRole("button", { name: "Descargar" }).click();
@@ -74,8 +71,8 @@ await withDatabase(async (db) => {
     await sellerPayout.getByText("Comisión 13%", { exact: true }).waitFor();
     await sellerPayout.getByText("Neto recibido").waitFor(); await sellerPayout.getByText("Pagado", { exact: true }).waitFor();
     await sellerPayout.getByRole("img", { name: "Comprobante del pago recibido" }).waitFor();
-    check(await db.notification.count({ where: { userId: seller.id, type: "PAYOUT_COMPLETED", createdAt: { gte: started } } }) > 0, "aviso de liquidación pagada al vendedor");
-    check(await db.notification.count({ where: { userId: buyer.id, type: "ORDER_RELEASED", createdAt: { gte: started } } }) > 0, "aviso de liquidación completada al comprador");
+    await eventually(async () => await db.notification.count({ where: { userId: seller.id, type: "PAYOUT_COMPLETED", createdAt: { gte: started } } }) > 0, "aviso de liquidación pagada al vendedor");
+    await eventually(async () => await db.notification.count({ where: { userId: buyer.id, type: "ORDER_RELEASED", createdAt: { gte: started } } }) > 0, "aviso de liquidación completada al comprador");
     globalThis.console.log("✓ pagos digitales: denegación y reenvío, verificación, acceso, liquidación, Mis cobros y notificaciones");
   } finally {
     await Promise.all([buyerSession.browser.close(), modSession.browser.close(), sellerSession.browser.close()]);
