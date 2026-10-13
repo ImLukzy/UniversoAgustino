@@ -16,5 +16,6 @@ Reglas para cualquier agente (Codex, Antigravity/Gemini, OpenCode, Claude). **An
 - Nada a `main`, ningún push y ningún cambio en la base de datos de producción.
 - Nunca commitear `.env` ni secretos; no imprimir secretos.
 - Antes de reportar cambios, ejecutar `npm run verify` y confirmar que pasa.
+- Para E2E locales, carga solo fixtures QA con `npm run qa:seed` y ejecuta `npm run e2e`.
 - Responde en español. Reporte final: resumen de 3–5 líneas · archivos tocados · cómo verificarlo · dudas o riesgos · estado OK o BLOQUEADO.
 - Orca: si el comando `orca` falla en tu entorno, usa `/home/lukzy/.local/bin/orca-ide` con los mismos argumentos.
