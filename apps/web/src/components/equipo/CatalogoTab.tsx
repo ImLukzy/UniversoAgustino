@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, apiError, type StaffListing } from "../../lib/api";
+import { useDebounce } from "../../lib/useDebounce";
 import { useAuth } from "../../auth/AuthContext";
 import { PanelLoading } from "../teamPanel/PanelLoading";
 import { CatalogoRow } from "./CatalogoRow";
@@ -13,11 +14,12 @@ export function CatalogoTab() {
   const [type, setType] = useState<"" | "document" | "bazar">("");
   const [state, setState] = useState<"" | StaffListing["state"]>("");
   const [q, setQ] = useState("");
+  const appliedQ = useDebounce(q, 300);
   const [page, setPage] = useState(1);
   const [message, setMessage] = useState("");
   const qc = useQueryClient();
-  const query = useQuery({ queryKey: ["staff", "listings", type, state, q, page], enabled: user?.role === "admin" || user?.role === "moderator",
-    queryFn: async () => (await api.get("/staff/listings", { params: { type: type || undefined, state: state || undefined, q: q || undefined, page, pageSize: PAGE_SIZE } })).data as ListingPage });
+  const query = useQuery({ queryKey: ["staff", "listings", type, state, appliedQ, page], enabled: (user?.role === "admin" || user?.role === "moderator") && q === appliedQ,
+    queryFn: async () => (await api.get("/staff/listings", { params: { type: type || undefined, state: state || undefined, q: appliedQ.trim() || undefined, page, pageSize: PAGE_SIZE } })).data as ListingPage });
   const action = useMutation({ mutationFn: async ({ kind, item, reason }: { kind: "remove" | "restore"; item: StaffListing; reason?: string }) => {
     const path = `/staff/listings/${item.type}/${encodeURIComponent(item.id)}/${kind}`;
     return kind === "remove" ? api.post(path, { reason }) : api.post(path);
