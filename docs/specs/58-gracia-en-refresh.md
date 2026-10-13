@@ -34,9 +34,12 @@
 | A4 | E2E | `npm run e2e:ci` 3 veces | ✓ |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: schema + migración + lógica + tests + openapi.
-- [ ] Tarea 2: verificar A1–A4 y anotar en §7.
+- [x] Tarea 1: schema + migración + lógica + tests + openapi.
+- [x] Tarea 2: verificar A1–A4 y anotar en §7.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1/A2/A4 | OK: verify ✓; 5 tests nuevos de refresh (5 s ok, 31 s 401, logout 401, cambio de contraseña 401, concurrentes 200); `e2e:ci` ×3 ✓ | Dwight b99cac6 |
+| 2026-10-13 | A3 | OK: migración `refresh_grace` aplicada en BD dev (ep-orange-mountain); producción pendiente de OK humano | Claudio |
+| 2026-10-13 | Auditoría (seguridad) | OK. Riesgo residual IMPORTANTE aceptado por el integrador: cada uso dentro de la gracia emite una sesión nueva con TTL completo; requiere robar la cookie httpOnly+Secure dentro de 30 s y limitarlo a un solo uso rompería el caso de pestañas concurrentes | Kelly |
