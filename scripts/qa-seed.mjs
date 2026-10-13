@@ -24,17 +24,23 @@ const bcrypt = bcryptModule.default ?? bcryptModule;
 const db = new PrismaClient();
 const passwordHash = await bcrypt.hash(process.env.QA_PASSWORD || "QaPrueba2026!", 12);
 async function resetQaOrders(db, userIds) {
+  const fixtures = ["qa-e2e-document", "qa-e2e-pay-accepted", "qa-e2e-pay-refund", "qa-e2e-bazar"];
   const base = await db.order.findFirst({ where: { buyerId: userIds[0], itemType: "document", itemId: "qa-e2e-document" }, select: { id: true } });
-  const orders = await db.order.findMany({ where: { OR: [{ buyerId: { in: userIds } }, { sellerId: { in: userIds } }], ...(base ? { id: { not: base.id } } : {}) }, select: { id: true } });
+  const orders = await db.order.findMany({ where: { OR: [
+    { AND: [{ buyerId: { in: userIds } }, { sellerId: { in: userIds } }] }, { itemId: { startsWith: "qa-e2e-" } },
+  ], ...(base ? { id: { not: base.id } } : {}) }, select: { id: true } });
   const ids = orders.map((row) => row.id);
   if (!ids.length) return;
   const cases = await db.handoverCase.findMany({ where: { orderId: { in: ids } }, select: { id: true } });
   const caseIds = cases.map((row) => row.id);
   const appointments = caseIds.length ? await db.appointment.findMany({ where: { caseId: { in: caseIds } }, select: { id: true } }) : [];
   const appointmentIds = appointments.map((row) => row.id);
-  await db.report.deleteMany({ where: { OR: [{ targetType: "order", targetId: { in: ids } }, { reporterId: { in: userIds } }, { targetType: "user", targetId: { in: userIds } }] } });
-  await db.userReview.deleteMany({ where: { OR: [{ authorId: { in: userIds } }, { subjectId: { in: userIds } }, { caseId: { in: caseIds } }] } });
-  await db.auditLog.deleteMany({ where: { OR: [{ actorId: { in: userIds } }, { entityId: { in: [...ids, ...caseIds, ...appointmentIds] } }] } });
+  await db.report.deleteMany({ where: { OR: [
+    { reporterId: { in: userIds }, targetType: "user", targetId: { in: userIds } },
+    { targetType: "order", targetId: { in: ids } }, { targetType: { in: ["document", "bazar"] }, targetId: { in: fixtures } },
+  ] } });
+  await db.userReview.deleteMany({ where: { authorId: { in: userIds }, subjectId: { in: userIds } } });
+  await db.auditLog.deleteMany({ where: { entityId: { in: [...ids, ...caseIds, ...appointmentIds] } } });
   await db.notification.deleteMany({ where: { userId: { in: userIds } } });
   await db.sanction.deleteMany({ where: { userId: { in: userIds } } });
   await db.strike.deleteMany({ where: { userId: { in: userIds } } });
@@ -98,7 +104,7 @@ try {
   const accountData = { userId: users["qa-mod@unsa.edu.pe"].id, method: "YAPE", holder: "QA Cuenta", number: "900000000", photoUrl: "/uploads/qa-e2e-account.png", qrUrl: "/uploads/qa-e2e-account.png", active: true };
   if (account) await db.paymentAccount.update({ where: { id: account.id }, data: accountData });
   else await db.paymentAccount.create({ data: accountData });
-  const sede = await db.sede.upsert({ where: { id: "qa-e2e-sede" }, create: { id: "qa-e2e-sede", name: "QA Sede E2E", address: "Sede de pruebas", meetingPoint: "Punto QA" }, update: { name: "QA Sede E2E", address: "Sede de pruebas", meetingPoint: "Punto QA", active: true } });
+  const sede = await db.sede.upsert({ where: { id: "qa-e2e-sede" }, create: { id: "qa-e2e-sede", name: "QA E2E (pruebas, no usar)", address: "Sede de pruebas", meetingPoint: "Punto QA" }, update: { name: "QA E2E (pruebas, no usar)", address: "Sede de pruebas", meetingPoint: "Punto QA", active: true } });
   const defaults = [1, 2, 3, 4, 5].map((weekday) => ({ weekday, opens: 480, closes: 1080 })).concat([{ weekday: 6, opens: 480, closes: 780 }]);
   for (const hours of defaults) await db.openingHours.upsert({ where: { weekday: hours.weekday }, create: hours, update: {} });
   const openHours = await db.openingHours.findMany();

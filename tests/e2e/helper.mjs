@@ -7,21 +7,32 @@ export const API = process.env.E2E_API_URL || "http://localhost:4300/api/v1";
 export const WEB = process.env.E2E_WEB_URL || "http://localhost:4373";
 export const creds = (name) => ({ email: `qa-${name}@unsa.edu.pe`, password: process.env.QA_PASSWORD || "QaPrueba2026!" });
 export const check = (condition, message) => assert.ok(condition, message);
+const sessions = new Map();
+async function sessionFor(name) {
+  if (!sessions.has(name)) sessions.set(name, (async () => {
+    const browser = await chromium.launch({ headless: true, executablePath: process.env.E2E_CHROME || "/usr/bin/google-chrome-stable", args: ["--no-sandbox"] });
+    try {
+      const context = await browser.newContext();
+      const response = await context.request.post(`${API}/auth/login`, { data: creds(name) });
+      check(response.ok(), `cookie login QA ${name}: ${response.status()}`);
+      const result = await response.json();
+      return { access: result.data.access, storageState: await context.storageState() };
+    } finally { await browser.close(); }
+  })());
+  return sessions.get(name);
+}
 export async function api(path, { token, method = "GET", body } = {}) {
   const response = await globalThis.fetch(`${API}${path}`, { method, headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const data = await response.json().catch(() => ({}));
   return { status: response.status, data: data.data, error: data.error };
 }
 export async function login(name) {
-  const result = await api("/auth/login", { method: "POST", body: creds(name) });
-  check(result.status === 200, `login QA ${name}: ${result.status}`);
-  return result.data.access;
+  return (await sessionFor(name)).access;
 }
 export async function browserFor(name) {
+  const session = await sessionFor(name);
   const browser = await chromium.launch({ headless: true, executablePath: process.env.E2E_CHROME || "/usr/bin/google-chrome-stable", args: ["--no-sandbox"] });
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  const response = await context.request.post(`${API}/auth/login`, { data: creds(name) });
-  check(response.ok(), `cookie login QA ${name}: ${response.status()}`);
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, storageState: session.storageState });
   return { browser, context, page: await context.newPage() };
 }
 export async function audit(page) {
