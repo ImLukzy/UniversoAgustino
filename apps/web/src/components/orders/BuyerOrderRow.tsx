@@ -7,6 +7,7 @@ import { getOrderLabel } from "../../lib/orderLabels";
 import { ROUTES } from "../../lib/routes";
 import { SPRING } from "../../lib/motion";
 import { BuyerCaseView } from "./BuyerCaseView";
+import { ReportSellerForm } from "./ReportSellerForm";
 import { PrivateImage } from "../PrivateImage";
 import { DownloadButton } from "../DownloadButton";
 
@@ -24,6 +25,7 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
   const qc = useQueryClient();
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const isDoc = order.itemType === "document";
   const title = order.itemTitle?.trim() || `${order.itemType} · ${order.itemId.slice(0, 8)}…`;
   const itemHref = isDoc ? ROUTES.document(order.itemId) : ROUTES.bazarItem(order.itemId);
@@ -76,6 +78,7 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
             </>
           )}
           {order.status === "PAID" && <Link to={ROUTES.checkout(order.id)} className="btn btn-secondary btn-sm">Ver estado</Link>}
+          {order.status !== "PENDING" && order.status !== "CANCELLED" && <button type="button" className="btn btn-secondary btn-sm" aria-expanded={reportOpen} aria-controls={`report-seller-${order.id}`} onClick={() => setReportOpen((open) => !open)}>{reportOpen ? "Cerrar reporte" : "Reportar al vendedor"}</button>}
           {isDoc && (order.fileUrl || order.status === "ESCROW" || order.status === "RELEASED") && (order.fileUrl ? (
             <DownloadButton documentId={order.itemId} url={order.fileUrl} className="btn btn-dark btn-sm"><span className="material-symbols-outlined text-base">download</span>Descargar</DownloadButton>
           ) : (
@@ -83,6 +86,7 @@ export function BuyerOrderRow({ order }: { order: HubOrder }) {
           ))}
         </div>
       </div>
+      {reportOpen && order.status !== "PENDING" && order.status !== "CANCELLED" && <div id={`report-seller-${order.id}`}><ReportSellerForm orderId={order.id} /></div>}
       {order.status === "REFUNDED" && order.refund?.refundProofUrl && <div className="flex min-w-0 flex-col gap-2"><p className="text-sm">Reembolsado: {pen(order.amountCents)}</p><PrivateImage path={order.refund.refundProofUrl} alt="Comprobante de devolución al comprador" expandable />{order.refund.refundPaymentRef && <p className="break-all text-sm">Operación: {order.refund.refundPaymentRef}</p>}</div>}
       {!isDoc && order.status !== "PENDING" && <BuyerCaseView orderId={order.id} />}
     </article>
