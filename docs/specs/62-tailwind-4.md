@@ -60,12 +60,21 @@
 | A7 | Iconos y fuentes | `node scripts/subset-icons.mjs --check`; fuentes locales cargan | verde |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: medir la base (A4) y capturas «antes».
-- [ ] Tarea 2: dependencias, plugin de Vite, quitar PostCSS/autoprefixer.
-- [ ] Tarea 3: CSS (`@import "tailwindcss"`, `@theme`, base de cursor).
-- [ ] Tarea 4: renombres de utilidades y revisión de `space-*`/`divide-*`/bordes.
-- [ ] Tarea 5: A1–A7 y anotar números antes/después.
+- [x] Tarea 1: medir la base (A4) y capturas «antes».
+- [x] Tarea 2: dependencias, plugin de Vite, quitar PostCSS/autoprefixer.
+- [x] Tarea 3: CSS (`@import "tailwindcss"`, `@theme`, base de cursor).
+- [x] Tarea 4: renombres de utilidades y revisión de `space-*`/`divide-*`/bordes.
+- [x] Tarea 5: A1–A7 y anotar números antes/después.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1 | ✅ | `npm ls`: tailwindcss y @tailwindcss/vite 4.3.3; sin autoprefixer ni `postcss.config.js` (Michael 61e41f2) |
+| 2026-10-13 | A2 | ✅ | `npm run verify` en verde tras integrar (Claudio, `npm ci`); API 630, web 172, shared 132 |
+| 2026-10-13 | A3 | ✅ | Renombres v4 aplicados (shadow, rounded, blur, backdrop-blur, outline-hidden, bg-linear); auditados por Kelly |
+| 2026-10-13 | A4 | ✅ | CSS gzip 10 294 → 12 714 B (+23,5 %, excepción aprobada ≤ +25 %); JS inicial sin cambios (124 734 B) |
+| 2026-10-13 | A5 | ✅ | Diff de medidas elemento a elemento v3 vs v4 (Claudio): 0 diferencias > 1 px en /, /explorar, /balotarios, /bazar, /login, /ajustes y 404 a 1440 y 375, tras la ronda 2 (e8b7335: interlineado `leading` vs `text-*` responsive y reglas de elemento en `@layer base`) |
+| 2026-10-13 | A6 | ✅ | `npm run e2e:ci` en la rama integrada: 7 suites ✓ (axe 0) |
+| 2026-10-13 | A7 | ✅ | `subset-icons --check` en verde (verify); Pam: iconos y fuentes locales correctos |
+| 2026-10-13 | Auditoría | ✅ | Kelly (task_0505462dbbce): APROBADO, sin hallazgos |
+| 2026-10-13 | QA | ✅ | Pam (task_91118b12a315): v3 vs v4 con sesión (estudiante, vendedor, moderador) a 1280 y 375; 31 capturas comparadas, sin diferencias de maquetación (las marcadas eran carga de imagen y suavizado); axe 0 salvo `definition-list` en /publicar, preexistente en v3 |
