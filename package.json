@@ -23,6 +23,8 @@
     "budget:any": "node scripts/any-budget.mjs --check",
     "budget:size": "node scripts/check-file-size.mjs",
     "verify": "node scripts/verify.mjs",
+    "qa:seed": "node scripts/qa-seed.mjs",
+    "e2e": "node tests/e2e/run.mjs",
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "prisma:generate": "npm run prisma:generate -w apps/api",
