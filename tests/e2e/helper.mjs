@@ -45,6 +45,11 @@ export async function audit(page) {
   await page.setViewportSize({ width: 375, height: 812 });
   const width = await page.evaluate(() => ({ inner: globalThis.window.innerWidth, scroll: globalThis.document.documentElement.scrollWidth }));
   check(width.scroll <= width.inner, `scroll horizontal ${width.scroll}/${width.inner}`);
+  // Espera a que terminen las animaciones finitas: axe mide mal el contraste a mitad de un fundido.
+  await page.evaluate(() => Promise.race([
+    Promise.all(globalThis.document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => null))),
+    new Promise((resolve) => globalThis.setTimeout(resolve, 3000)),
+  ]));
   const violations = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
   check(violations.violations.length === 0, `axe: ${violations.violations.map((item) => item.id).join(", ")}`);
   await page.setViewportSize({ width: 1280, height: 900 });
