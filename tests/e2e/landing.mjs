@@ -1,7 +1,7 @@
 import process from "node:process";
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
-import { check, WEB } from "./helper.mjs";
+import { check, settleAnimations, WEB } from "./helper.mjs";
 
 // Regresión: las secciones diferidas de la portada deben cargar aunque el hero llene la pantalla.
 const browser = await chromium.launch({ headless: true, executablePath: process.env.E2E_CHROME || "/usr/bin/google-chrome-stable", args: ["--no-sandbox"] });
@@ -22,6 +22,7 @@ try {
     check(await page.title() === "Página no encontrada · Universo Agustino", "título de documento 404 incorrecto");
     const dimensions = await page.evaluate(() => ({ inner: globalThis.window.innerWidth, scroll: globalThis.document.documentElement.scrollWidth }));
     check(dimensions.scroll <= dimensions.inner, `404 con scroll horizontal a ${width}px: ${dimensions.scroll}/${dimensions.inner}`);
+    await settleAnimations(page);
     const violations = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
     check(violations.violations.length === 0, `404 axe a ${width}px: ${violations.violations.map((item) => item.id).join(", ")}`);
     await page.screenshot({ path: `/tmp/spec61-notfound-${width}.png`, fullPage: true });
