@@ -7,7 +7,7 @@ import { registerCreate } from "../orders/create.js";
 import { errorHandler } from "../../middleware/errors.js";
 
 const h = vi.hoisted(() => {
-  const model = () => ({ count: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), update: vi.fn(), updateMany: vi.fn(), findFirst: vi.fn(), create: vi.fn(), groupBy: vi.fn() });
+  const model = () => ({ count: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), update: vi.fn(), updateMany: vi.fn(), delete: vi.fn(), findFirst: vi.fn(), create: vi.fn(), groupBy: vi.fn() });
   return { document: model(), bazarItem: model(), report: model(), order: model(), savedDocument: { count: vi.fn() }, auditLog: { create: vi.fn() }, notification: { create: vi.fn() }, sanction: { findFirst: vi.fn() },
     user: { findUnique: vi.fn() }, notice: vi.fn(), env: { FEE_PCT: 13 }, read: vi.fn() };
 });
@@ -20,7 +20,7 @@ const orders = Router(); registerCreate(orders);
 const owner = { id: "owner", authorId: "owner", sellerId: "owner", email: "owner@unsa.edu.pe", profile: { fullName: "Dueño" } };
 const listing = { id: "l1", title: "Apunte de prueba", priceCents: 100, status: "PUBLISHED", reviewStatus: "APPROVED", pausedAt: null, removedAt: null, authorId: "owner", sellerId: "owner", author: owner, seller: owner, createdAt: new Date() };
 function request(router: Router, method: string, path: string, role?: string, body: unknown = {}, query: Record<string, string> = {}) {
-  type Body = { data?: unknown; error?: { code: string }; total?: number };
+  type Body = { data?: unknown; error?: { code?: string; message?: string }; total?: number };
   return new Promise<{ status: number; body: Body }>((resolve) => {
     const req = { method, url: path, query, headers: role ? { authorization: `Bearer ${role}` } : {}, body } as Request;
     const res = { statusCode: 200, status(this: Response, code: number) { this.statusCode = code; return this; }, setHeader() {},
@@ -34,6 +34,7 @@ beforeEach(() => {
   vi.resetAllMocks();
   for (const model of [h.document, h.bazarItem]) { model.count.mockResolvedValue(0); model.findMany.mockResolvedValue([]); model.findUnique.mockResolvedValue(listing); model.findUniqueOrThrow.mockResolvedValue(listing); model.update.mockResolvedValue(listing); }
   h.report.groupBy.mockResolvedValue([]); h.order.create.mockResolvedValue({ id: "o1" }); h.order.updateMany.mockResolvedValue({ count: 0 }); h.order.findFirst.mockResolvedValue(null);
+  h.order.findMany.mockResolvedValue([]);
   h.savedDocument.count.mockResolvedValue(0);
   h.auditLog.create.mockResolvedValue({}); h.notice.mockResolvedValue(undefined); h.sanction.findFirst.mockResolvedValue(null); h.user.findUnique.mockResolvedValue({ role: "student" });
 });
@@ -89,4 +90,25 @@ describe("publicaciones retiradas", () => {
     const r = await request(orders, "POST", "/", "student:buyer", { itemType: "document", itemId: "l1" });
     expect(r.status).toBe(409); expect(r.body.error?.code).toBe("LISTING_REMOVED"); expect(h.order.create).not.toHaveBeenCalled();
   });
+});
+
+describe("edición y eliminación solo por el dueño", () => {
+  for (const { kind, router } of [{ kind: "document", router: documentsRouter }, { kind: "bazar", router: bazarRouter }]) {
+    it(`${kind}: dueño puede editar y eliminar; moderator/admin reciben 403`, async () => {
+    const model = kind === "document" ? h.document : h.bazarItem;
+    const base = await request(router, "PATCH", "/l1", "student:owner", { title: "Título corregido" });
+    expect(base.status).toBe(200);
+    const deleted = await request(router, "DELETE", "/l1", "student:owner");
+    expect(deleted.status).toBe(200);
+    model.update.mockClear(); model.delete.mockClear();
+    for (const role of ["moderator", "admin"]) {
+      for (const method of ["PATCH", "DELETE"]) {
+        const response = await request(router, method, "/l1", `${role}:staff`, { title: "Título corregido" });
+        const verb = method === "PATCH" ? "edita" : "elimina";
+        expect(response).toMatchObject({ status: 403, body: { error: { code: "FORBIDDEN", message: `Solo el dueño ${verb} su publicación` } } });
+      }
+    }
+    expect(model.update).not.toHaveBeenCalled(); expect(model.delete).not.toHaveBeenCalled();
+    });
+  }
 });

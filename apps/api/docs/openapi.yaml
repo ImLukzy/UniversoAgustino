@@ -484,16 +484,16 @@ paths:
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
     patch:
       tags: [documents]
-      summary: Edita el dueño (auth)
+      summary: Edita solo el dueño; moderator y admin también reciben 403 FORBIDDEN
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND } }
+      responses: { '200': { description: OK }, '403': { description: Solo el dueño edita su publicación }, '404': { description: NOT_FOUND } }
     delete:
       tags: [documents]
-      summary: Elimina el dueño; 409 si hay pedidos vivos (auth)
+      summary: Elimina solo el dueño; moderator y admin también reciben 403 FORBIDDEN; 409 si hay pedidos vivos
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
+      responses: { '200': { description: OK }, '403': { description: Solo el dueño elimina su publicación }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
   /documents/{id}/pause:
     post:
       tags: [documents]
@@ -569,16 +569,16 @@ paths:
       responses: { '200': { description: OK }, '404': { description: NOT_FOUND } }
     patch:
       tags: [bazar]
-      summary: Edita el dueño (auth)
+      summary: Edita solo el dueño; moderator y admin también reciben 403 FORBIDDEN
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK }, '403': { description: FORBIDDEN }, '404': { description: NOT_FOUND } }
+      responses: { '200': { description: OK }, '403': { description: Solo el dueño edita su publicación }, '404': { description: NOT_FOUND } }
     delete:
       tags: [bazar]
-      summary: Elimina el dueño; 409 si hay pedidos vivos (auth)
+      summary: Elimina solo el dueño; moderator y admin también reciben 403 FORBIDDEN; 409 si hay pedidos vivos
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: OK }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
+      responses: { '200': { description: OK }, '403': { description: Solo el dueño elimina su publicación }, '404': { description: NOT_FOUND }, '409': { description: CONFLICT_ACTIVE_ORDERS } }
   /bazar/{id}/pause:
     post:
       tags: [bazar]

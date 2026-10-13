@@ -61,8 +61,8 @@ bazarRouter.get(
   })
 );
 
-function canEditBazar(role: string | undefined, sellerId: string, me: string) {
-  return sellerId === me || role === "admin" || role === "moderator";
+function canEditBazar(sellerId: string, me: string) {
+  return sellerId === me;
 }
 
 bazarRouter.patch(
@@ -70,7 +70,7 @@ bazarRouter.patch(
   requireAuth,
   asyncHandler(async (req: AuthedRequest, res) => {
     const item = await prisma.bazarItem.findUniqueOrThrow({ where: { id: req.params.id } });
-    if (!canEditBazar(req.user!.role, item.sellerId, req.user!.sub)) {
+    if (!canEditBazar(item.sellerId, req.user!.sub)) {
       return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el dueño edita su publicación" } });
     }
     const input = UpdateBazarItemSchema.parse(req.body);
@@ -85,7 +85,7 @@ bazarRouter.delete(
   requireAuth,
   asyncHandler(async (req: AuthedRequest, res) => {
     const item = await prisma.bazarItem.findUniqueOrThrow({ where: { id: req.params.id } });
-    if (!canEditBazar(req.user!.role, item.sellerId, req.user!.sub)) {
+    if (!canEditBazar(item.sellerId, req.user!.sub)) {
       return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el dueño elimina su publicación" } });
     }
     const active = await prisma.order.findMany({

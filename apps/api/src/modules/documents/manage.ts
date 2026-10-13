@@ -33,8 +33,8 @@ export function registerManage(router: Router) {
     })
   );
 
-  function canEditDoc(role: string | undefined, authorId: string, me: string) {
-    return authorId === me || role === "admin" || role === "moderator";
+  function canEditDoc(authorId: string, me: string) {
+    return authorId === me;
   }
 
   router.patch(
@@ -42,7 +42,7 @@ export function registerManage(router: Router) {
     requireAuth,
     asyncHandler(async (req: AuthedRequest, res) => {
       const doc = await prisma.document.findUniqueOrThrow({ where: { id: req.params.id } });
-      if (!canEditDoc(req.user!.role, doc.authorId, req.user!.sub)) {
+      if (!canEditDoc(doc.authorId, req.user!.sub)) {
         return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el dueño edita su publicación" } });
       }
       const input = UpdateDocumentSchema.parse(req.body);
@@ -57,7 +57,7 @@ export function registerManage(router: Router) {
     requireAuth,
     asyncHandler(async (req: AuthedRequest, res) => {
       const doc = await prisma.document.findUniqueOrThrow({ where: { id: req.params.id } });
-      if (!canEditDoc(req.user!.role, doc.authorId, req.user!.sub)) {
+      if (!canEditDoc(doc.authorId, req.user!.sub)) {
         return res.status(403).json({ error: { code: "FORBIDDEN", message: "Solo el dueño elimina su publicación" } });
       }
       const active = await prisma.order.findMany({
