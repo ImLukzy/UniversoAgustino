@@ -15,5 +15,6 @@ Reglas para cualquier agente (Codex, Antigravity/Gemini, OpenCode, Claude). **An
 - Commits siempre a nombre de `ImLukzy <lukas.melgar@tecsup.edu.pe>` (autor y committer), **sin menciones a IA ni líneas `Co-Authored-By` / `Claude-Session`**.
 - Nada a `main`, ningún push y ningún cambio en la base de datos de producción.
 - Nunca commitear `.env` ni secretos; no imprimir secretos.
+- Antes de reportar cambios, ejecutar `npm run verify` y confirmar que pasa.
 - Responde en español. Reporte final: resumen de 3–5 líneas · archivos tocados · cómo verificarlo · dudas o riesgos · estado OK o BLOQUEADO.
 - Orca: si el comando `orca` falla en tu entorno, usa `/home/lukzy/.local/bin/orca-ide` con los mismos argumentos.

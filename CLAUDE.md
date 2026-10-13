@@ -4,7 +4,7 @@ Marketplace académico UNSA: apuntes PDF (visor protegido), bazar con custodia, 
 ## Trabajo
 - Responde en español. Sin explicar código: al terminar, "Hecho" + resultado verificable.
 - Tarea = spec en `docs/specs/NN-*.md` (plantilla `_TEMPLATE.md`); marca `[x]` y registra evidencia en §7.
-- Antes de marcar: `npm run typecheck` · `npm run lint` · `npm test` en verde (+ `docs:check` si tocas rutas).
+- Antes de reportar: `npm run verify` en verde (incluye typecheck, lint, tests y controles del CI).
 - No commit/push sin pedirlo. Nunca commitear `.env` ni pegar secretos en docs.
 - Leer bajo demanda (no por defecto): API `docs/API_SPECS.md` · negocio `docs/PROJECT_CONTEXT.md` · UI `docs/skills/studocu-ui-architect.md` · backend `docs/skills/bazar-engine-expert.md` · clonar UI `docs/skills/site-cloner.md` · reglas de docs `docs/REGLAS_DOCS_IA.md`.
 
