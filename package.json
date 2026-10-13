@@ -30,7 +30,7 @@
     "prisma:seed": "npm run prisma:seed -w apps/api"
   },
   "engines": {
-    "node": ">=20"
+    "node": "24.x"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
