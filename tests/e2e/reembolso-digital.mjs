@@ -1,0 +1,60 @@
+import process from "node:process";
+import { api, browserFor, check, login, withDatabase } from "./helper.mjs";
+import { cleanupOrder, createOrder, proofFile, waitOrder } from "./paymentHelpers.mjs";
+
+await withDatabase(async (db) => {
+  const started = new Date(), buyer = await db.user.findUniqueOrThrow({ where: { email: "qa-est@unsa.edu.pe" } });
+  const seller = await db.user.findUniqueOrThrow({ where: { email: "qa-vendedor@unsa.edu.pe" } });
+  const collector = await db.user.findUniqueOrThrow({ where: { email: "qa-mod@unsa.edu.pe" } });
+  const doc = await db.document.findUniqueOrThrow({ where: { id: "qa-e2e-pay-refund" } });
+  let orderId;
+  const buyerSession = await browserFor("est"), modSession = await browserFor("mod"), adminSession = await browserFor("admin");
+  try {
+    const order = await createOrder(doc.id); orderId = order.id;
+    await buyerSession.page.goto(`${process.env.E2E_WEB_URL}/checkout/${order.id}`);
+    await buyerSession.page.getByLabel("Cuenta destino del equipo").waitFor();
+    await buyerSession.page.locator('input[type="file"]').setInputFiles(proofFile);
+    await buyerSession.page.getByText("payment-proof.png").waitFor();
+    await buyerSession.page.getByRole("button", { name: "Ya pagué" }).click();
+    await waitOrder(db, order.id, (row) => row.status === "PAID");
+    await modSession.page.goto(`${process.env.E2E_WEB_URL}/panel/pagos-por-verificar`);
+    const review = modSession.page.locator("article.card").filter({ hasText: doc.title });
+    modSession.page.on("dialog", (dialog) => void dialog.accept());
+    await review.getByRole("button", { name: "Aceptar pago" }).click();
+    const payout = await waitOrder(db, order.id, (row) => row.status === "ESCROW").then(() => db.payout.findUniqueOrThrow({ where: { orderId: order.id } }));
+    const before = await api(`/staff/payouts/earnings?from=${encodeURIComponent(new Date(started.getTime() - 1000).toISOString())}&to=${encodeURIComponent(new Date(Date.now() + 86400000).toISOString())}`, { token: await login("mod") });
+    check(before.status === 200 && before.data.verifiedCount > 0, "ganancias incluyen pago verificado mientras no se devuelve");
+    check((await api(`/documents/${doc.id}/download`, { token: await login("est") })).status === 200, "comprador descarga antes del reclamo");
+    await buyerSession.page.goto(`${process.env.E2E_WEB_URL}/pedidos`);
+    const row = buyerSession.page.locator("article.card").filter({ hasText: doc.title });
+    await row.getByRole("button", { name: "Reportar al vendedor" }).click();
+    await row.getByLabel("Cuéntanos los detalles").fill("QA E2E: solicito revisar este pago y su entrega.");
+    await row.getByRole("button", { name: "Enviar reporte" }).click();
+    await row.getByRole("status").filter({ hasText: "Reporte enviado" }).waitFor();
+    const frozen = await db.payout.findUniqueOrThrow({ where: { id: payout.id } });
+    check(frozen.status === "FROZEN", "reclamo del comprador congela la liquidación");
+    check(await db.notification.count({ where: { userId: buyer.id, type: "PAYOUT_FROZEN", createdAt: { gte: started } } }) > 0, "notificación al comprador por reclamo congelado");
+    check(await db.notification.count({ where: { userId: seller.id, type: "PAYOUT_FROZEN", createdAt: { gte: started } } }) > 0, "notificación al vendedor por reclamo congelado");
+    await adminSession.page.goto(`${process.env.E2E_WEB_URL}/panel/pagos-a-vendedores`);
+    const frozenCard = adminSession.page.locator("article.card").filter({ hasText: doc.title });
+    adminSession.page.on("dialog", (dialog) => void dialog.accept());
+    await frozenCard.getByLabel("Motivo de resolución").fill("QA E2E: autorizo devolución íntegra al comprador.");
+    await frozenCard.getByRole("button", { name: "Marcar que requiere reembolso" }).click();
+    await frozenCard.getByText("Foto del reembolso al comprador (obligatoria)").waitFor();
+    await frozenCard.locator('input[type="file"]').setInputFiles(proofFile);
+    await frozenCard.getByText("Foto adjunta").waitFor();
+    await frozenCard.getByRole("button", { name: "Registrar reembolso" }).click();
+    const refunded = await waitOrder(db, order.id, (item) => item.status === "REFUNDED");
+    check(refunded.status === "REFUNDED" && (await db.payout.findUniqueOrThrow({ where: { id: payout.id } })).status === "REFUNDED", "Técnico registra reembolso de la liquidación congelada");
+    check((await api(`/documents/${doc.id}/download`, { token: await login("est") })).status === 403, "descarga denegada después de revocar el acceso");
+    const after = await api(`/staff/payouts/earnings?from=${encodeURIComponent(new Date(started.getTime() - 1000).toISOString())}&to=${encodeURIComponent(new Date(Date.now() + 86400000).toISOString())}`, { token: await login("mod") });
+    check(after.data.verifiedCount === before.data.verifiedCount - 1 && after.data.commissionCents === before.data.commissionCents - payout.feeCents, "Ganancias excluye el reembolso");
+    check(await db.notification.count({ where: { userId: buyer.id, type: "ORDER_REFUNDED", createdAt: { gte: started } } }) > 0, "notificación de reembolso al comprador");
+    check(await db.notification.count({ where: { userId: seller.id, type: "ORDER_REFUNDED", createdAt: { gte: started } } }) > 0, "notificación de reembolso al vendedor");
+    check(await db.notification.count({ where: { userId: collector.id, type: "ORDER_REFUNDED", createdAt: { gte: started } } }) > 0, "notificación de reembolso al cobrador");
+    globalThis.console.log("✓ reembolso digital: reclamo congela, técnico devuelve, acceso revocado, Ganancias ajusta y avisos enviados");
+  } finally {
+    await Promise.all([buyerSession.browser.close(), modSession.browser.close(), adminSession.browser.close()]);
+    if (orderId) await cleanupOrder(db, orderId);
+  }
+});

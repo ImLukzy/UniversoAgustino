@@ -1,7 +1,10 @@
 # Pruebas E2E locales
 
-Las pruebas recorren los flujos de pausa/reactivación de la spec 45 y denuncia,
-moderación, sanción y restauración de la spec 46 con usuarios `qa-*`.
+Las pruebas recorren pausa/reactivación (spec 45), denuncia/moderación (spec 46)
+y pagos digitales (spec 51) con usuarios `qa-*`: declaración con foto, rechazo y
+reenvío, aceptación, acceso y descarga, liquidación al vendedor, reclamo,
+congelación, reembolso y revocación del acceso. Los pagos usan una cuenta
+ficticia `QA Cuenta` / `900000000`; nunca se cargan datos reales.
 
 ## Preparación
 
@@ -14,19 +17,20 @@ moderación, sanción y restauración de la spec 46 con usuarios `qa-*`.
    npm run qa:seed
    ```
 
-2. Inicia el API local (en `apps/api`) con `NODE_ENV=development`, puerto 4300,
-   `WEB_ORIGIN=http://localhost:4373`, secretos ficticios de CI, `MAIL_DRIVER=console`,
+2. Inicia el API local (en `apps/api`) con `NODE_ENV=development`, puerto 4400,
+   `WEB_ORIGIN=http://localhost:4473`, secretos ficticios de CI, `MAIL_DRIVER=console`,
    `STORAGE_DRIVER=local` y `ENABLE_JOBS=false`.
-3. Compila la web en `apps/web` con `VITE_API_URL=http://localhost:4300/api/v1`
-   hacia `/tmp/dwight-e2e/web-dist` y sírvela con Vite Preview en el puerto 4373.
+3. Compila la web en `apps/web` con `VITE_API_URL=http://localhost:4400/api/v1`
+   hacia `/tmp/michael-e2e/web-dist` y sírvela con Vite Preview en el puerto 4473.
 4. Ejecuta `npm run e2e`. Chrome usa `/usr/bin/google-chrome-stable`; cambia la ruta
    con `E2E_CHROME` si es necesario. `QA_PASSWORD`, `E2E_API_URL` y `E2E_WEB_URL`
    permiten ajustar credenciales y direcciones locales.
 
-El seed aborta si la URL no identifica `ep-orange-mountain` o identifica
-`ep-hidden-dew`. Los tests solo modifican registros de los usuarios QA y restauran
-la publicación, los reportes y las sanciones en `finally`. No ejecutes estas
-pruebas contra una base compartida o de producción.
+El seed decide por el host de la URL: acepta solo `ep-orange-mountain-*.neon.tech` (o `localhost` en CI) y rechaza siempre `ep-hidden-dew`; es idempotente y prepara una cuenta de cobro ficticia y dos
+apuntes nuevos de pago. Los tests limpian órdenes, liquidaciones, accesos,
+reportes, notificaciones, auditoría y archivos subidos en `finally`; si un
+proceso se interrumpe antes, vuelve a revisar los registros `qa-*` antes de
+repetirlo. No ejecutes estas pruebas contra una base compartida o de producción.
 
 ## CI y reproducción local
 
