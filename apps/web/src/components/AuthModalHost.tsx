@@ -7,7 +7,7 @@ import { Modal } from "./ui/Modal";
 import { OAuthButtons, type OAuthStatus } from "./auth/OAuthButtons";
 import { EmailCodeLogin } from "./auth/EmailCodeLogin";
 
-// Modal de autenticación global (no existe página /login): openAuth() lo abre
+// Modal de autenticación global (sin página propia: /login y /register solo lo abren): openAuth() lo abre
 // desde cualquier parte. Google/Apple o correo UNSA con código al buzón
 // (spec 22): el backend exige @unsa.edu.pe y crea la cuenta en el primer
 // ingreso, así que iniciar sesión y registrarse son el mismo paso.
