@@ -35,6 +35,7 @@ const Suscripcion = lazy(() => import("../pages/Suscripcion").then((m) => ({ def
 const Perfil = lazy(() => import("../pages/Perfil").then((m) => ({ default: m.Perfil })));
 const AuthCallback = lazy(() => import("../pages/AuthCallback").then((m) => ({ default: m.AuthCallback })));
 const Bienvenida = lazy(() => import("../pages/Bienvenida").then((m) => ({ default: m.Bienvenida })));
+const NotFound = lazy(() => import("../pages/NotFound").then((m) => ({ default: m.NotFound })));
 
 if (typeof window !== "undefined" && window.location.pathname.startsWith("/p/")) {
   void import("../components/AppLayout");
@@ -106,6 +107,7 @@ export function AppRoutes() {
         <Route path="/perfil" element={<Perfil />} />
         {/* Spec 24: la subida en lote vive en /publicar. */}
         <Route path="/subir-material" element={<Navigate to="/publicar" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </OnboardingGate>
   );
