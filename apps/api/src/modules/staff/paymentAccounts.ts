@@ -24,10 +24,11 @@ paymentAccountsRouter.post("/", asyncHandler(async (req: AuthedRequest, res) => 
     const owner = await tx.user.findUnique({ where: { id: input.userId }, select: { role: true } });
     if (!owner || !["admin", "moderator"].includes(owner.role)) scheduleFail("NOT_STAFF", "El titular debe pertenecer al equipo", 400);
     for (const url of [input.photoUrl, input.qrUrl]) {
+      if (!url) continue;
       await ownPhoto(tx, url, req.user!.sub);
       await tx.upload.update({ where: { storedName: url.slice(9) }, data: { private: true } });
     }
-    const account = await tx.paymentAccount.create({ data: input });
+    const account = await tx.paymentAccount.create({ data: { ...input, photoUrl: input.photoUrl ?? null } });
     await tx.auditLog.create({ data: { actorId: req.user!.sub, action: "paymentAccount.create", entity: "paymentAccount", entityId: account.id } });
     return account;
   });
@@ -42,6 +43,7 @@ paymentAccountsRouter.patch("/:id", asyncHandler(async (req: AuthedRequest, res)
     if (!account) scheduleFail("NOT_FOUND", "Cuenta no encontrada", 404);
     if (role !== "admin" && account.userId !== req.user!.sub) scheduleFail("FORBIDDEN", "Solo puedes editar tus cuentas", 403);
     for (const url of [input.photoUrl, input.qrUrl]) {
+      if (!url) continue;
       if ([account.photoUrl, account.qrUrl].includes(url)) continue;
       await ownPhoto(tx, url, req.user!.sub);
       await tx.upload.update({ where: { storedName: url.slice(9) }, data: { private: true } });

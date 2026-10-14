@@ -1721,12 +1721,12 @@ components:
         reviewedById: { type: string, nullable: true }
     PaymentAccountInput:
       type: object
-      required: [method, holder, number, photoUrl, qrUrl]
+      required: [method, holder, number, qrUrl]
       properties:
         method: { type: string, enum: [YAPE, PLIN, OTHER] }
         holder: { type: string, minLength: 3, maxLength: 120 }
         number: { type: string, minLength: 3, maxLength: 80 }
-        photoUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$' }
+        photoUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$', nullable: true, description: Opcional; null quita la foto del titular al editar }
         qrUrl: { type: string, pattern: '^/uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}$' }
         active: { type: boolean, default: true }
     PaymentAccount:

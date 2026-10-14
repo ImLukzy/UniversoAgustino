@@ -593,7 +593,7 @@ model PaymentAccount {
   method String
   holder String
   number String
-  photoUrl String
+  photoUrl String?
   qrUrl String
   active Boolean @default(true)
   createdAt DateTime @default(now())

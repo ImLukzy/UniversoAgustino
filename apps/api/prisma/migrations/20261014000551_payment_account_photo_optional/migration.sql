@@ -1,0 +1,1 @@
+ALTER TABLE "PaymentAccount" ALTER COLUMN "photoUrl" DROP NOT NULL;

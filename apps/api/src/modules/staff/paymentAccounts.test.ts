@@ -39,6 +39,12 @@ describe("cuentas del equipo", () => {
     expect(db.upload.update).toHaveBeenCalledTimes(2);
     expect(db.auditLog.create).toHaveBeenCalledWith({ data: { actorId: "owner", action: "paymentAccount.create", entity: "paymentAccount", entityId: "account" } });
   });
+  it("crea cuenta sin foto del titular y guarda null", async () => {
+    const { photoUrl: _photo, ...withoutPhoto } = input;
+    expect((await request("POST", "moderator", withoutPhoto)).status).toBe(201);
+    expect(db.paymentAccount.create).toHaveBeenCalledWith({ data: { ...withoutPhoto, photoUrl: null } });
+    expect(db.upload.update).toHaveBeenCalledTimes(1);
+  });
   it("trabajador no crea a nombre de otro", async () => {
     expect((await request("POST", "moderator", { ...input, userId: "other" })).status).toBe(403);
     expect(db.paymentAccount.create).not.toHaveBeenCalled();
@@ -68,6 +74,12 @@ describe("cuentas del equipo", () => {
     expect((await request("PATCH", "admin", { ...data, active: false }, "/payment-accounts/account")).status).toBe(200);
     expect(db.paymentAccount.update).toHaveBeenCalledWith({ where: { id: "account" }, data: { ...data, active: false } });
     expect(db.upload.findUnique).not.toHaveBeenCalled(); expect(db.auditLog.create).toHaveBeenCalledTimes(1);
+  });
+  it("PATCH con foto null la quita sin validar un upload", async () => {
+    const { userId: _owner, ...data } = input;
+    expect((await request("PATCH", "moderator", { ...data, photoUrl: null }, "/payment-accounts/account")).status).toBe(200);
+    expect(db.paymentAccount.update).toHaveBeenCalledWith({ where: { id: "account" }, data: { ...data, photoUrl: null } });
+    expect(db.upload.findUnique).not.toHaveBeenCalled();
   });
   it("token de exmiembro no permite leer cuentas", async () => {
     db.user.findUnique.mockResolvedValue({ role: "creator" });

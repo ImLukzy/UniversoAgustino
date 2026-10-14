@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api, apiError } from "../../lib/api";
 import { PrivateImage } from "../PrivateImage";
 import type { AccountFields, PaymentAccount } from "./paymentAccountTypes";
-const blank = (userId: string): AccountFields => ({ userId, method: "YAPE", holder: "", number: "", photoUrl: "", qrUrl: "", active: true });
+const blank = (userId: string): AccountFields => ({ userId, method: "YAPE", holder: "", number: "", photoUrl: null, qrUrl: "", active: true });
 export function PaymentAccountForm({ account, userId, members, saved }: {
   account?: PaymentAccount; userId: string; members?: { id: string; fullName: string }[]; saved: () => void;
 }) {
@@ -29,10 +29,10 @@ export function PaymentAccountForm({ account, userId, members, saved }: {
     <label className="flex min-w-0 flex-col gap-1">Titular<input className="input min-w-0" required minLength={3} maxLength={120} value={form.holder} onChange={(e) => setForm({ ...form, holder: e.target.value })} /></label>
     <label className="flex min-w-0 flex-col gap-1">Número o cuenta<input className="input min-w-0" required minLength={3} maxLength={80} value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} /></label>
     {(["photoUrl", "qrUrl"] as const).map((key) => <div key={key} className="flex min-w-0 flex-col gap-2">
-      <label className="flex min-w-0 flex-col gap-1">{key === "qrUrl" ? "QR" : "Foto de perfil"}<input className="w-full min-w-0" type="file" accept="image/jpeg,image/png" disabled={busy} onChange={(e) => void upload(key, e.target.files?.[0])} /></label>
-      {form[key] && <PrivateImage path={form[key]} alt={key === "qrUrl" ? "QR de cobro" : "Foto de perfil"} />}</div>)}
+      <label className="flex min-w-0 flex-col gap-1">{key === "qrUrl" ? "QR" : "Foto del titular (opcional)"}<input className="w-full min-w-0" type="file" accept="image/jpeg,image/png" disabled={busy} onChange={(e) => void upload(key, e.target.files?.[0])} /></label>
+      {form[key] && <><PrivateImage path={form[key]} alt={key === "qrUrl" ? "QR de cobro" : "Foto del titular"} />{key === "photoUrl" && <button type="button" className="btn btn-secondary btn-sm w-fit" disabled={busy} onClick={() => setForm((v) => ({ ...v, photoUrl: null }))}>Quitar foto</button>}</>}</div>)}
     <label className="flex items-center gap-2"><input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />Activa</label>
     {error && <p role="alert" className="wrap-break-word text-sm">{error}</p>}
-    <button className="btn btn-primary" disabled={busy || !form.photoUrl || !form.qrUrl} type="submit">{busy ? "Guardando…" : "Guardar cuenta"}</button>
+    <button className="btn btn-primary" disabled={busy || !form.qrUrl} type="submit">{busy ? "Guardando…" : "Guardar cuenta"}</button>
   </form>;
 }
