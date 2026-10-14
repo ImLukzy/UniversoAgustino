@@ -6,6 +6,7 @@ import { CareerAvatar } from "../CareerVisual";
 import { todayLocal, type Detail } from "./useDetail";
 import { ROUTES } from "../../lib/routes";
 import { ReportListingForm } from "./ReportListingForm";
+import { OwnerListingNotice } from "./OwnerListingNotice";
 
 // Panel de compra: vendedor, precio con desglose real, cobro, fechas de alquiler y CTA.
 export function BuyPanel({ d }: { d: Detail }) {
@@ -17,8 +18,12 @@ export function BuyPanel({ d }: { d: Detail }) {
     <aside className="flex flex-col gap-4">
       <div className="card flex flex-col gap-4 p-6">
         <h1 className="h-display text-2xl">{d.src?.title}</h1>
-        {d.pausedForViewer && <p role="status" className="chip w-fit">Pausada por su autor</p>}
-        {d.removed && <p role="status" className="chip w-fit">Retirada por moderación</p>}
+        {d.isOwner
+          ? <OwnerListingNotice review={d.ownerReview} paused={d.pausedForOwner} removed={d.removed} />
+          : <>
+            {d.pausedForViewer && <p role="status" className="chip w-fit">Pausada por su autor</p>}
+            {d.removed && <p role="status" className="chip w-fit">Retirada por moderación</p>}
+          </>}
         <div className="flex items-center gap-3">
           <CareerAvatar name={p?.fullName ?? "?"} className="h-11 w-11" />
           <div className="text-sm">
@@ -51,7 +56,7 @@ export function BuyPanel({ d }: { d: Detail }) {
         <p role="alert" className="min-h-4 text-sm font-bold text-[#b91c1c]">{d.err}</p>
         {d.fullAccess && d.doc
           ? <Link to={ROUTES.document(d.doc.id)} className="btn btn-secondary btn-lg w-full">Abrir documento</Link>
-          : !d.pausedForViewer && !d.removed && <button type="button" disabled={!d.available || d.busy} onClick={d.buy} className="btn btn-primary btn-lg w-full">{cta}</button>}
+          : !d.isOwner && !d.pausedForViewer && !d.removed && <button type="button" disabled={!d.available || d.busy} onClick={d.buy} className="btn btn-primary btn-lg w-full">{cta}</button>}
         {!d.isOwner && (d.loggedIn
           ? <button type="button" className="btn btn-secondary btn-sm w-full" aria-expanded={reportOpen} onClick={() => setReportOpen((open) => !open)}>{reportOpen ? "Cerrar reporte" : "Reportar publicación"}</button>
           : <button type="button" className="btn btn-secondary btn-sm w-full" onClick={d.openAuth}>Inicia sesión para reportar</button>)}

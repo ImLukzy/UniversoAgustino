@@ -43,10 +43,10 @@ export function AppLayout({ children, fluid }: { children: ReactNode; fluid?: bo
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-50 flex h-16 items-center gap-3 border-b border-zinc-200 bg-white/95 px-4 backdrop-blur-sm md:px-8">
           <button type="button" onClick={() => setDrawer(true)} aria-label="Abrir menú" className="btn-ghost h-11 w-11 shrink-0 px-0 lg:hidden">
-            <span className="material-symbols-outlined">menu</span>
+          <span className="material-symbols-outlined h-6 w-6 shrink-0 overflow-hidden">menu</span>
           </button>
           <form role="search" aria-label="Búsqueda global" onSubmit={search} className="searchbar mx-auto h-11 min-w-0 max-w-2xl">
-            <span className="material-symbols-outlined text-zinc-500" aria-hidden="true">search</span>
+            <span className="material-symbols-outlined h-6 w-6 shrink-0 overflow-hidden text-zinc-500" aria-hidden="true">search</span>
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar apuntes, cursos o artículos" aria-label="Buscar en el catálogo" />
           </form>
           <div className="flex shrink-0 items-center gap-2">

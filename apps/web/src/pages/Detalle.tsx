@@ -39,9 +39,9 @@ export function Detalle() {
         <span className="tag">{d.doc ? d.doc.type : `${d.item?.kind} · ${d.item?.tx}`}</span>
         {d.item && <span className="tag">{d.item.status}</span>}
       </div>
-      <div className="grid items-start gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2"><DetailMedia d={d} /></div>
-        <BuyPanel d={d} />
+      <div className="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-3">
+        <div className="min-w-0 lg:col-span-2"><DetailMedia d={d} /></div>
+        <div className="min-w-0"><BuyPanel d={d} /></div>
       </div>
     </motion.main>
   );

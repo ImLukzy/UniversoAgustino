@@ -43,9 +43,13 @@ export function useDetail(kind: "document" | "bazar", id: string | undefined) {
   const isRental = kind === "bazar" && item.data?.tx === "ALQUILER";
   const isOwner = kind === "document" ? doc.data?.authorId === user?.id : item.data?.sellerId === user?.id;
   const pausedForViewer = !!src?.paused && !isOwner;
+  const pausedForOwner = !!isOwner && !!src?.paused;
   const removed = !!src?.removed;
+  const ownerReview = isOwner ? { reviewStatus: src?.reviewStatus, reviewNote: src?.reviewNote } : null;
   const fullAccess = kind === "document" && !!doc.data?.fullAccess;
-  const available = (kind === "document" ? !!doc.data : item.data?.status === "AVAILABLE") && !pausedForViewer && !removed;
+  const statusAvailable = kind === "document" ? doc.data?.status === "PUBLISHED" : item.data?.status === "AVAILABLE";
+  const reviewApproved = !src?.reviewStatus || src.reviewStatus === "APPROVED";
+  const available = !!statusAvailable && reviewApproved && !isOwner && !pausedForViewer && !pausedForOwner && !removed;
 
   const buy = async () => {
     // Sin sesión: el modal se abre sobre esta página; al entrar, el usuario sigue aquí.
@@ -80,7 +84,9 @@ export function useDetail(kind: "document" | "bazar", id: string | undefined) {
     isRental,
     available,
     pausedForViewer,
+    pausedForOwner,
     removed,
+    ownerReview,
     fullAccess,
     isOwner,
     loggedIn: !!user,

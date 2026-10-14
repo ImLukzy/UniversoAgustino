@@ -44,7 +44,7 @@ export function DetailMedia({ d }: { d: Detail }) {
             ) : (
               <CareerVisual className="h-64 w-full" label={d.doc ? "Vista previa del documento" : "Foto referencial del bazar"} />
             )}
-            {d.doc && d.doc.priceCents > 0 && !d.fullAccess && !d.pausedForViewer && !d.removed && (
+            {d.doc && d.doc.priceCents > 0 && !d.fullAccess && !d.isOwner && !d.pausedForViewer && !d.removed && (
               <div className="flex flex-col items-center gap-2 border-t-2 border-zinc-900 p-6 text-center">
                 <span className="material-symbols-outlined text-3xl text-zinc-400">lock</span>
                 <p className="font-extrabold text-zinc-950">Contenido completo bloqueado</p>

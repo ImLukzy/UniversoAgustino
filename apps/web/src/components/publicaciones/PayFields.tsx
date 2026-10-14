@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PLATFORM_FEE_PCT } from "@hub/shared";
 import { apiError, resolveQr, uploadFile, type PayMethod } from "../../lib/api";
 
 // Datos de cobro del vendedor: método, titular/número y QR (subida real).
@@ -29,19 +30,20 @@ export function PayFields({ method, detail, qr, onMethod, onDetail, onQr }: {
   return (
     <div className="grid grid-cols-1 gap-3 rounded-xl border border-dashed border-zinc-300 p-3 sm:grid-cols-2">
       <label className={label}>
-        ¿Cómo te pagan?
+        ¿Dónde te pagamos tu parte?
         <select className="input" value={method} onChange={(e) => onMethod(e.target.value as PayMethod)}>
           <option value="YAPE">Yape</option>
           <option value="PLIN">Plin</option>
           <option value="AMBAS">Yape y Plin</option>
         </select>
       </label>
+      <p className="text-xs text-zinc-600 sm:col-span-2">Los compradores pagan al equipo, no a ti. Cuando la venta se confirma, te transferimos tu parte (el precio menos la comisión del {PLATFORM_FEE_PCT} %) a esta cuenta, normalmente en 24–48 h.</p>
       <label className={label}>
         Titular / número
         <input className="input" value={detail} onChange={(e) => onDetail(e.target.value)} placeholder="Yape 999888777 - Tu nombre" maxLength={160} />
       </label>
       <label className={`${label} sm:col-span-2`}>
-        QR de cobro (imagen)
+        QR de tu Yape o Plin (imagen)
         <input type="file" accept="image/*" className="text-xs font-normal" onChange={(e) => pick(e.target.files?.[0])} />
       </label>
       <p className="min-h-4 text-xs sm:col-span-2" role={upErr ? "alert" : undefined}>

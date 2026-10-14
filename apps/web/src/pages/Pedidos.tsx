@@ -84,7 +84,7 @@ export function Pedidos() {
                 </li>
               ))}
             </ol>
-            <Link to={ROUTES.mySales} className="btn btn-secondary btn-sm mt-5 w-full">¿Problemas? Abrir un reporte</Link>
+            <p className="mt-5 text-xs text-zinc-600">¿Problemas con un pedido? Ábrelo en la lista y usa <strong>Reportar al vendedor</strong>. Si pagaste un apunte y no recibiste acceso, usa <strong>Enviar reclamo</strong> en su seguimiento: congela el pago al vendedor hasta que el equipo lo revise.</p>
           </div>
           <DeliverySites />
         </aside>
