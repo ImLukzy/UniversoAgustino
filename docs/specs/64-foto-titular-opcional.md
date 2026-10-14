@@ -54,11 +54,17 @@ Además, el formulario dice «Foto de perfil», mientras que el checkout la llam
 | A5 | UI | captura del formulario y del checkout sin foto, a 375 px | sin hueco ni imagen rota; etiqueta «(opcional)» |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: esquema, migración y shared.
-- [ ] Tarea 2: API y OpenAPI, con tests.
-- [ ] Tarea 3: web (formulario, checkout, cobro en sede), con test.
-- [ ] Tarea 4: A1–A3 y A5 (implementador); A4 (integrador).
+- [x] Tarea 1: esquema, migración y shared.
+- [x] Tarea 2: API y OpenAPI, con tests.
+- [x] Tarea 3: web (formulario, checkout, cobro en sede), con test.
+- [x] Tarea 4: A1–A3 y A5 (implementador); A4 (integrador).
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1 | ✅ | `npm run verify` en verde (Michael 860b8e1 y Claudio tras integrar 2b5f4de) |
+| 2026-10-13 | A2 | ✅ | shared: sin foto y `null` válidos, ruta externa rechazada; API: alta sin foto → 201 con `photoUrl: null`, PATCH con `null` quita la foto sin validar upload; web: formulario, checkout y cobro en sede sin foto |
+| 2026-10-13 | A3 | ✅ | Migración `20261014000551_payment_account_photo_optional` (`ALTER TABLE "PaymentAccount" ALTER COLUMN "photoUrl" DROP NOT NULL;`); `npm run e2e:ci` 7 suites ✓ en ejecución limpia (dos fallos previos por E2E simultánea en los mismos puertos) |
+| 2026-10-13 | A4 | ✅ | `npm run db:ensayo` en rama clonada de prod: migraciones al día (33), User 7 / Document 2 / Order 2, rama borrada; prod intacta |
+| 2026-10-13 | A5 | ✅ | `/tmp/spec64/checkout-375.png` y `form-375.png`: solo QR, sin hueco ni scroll horizontal; etiqueta «Foto del titular (opcional)» |
+| 2026-10-13 | Auditoría | ✅ | Kelly (task_86c6da24290a): APROBADO |
