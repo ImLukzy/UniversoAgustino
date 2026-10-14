@@ -64,11 +64,18 @@ Antes hay que comprobar en el código que los dos nombres de botón existen tal 
 | A6 | UI | capturas a 375 y 1280 de `/pedidos`, del detalle propio en revisión y de `/publicar` paso 2 | sin scroll horizontal; CLS 0 |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: §4.1.
-- [ ] Tarea 2: §4.2 (detalle y lista).
-- [ ] Tarea 3: §4.3.
-- [ ] Tarea 4: A1–A6.
+- [x] Tarea 1: §4.1.
+- [x] Tarea 2: §4.2 (detalle y lista).
+- [x] Tarea 3: §4.3.
+- [x] Tarea 4: A1–A6.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1 | ✅ | `npm run verify` en verde (Dwight 04d341a y Claudio tras integrar 72a2d21) |
+| 2026-10-13 | A2 | ✅ | `PedidosHelp.test.tsx`: texto de §4.1, sin `href="/ventas"` en la tarjeta; botones reales «Reportar al vendedor» y «Enviar reclamo» |
+| 2026-10-13 | A3 | ✅ | `OwnerListingNotice.test.tsx` y `ReviewChip.test.tsx`: PENDING, REJECTED con y sin nota, pausada, retirada, sin aviso para quien no es dueño. GET `/documents/:id` y `/bazar/:id` devuelven `reviewStatus`/`reviewNote` al dueño |
+| 2026-10-13 | A4 | ✅ | `PayFields.test.tsx`: textos de §4.3 con `PLATFORM_FEE_PCT` |
+| 2026-10-13 | A5 | ✅ | `npm run e2e:ci` en la rama integrada: 7 suites ✓ |
+| 2026-10-13 | A6 | ✅ | `/tmp/spec65/` (pedidos, detalle en revisión, publicar paso 2) a 375 y 1280: sin scroll horizontal; Dwight fijó tamaño de iconos del encabezado y `min-w-0` en el detalle para CLS |
+| 2026-10-13 | Auditoría | ✅ | Kelly (task_0d4941548ef2): textos exactos y extras de Dwight correctos (el dueño no ve compra ni paywall; «disponible» exige publicado y aprobado). Su único bloqueo (`StaticRouter` indefinido en `PedidosHelp.test.tsx`) fue un falso positivo: su worktree tenía react-router-dom 6.30.6 instalado; con las dependencias del repo (7.18) el test pasa |
