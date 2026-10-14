@@ -42,11 +42,16 @@ Las tres vistas deben usar la misma función, para que no vuelvan a divergir.
 | A4 | E2E | `npm run e2e:ci` | 7 suites ✓ |
 
 ## 6. Checklist de ejecución
-- [ ] Tarea 1: confirmar los campos de `/documents/mine` y `/bazar/mine`.
-- [ ] Tarea 2: `listingState.ts` y sus tests.
-- [ ] Tarea 3: usarlo en `Publicaciones.tsx` y `usePanelData.ts`.
-- [ ] Tarea 4: A1–A4.
+- [x] Tarea 1: confirmar los campos de `/documents/mine` y `/bazar/mine`.
+- [x] Tarea 2: `listingState.ts` y sus tests.
+- [x] Tarea 3: usarlo en `Publicaciones.tsx` y `usePanelData.ts`.
+- [x] Tarea 4: A1–A4.
 
 ## 7. Registro de verificación
 | Fecha | Criterio | Resultado | Evidencia (comando / captura) |
 |---|---|---|---|
+| 2026-10-13 | A1 | ✅ | `npm run verify` en verde (Dwight ee8b3a3 y Claudio tras integrar e79a8ab) |
+| 2026-10-13 | A2 | ✅ | `apps/web/src/lib/listingState.test.ts`: activa, sin `reviewStatus`, pausada (`paused`/`pausedAt`), retirada (`removed`/`removedAt`), `PENDING`, `REJECTED`, `DRAFT`, `SOLD` y bazar `AVAILABLE`. `/documents/mine` y `/bazar/mine` devuelven filas completas (`pausedAt`, `removedAt`, `reviewStatus`) |
+| 2026-10-13 | A3 | ✅ | Contador mixto 1 activa + 1 pausada = 1; Mis publicaciones y panel (`usePanelData`) usan `isActiveListing` |
+| 2026-10-13 | A4 | ✅ | `npm run e2e:ci` en la rama integrada: 7 suites ✓ |
+| 2026-10-13 | Auditoría | ✅ | Kelly (task_0a8bca0d886d): APROBADO; coincide con los filtros de catálogo y compra de la API |
